@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scheda — Paladino Lv7 · Giuramento della Devozione</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2b2419;
+    --ink-soft:#574b38;
+    --parch:#f4ecd8;
+    --parch-2:#efe4c9;
+    --gold:#a8842c;
+    --gold-bright:#c9a443;
+    --celest:#3a5a78;
+    --celest-soft:#5b7e9b;
+    --crimson:#7c2d2d;
+    --line:#c9b483;
+    --shadow:rgba(60,45,15,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{max-width:100%;overflow-x:hidden}
+  h1,.subtitle,.sc-desc,.fd,.grim-intro{overflow-wrap:break-word}
+  body{
+    font-family:'EB Garamond',serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 20% 10%, #fbf5e6 0%, transparent 55%),
+      radial-gradient(circle at 85% 90%, #f0e6cd 0%, transparent 50%),
+      #e9dcbd;
+    padding:26px 16px;
+    line-height:1.4;
+  }
+  .sheet{
+    max-width:1080px;margin:0 auto;
+    background:linear-gradient(160deg,var(--parch),var(--parch-2));
+    border:1px solid var(--line);
+    border-radius:6px;
+    box-shadow:0 18px 50px var(--shadow), inset 0 0 0 6px rgba(168,132,44,.10);
+    padding:30px 34px 34px;
+    position:relative;
+  }
+  .sheet::before{
+    content:"";position:absolute;inset:10px;border:1.5px solid rgba(168,132,44,.4);
+    border-radius:4px;pointer-events:none;
+  }
+  /* ---- Header ---- */
+  header{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    gap:20px;border-bottom:2.5px solid var(--gold);padding-bottom:14px;margin-bottom:18px;
+    position:relative;z-index:1;
+  }
+  .crest{display:flex;align-items:center;gap:16px}
+  .sigil{
+    width:58px;height:58px;flex:none;border-radius:50%;
+    background:radial-gradient(circle at 50% 38%, var(--gold-bright), var(--gold) 70%);
+    display:grid;place-items:center;color:#fff8e6;font-size:30px;
+    box-shadow:0 4px 12px rgba(120,90,20,.4), inset 0 2px 4px rgba(255,255,255,.4);
+  }
+  h1{font-family:'Cinzel',serif;font-weight:700;font-size:30px;letter-spacing:1px;color:var(--ink);line-height:1}
+  .subtitle{font-style:italic;color:var(--ink-soft);font-size:16px;margin-top:4px}
+  .meta{text-align:right;font-size:14.5px;color:var(--ink-soft)}
+  .meta b{font-family:'Cinzel',serif;font-weight:600;color:var(--ink);font-size:13px}
+  /* ---- Layout ---- */
+  .grid{display:grid;grid-template-columns:182px 1fr 1fr;gap:16px;position:relative;z-index:1}
+  .col{display:flex;flex-direction:column;gap:14px}
+  .card{
+    background:rgba(255,250,235,.6);
+    border:1px solid var(--line);border-radius:5px;padding:11px 13px;
+    box-shadow:0 2px 5px rgba(120,90,20,.07);
+  }
+  .card h2{
+    font-family:'Cinzel',serif;font-size:12.5px;font-weight:700;letter-spacing:1.2px;
+    text-transform:uppercase;color:var(--celest);margin-bottom:8px;
+    border-bottom:1px solid var(--line);padding-bottom:4px;display:flex;justify-content:space-between;align-items:baseline;
+  }
+  .card h2 small{font-family:'EB Garamond';font-weight:400;font-size:11px;letter-spacing:0;color:var(--ink-soft);font-style:italic}
+  /* ---- Abilities ---- */
+  .abil{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dotted var(--line)}
+  .abil:last-child{border-bottom:none}
+  .abil .name{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5px;width:34px;color:var(--ink-soft)}
+  .abil .mod{font-size:22px;font-weight:600;font-family:'Cinzel';width:42px;text-align:center;color:var(--ink)}
+  .abil .score{margin-left:auto;font-size:13px;color:var(--ink-soft);background:rgba(168,132,44,.16);border-radius:20px;padding:2px 9px}
+  /* ---- Stat band ---- */
+  .stats-band{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:14px;position:relative;z-index:1}
+  .stat{
+    text-align:center;border:1px solid var(--line);border-radius:5px;padding:8px 4px;
+    background:linear-gradient(180deg,rgba(255,251,238,.8),rgba(239,228,201,.6));
+  }
+  .stat .big{font-family:'Cinzel';font-size:25px;font-weight:700;color:var(--crimson);line-height:1}
+  .stat .lab{font-family:'Cinzel';font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
+  .stat .sub{font-size:11px;color:var(--ink-soft);font-style:italic}
+  .stat.celest .big{color:var(--celest)}
+  .stat.gold .big{color:var(--gold)}
+  /* ---- Stat band ---- */
+  .row{display:flex;justify-content:space-between;font-size:13.5px;padding:2.5px 0}
+  .row .v{font-weight:600;font-family:'Cinzel';font-size:12.5px}
+  .prof{color:var(--crimson);font-weight:700}
+  .dim{color:var(--ink-soft);opacity:.7}
+  /* features */
+  .feat{margin-bottom:8px}
+  .feat .ft{font-family:'Cinzel';font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.3px}
+  .feat .fd{font-size:12.5px;color:var(--ink-soft);line-height:1.32}
+  .tag{display:inline-block;background:var(--celest);color:#fdf6e3;font-size:9px;font-family:'Cinzel';
+    letter-spacing:.5px;padding:1px 6px;border-radius:3px;vertical-align:middle;margin-left:4px}
+  .tag.g{background:var(--gold)}
+  .tag.c{background:var(--crimson)}
+  /* attacks */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{font-family:'Cinzel';font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:3px 5px;border-bottom:1px solid var(--line)}
+  td{padding:5px 5px;border-bottom:1px dotted var(--line);vertical-align:top}
+  td.atk{font-weight:600;font-family:'Cinzel';font-size:12px}
+  td .mast{font-size:11px;color:var(--celest);font-style:italic}
+  /* spells */
+  .slots{display:flex;gap:14px;margin-bottom:9px;flex-wrap:wrap}
+  .slotgrp{display:flex;align-items:center;gap:5px;font-size:12px;font-family:'Cinzel'}
+  .pip{width:13px;height:13px;border:1.6px solid var(--gold);border-radius:50%;display:inline-block;background:rgba(201,164,67,.25)}
+  .spell{font-size:12.8px;padding:2px 0;display:flex;gap:6px;align-items:baseline}
+  .spell .lv{font-family:'Cinzel';font-size:10px;color:#fff8e6;background:var(--celest-soft);border-radius:3px;padding:0 5px;flex:none}
+  .spell.free .lv{background:var(--gold)}
+  .ctx{font-size:11px;color:var(--ink-soft);font-style:italic}
+  .note{font-size:11.5px;color:var(--ink-soft);font-style:italic;margin-top:7px;border-top:1px dotted var(--line);padding-top:6px}
+  .full{grid-column:1 / -1}
+  footer{margin-top:16px;text-align:center;font-size:11px;color:var(--ink-soft);font-style:italic;position:relative;z-index:1}
+  /* ---- Sword banner ---- */
+  .sword-banner{
+    grid-column:1 / -1;margin-bottom:14px;position:relative;z-index:1;
+    background:linear-gradient(135deg,#1f2a38 0%,#33271a 55%,#4a3413 100%);
+    border:1px solid var(--gold);border-radius:6px;padding:13px 18px;overflow:hidden;
+    box-shadow:0 4px 14px rgba(40,30,10,.35), inset 0 0 22px rgba(201,164,67,.18);
+  }
+  .sword-banner::after{
+    content:"";position:absolute;top:-40%;right:-6%;width:240px;height:240px;
+    background:radial-gradient(circle,rgba(201,164,67,.30),transparent 65%);pointer-events:none;
+  }
+  .sword-banner h2{font-family:'Cinzel';font-size:14px;font-weight:700;letter-spacing:1.5px;
+    color:var(--gold-bright);border:none;text-transform:uppercase;margin-bottom:9px;
+    display:flex;align-items:center;gap:9px}
+  .sword-banner h2 .blade{color:#f3e6c0;font-size:18px}
+  .sw-tiers{display:flex;gap:16px;flex-wrap:wrap}
+  .sw-tier{flex:1;min-width:230px;background:rgba(255,250,235,.06);border:1px solid rgba(201,164,67,.4);
+    border-radius:5px;padding:9px 12px}
+  .sw-tier .lvl{font-family:'Cinzel';font-size:10.5px;letter-spacing:1px;color:var(--gold-bright);
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+  .sw-tier .badge{font-size:8.5px;letter-spacing:.5px;padding:1px 7px;border-radius:3px;
+    background:var(--gold);color:#241a08;font-weight:700}
+  .sw-tier .badge.dim{background:rgba(201,164,67,.25);color:#d9c389}
+  .sw-tier p{font-size:13px;color:#ede2c8;line-height:1.42}
+  .sw-tier b{color:var(--gold-bright)}
+  /* ---- Interactive resources ---- */
+  .res-panel{grid-column:1/-1;margin-bottom:14px;position:relative;z-index:1;
+    background:rgba(255,250,235,.62);border:1px solid var(--line);border-radius:5px;padding:12px 16px;
+    box-shadow:0 2px 6px rgba(120,90,20,.08)}
+  .res-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+    border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:10px}
+  .res-head h2{font-family:'Cinzel';font-size:13px;font-weight:700;letter-spacing:1.3px;
+    text-transform:uppercase;color:var(--celest);border:none}
+  .rest-bar{display:flex;gap:8px}
+  .rest-btn{font-family:'Cinzel';font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;
+    padding:6px 13px;border-radius:4px;border:1px solid var(--gold);color:var(--ink);
+    background:linear-gradient(180deg,rgba(255,251,238,.95),rgba(239,228,201,.75));transition:.12s}
+  .rest-btn:hover{background:var(--gold);color:#fff8e6}
+  .rest-btn:active{transform:translateY(1px)}
+  .res-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 26px}
+  .userow{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;padding:4px 0;
+    border-bottom:1px dotted var(--line)}
+  .userow .lbl{color:var(--ink-soft)}
+  .userow .lbl b{color:var(--ink);font-family:'Cinzel';font-size:11.5px;font-weight:600;letter-spacing:.2px}
+  .uses{display:inline-flex;gap:6px}
+  .use-pip{width:17px;height:17px;border-radius:50%;border:1.9px solid var(--gold);cursor:pointer;transition:.13s;
+    background:radial-gradient(circle at 40% 34%,var(--gold-bright),var(--gold));
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.55)}
+  .use-pip:hover{transform:scale(1.18)}
+  .use-pip.spent{background:transparent;border-color:#c5b68c;box-shadow:none;opacity:.5}
+  .pool{display:flex;align-items:center;gap:6px}
+  .pool .pv{font-family:'Cinzel';font-size:16px;font-weight:700;color:var(--gold);min-width:64px;text-align:center}
+  .pool .pv small{font-size:10.5px;color:var(--ink-soft);font-weight:400}
+  .pbtn{font-family:'Cinzel';font-size:11px;cursor:pointer;border:1px solid var(--line);
+    background:rgba(255,251,238,.85);border-radius:4px;padding:2px 7px;color:var(--ink);transition:.12s}
+  .pbtn:hover{background:var(--gold);color:#fff8e6;border-color:var(--gold)}
+  .res-hint{font-size:11px;color:var(--ink-soft);font-style:italic;margin-top:9px;text-align:right}
+  .hp-row{grid-column:1/-1;display:block;background:rgba(124,45,45,.07);
+    border:1px solid rgba(124,45,45,.3);border-radius:6px;padding:10px 13px;margin-bottom:6px}
+  .hp-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
+  .hp-row .lbl b{color:var(--crimson);font-size:13px}
+  .hp-val{font-family:'Cinzel';font-weight:700;line-height:1}
+  .hp-val #pv-hp{font-size:25px;color:var(--crimson)}
+  .hp-val .hp-max{font-size:14px;color:var(--ink-soft);font-weight:600}
+  .hp-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .hp-actions .pbtn{padding:8px 13px;font-size:12.5px}
+  .hp-actions .pbtn.step{min-width:42px}
+  .hp-in{flex:1;min-width:96px;font-family:'EB Garamond';font-size:14px;padding:8px 9px;
+    border:1px solid var(--line);border-radius:5px;background:#fffdf6;color:var(--ink);text-align:center}
+  .pbtn.dmg{background:var(--crimson);color:#fff5ee;border-color:var(--crimson);font-family:'Cinzel';letter-spacing:.4px}
+  .pbtn.heal{background:#3f6b3f;color:#f3fbef;border-color:#3f6b3f;font-family:'Cinzel';letter-spacing:.4px}
+  .pbtn.dmg:hover,.pbtn.heal:hover{filter:brightness(1.12)}
+  .hd-row{grid-column:1/-1}
+  .hd-ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .pbtn.roll{background:var(--celest);color:#f3f8fc;border-color:var(--celest);font-family:'Cinzel';
+    font-size:11px;letter-spacing:.3px;padding:6px 11px}
+  .pbtn.roll:hover{filter:brightness(1.13)}
+  .hd-roll{font-family:'Cinzel';font-size:12px;font-weight:600;color:var(--celest);min-width:42px}
+  /* ---- Grimoire page ---- */
+  .grimoire{margin-top:26px}
+  .grim-intro{font-size:12.5px;color:var(--ink-soft);background:rgba(58,90,120,.07);
+    border:1px solid var(--line);border-radius:5px;padding:9px 13px;margin-bottom:16px;line-height:1.45}
+  .grim-intro b{color:var(--ink);font-family:'Cinzel';font-size:11.5px}
+  .grim-sec{font-family:'Cinzel';font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--gold);border-bottom:2px solid var(--gold);padding-bottom:5px;margin:18px 0 12px;position:relative;z-index:1}
+  .grim-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative;z-index:1}
+  .spellcard{background:rgba(255,250,235,.6);border:1px solid var(--line);border-radius:5px;
+    padding:10px 13px;box-shadow:0 2px 5px rgba(120,90,20,.06)}
+  .sc-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:3px}
+  .sc-name{font-family:'Cinzel';font-size:14px;font-weight:600;color:var(--ink)}
+  .sc-lvl{font-size:10px;font-family:'Cinzel';letter-spacing:.4px;color:var(--celest);white-space:nowrap}
+  .sc-meta{font-size:11.5px;color:var(--ink-soft);font-style:italic;margin-bottom:5px;
+    border-bottom:1px dotted var(--line);padding-bottom:5px}
+  .sc-meta .conc{font-style:normal;background:var(--crimson);color:#fdf3ee;font-family:'Cinzel';
+    font-size:8.5px;letter-spacing:.5px;padding:1px 5px;border-radius:3px;margin-left:2px}
+  .sc-desc{font-size:12.8px;color:var(--ink);line-height:1.4}
+  .sc-desc b{color:var(--crimson)}
+  @media(max-width:760px){.grim-grid{grid-template-columns:1fr}}
+  @media print{.grimoire{page-break-before:always}}
+  /* ---- Find Steed detail ---- */
+  .steed-block{margin-top:8px;position:relative;z-index:1}
+  .steed-core{background:rgba(58,90,120,.07);border:1px solid var(--line);border-radius:5px;padding:10px 13px;font-size:12.5px;color:var(--ink);line-height:1.5;margin-bottom:12px}
+  .steed-core b{color:var(--celest);font-family:'Cinzel';font-size:11.5px}
+  .steed-core .stat-mini{font-family:'Cinzel';font-size:12px}
+  .steed-table{width:100%;border-collapse:collapse;font-size:12.5px;position:relative;z-index:1}
+  .steed-table th{font-family:'Cinzel';font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:#fdf6e3;
+    background:var(--celest);text-align:left;padding:7px 9px;border:1px solid var(--celest)}
+  .steed-table td{padding:8px 9px;border:1px solid var(--line);vertical-align:top;background:rgba(255,250,235,.55)}
+  .steed-table .ty{font-family:'Cinzel';font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap}
+  .steed-table b{color:var(--crimson)}
+  /* ---- Notes page ---- */
+  .notes-page{margin-top:26px}
+  .notes-area{width:100%;min-height:520px;font-family:'EB Garamond',serif;font-size:15px;line-height:1.7;
+    color:var(--ink);background:repeating-linear-gradient(transparent,transparent 30px,rgba(168,132,44,.18) 31px);
+    border:1px solid var(--line);border-radius:6px;padding:8px 14px;resize:vertical;position:relative;z-index:1}
+  .notes-area:focus{outline:none;border-color:var(--gold)}
+  .notes-hint{font-size:11.5px;color:var(--ink-soft);font-style:italic;margin-bottom:10px;position:relative;z-index:1}
+  @media print{.notes-page{page-break-before:always}.notes-area{background:none;min-height:600px}}
+  /* ---- Treasury page ---- */
+  .coin-band{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:6px;position:relative;z-index:1}
+  .coin{text-align:center;border:1px solid var(--line);border-radius:6px;padding:10px 6px;
+    background:linear-gradient(180deg,rgba(255,251,238,.85),rgba(239,228,201,.6))}
+  .coin .cv{font-family:'Cinzel';font-size:24px;font-weight:700;line-height:1}
+  .coin .cv-in{font-family:'Cinzel';font-size:24px;font-weight:700;text-align:center;width:100%;line-height:1;
+    border:none;background:transparent;color:inherit;padding:0;
+    -moz-appearance:textfield;cursor:text}
+  .coin .cv-in:focus{outline:none;border-bottom:1.5px solid var(--gold)}
+  .coin .cv-in::-webkit-outer-spin-button,.coin .cv-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .coin.pt .cv-in{color:#6b7b86}.coin.au .cv-in{color:var(--gold)}
+  .coin.ag .cv-in{color:#8a8a8a}.coin.cu .cv-in{color:#a5673f}
+  .coin-steps{display:flex;gap:4px;justify-content:center;margin-top:6px}
+  .coin-steps .pbtn{padding:3px 7px;font-size:11px;font-family:'Cinzel'}
+  .coin .cl{font-family:'Cinzel';font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);margin-top:4px}
+  .coin.pt .cv{color:#6b7b86}.coin.au .cv{color:var(--gold)}
+  .coin.ag .cv{color:#8a8a8a}.coin.cu .cv{color:#a5673f}
+  .coin .calc{font-size:10px;color:var(--ink-soft);font-style:italic;margin-top:3px;line-height:1.25}
+  .total-line{text-align:right;font-size:13px;color:var(--ink-soft);margin:8px 2px 0;position:relative;z-index:1}
+  .total-line b{font-family:'Cinzel';font-size:15px;color:var(--gold)}
+  .treas-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative;z-index:1}
+  .loot{background:rgba(255,250,235,.6);border:1px solid var(--line);border-radius:5px;padding:10px 13px;
+    box-shadow:0 2px 5px rgba(120,90,20,.06)}
+  .loot .ln{font-family:'Cinzel';font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:3px}
+  .loot .ld{font-size:12.5px;color:var(--ink-soft);line-height:1.38}
+  .loot.feature{border-color:var(--gold);background:rgba(201,164,67,.1)}
+  @media(max-width:760px){.coin-band{grid-template-columns:repeat(2,1fr)}.treas-grid{grid-template-columns:1fr}}
+  @media print{.treasury{page-break-before:always}}
+  @media print{
+    .res-panel{display:none}
+    .sword-banner h2,.sword-banner h2 .blade{color:#7c5a14 !important}
+    .sw-tier p,.sw-tier b{color:#2b2419 !important}
+    body{background:#fff;padding:0}
+    .sheet{box-shadow:none;border:none;max-width:none}
+    .card{box-shadow:none}
+  }
+  @media(max-width:760px){
+    body{padding:12px 8px}
+    .sheet{padding:18px 14px 20px}
+    .sheet::before{inset:6px}
+    header{flex-direction:column;align-items:flex-start;gap:10px}
+    h1{font-size:25px}
+    .subtitle{font-size:14px}
+    .meta{text-align:left;font-size:13.5px}
+    .grid{grid-template-columns:1fr}
+    .stats-band{grid-template-columns:repeat(2,1fr)}
+    .res-grid{grid-template-columns:1fr}
+    .grim-grid{grid-template-columns:1fr}
+    .grim-intro{font-size:13px}
+  }
+  @media(max-width:380px){
+    .stats-band{grid-template-columns:1fr 1fr;gap:6px}
+    .stat .big{font-size:21px}
+    h1{font-size:22px}
+  }
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tharion">
+<meta name="theme-color" content="#0c0a10">
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <div class="crest">
+      <div class="sigil">&#10050;</div>
+      <div>
+        <h1>Tharion Velnar</h1>
+        <div class="subtitle">Dragonide d'Oro &middot; Paladino 7 &middot; Giuramento della Devozione</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div><b>Background</b> &nbsp;Nobile</div>
+      <div><b>Allineamento</b> &nbsp;Legale Buono</div>
+      <div><b>Velocità</b> &nbsp;9 m &middot; <b>Scurovisione</b> 18 m</div>
+      <div><b>Resistenza</b> &nbsp;Fuoco</div>
+    </div>
+  </header>
+
+  <!-- top stat band -->
+  <div class="stats-band">
+    <div class="stat"><div class="big">20</div><div class="lab">Classe Armatura</div><div class="sub">Piastre + Scudo</div></div>
+    <div class="stat gold"><div class="big">60</div><div class="lab">Punti Ferita</div><div class="sub">Dadi Vita 7d10</div></div>
+    <div class="stat"><div class="big">+3</div><div class="lab">Bonus Comp.</div><div class="sub">Iniz. &minus;1 · vantaggio</div></div>
+    <div class="stat celest"><div class="big">CD 15</div><div class="lab">Tiro Salv. Incant.</div><div class="sub">Attacco incant. +7</div></div>
+    <div class="stat" id="insp-cell" onclick="toggleInsp()" style="cursor:pointer;transition:.2s" title="Clicca per attivare/disattivare">
+      <div class="big" id="insp-display" style="font-size:30px;color:var(--ink-soft)">☆</div>
+      <div class="lab">Ispirazione</div>
+      <div id="insp-sub" class="sub">nessuna</div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- magic sword banner -->
+    <div class="sword-banner">
+      <h2><span class="blade">&#10013;</span> Lama Vincolante &middot; livelli di potere</h2>
+      <div class="sw-tiers">
+        <div class="sw-tier">
+          <div class="lvl">LIVELLO I &mdash; SENTINELLA<span class="badge dim">attivo</span></div>
+          <p>La lama <b>si illumina</b> quando ti trovi vicino alle <b>Vesti Purpuree</b>. Allarme e rivelatore della loro presenza.</p>
+        </div>
+        <div class="sw-tier">
+          <div class="lvl">LIVELLO II &mdash; ASCESA<span class="badge">attivo</span></div>
+          <p><b>+1</b> a incantesimi (colpire e CD) &middot; <b>+1</b> a colpire &middot; <b>+1</b> ai danni. <b>Vantaggio</b> ai TS per resistere a Spaventato, essere gettato Prono o Spinto.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- interactive resource tracker -->
+    <div class="res-panel">
+      <div class="res-head">
+        <h2>&#9670; Risorse &amp; Usi</h2>
+        <div class="rest-bar">
+          <button class="rest-btn" onclick="shortRest()">Riposo Breve</button>
+          <button class="rest-btn" onclick="longRest()">Riposo Lungo</button>
+        </div>
+      </div>
+      <div class="res-grid">
+        <div class="userow hp-row">
+          <div class="hp-top">
+            <span class="lbl"><b>&#10084; Punti Ferita</b></span>
+            <span class="hp-val"><span id="pv-hp">60</span><span class="hp-max"> / 60</span></span>
+          </div>
+          <div class="hp-actions">
+            <button class="pbtn step" onclick="adjustPool('hp',-1)">&minus;1</button>
+            <button class="pbtn step" onclick="adjustPool('hp',1)">+1</button>
+            <input class="hp-in" id="hp-in" type="number" min="0" inputmode="numeric" placeholder="quantità">
+            <button class="pbtn dmg" onclick="applyHP(-1)">Danno</button>
+            <button class="pbtn heal" onclick="applyHP(1)">Cura</button>
+          </div>
+        </div>
+        <div class="userow hd-row"><span class="lbl"><b>&#11042; Dadi Ferita</b> <span class="ctx">7d10 · riposo breve</span></span>
+          <span class="hd-ctl">
+            <span class="uses" data-key="hd" data-max="7"><span class="use-pip"></span><span class="use-pip"></span><span class="use-pip"></span><span class="use-pip"></span><span class="use-pip"></span><span class="use-pip"></span><span class="use-pip"></span></span>
+          </span>
+        </div>
+        <div class="userow"><span class="lbl"><b>Slot</b> 1&deg; livello</span><span class="uses" data-key="sl1" data-max="4"><span class="use-pip"></span><span class="use-pip"></span><span class="use-pip"></span><span class="use-pip"></span></span></div>
+        <div class="userow"><span class="lbl"><b>Slot</b> 2&deg; livello</span><span class="uses" data-key="sl2" data-max="3"><span class="use-pip"></span><span class="use-pip"></span><span class="use-pip"></span></span></div>
+        <div class="userow"><span class="lbl"><b>Channel Divinity</b> <span class="ctx">1 al rip. breve</span></span><span class="uses" data-key="cd" data-max="2"><span class="use-pip"></span><span class="use-pip"></span></span></div>
+        <div class="userow"><span class="lbl"><b>Soffio</b> del Drago</span><span class="uses" data-key="breath" data-max="3"><span class="use-pip"></span><span class="use-pip"></span><span class="use-pip"></span></span></div>
+        <div class="userow"><span class="lbl"><b>Punizione Divina</b> gratis</span><span class="uses" data-key="smitefree" data-max="1"><span class="use-pip"></span></span></div>
+        <div class="userow"><span class="lbl"><b>Trova Destriero</b> gratis</span><span class="uses" data-key="steedfree" data-max="1"><span class="use-pip"></span></span></div>
+        <div class="userow"><span class="lbl"><b>Volo Draconico</b></span><span class="uses" data-key="flight" data-max="1"><span class="use-pip"></span></span></div>
+        <div class="userow"><span class="lbl"><b>Scudo magico</b> <span class="ctx">+5 CA, reazione &middot; 1/giorno</span></span><span class="uses" data-key="shield" data-max="1"><span class="use-pip"></span></span></div>
+        <div class="userow"><span class="lbl"><b>Imposizione delle Mani</b></span>
+          <span class="pool" data-key="loh">
+            <button class="pbtn" onclick="adjustPool('loh',-5)">&minus;5</button>
+            <button class="pbtn" onclick="adjustPool('loh',-1)">&minus;1</button>
+            <span class="pv" id="pv-loh">35 <small>/ 35 PF</small></span>
+            <button class="pbtn" onclick="adjustPool('loh',5)">+5</button>
+          </span>
+        </div>
+      </div>
+      <div class="res-hint">Tocca un segnalino per consumarlo &middot; ritoccalo per recuperarlo &middot; i Riposi azzerano in automatico</div>
+    </div>
+
+    <!-- ===== COLUMN 1 ===== -->
+    <div class="col">
+      <div class="card">
+        <h2>Caratteristiche</h2>
+        <div class="abil"><span class="name">FOR</span><span class="mod">+4</span><span class="score">18</span></div>
+        <div class="abil"><span class="name">DES</span><span class="mod">&minus;1</span><span class="score">8</span></div>
+        <div class="abil"><span class="name">COS</span><span class="mod">+2</span><span class="score">14</span></div>
+        <div class="abil"><span class="name">INT</span><span class="mod">+0</span><span class="score">10</span></div>
+        <div class="abil"><span class="name">SAG</span><span class="mod">+0</span><span class="score">10</span></div>
+        <div class="abil"><span class="name">CAR</span><span class="mod">+3</span><span class="score">16</span></div>
+      </div>
+
+      <div class="card">
+        <h2>Tiri Salvezza <small>Aura +3 inclusa</small></h2>
+        <div class="row"><span>Forza</span><span class="v">+7</span></div>
+        <div class="row"><span>Destrezza</span><span class="v">+2</span></div>
+        <div class="row"><span>Costituzione</span><span class="v">+5</span></div>
+        <div class="row"><span>Intelligenza</span><span class="v">+3</span></div>
+        <div class="row"><span class="prof">&#9670; Saggezza</span><span class="v prof">+6</span></div>
+        <div class="row"><span class="prof">&#9670; Carisma</span><span class="v prof">+9</span></div>
+        <div class="note">Valori già comprensivi dell'Aura di Protezione (+3); lo stesso bonus vale per gli alleati entro 3 m.</div>
+        <div class="note" style="border-top:none;padding-top:3px">Spada: <b>vantaggio</b> contro Spaventato, Prono e Spinto.</div>
+      </div>
+
+      <div class="card">
+        <h2>Abilità <small>solo con modificatore</small></h2>
+        <div class="row"><span class="prof">&#9670; Atletica <span class="dim">(For)</span></span><span class="v prof">+7</span></div>
+        <div class="row"><span class="prof">&#9670; Intimidire <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
+        <div class="row"><span class="prof">&#9670; Persuasione <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
+        <div class="row"><span class="prof">&#9670; Percezione <span class="dim">(Sag)</span></span><span class="v prof">+3</span></div>
+        <div class="row"><span>Inganno <span class="dim">(Car)</span></span><span class="v">+3</span></div>
+        <div class="row"><span>Intrattenere <span class="dim">(Car)</span></span><span class="v">+3</span></div>
+        <div class="row"><span>Acrobazia <span class="dim">(Des)</span></span><span class="v">&minus;1</span></div>
+        <div class="row"><span>Furtività <span class="dim">(Des)</span></span><span class="v">&minus;1</span></div>
+        <div class="row"><span>Rapidità di Mano <span class="dim">(Des)</span></span><span class="v">&minus;1</span></div>
+        <div class="row"><span class="dim">Percez. passiva</span><span class="v dim">13</span></div>
+      </div>
+
+      <div class="card">
+        <h2>Competenze</h2>
+        <div style="font-size:12.5px;color:var(--ink-soft);line-height:1.45">
+          Armature: leggere, medie, <b>pesanti</b>, scudi · Armi: semplici e da guerra · TS: SAG, CAR · Simbolo Sacro (focus)
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== COLUMN 2 ===== -->
+    <div class="col">
+      <div class="card">
+        <h2>Attacchi <small>Attacco Extra: 2 colpi</small></h2>
+        <table>
+          <tr><th>Arma</th><th>Colpire</th><th>Danni</th></tr>
+          <tr>
+            <td class="atk">Spada lunga &#10013; <span style="font-weight:400;font-style:italic">(magica)</span><div class="mast">Maestria: Vex (se colpisci → vantaggio al prossimo attacco sullo stesso bersaglio)</div></td>
+            <td>+8</td><td>1d8+7 taglienti</td>
+          </tr>
+          <tr>
+            <td class="atk">Giavellotto <span style="font-weight:400;font-style:italic">(9/36 m)</span><div class="mast">Maestria: Rallentare (&minus;3 m velocità)</div></td>
+            <td>+7</td><td>1d6+4 perforanti</td>
+          </tr>
+        </table>
+        <div class="note">Colpire/danni includono la <b>spada +1</b>. Stile <b>Duellante</b> +2 ai danni (incluso). Con <b>Arma Sacra</b> attiva: +3 al colpire (→ +11) e danni Radiosi a scelta.</div>
+      </div>
+
+      <div class="card">
+        <h2>Punizione Divina <small>Azione bonus dopo un colpo in mischia</small></h2>
+        <div class="row"><span>Slot di 1° livello</span><span class="v">2d8 radiosi</span></div>
+        <div class="row"><span>Slot di 2° livello</span><span class="v">3d8 radiosi</span></div>
+        <div class="row"><span>vs Immondo / Non Morto</span><span class="v">+1d8</span></div>
+        <div class="note">Sempre preparata. <b>1 volta/riposo lungo</b> puoi lanciarla senza spendere slot (Punizione del Paladino).</div>
+      </div>
+
+      <div class="card">
+        <h2>Channel Divinity <small>2 usi · 1 al riposo breve</small></h2>
+        <div class="feat">
+          <span class="ft">Arma Sacra</span><span class="tag g">azione attacco</span>
+          <div class="fd">Per 10 min aggiungi +3 (CAR) al colpire con un'arma da mischia e infliggi danni Radiosi a scelta; emana luce intensa (6 m).</div>
+        </div>
+        <div class="feat">
+          <span class="ft">Percezione Divina</span><span class="tag">azione bonus</span>
+          <div class="fd">Per 10 min localizzi Celestiali, Immondi e Non Morti entro 18 m e luoghi consacrati/profanati.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Imposizione delle Mani</h2>
+        <div class="fd">Riserva da <b>35 PF</b> (contatore nel riquadro Risorse). Azione bonus per curare a contatto; spendi 5 PF per rimuovere <b>Avvelenato</b>. Ricarica al riposo lungo.</div>
+      </div>
+    </div>
+
+    <!-- ===== COLUMN 3 ===== -->
+    <div class="col">
+      <div class="card">
+        <h2>Privilegi di Classe & Aure</h2>
+        <div class="feat"><span class="ft">Aura di Protezione</span><span class="tag g">3 m</span>
+          <div class="fd">Tu e gli alleati nell'aura +3 (CAR) a tutti i TS.</div></div>
+        <div class="feat"><span class="ft">Aura di Devozione</span><span class="tag g">3 m</span>
+          <div class="fd">Tu e gli alleati nell'aura siete <b>immuni</b> ad Affascinato.</div></div>
+        <div class="feat"><span class="ft">Destriero Fedele</span>
+          <div class="fd">Trova Destriero sempre preparata; 1 lancio gratis/riposo lungo.</div></div>
+        <div class="feat"><span class="ft">Maestria nelle Armi</span>
+          <div class="fd">Vex (spada) e Rallentare (giavellotto).</div></div>
+      </div>
+
+      <div class="card">
+        <h2>Tratti Dragonide d'Oro</h2>
+        <div class="feat"><span class="ft">Soffio (Fuoco)</span><span class="tag c">3 usi/rip. lungo</span>
+          <div class="fd">In sostituzione di un attacco: cono 4,5 m o linea 9 m. TS DES <b>CD 13</b>, <b>2d10</b> fuoco (metà se supera).</div></div>
+        <div class="feat"><span class="ft">Resistenza al Danno</span>
+          <div class="fd">Resistenza ai danni da <b>Fuoco</b>.</div></div>
+        <div class="feat"><span class="ft">Volo Draconico</span><span class="tag c">1/rip. lungo</span>
+          <div class="fd">Az. bonus: ali spettrali, velocità di volo 9 m per 10 min.</div></div>
+        <div class="feat"><span class="ft">Scurovisione</span>
+          <div class="fd">18 metri.</div></div>
+      </div>
+
+      <div class="card">
+        <h2>Incantesimi <small>recupero: riposo lungo</small></h2>
+        <div class="slots" style="font-style:italic;color:var(--ink-soft);font-size:11.5px;margin-bottom:9px">Slot: 1&deg; &times;4 &middot; 2&deg; &times;3 &mdash; segnali nel riquadro <b>Risorse &amp; Usi</b>.</div>
+        <div class="spell free"><span class="lv">★</span><span>Punizione Divina · Trova Destriero</span></div>
+        <div class="spell free"><span class="lv">★</span><span>Prot. dal Male e dal Bene · Scudo della Fede</span></div>
+        <div class="spell free"><span class="lv">★</span><span>Aiuto · Zona di Verità <span class="ctx">(Giuramento)</span></span></div>
+        <div style="height:6px"></div>
+        <div class="spell"><span class="lv">1</span><span>Benedizione <span class="ctx">(C)</span></span></div>
+        <div class="spell"><span class="lv">1</span><span>Comando</span></div>
+        <div class="spell"><span class="lv">1</span><span>Cura Ferite</span></div>
+        <div class="spell"><span class="lv">1</span><span>Punizione Ardente <span class="ctx">(no C)</span></span></div>
+        <div class="spell"><span class="lv">1</span><span>Punizione Collerica</span></div>
+        <div class="spell"><span class="lv">2</span><span>Punizione Radiosa <span class="ctx">(C)</span></span></div>
+        <div class="spell"><span class="lv">2</span><span>Ristorare Inferiore</span></div>
+        <div class="note">★ = sempre preparati (non contano sul limite). CD/attacco includono la <b>spada +1</b>. Punizione Divina è azione bonus: niente altro incant. a slot nello stesso turno.</div>
+      </div>
+    </div>
+
+    <!-- equipment full width -->
+    <div class="card full">
+      <h2>Equipaggiamento & Note</h2>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--ink-soft)">
+        <span><b style="font-family:Cinzel;font-size:11px;color:var(--ink)">ARMI/DIFESA:</b> Armatura a piastre · Scudo magico <i>(vantaggio all'iniziativa; reazione: +5 CA fino al tuo prossimo turno, 1/giorno)</i> · Spada lunga magica (Lama Vincolante) · 4 Giavellotti · Simbolo Sacro</span>
+        <span><b style="font-family:Cinzel;font-size:11px;color:var(--ink)">VARIE:</b> Zaino dell'esploratore · Anello con sigillo (Nobile) · Pergamena di nobiltà</span>
+      </div>
+      <div class="note" style="border-top:none;padding-top:8px">
+        <b>Giuramento:</b> mantieni la parola data &middot; proteggi i deboli &middot; che le tue gesta siano d'esempio. &nbsp;
+        <b>Combo:</b> 1° attacco colpisce → <b>Vex</b> dà vantaggio al 2° → cala la Punizione Divina come azione bonus sul colpo migliore. Arma Sacra (+11, Radiosi) per i bersagli ostici, Soffio per i gruppi.
+      </div>
+    </div>
+
+  </div>
+
+  <footer>Manuale del Giocatore D&amp;D 2024 &middot; Dragonide d'Oro · build sword-and-board FOR/CAR · poteri spada concessi dal Master</footer>
+</div>
+
+<div class="sheet grimoire">
+  <header>
+    <div class="crest">
+      <div class="sigil">&#9883;</div>
+      <div>
+        <h1>Grimorio</h1>
+        <div class="subtitle">Incantesimi di Tharion Velnar &middot; Paladino 7</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div><b>CD Incantesimi</b> &nbsp;15</div>
+      <div><b>Attacco</b> &nbsp;+7 &middot; <b>CAR</b> +3</div>
+      <div><b>Slot</b> &nbsp;1&deg; &times;4 &middot; 2&deg; &times;3</div>
+    </div>
+  </header>
+
+  <div class="grim-intro">
+    <b>Promemoria.</b> Puoi mantenere la <b>Concentrazione</b> su un solo incantesimo per volta (un nuovo incantesimo di concentrazione interrompe il precedente). La <b>Punizione Divina</b> è un'azione bonus: nel turno in cui la lanci non puoi lanciare altri incantesimi che spendono uno slot. I valori "CD 15" nei tiri salvezza nemici sono già comprensivi del +1 della spada.
+  </div>
+
+  <div class="grim-sec">&#9670; Sempre preparati <span style="font-family:'EB Garamond';font-weight:400;font-size:11px;text-transform:none;letter-spacing:0;color:var(--ink-soft);font-style:italic">(non contano sul limite)</span></div>
+  <div class="grim-grid">
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Punizione Divina</span><span class="sc-lvl">1&deg; · Evocazione</span></div>
+      <div class="sc-meta">Azione bonus (dopo un colpo in mischia) · Sé · Istantaneo · V</div>
+      <p class="sc-desc">Il bersaglio subisce <b>2d8 radiosi</b> extra dal colpo; <b>+1d8</b> contro Immondi e Non Morti. Con slot di 2&deg; livello diventa <b>3d8</b>. Gratis 1 volta a riposo lungo senza spendere slot.</p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Protezione dal Male e dal Bene</span><span class="sc-lvl">1&deg; · Abiurazione</span></div>
+      <div class="sc-meta">Azione · Tocco · 10 min <span class="conc">CONC</span> · V, S, M <span style="font-style:normal">(acqua santa, consumata)</span></div>
+      <p class="sc-desc">Una creatura volontaria è protetta da Aberrazioni, Celestiali, Elementali, Folletti, Immondi e Non Morti: questi hanno <b>svantaggio</b> ad attaccarla, e lei non può essere posseduta né resa <b>Affascinata o Spaventata</b> da loro (vantaggio ai TS se già soggetta).</p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Scudo della Fede</span><span class="sc-lvl">1&deg; · Abiurazione</span></div>
+      <div class="sc-meta">Azione bonus · 18 m · 10 min <span class="conc">CONC</span> · V, S, M</div>
+      <p class="sc-desc">Una creatura a scelta entro gittata ottiene <b>+2 alla CA</b> per tutta la durata.</p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Trova Destriero</span><span class="sc-lvl">2&deg; · Evocazione</span></div>
+      <div class="sc-meta">Azione · 9 m · Istantaneo · V, S</div>
+      <p class="sc-desc">Evochi un destriero ultraterreno fedele (Grande e cavalcabile: cavallo, lupo gigante, alce…). Scegli il tipo: <b>Celestiale, Folletto o Immondo</b>. Usa il blocco "Destriero Ultraterreno"; sostituisce un destriero precedente. Gratis 1/riposo lungo.</p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Aiuto</span><span class="sc-lvl">2&deg; · Abiurazione</span></div>
+      <div class="sc-meta">Azione · 9 m · 8 ore · V, S, M</div>
+      <p class="sc-desc">Fino a <b>3 creature</b>: i PF massimi e attuali aumentano di <b>5</b> per la durata. Con slot superiori, +5 per ogni livello oltre il 2&deg;.</p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Zona di Verità</span><span class="sc-lvl">2&deg; · Incantamento</span></div>
+      <div class="sc-meta">Azione · 18 m · 10 min · V, S</div>
+      <p class="sc-desc">Sfera di raggio 4,5 m. Chi entra o inizia il turno nell'area fa <b>TS Carisma (CD 15)</b>: se fallisce non può <b>mentire</b> deliberatamente (può restare evasivo). Sai chi supera o fallisce il tiro.</p>
+    </div>
+  </div>
+
+  <div class="grim-sec">&#9670; Preparati a scelta</div>
+  <div class="grim-grid">
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Benedizione</span><span class="sc-lvl">1&deg; · Incantamento</span></div>
+      <div class="sc-meta">Azione · 9 m · 1 min <span class="conc">CONC</span> · V, S, M</div>
+      <p class="sc-desc">Fino a <b>3 creature</b> aggiungono <b>1d4</b> ai tiri per colpire e ai tiri salvezza finché dura. +1 bersaglio per ogni slot oltre il 1&deg;.</p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Cura Ferite</span><span class="sc-lvl">1&deg; · Abiurazione</span></div>
+      <div class="sc-meta">Azione · Tocco · Istantaneo · V, S</div>
+      <p class="sc-desc">La creatura toccata recupera <b>2d8 + 3</b> PF (CAR). La cura aumenta di 2d8 per ogni slot oltre il 1&deg;.</p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Comando</span><span class="sc-lvl">1&deg; · Incantamento</span></div>
+      <div class="sc-meta">Azione · 18 m · 1 round · V</div>
+      <p class="sc-desc">Un nemico che capisca una lingua fa <b>TS Saggezza (CD 15)</b>: se fallisce esegue un comando di una parola per il suo prossimo turno. Comandi tipici: <b>Avanzare</b> (allontanati da me), <b>Cadere</b> (diventa Prono e salta il turno), <b>Fuggi</b> (scappa → attacchi di opportunità da tutto il party), <b>Rannicchiati</b> (Prono e salta il turno → vantaggio automatico per chiunque in corpo a corpo), <b>Vieni</b> (avvicinati). <b>Niente concentrazione.</b> +1 bersaglio per slot oltre il 1&deg;.</p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Punizione Collerica</span><span class="sc-lvl">1&deg; · Negromanzia</span></div>
+      <div class="sc-meta">Az. bonus subito dopo aver colpito · Sé · 1 min · V</div>
+      <p class="sc-desc">+<b>1d6 necrotico</b> al colpo. Il bersaglio fa <b>TS Saggezza (CD 15)</b>: se fallisce è <b>Spaventato</b> da te per tutta la durata — non si può avvicinare a te e ha svantaggio ad attaccare e ai tiri di abilità mentre ti vede. Alla <b>fine di ogni suo turno</b> ripete il TS: se riesce l'incantesimo termina. <i>Nessuna concentrazione. Upcast: +1d6 necrotico per slot oltre il 1°.</i></p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Punizione Ardente</span><span class="sc-lvl">1&deg; · Evocazione</span></div>
+      <div class="sc-meta">Azione bonus (dopo un colpo in mischia) · Sé · 1 min · V</div>
+      <p class="sc-desc">+1d6 fuoco al colpo. Poi a inizio di ogni suo turno il bersaglio subisce <b>1d6 fuoco</b> e fa <b>TS Costituzione (CD 15)</b>: se riesce, l'incantesimo termina. +1d6 a tutto per ogni slot oltre il 1&deg;. <i>Non richiede concentrazione.</i></p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Punizione Radiosa</span><span class="sc-lvl">2&deg; · Evocazione</span></div>
+      <div class="sc-meta">Azione bonus (dopo un colpo in mischia) · Sé · 1 min <span class="conc">CONC</span> · V</div>
+      <p class="sc-desc">+<b>2d8 radiosi</b> al colpo. Il bersaglio emana <b>luce intensa</b> (1,5 m) e luce fioca (1,5 m) in più per tutta la durata: tutti gli attacchi contro di esso hanno <b>vantaggio automatico</b> (non può nascondersi né ricevere mezze coperture). Quando l'incantesimo termina, il bersaglio subisce altri <b>2d8 radiosi</b>. Perfetto per fissare un bersaglio prioritario e dare vantaggio a tutto il party.</p>
+    </div>
+    <div class="spellcard">
+      <div class="sc-head"><span class="sc-name">Ristorare Inferiore</span><span class="sc-lvl">2&deg; · Abiurazione</span></div>
+      <div class="sc-meta">Azione bonus · Tocco · Istantaneo · V, S</div>
+      <p class="sc-desc">Rimuovi dalla creatura toccata <b>una</b> condizione tra: <b>Accecato, Assordato, Paralizzato o Avvelenato</b>.</p>
+    </div>
+  </div>
+
+  <div class="grim-sec">&#9670; Trova Destriero &mdash; il Destriero Ultraterreno</div>
+  <div class="steed-block">
+    <div class="steed-core">
+      <b>Caratteristiche comuni</b> (lanciato a 2&deg; livello) &mdash; Grande, tipo a scelta. <span class="stat-mini">CA 12 &middot; PF 25 (2d10) &middot; Velocità 18 m</span> (Volo 18 m solo con slot di 4&deg;+).
+      FOR 18 (+4) · DES 12 (+1) · COS 14 (+2) · INT 6 (&minus;2) · SAG 12 (+1) · CAR 8 (&minus;1). PP 11 · Telepatia con te (1,6 km) · Bonus comp. = il tuo (+3).<br>
+      <b>Schianto Ultraterreno</b> (azione): <b>+7</b> al colpire (tuo mod. d'attacco incantesimi), portata 1,5 m, <b>1d8+2</b> danni (tipo secondo la forma, vedi tabella).<br>
+      <b>Legame Vitale:</b> quando recuperi PF da un incantesimo (liv. 1+) e il destriero è entro 1,5 m, recupera i tuoi stessi PF. <b>Combattimento:</b> condivide la tua iniziativa, è una cavalcatura controllata. Scompare a 0 PF o se muori.
+    </div>
+    <table class="steed-table">
+      <tr><th>Forma</th><th>Danno Schianto</th><th>Potere speciale &mdash; azione bonus (ricarica: riposo lungo)</th></tr>
+      <tr>
+        <td class="ty">Celestiale</td>
+        <td><b>Radioso</b></td>
+        <td><b>Tocco Guaritore:</b> una creatura entro 1,5 m recupera <b>2d8+2</b> PF.</td>
+      </tr>
+      <tr>
+        <td class="ty">Folletto <span style="font-weight:400;font-style:italic">(Fey)</span></td>
+        <td><b>Psichico</b></td>
+        <td><b>Passo Fatato:</b> il destriero si teletrasporta (con te in sella) in uno spazio libero entro 18 m.</td>
+      </tr>
+      <tr>
+        <td class="ty">Immondo <span style="font-weight:400;font-style:italic">(Fiend)</span></td>
+        <td><b>Necrotico</b></td>
+        <td><b>Sguardo Maligno:</b> una creatura entro 18 m fa <b>TS Saggezza CD 15</b> o è <b>Spaventata</b> fino alla fine del tuo prossimo turno.</td>
+      </tr>
+    </table>
+    <div class="notes-hint" style="margin-top:8px">Con slot più alti: CA = 10 + livello slot · PF = 5 + 10 × livello · Schianto = 1d8 + livello · Cura = 2d8 + livello · Volo da 4&deg;+.</div>
+  </div>
+
+  <footer>Descrizioni riassunte dal Manuale del Giocatore D&amp;D 2024 · per uso al tavolo</footer>
+</div>
+
+<div class="sheet treasury">
+  <header>
+    <div class="crest">
+      <div class="sigil">&#9878;</div>
+      <div>
+        <h1>Tesoreria</h1>
+        <div class="subtitle">Cassa Comune del gruppo &amp; bottino</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div><b>Conversioni</b></div>
+      <div>1 MP = 10 MO</div>
+      <div>1 MO = 10 MA = 100 MR</div>
+    </div>
+  </header>
+
+  <div class="grim-sec">&#9670; Cassa Comune &mdash; monete</div>
+  <div class="coin-band">
+    <div class="coin pt"><input class="cv-in" id="coin-mp" type="number" min="0" inputmode="numeric" value="10"><div class="cl">Platino · MP</div></div>
+    <div class="coin au"><input class="cv-in" id="coin-mo" type="number" min="0" inputmode="numeric" value="4696"><div class="cl">Oro · MO</div></div>
+    <div class="coin ag"><input class="cv-in" id="coin-ma" type="number" min="0" inputmode="numeric" value="250"><div class="cl">Argento · MA</div></div>
+    <div class="coin cu"><input class="cv-in" id="coin-mr" type="number" min="0" inputmode="numeric" value="928"><div class="cl">Rame · MR</div></div>
+  </div>
+  <div class="total-line">Valore monete convertito: <b id="coin-value">&asymp; 4.830 MO</b></div>
+  <div class="total-line" style="margin-top:3px">Peso delle monete: <b id="coin-weight">&asymp; 53,4 kg</b> <span style="font-style:italic">(50 monete = ~0,45 kg)</span></div>
+
+  <div class="grim-sec">&#9670; Oggetti &amp; valori</div>
+  <div class="treas-grid">
+    <div class="loot">
+      <div class="ln">Statuetta &mdash; testa di drago nero</div>
+      <div class="ld">Oggetto d'arte; valore da stimare/vendere.</div>
+    </div>
+    <div class="loot">
+      <div class="ln">25 rotoli di velluto</div>
+      <div class="ld">Stoffa pregiata da rivendere.</div>
+    </div>
+    <div class="loot">
+      <div class="ln">Gemma piccola e chiara</div>
+      <div class="ld">1 pietra limpida; valore da stimare.</div>
+    </div>
+  </div>
+
+  <div class="grim-sec">&#9670; Bottino &mdash; cassa del culto del drago</div>
+  <div class="treas-grid">
+    <div class="loot">
+      <div class="ln">Tesoro della cassa</div>
+      <div class="ld"><b>&asymp; 3.000 MO</b> di valore complessivo.</div>
+    </div>
+    <div class="loot feature">
+      <div class="ln">Tunica del Mago Rosso di Thay</div>
+      <div class="ld">Chi la indossa è <b>specializzato nella scuola di Invocazione</b>. (Effetto preciso da confermare col Master.)</div>
+    </div>
+  </div>
+
+  <div class="total-line" style="margin-top:14px;font-size:14px">Patrimonio stimato del gruppo: <b>&asymp; 7.830 MO</b> <span style="font-style:italic">(monete + cassa del drago, esclusi oggetti da stimare)</span></div>
+
+  <footer>Tesoreria condivisa &middot; aggiorna i totali dopo vendite e spese</footer>
+</div>
+
+<div class="sheet notes-page">
+  <header>
+    <div class="crest">
+      <div class="sigil">&#9998;</div>
+      <div>
+        <h1>Diario</h1>
+        <div class="subtitle">Appunti di sessione &middot; Tharion Velnar</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div><b>Salvataggio</b></div>
+      <div>automatico</div>
+    </div>
+  </header>
+  <div class="notes-hint">Scrivi qui i tuoi appunti durante la sessione: eventi, PNG, indizi, missioni. Vengono salvati da soli a ogni modifica.</div>
+  <textarea class="notes-area" id="notes-area" placeholder="Sessione del…&#10;&#10;• "></textarea>
+  <footer>Diario di gioco &middot; il testo resta salvato sul dispositivo</footer>
+</div>
+<script>
+(function(){
+  var MAX={sl1:4,sl2:3,cd:2,breath:3,smitefree:1,steedfree:1,flight:1,shield:1};
+  var POOLMAX={loh:35,hp:60};
+  var spent={}, pools={loh:35,hp:60};
+  var coins={mp:10,mo:4696,ma:250,mr:928};
+  var notes='';
+  var KEY='tharion-velnar-sheet';
+
+  function persist(){
+    var data=JSON.stringify({spent:spent,pools:pools,coins:coins,notes:notes});
+    var saved=false;
+    try{
+      if(window.storage&&typeof window.storage.set==='function'){
+        var p=window.storage.set(KEY,data,false);
+        if(p&&typeof p.then==='function'){ p.then(function(){},function(){}); }
+        saved=true;
+      }
+    }catch(e){}
+    try{ window.localStorage&&window.localStorage.setItem(KEY,data); }catch(e){}
+  }
+  function applyData(d){
+    if(!d) return;
+    spent=d.spent||{}; pools=Object.assign({loh:35,hp:60},d.pools||{});
+    coins=Object.assign({mp:10,mo:4696,ma:250,mr:928},d.coins||{});
+    notes=(typeof d.notes==='string')?d.notes:notes; renderAll();
+  }
+  function restore(){
+    renderAll();           // draw pips right away, no dependency on storage
+    // 1) try browser localStorage (instant, persists per device/browser)
+    try{
+      var ls=window.localStorage&&window.localStorage.getItem(KEY);
+      if(ls){ applyData(JSON.parse(ls)); }
+    }catch(e){}
+    // 2) also try the artifact persistent storage; if present it overrides
+    try{
+      if(window.storage&&typeof window.storage.get==='function'){
+        var p=window.storage.get(KEY,false);
+        if(p&&typeof p.then==='function'){
+          p.then(function(r){ if(r&&r.value){ try{ applyData(JSON.parse(r.value)); }catch(e){} } },function(){});
+        }
+      }
+    }catch(e){}
+  }
+
+  function renderUses(el){
+    var k=el.getAttribute('data-key'), max=+el.getAttribute('data-max'), sp=spent[k]||0, avail=max-sp, h='';
+    for(var i=0;i<max;i++){ h+='<span class="use-pip'+(i<avail?'':' spent')+'"></span>'; }
+    el.innerHTML=h;
+    Array.prototype.forEach.call(el.querySelectorAll('.use-pip'),function(p){
+      p.onclick=function(){
+        var cur=spent[k]||0;
+        spent[k]=p.classList.contains('spent')?Math.max(0,cur-1):Math.min(max,cur+1);
+        renderUses(el); persist();
+      };
+    });
+  }
+  function renderPool(k){
+    if(k==='hp'){ var h=document.getElementById('pv-hp'); if(h){ h.textContent=pools.hp; } return; }
+    var el=document.getElementById('pv-'+k);
+    if(el){ el.innerHTML=(pools[k])+' <small>/ '+POOLMAX[k]+' PF</small>'; }
+  }
+  function fmt(n){ return n.toLocaleString('it-IT'); }
+  function renderCoins(){
+    ['mp','mo','ma','mr'].forEach(function(k){
+      var inp=document.getElementById('coin-'+k);
+      if(inp && document.activeElement!==inp){ inp.value=coins[k]; }
+    });
+    var total=coins.mp+coins.mo+coins.ma+coins.mr;
+    var gp=coins.mp*10+coins.mo+coins.ma/10+coins.mr/100;
+    var kg=total/50*0.4536;
+    var v=document.getElementById('coin-value'); if(v){ v.innerHTML='&asymp; '+fmt(Math.round(gp))+' MO'; }
+    var w=document.getElementById('coin-weight'); if(w){ w.innerHTML='&asymp; '+kg.toLocaleString('it-IT',{maximumFractionDigits:1})+' kg <span style="font-style:italic;font-weight:400">('+fmt(total)+' monete)</span>'; }
+  }
+  function bindCoins(){
+    ['mp','mo','ma','mr'].forEach(function(k){
+      var inp=document.getElementById('coin-'+k);
+      if(inp && !inp._bound){
+        inp._bound=true;
+        inp.addEventListener('input',function(){
+          var n=parseInt(inp.value,10); coins[k]=isNaN(n)||n<0?0:n; renderCoins(); persist();
+        });
+      }
+    });
+  }
+  window.stepCoin=function(k,d){ coins[k]=Math.max(0,(coins[k]||0)+d); renderCoins(); persist(); };
+  function bindNotes(){
+    var ta=document.getElementById('notes-area');
+    if(ta){
+      if(document.activeElement!==ta){ ta.value=notes; }
+      if(!ta._bound){ ta._bound=true; ta.addEventListener('input',function(){ notes=ta.value; persist(); }); }
+    }
+  }
+  function renderAll(){
+    Array.prototype.forEach.call(document.querySelectorAll('.uses'),renderUses);
+    Object.keys(POOLMAX).forEach(renderPool);
+    bindCoins(); renderCoins(); bindNotes();
+  }
+  window.adjustPool=function(k,d){ pools[k]=Math.max(0,Math.min(POOLMAX[k],(pools[k]||0)+d)); renderPool(k); persist(); };
+  window.applyHP=function(sign){
+    var inp=document.getElementById('hp-in'); var n=parseInt(inp.value,10);
+    if(!isNaN(n)&&n!==0){ adjustPool('hp',sign*Math.abs(n)); }
+    inp.value='';
+  };
+  window.rollHD=function(){};
+  window.longRest=function(){
+    spent={}; pools={loh:35,hp:60}; renderAll();
+    persist();
+  };
+  window.shortRest=function(){ spent.cd=Math.max(0,(spent.cd||0)-1); renderAll(); persist(); };
+
+
+  if(document.readyState!=='loading') restore();
+  else document.addEventListener('DOMContentLoaded',restore);
+})();
+
+// --- Ispirazione ---
+(function(){
+  var IKEY='tharion-insp';
+  var hasInsp=false;
+  try{ hasInsp=localStorage.getItem(IKEY)==='1'; }catch(e){}
+
+  function renderInsp(){
+    var cell=document.getElementById('insp-cell');
+    var el=document.getElementById('insp-display');
+    var sub=document.getElementById('insp-sub');
+    if(!el) return;
+    if(hasInsp){
+      el.textContent='★'; el.style.color='var(--gold-bright)';
+      if(sub) sub.textContent='ATTIVA · vantaggio';
+      if(cell){ cell.style.background='linear-gradient(180deg,rgba(201,164,67,.28),rgba(168,132,44,.12))'; cell.style.border='1.5px solid var(--gold)'; }
+    } else {
+      el.textContent='☆'; el.style.color='var(--ink-soft)';
+      if(sub) sub.textContent='nessuna';
+      if(cell){ cell.style.background=''; cell.style.border=''; }
+    }
+  }
+  window.toggleInsp=function(){
+    hasInsp=!hasInsp; renderInsp();
+    try{ localStorage.setItem(IKEY,hasInsp?'1':'0'); }catch(e){}
+  };
+
+  if(document.readyState!=='loading') renderInsp();
+  else document.addEventListener('DOMContentLoaded',renderInsp);
+})();
+</script>
+</body>
+</html>
