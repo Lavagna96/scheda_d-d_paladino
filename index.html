@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Scheda — Paladino Lv7 · Giuramento della Devozione</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -298,6 +298,36 @@
     .stat .big{font-size:21px}
     h1{font-size:22px}
   }
+  /* ---- Floating bottom nav ---- */
+  html{scroll-behavior:smooth}
+  body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .sheet{scroll-margin-top:10px}
+  .floatnav{
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:calc(12px + env(safe-area-inset-bottom));z-index:60;
+    display:flex;gap:3px;padding:6px;
+    background:linear-gradient(160deg,#26211a,#14110c);
+    border:1px solid var(--gold);border-radius:16px;
+    box-shadow:0 8px 26px rgba(20,15,5,.5), inset 0 0 18px rgba(201,164,67,.12);
+    max-width:calc(100% - 18px);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .floatnav a{
+    flex:1;text-decoration:none;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    min-width:62px;padding:7px 9px;border-radius:11px;
+    color:#d9c389;font-family:'Cinzel',serif;transition:.15s;
+  }
+  .floatnav a .ic{font-size:18px;line-height:1;color:var(--gold-bright)}
+  .floatnav a .tx{font-size:9.5px;letter-spacing:.5px;text-transform:uppercase}
+  .floatnav a:active{transform:scale(.95)}
+  .floatnav a.active{background:linear-gradient(180deg,rgba(201,164,67,.30),rgba(168,132,44,.14))}
+  .floatnav a.active .tx{color:#fff8e6}
+  @media(max-width:380px){
+    .floatnav a{min-width:54px;padding:6px 5px}
+    .floatnav a .tx{font-size:8.5px}
+  }
+  @media print{.floatnav{display:none}body{padding-bottom:0}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -307,7 +337,7 @@
 <meta name="theme-color" content="#0c0a10">
 </head>
 <body>
-<div class="sheet">
+<div class="sheet" id="scheda">
 
   <header>
     <div class="crest">
@@ -555,7 +585,7 @@
   <footer>Manuale del Giocatore D&amp;D 2024 &middot; Dragonide d'Oro · build sword-and-board FOR/CAR · poteri spada concessi dal Master</footer>
 </div>
 
-<div class="sheet grimoire">
+<div class="sheet grimoire" id="grimorio">
   <header>
     <div class="crest">
       <div class="sigil">&#9883;</div>
@@ -680,7 +710,7 @@
   <footer>Descrizioni riassunte dal Manuale del Giocatore D&amp;D 2024 · per uso al tavolo</footer>
 </div>
 
-<div class="sheet treasury">
+<div class="sheet treasury" id="tesoreria">
   <header>
     <div class="crest">
       <div class="sigil">&#9878;</div>
@@ -739,7 +769,7 @@
   <footer>Tesoreria condivisa &middot; aggiorna i totali dopo vendite e spese</footer>
 </div>
 
-<div class="sheet notes-page">
+<div class="sheet notes-page" id="diario">
   <header>
     <div class="crest">
       <div class="sigil">&#9998;</div>
@@ -901,6 +931,35 @@
 
   if(document.readyState!=='loading') renderInsp();
   else document.addEventListener('DOMContentLoaded',renderInsp);
+})();
+</script>
+<nav class="floatnav">
+  <a href="#scheda" data-target="scheda"><span class="ic">&#10050;</span><span class="tx">Scheda</span></a>
+  <a href="#grimorio" data-target="grimorio"><span class="ic">&#9883;</span><span class="tx">Grimorio</span></a>
+  <a href="#tesoreria" data-target="tesoreria"><span class="ic">&#9878;</span><span class="tx">Tesoreria</span></a>
+  <a href="#diario" data-target="diario"><span class="ic">&#9998;</span><span class="tx">Diario</span></a>
+</nav>
+<script>
+(function(){
+  var links=Array.prototype.slice.call(document.querySelectorAll('.floatnav a'));
+  links.forEach(function(a){
+    a.addEventListener('click',function(ev){
+      ev.preventDefault();
+      var el=document.getElementById(a.getAttribute('data-target'));
+      if(el){ el.scrollIntoView({behavior:'smooth',block:'start'}); }
+    });
+  });
+  function setActive(id){
+    links.forEach(function(a){ a.classList.toggle('active',a.getAttribute('data-target')===id); });
+  }
+  if('IntersectionObserver' in window){
+    var obs=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ setActive(e.target.id); } });
+    },{rootMargin:'-45% 0px -45% 0px',threshold:0});
+    ['scheda','grimorio','tesoreria','diario'].forEach(function(id){
+      var el=document.getElementById(id); if(el){ obs.observe(el); }
+    });
+  }
 })();
 </script>
 </body>
