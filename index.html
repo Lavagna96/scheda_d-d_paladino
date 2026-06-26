@@ -432,11 +432,29 @@
     /* mobile: ogni riga risorsa si impila — etichetta sopra, controlli sotto a piena larghezza */
     .userow{flex-direction:column;align-items:flex-start;gap:7px;padding:9px 0}
     .userow .lbl{width:100%}
-    .res-cards{grid-template-columns:1fr}
     .abil-grid{grid-template-columns:repeat(3,1fr)}
     .hp-in{min-height:40px;font-size:15px}
     .coin-steps .pbtn{padding:6px 10px;font-size:12px}
     .coin .cv-in{padding:5px 0;font-size:22px}
+    /* mobile: pagina Scheda più densa — più info per schermata */
+    .grid{gap:9px}
+    .col{gap:9px}
+    .card{padding:8px 11px}
+    .card h2{margin-bottom:5px;padding-bottom:3px}
+    .stats-band{gap:7px;margin-bottom:9px}
+    .stat{padding:6px 4px}
+    .stat .big{font-size:23px}
+    .stat .sub{font-size:11px}
+    .res-panel{padding:11px 13px;margin-bottom:10px}
+    .res-cards{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;margin:9px 0}
+    .res-card{padding:7px 9px}
+    .feat{margin-bottom:5px}
+    .feat .fd{line-height:1.28}
+    .row{padding:2px 0}
+    .sword-banner{padding:10px 13px;margin-bottom:10px}
+    .abil-grid{gap:6px}
+    .abil-card{padding:7px 4px 6px}
+    .abil-card .mod{font-size:22px}
   }
   @media(max-width:380px){
     .stats-band{grid-template-columns:1fr 1fr;gap:6px}
