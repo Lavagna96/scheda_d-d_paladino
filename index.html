@@ -15,9 +15,13 @@
     --parch-2:#efe4c9;
     --gold:#a8842c;
     --gold-bright:#c9a443;
-    --celest:#3a5a78;
-    --celest-soft:#5b7e9b;
-    --crimson:#7c2d2d;
+    --celest:#1a5c44;
+    --celest-soft:#2a7a5c;
+    --celest-bright:#3d9470;
+    --ruby:#9e0922;
+    --ruby-bright:#cc2440;
+    --ruby-dark:#660514;
+    --crimson:#9e0922;
     --line:#c9b483;
     --shadow:rgba(60,45,15,.18);
   }
@@ -39,7 +43,7 @@
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    opacity:.5;mix-blend-mode:multiply;
+    opacity:.32;mix-blend-mode:multiply;
   }
   .sheet{
     max-width:1080px;margin:0 auto;
@@ -77,10 +81,10 @@
   .crest{display:flex;align-items:center;gap:16px}
   .sigil{
     width:58px;height:58px;flex:none;border-radius:50%;
-    background:radial-gradient(circle at 50% 38%, var(--gold-bright), var(--gold) 70%);
-    display:grid;place-items:center;color:#fff8e6;font-size:30px;
-    box-shadow:0 4px 12px rgba(120,90,20,.4), inset 0 2px 4px rgba(255,255,255,.4),
-      0 0 0 3px var(--parch), 0 0 0 4.5px var(--gold);
+    background:radial-gradient(circle at 42% 32%, var(--ruby-bright), var(--ruby) 52%, var(--ruby-dark) 100%);
+    display:grid;place-items:center;color:#ffe6c4;font-size:30px;
+    box-shadow:0 4px 13px rgba(102,5,20,.5), inset 0 2px 5px rgba(255,255,255,.4), inset 0 -3px 6px rgba(60,3,12,.45),
+      0 0 0 3px var(--parch), 0 0 0 5px var(--gold);
   }
   h1{font-family:'Cinzel',serif;font-weight:700;font-size:30px;letter-spacing:1px;color:var(--ink);line-height:1;
     text-shadow:0 1px 0 rgba(255,251,238,.6), 0 -1px 0 rgba(60,45,15,.12)}
@@ -91,7 +95,7 @@
   .grid{display:grid;grid-template-columns:182px minmax(0,1fr) minmax(0,1fr);gap:16px;position:relative;z-index:1}
   .col{display:flex;flex-direction:column;gap:14px;min-width:0}
   .card{
-    background:rgba(255,250,235,.6);
+    background:rgba(255,250,235,.78);
     border:1px solid var(--line);border-radius:10px;padding:11px 13px;
     box-shadow:0 2px 5px rgba(120,90,20,.07);
   }
@@ -148,13 +152,14 @@
     border:1px solid var(--gold) !important;color:#ede2c8;
     box-shadow:0 4px 14px rgba(0,0,0,.4), inset 0 0 22px rgba(201,164,67,.12);
   }
+  .col-combat .card:not(.combat-card) h2{color:var(--ruby)}
   .combat-card h2{color:var(--gold-bright);border-bottom-color:rgba(201,164,67,.35)}
   .combat-card h2 small{color:#cdb98f}
   .combat-card h2::before{color:var(--gold-bright)}
   .combat-card th{color:#cdb98f;border-bottom-color:rgba(201,164,67,.3)}
   .combat-card td{border-bottom-color:rgba(201,164,67,.2);color:#ede2c8}
   .combat-card td.atk{color:var(--gold-bright)}
-  .combat-card td .mast{color:#9fc3dd}
+  .combat-card td .mast{color:#6db89a}
   .combat-card .note{color:#cdb98f;border-top-color:rgba(201,164,67,.3)}
   .combat-card .note b{color:var(--gold-bright)}
   /* spells */
@@ -164,6 +169,11 @@
   .spell{font-size:12.8px;padding:2px 0;display:flex;gap:6px;align-items:baseline}
   .spell .lv{font-family:'Cinzel';font-size:10px;color:#fff8e6;background:var(--celest-soft);border-radius:5px;padding:0 5px;flex:none}
   .spell.free .lv{background:var(--gold)}
+  a.spell-link{color:inherit;text-decoration:none;border-radius:5px;padding:1px 3px;margin:-1px -3px;
+    cursor:pointer;transition:color .12s,background .12s;-webkit-tap-highlight-color:transparent}
+  a.spell-link:active{background:rgba(168,132,44,.18)}
+  @media(hover:hover) and (pointer:fine){a.spell-link:hover{color:var(--celest);background:rgba(26,92,68,.08)}}
+  .spell-sep{color:var(--ink-soft);pointer-events:none}
   .ctx{font-size:11px;color:var(--ink-soft);font-style:italic}
   .note{font-size:11.5px;color:var(--ink-soft);font-style:italic;margin-top:7px;border-top:1px dotted var(--line);padding-top:6px}
   .full{grid-column:1 / -1}
@@ -186,11 +196,16 @@
   .sw-tiers{display:flex;gap:16px;flex-wrap:wrap}
   .sw-tier{flex:1;min-width:170px;background:rgba(255,250,235,.06);border:1px solid rgba(201,164,67,.4);
     border-radius:10px;padding:9px 12px}
-  .sw-tier .lvl{font-family:'Cinzel';font-size:10.5px;letter-spacing:1px;color:var(--gold-bright);
-    display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
-  .sw-tier .badge{font-size:8.5px;letter-spacing:.5px;padding:1px 7px;border-radius:5px;
-    background:var(--gold);color:#241a08;font-weight:700}
-  .sw-tier .badge.dim{background:rgba(201,164,67,.25);color:#d9c389}
+  .sw-tier .lvl{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+  .sw-tier .lvl-title{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .sw-tier .lvl-num{font-family:'Cinzel';font-size:9px;letter-spacing:1.3px;text-transform:uppercase;
+    color:var(--ruby-bright);line-height:1.2}
+  .sw-tier .lvl-name{font-family:'Cinzel';font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;
+    color:var(--gold-bright);line-height:1.2}
+  .sw-tier .badge{flex:none;font-family:'Cinzel';font-size:8px;letter-spacing:.6px;text-transform:uppercase;
+    padding:2px 8px;border-radius:5px;font-weight:700;
+    background:linear-gradient(180deg,var(--ruby-bright),var(--ruby));
+    color:#fff5ee;box-shadow:0 1px 3px rgba(102,5,20,.35)}
   .sw-tier p{font-size:13px;color:#ede2c8;line-height:1.42}
   .sw-tier b{color:var(--gold-bright)}
   /* ---- Interactive resources ---- */
@@ -213,7 +228,7 @@
   .userow .lbl{color:var(--ink-soft)}
   .userow .lbl b{color:var(--ink);font-family:'Cinzel';font-size:11.5px;font-weight:600;letter-spacing:.2px}
   .res-cards{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:12px 0}
-  .res-card{background:rgba(255,250,235,.6);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+  .res-card{background:rgba(255,250,235,.78);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
   .rc-top{display:flex;align-items:baseline;gap:6px;margin-bottom:7px;flex-wrap:wrap}
   .rc-name{font-family:'Cinzel';font-size:12px;font-weight:700;color:var(--ink);letter-spacing:.6px;text-transform:uppercase}
   .rc-name::before{content:"\2666";color:var(--gold);font-size:9px;margin-right:5px}
@@ -233,8 +248,8 @@
   .res-hint{font-size:11px;color:var(--ink-soft);font-style:italic;margin-top:10px;text-align:right}
   .hp-row{grid-column:1/-1;display:block;
     background:linear-gradient(160deg,rgba(255,251,238,.8),rgba(239,228,201,.6));
-    border:1px solid var(--gold);border-radius:12px;padding:18px 20px;margin-bottom:8px;
-    box-shadow:0 2px 6px rgba(120,90,20,.08)}
+    border:1.5px solid var(--ruby);border-radius:12px;padding:18px 20px;margin-bottom:8px;
+    box-shadow:0 2px 6px rgba(102,5,20,.14), inset 0 0 0 1px rgba(204,36,64,.12)}
   .hp-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
     border-bottom:1px dotted var(--line);padding-bottom:11px;margin-bottom:13px}
   .hp-row .lbl b{color:var(--crimson);font-size:13px;white-space:nowrap}
@@ -248,8 +263,10 @@
   .hp-dmgheal .pbtn{flex:1;text-align:center}
   .hp-in{flex:1;min-width:96px;font-family:'EB Garamond';font-size:14px;padding:9px;
     border:1px solid var(--line);border-radius:10px;background:#fffdf6;color:var(--ink);text-align:center}
-  .pbtn.dmg{background:var(--crimson);color:#fff5ee;border-color:var(--crimson);font-family:'Cinzel';letter-spacing:.4px}
-  .pbtn.heal{background:#3f6b3f;color:#f3fbef;border-color:#3f6b3f;font-family:'Cinzel';letter-spacing:.4px}
+  .pbtn.dmg{background:linear-gradient(180deg,var(--ruby-bright),var(--ruby) 55%,var(--ruby-dark));color:#fff5ee;
+    border-color:var(--ruby-dark);font-family:'Cinzel';letter-spacing:.4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+  .pbtn.heal{background:linear-gradient(180deg,var(--celest-soft),var(--celest));color:#f0faf5;
+    border-color:#144a36;font-family:'Cinzel';letter-spacing:.4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.15)}
   @media(hover:hover) and (pointer:fine){.pbtn.dmg:hover,.pbtn.heal:hover{filter:brightness(1.12)}}
   .loh-card{background:linear-gradient(160deg,rgba(255,251,238,.8),rgba(239,228,201,.6));
     border:1px solid var(--gold);border-radius:12px;padding:16px 18px;margin-top:10px;
@@ -279,14 +296,17 @@
     position:relative;z-index:1}
   .spell-search:focus{outline:none;border-color:var(--gold)}
   .grim-sec.hidden,.spellcard.hidden,.steed-block.hidden,.spell-section.hidden{display:none}
-  .grim-intro{font-size:12.5px;color:var(--ink-soft);background:rgba(58,90,120,.07);
+  .grim-intro{font-size:12.5px;color:var(--ink-soft);background:rgba(26,92,68,.08);
     border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin-bottom:16px;line-height:1.45}
   .grim-intro b{color:var(--ink);font-family:'Cinzel';font-size:11.5px}
   .grim-sec{font-family:'Cinzel';font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
     color:var(--gold);border-bottom:2px solid var(--gold);padding-bottom:5px;margin:18px 0 12px;position:relative;z-index:1}
   .grim-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;position:relative;z-index:1}
-  .spellcard{background:rgba(255,250,235,.6);border:1px solid var(--line);border-radius:10px;
-    padding:10px 13px;box-shadow:0 2px 5px rgba(120,90,20,.06)}
+  .spellcard{background:rgba(255,250,235,.78);border:1px solid var(--line);border-radius:10px;
+    padding:10px 13px;box-shadow:0 2px 5px rgba(120,90,20,.06);
+    scroll-margin-top:18px;scroll-margin-bottom:calc(100px + env(safe-area-inset-bottom))}
+  .spellcard.spell-focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,164,67,.35),0 2px 8px rgba(120,90,20,.12);
+    transition:border-color .25s,box-shadow .25s}
   .sc-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:3px}
   .sc-name{font-family:'Cinzel';font-size:14px;font-weight:600;color:var(--ink)}
   .sc-lvl{font-size:10px;font-family:'Cinzel';letter-spacing:.4px;color:var(--celest);white-space:nowrap}
@@ -300,18 +320,18 @@
   @media print{.grimoire{page-break-before:always}}
   /* ---- Find Steed detail ---- */
   .steed-block{margin-top:8px;position:relative;z-index:1}
-  .steed-hp-row{background:rgba(124,45,45,.07);border:1px solid rgba(124,45,45,.3);border-radius:12px;
+  .steed-hp-row{background:rgba(158,9,34,.07);border:1px solid rgba(158,9,34,.3);border-radius:12px;
     padding:10px 13px;margin-bottom:12px}
   .steed-hp-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
   .steed-hp-row .lbl b{color:var(--crimson);font-size:13px}
   #pv-steedhp{font-family:'Cinzel';font-weight:700;font-size:22px;color:var(--crimson)}
-  .hp-bar-track{width:100%;height:14px;border-radius:7px;background:rgba(124,45,45,.14);
+  .hp-bar-track{width:100%;height:14px;border-radius:7px;background:rgba(158,9,34,.14);
     border:1px solid var(--line);overflow:hidden;margin-bottom:9px}
-  .hp-bar-fill{height:100%;background:linear-gradient(90deg,#3f7d3f,#5a9c4f);
+  .hp-bar-fill{height:100%;background:linear-gradient(90deg,var(--celest),var(--celest-bright));
     transition:width .25s ease,background .25s ease}
   .hp-bar-fill.mid{background:linear-gradient(90deg,#b5832a,var(--gold))}
-  .hp-bar-fill.low{background:linear-gradient(90deg,#5a1e1e,#7c2d2d)}
-  .steed-core{background:rgba(58,90,120,.07);border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin-bottom:12px}
+  .hp-bar-fill.low{background:linear-gradient(90deg,var(--ruby-dark),var(--ruby))}
+  .steed-core{background:rgba(26,92,68,.08);border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin-bottom:12px}
   .steed-mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
   .steed-core .fd{margin-bottom:7px}
   .steed-core .fd:last-child{margin-bottom:0}
@@ -323,7 +343,7 @@
   .sa-s{display:block;font-size:9.5px;color:var(--ink-soft)}
   @media(max-width:380px){.steed-abil-grid{grid-template-columns:repeat(3,1fr)}}
   .steed-forms{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
-  .steed-form{background:rgba(255,250,235,.6);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+  .steed-form{background:rgba(255,250,235,.78);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
   .sf-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:5px}
   .sf-name{font-family:'Cinzel';font-size:13px;font-weight:600;color:var(--ink)}
   .sf-name i{font-style:italic;font-weight:400;font-size:11px;color:var(--ink-soft)}
@@ -399,6 +419,9 @@
   @media print{
     .res-panel{display:none}
     .sword-banner h2,.sword-banner h2 .blade{color:#7c5a14 !important}
+    .sw-tier .lvl-num{color:var(--crimson) !important}
+    .sw-tier .lvl-name{color:#7c5a14 !important}
+    .sw-tier .badge{background:var(--crimson) !important;color:#fff !important;box-shadow:none !important}
     .sw-tier p,.sw-tier b{color:#2b2419 !important}
     .combat-card{background:none !important;color:var(--ink) !important;box-shadow:none !important}
     .combat-card h2,.combat-card h2::before{color:#7c5a14 !important}
@@ -540,11 +563,17 @@
       <h2><span class="blade">&#10013;</span> Lama Vincolante &middot; livelli di potere</h2>
       <div class="sw-tiers">
         <div class="sw-tier">
-          <div class="lvl">LIVELLO I &mdash; SENTINELLA<span class="badge dim">attivo</span></div>
+          <div class="lvl">
+            <div class="lvl-title"><span class="lvl-num">Livello I</span><span class="lvl-name">Sentinella</span></div>
+            <span class="badge">attivo</span>
+          </div>
           <p>La lama <b>si illumina</b> quando ti trovi vicino alle <b>Vesti Purpuree</b>. Allarme e rivelatore della loro presenza.</p>
         </div>
         <div class="sw-tier">
-          <div class="lvl">LIVELLO II &mdash; ASCESA<span class="badge">attivo</span></div>
+          <div class="lvl">
+            <div class="lvl-title"><span class="lvl-num">Livello II</span><span class="lvl-name">Ascesa</span></div>
+            <span class="badge">attivo</span>
+          </div>
           <p><b>+1</b> a incantesimi (colpire e CD) &middot; <b>+1</b> a colpire &middot; <b>+1</b> ai danni. <b>Vantaggio</b> ai TS per resistere a Spaventato, essere gettato Prono o Spinto.</p>
         </div>
       </div>
@@ -581,16 +610,16 @@
           <div class="rc-top"><span class="rc-name">Dadi Ferita</span><span class="ctx">7d10 · riposo breve</span><span class="rc-count"></span></div>
           <div class="segbar"></div>
         </div>
+        <div class="res-card" data-key="cd" data-max="2">
+          <div class="rc-top"><span class="rc-name">Channel Divinity</span><span class="ctx">1 al rip. breve</span><span class="rc-count"></span></div>
+          <div class="segbar"></div>
+        </div>
         <div class="res-card" data-key="sl1" data-max="4">
           <div class="rc-top"><span class="rc-name">Slot 1&deg; livello</span><span class="rc-count"></span></div>
           <div class="segbar"></div>
         </div>
         <div class="res-card" data-key="sl2" data-max="3">
           <div class="rc-top"><span class="rc-name">Slot 2&deg; livello</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
-        </div>
-        <div class="res-card" data-key="cd" data-max="2">
-          <div class="rc-top"><span class="rc-name">Channel Divinity</span><span class="ctx">1 al rip. breve</span><span class="rc-count"></span></div>
           <div class="segbar"></div>
         </div>
         <div class="res-card" data-key="breath" data-max="3">
@@ -740,17 +769,17 @@
       <div class="card">
         <h2>Incantesimi <small>recupero: riposo lungo</small></h2>
         <div class="slots" style="font-style:italic;color:var(--ink-soft);font-size:11.5px;margin-bottom:9px">Slot: 1&deg; &times;4 &middot; 2&deg; &times;3 &mdash; segnali nel riquadro <b>Risorse &amp; Usi</b>.</div>
-        <div class="spell free"><span class="lv">★</span><span>Punizione Divina · Trova Destriero</span></div>
-        <div class="spell free"><span class="lv">★</span><span>Prot. dal Male e dal Bene · Scudo della Fede</span></div>
-        <div class="spell free"><span class="lv">★</span><span>Aiuto · Zona di Verità <span class="ctx">(Giuramento)</span></span></div>
+        <div class="spell free"><span class="lv">★</span><span><a class="spell-link" href="#spell-punizione-divina" data-spell="punizione-divina">Punizione Divina</a><span class="spell-sep"> · </span><a class="spell-link" href="#spell-trova-destriero" data-spell="trova-destriero">Trova Destriero</a></span></div>
+        <div class="spell free"><span class="lv">★</span><span><a class="spell-link" href="#spell-protezione-mal-bene" data-spell="protezione-mal-bene">Prot. dal Male e dal Bene</a><span class="spell-sep"> · </span><a class="spell-link" href="#spell-scudo-della-fede" data-spell="scudo-della-fede">Scudo della Fede</a></span></div>
+        <div class="spell free"><span class="lv">★</span><span><a class="spell-link" href="#spell-aiuto" data-spell="aiuto">Aiuto</a><span class="spell-sep"> · </span><a class="spell-link" href="#spell-zona-di-verita" data-spell="zona-di-verita">Zona di Verità</a> <span class="ctx">(Giuramento)</span></span></div>
         <div style="height:6px"></div>
-        <div class="spell"><span class="lv">1</span><span>Benedizione <span class="ctx">(C)</span></span></div>
-        <div class="spell"><span class="lv">1</span><span>Comando</span></div>
-        <div class="spell"><span class="lv">1</span><span>Cura Ferite</span></div>
-        <div class="spell"><span class="lv">1</span><span>Punizione Ardente <span class="ctx">(no C)</span></span></div>
-        <div class="spell"><span class="lv">1</span><span>Punizione Collerica</span></div>
-        <div class="spell"><span class="lv">2</span><span>Punizione Radiosa <span class="ctx">(C)</span></span></div>
-        <div class="spell"><span class="lv">2</span><span>Ristorare Inferiore</span></div>
+        <div class="spell"><span class="lv">1</span><a class="spell-link" href="#spell-benedizione" data-spell="benedizione">Benedizione <span class="ctx">(C)</span></a></div>
+        <div class="spell"><span class="lv">1</span><a class="spell-link" href="#spell-comando" data-spell="comando">Comando</a></div>
+        <div class="spell"><span class="lv">1</span><a class="spell-link" href="#spell-cura-ferite" data-spell="cura-ferite">Cura Ferite</a></div>
+        <div class="spell"><span class="lv">1</span><a class="spell-link" href="#spell-punizione-ardente" data-spell="punizione-ardente">Punizione Ardente <span class="ctx">(no C)</span></a></div>
+        <div class="spell"><span class="lv">1</span><a class="spell-link" href="#spell-punizione-collerica" data-spell="punizione-collerica">Punizione Collerica</a></div>
+        <div class="spell"><span class="lv">2</span><a class="spell-link" href="#spell-punizione-radiosa" data-spell="punizione-radiosa">Punizione Radiosa <span class="ctx">(C)</span></a></div>
+        <div class="spell"><span class="lv">2</span><a class="spell-link" href="#spell-ristorare-inferiore" data-spell="ristorare-inferiore">Ristorare Inferiore</a></div>
         <div class="note">★ = sempre preparati (non contano sul limite). CD/attacco includono la <b>spada +1</b>. Punizione Divina è azione bonus: niente altro incant. a slot nello stesso turno.</div>
       </div>
     </div>
@@ -785,32 +814,32 @@
   <div class="spell-section">
   <div class="grim-sec">&#9670; Sempre preparati <span style="font-family:'EB Garamond';font-weight:400;font-size:11px;text-transform:none;letter-spacing:0;color:var(--ink-soft);font-style:italic">(non contano sul limite)</span></div>
   <div class="grim-grid">
-    <div class="spellcard">
+    <div class="spellcard" id="spell-punizione-divina">
       <div class="sc-head"><span class="sc-name">Punizione Divina</span><span class="sc-lvl">1&deg; · Evocazione</span></div>
       <div class="sc-meta">Azione bonus (dopo un colpo in mischia) · Sé · Istantaneo · V</div>
       <p class="sc-desc">Il bersaglio subisce <b>2d8 radiosi</b> extra dal colpo; <b>+1d8</b> contro Immondi e Non Morti. Con slot di 2&deg; livello diventa <b>3d8</b>. Gratis 1 volta a riposo lungo senza spendere slot.</p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-protezione-mal-bene">
       <div class="sc-head"><span class="sc-name">Protezione dal Male e dal Bene</span><span class="sc-lvl">1&deg; · Abiurazione</span></div>
       <div class="sc-meta">Azione · Tocco · 10 min <span class="conc">CONC</span> · V, S, M <span style="font-style:normal">(acqua santa, consumata)</span></div>
       <p class="sc-desc">Una creatura volontaria è protetta da Aberrazioni, Celestiali, Elementali, Folletti, Immondi e Non Morti: questi hanno <b>svantaggio</b> ad attaccarla, e lei non può essere posseduta né resa <b>Affascinata o Spaventata</b> da loro (vantaggio ai TS se già soggetta).</p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-scudo-della-fede">
       <div class="sc-head"><span class="sc-name">Scudo della Fede</span><span class="sc-lvl">1&deg; · Abiurazione</span></div>
       <div class="sc-meta">Azione bonus · 18 m · 10 min <span class="conc">CONC</span> · V, S, M</div>
       <p class="sc-desc">Una creatura a scelta entro gittata ottiene <b>+2 alla CA</b> per tutta la durata.</p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-trova-destriero">
       <div class="sc-head"><span class="sc-name">Trova Destriero</span><span class="sc-lvl">2&deg; · Evocazione</span></div>
       <div class="sc-meta">Azione · 9 m · Istantaneo · V, S</div>
       <p class="sc-desc">Evochi un destriero ultraterreno fedele (Grande e cavalcabile: cavallo, lupo gigante, alce…). Scegli il tipo: <b>Celestiale, Folletto o Immondo</b>. Usa il blocco "Destriero Ultraterreno"; sostituisce un destriero precedente. Gratis 1/riposo lungo.</p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-aiuto">
       <div class="sc-head"><span class="sc-name">Aiuto</span><span class="sc-lvl">2&deg; · Abiurazione</span></div>
       <div class="sc-meta">Azione · 9 m · 8 ore · V, S, M</div>
       <p class="sc-desc">Fino a <b>3 creature</b>: i PF massimi e attuali aumentano di <b>5</b> per la durata. Con slot superiori, +5 per ogni livello oltre il 2&deg;.</p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-zona-di-verita">
       <div class="sc-head"><span class="sc-name">Zona di Verità</span><span class="sc-lvl">2&deg; · Incantamento</span></div>
       <div class="sc-meta">Azione · 18 m · 10 min · V, S</div>
       <p class="sc-desc">Sfera di raggio 4,5 m. Chi entra o inizia il turno nell'area fa <b>TS Carisma (CD 15)</b>: se fallisce non può <b>mentire</b> deliberatamente (può restare evasivo). Sai chi supera o fallisce il tiro.</p>
@@ -821,37 +850,37 @@
   <div class="spell-section">
   <div class="grim-sec">&#9670; Preparati a scelta</div>
   <div class="grim-grid">
-    <div class="spellcard">
+    <div class="spellcard" id="spell-benedizione">
       <div class="sc-head"><span class="sc-name">Benedizione</span><span class="sc-lvl">1&deg; · Incantamento</span></div>
       <div class="sc-meta">Azione · 9 m · 1 min <span class="conc">CONC</span> · V, S, M</div>
       <p class="sc-desc">Fino a <b>3 creature</b> aggiungono <b>1d4</b> ai tiri per colpire e ai tiri salvezza finché dura. +1 bersaglio per ogni slot oltre il 1&deg;.</p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-cura-ferite">
       <div class="sc-head"><span class="sc-name">Cura Ferite</span><span class="sc-lvl">1&deg; · Abiurazione</span></div>
       <div class="sc-meta">Azione · Tocco · Istantaneo · V, S</div>
       <p class="sc-desc">La creatura toccata recupera <b>2d8 + 3</b> PF (CAR). La cura aumenta di 2d8 per ogni slot oltre il 1&deg;.</p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-comando">
       <div class="sc-head"><span class="sc-name">Comando</span><span class="sc-lvl">1&deg; · Incantamento</span></div>
       <div class="sc-meta">Azione · 18 m · 1 round · V</div>
       <p class="sc-desc">Un nemico che capisca una lingua fa <b>TS Saggezza (CD 15)</b>: se fallisce esegue un comando di una parola per il suo prossimo turno. Comandi tipici: <b>Avanzare</b> (allontanati da me), <b>Cadere</b> (diventa Prono e salta il turno), <b>Fuggi</b> (scappa → attacchi di opportunità da tutto il party), <b>Rannicchiati</b> (Prono e salta il turno → vantaggio automatico per chiunque in corpo a corpo), <b>Vieni</b> (avvicinati). <b>Niente concentrazione.</b> +1 bersaglio per slot oltre il 1&deg;.</p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-punizione-collerica">
       <div class="sc-head"><span class="sc-name">Punizione Collerica</span><span class="sc-lvl">1&deg; · Negromanzia</span></div>
       <div class="sc-meta">Az. bonus subito dopo aver colpito · Sé · 1 min · V</div>
       <p class="sc-desc">+<b>1d6 necrotico</b> al colpo. Il bersaglio fa <b>TS Saggezza (CD 15)</b>: se fallisce è <b>Spaventato</b> da te per tutta la durata — non si può avvicinare a te e ha svantaggio ad attaccare e ai tiri di abilità mentre ti vede. Alla <b>fine di ogni suo turno</b> ripete il TS: se riesce l'incantesimo termina. <i>Nessuna concentrazione. Upcast: +1d6 necrotico per slot oltre il 1°.</i></p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-punizione-ardente">
       <div class="sc-head"><span class="sc-name">Punizione Ardente</span><span class="sc-lvl">1&deg; · Evocazione</span></div>
       <div class="sc-meta">Azione bonus (dopo un colpo in mischia) · Sé · 1 min · V</div>
       <p class="sc-desc">+1d6 fuoco al colpo. Poi a inizio di ogni suo turno il bersaglio subisce <b>1d6 fuoco</b> e fa <b>TS Costituzione (CD 15)</b>: se riesce, l'incantesimo termina. +1d6 a tutto per ogni slot oltre il 1&deg;. <i>Non richiede concentrazione.</i></p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-punizione-radiosa">
       <div class="sc-head"><span class="sc-name">Punizione Radiosa</span><span class="sc-lvl">2&deg; · Evocazione</span></div>
       <div class="sc-meta">Azione bonus (dopo un colpo in mischia) · Sé · 1 min <span class="conc">CONC</span> · V</div>
       <p class="sc-desc">+<b>2d8 radiosi</b> al colpo. Il bersaglio emana <b>luce intensa</b> (1,5 m) e luce fioca (1,5 m) in più per tutta la durata: tutti gli attacchi contro di esso hanno <b>vantaggio automatico</b> (non può nascondersi né ricevere mezze coperture). Quando l'incantesimo termina, il bersaglio subisce altri <b>2d8 radiosi</b>. Perfetto per fissare un bersaglio prioritario e dare vantaggio a tutto il party.</p>
     </div>
-    <div class="spellcard">
+    <div class="spellcard" id="spell-ristorare-inferiore">
       <div class="sc-head"><span class="sc-name">Ristorare Inferiore</span><span class="sc-lvl">2&deg; · Abiurazione</span></div>
       <div class="sc-meta">Azione bonus · Tocco · Istantaneo · V, S</div>
       <p class="sc-desc">Rimuovi dalla creatura toccata <b>una</b> condizione tra: <b>Accecato, Assordato, Paralizzato o Avvelenato</b>.</p>
@@ -1234,13 +1263,13 @@
   else document.addEventListener('DOMContentLoaded',renderInsp);
 })();
 
-// --- Ricerca incantesimi ---
+// --- Ricerca incantesimi + navigazione dalla scheda ---
 (function(){
   var input=document.getElementById('spell-search');
-  if(!input) return;
   var sections=Array.prototype.slice.call(document.querySelectorAll('.spell-section'));
-  input.addEventListener('input',function(){
-    var q=input.value.trim().toLowerCase();
+  var focusTimer=null;
+
+  function filterSpells(q){
     sections.forEach(function(sec){
       var anyVisible=false;
       Array.prototype.forEach.call(sec.querySelectorAll('.spellcard'),function(card){
@@ -1251,7 +1280,61 @@
       });
       sec.classList.toggle('hidden',!anyVisible);
     });
+  }
+
+  function clearSpellFilter(){
+    if(input){ input.value=''; }
+    filterSpells('');
+  }
+
+  function highlightSpell(card){
+    Array.prototype.forEach.call(document.querySelectorAll('.spellcard.spell-focus'),function(el){
+      el.classList.remove('spell-focus');
+    });
+    card.classList.add('spell-focus');
+    clearTimeout(focusTimer);
+    focusTimer=setTimeout(function(){ card.classList.remove('spell-focus'); },2200);
+  }
+
+  window.goToSpell=function(spellId){
+    var card=document.getElementById('spell-'+spellId);
+    if(!card) return;
+    clearSpellFilter();
+    card.scrollIntoView({behavior:'smooth',block:'center'});
+    highlightSpell(card);
+    if(history.replaceState){
+      history.replaceState(null,'','#spell-'+spellId);
+    } else {
+      location.hash='spell-'+spellId;
+    }
+    var grimLink=document.querySelector('.floatnav a[data-target="grimorio"]');
+    if(grimLink){ grimLink.classList.add('active'); }
+  };
+
+  if(input){
+    input.addEventListener('input',function(){
+      filterSpells(input.value.trim().toLowerCase());
+    });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('a.spell-link[data-spell]'),function(link){
+    link.addEventListener('click',function(ev){
+      ev.preventDefault();
+      goToSpell(link.getAttribute('data-spell'));
+    });
   });
+
+  function openSpellFromHash(){
+    var hash=(location.hash||'').replace(/^#/,'');
+    if(hash.indexOf('spell-')===0){
+      var id=hash.slice(6);
+      setTimeout(function(){ goToSpell(id); },120);
+    }
+  }
+
+  if(document.readyState!=='loading') openSpellFromHash();
+  else document.addEventListener('DOMContentLoaded',openSpellFromHash);
+  window.addEventListener('hashchange',openSpellFromHash);
 })();
 </script>
 <nav class="floatnav">
