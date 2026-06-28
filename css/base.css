@@ -1,0 +1,170 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+}
+
+html, body {
+  max-width: 100%;
+  overflow: hidden;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  background: var(--bg-principal);
+  -webkit-font-smoothing: antialiased;
+}
+
+button, a, input, textarea, select {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  border-radius: var(--radius-sm);
+}
+
+button {
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+}
+
+button:not(.edit-del):not(.ds-reset):not(.ds-pip):not(.quest-check):not(.qbtn):not(.header-options),
+.btn, .nav-link, .subtab, .fab {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+}
+
+/* Feedback tattile al tap / click */
+:is(
+  button,
+  [role="button"],
+  .pbtn,
+  .hp-btn,
+  .hp-actions .pbtn,
+  .rest-btn,
+  .fab,
+  .nav-link,
+  .subtab,
+  .level-tab,
+  .qbtn,
+  .edit-del,
+  .ds-reset,
+  .ds-pip,
+  .header-options,
+  .hp-temp-add .pbtn,
+  .quest-check,
+  .sheet-close,
+  .seg,
+  .accordion-header,
+  .insp-badge,
+  .ds-reset,
+  .ds-pip
+) {
+  transition:
+    transform var(--press-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    filter var(--press-duration) ease,
+    opacity var(--press-duration) ease,
+    box-shadow var(--press-duration) ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+:is(
+  button:active:not(:disabled),
+  [role="button"]:active,
+  .pbtn:active,
+  .hp-btn:active,
+  .hp-actions .pbtn:active,
+  .rest-btn:active,
+  .fab:active,
+  .nav-link:active,
+  .subtab:active,
+  .level-tab:active,
+  .qbtn:active,
+  .edit-del:active,
+  .ds-reset:active,
+  .ds-pip:active,
+  .header-options:active,
+  .hp-temp-add .pbtn:active,
+  .quest-check:active,
+  .sheet-close:active,
+  .seg:active,
+  .accordion-header:active,
+  .insp-badge:active
+) {
+  transform: scale(var(--press-scale));
+  filter: brightness(var(--press-brightness));
+}
+
+:is(
+  .hp-combat-card .pbtn.dmg,
+  .hp-combat-card .pbtn.heal,
+  .subtab.active,
+  .level-tab.active,
+  .fab
+):active {
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.seg:active {
+  transform: scale(0.88);
+}
+
+input, textarea, select {
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  background-color: var(--bg-principal);
+  border-color: var(--border-color);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.85;
+}
+
+select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+[contenteditable="true"] {
+  background: transparent;
+  color: var(--text-primary);
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+[contenteditable="true"]:empty::before,
+[contenteditable="true"]:empty::after {
+  color: var(--text-secondary);
+}
+
+h1, h2, h3, .section-title, .card-title {
+  font-family: var(--font-title);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

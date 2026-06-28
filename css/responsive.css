@@ -1,0 +1,19 @@
+@media (max-width: 380px) {
+  .header-name {
+    font-size: 12px;
+  }
+
+  .abil-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .steed-abil-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 481px) {
+  #main-content {
+    padding: var(--space-5) var(--space-6);
+  }
+}

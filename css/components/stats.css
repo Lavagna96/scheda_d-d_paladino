@@ -1,0 +1,96 @@
+/* Tile statistiche — cornice dorata, fondo scuro caldo (tema dark fantasy) */
+.abil-card,
+.combat-stat-init,
+.mini-stat,
+.grim-stat,
+.sa {
+  border: 1px solid var(--border-gold);
+  background: var(--bg-stat-tile);
+  box-shadow: var(--shadow-sm);
+}
+
+.abil-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.abil-card {
+  text-align: center;
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-2);
+}
+
+.abil-card .name {
+  display: block;
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  margin-bottom: var(--space-1);
+}
+
+.abil-card .mod {
+  display: block;
+  font-family: var(--font-title);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.abil-card .score {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+  background: rgba(168, 132, 44, 0.18);
+  border-radius: var(--radius-pill);
+  padding: 1px 9px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-row .v {
+  font-family: var(--font-title);
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.stat-row .prof {
+  color: var(--accent-gold);
+}
+
+.stat-row .dim {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.skill-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.skill-dot.master {
+  box-shadow: 8px 0 0 var(--accent-gold);
+  margin-right: 12px;
+}

@@ -1,0 +1,270 @@
+window.APP_CONFIG = {
+  STORAGE_KEY: 'tharion-velnar-v2',
+  STORAGE_KEY_V1: 'tharion-velnar-sheet',
+  INSPIRATION_KEY: 'tharion-insp',
+
+  POOLMAX: { loh: 35, hp: 60, steedhp: 25, tempHp: 0 },
+
+  RESOURCES: [
+    { key: 'hd', max: 7, name: 'Dadi Ferita', ctx: '7d10 · riposo breve' },
+    { key: 'cd', max: 2, name: 'Channel Divinity', ctx: '1 al rip. breve' },
+    { key: 'sl1', max: 4, name: 'Slot 1° livello' },
+    { key: 'sl2', max: 3, name: 'Slot 2° livello' },
+    { key: 'breath', max: 3, name: 'Soffio del Drago' },
+    { key: 'smitefree', max: 1, name: 'Punizione Divina gratis' },
+    { key: 'steedfree', max: 1, name: 'Trova Destriero gratis' },
+    { key: 'flight', max: 1, name: 'Volo Draconico' },
+    { key: 'shield', max: 1, name: 'Scudo magico', ctx: '+5 CA, reazione · 1/giorno' }
+  ],
+
+  CHARACTER: {
+    name: 'Tharion Velnar',
+    classLine: 'Dragonide d\'Oro · Paladino 7 · Devozione',
+    ac: 20,
+    acNote: 'Piastre + Scudo',
+    initiative: -1,
+    initiativeNote: 'vant. iniziativa',
+    avatar: '✦',
+    spellDc: 15,
+    spellAttack: 7
+  },
+
+  ABILITIES: [
+    { name: 'FOR', mod: '+4', score: 18 },
+    { name: 'DES', mod: '−1', score: 8 },
+    { name: 'COS', mod: '+2', score: 14 },
+    { name: 'INT', mod: '+0', score: 10 },
+    { name: 'SAG', mod: '+0', score: 10 },
+    { name: 'CAR', mod: '+3', score: 16 }
+  ],
+
+  SAVES: [
+    { name: 'Forza', value: '+7' },
+    { name: 'Destrezza', value: '+2' },
+    { name: 'Costituzione', value: '+5' },
+    { name: 'Intelligenza', value: '+3' },
+    { name: 'Saggezza', value: '+6', prof: true },
+    { name: 'Carisma', value: '+9', prof: true }
+  ],
+
+  SKILLS: [
+    { name: 'Atletica', attr: 'For', value: '+7', prof: true },
+    { name: 'Intimidire', attr: 'Car', value: '+6', prof: true },
+    { name: 'Persuasione', attr: 'Car', value: '+6', prof: true },
+    { name: 'Percezione', attr: 'Sag', value: '+3', prof: true },
+    { name: 'Inganno', attr: 'Car', value: '+3' },
+    { name: 'Intrattenere', attr: 'Car', value: '+3' },
+    { name: 'Acrobazia', attr: 'Des', value: '−1' },
+    { name: 'Furtività', attr: 'Des', value: '−1' },
+    { name: 'Rapidità di Mano', attr: 'Des', value: '−1' },
+    { name: 'Percez. passiva', value: '13', dim: true }
+  ],
+
+  ATTACKS: [
+    {
+      name: 'Spada lunga ✦ (magica)',
+      hit: '+8',
+      damage: '1d8+7 taglienti',
+      note: 'Maestria: Vex (se colpisci → vantaggio al prossimo attacco sullo stesso bersaglio)'
+    },
+    {
+      name: 'Soffio (Fuoco) (cono 4,5 m / linea 9 m)',
+      hit: 'TS DES 13',
+      damage: '2d10 fuoco (metà se supera)'
+    }
+  ],
+
+  STEED: {
+    defaultName: 'Destriero Ultraterreno',
+    ac: 12,
+    speed: '18 m',
+    prof: '+3',
+    abilities: [
+      { name: 'FOR', mod: '+4', score: 18 },
+      { name: 'DES', mod: '+1', score: 12 },
+      { name: 'COS', mod: '+2', score: 14 },
+      { name: 'INT', mod: '−2', score: 6 },
+      { name: 'SAG', mod: '+1', score: 12 },
+      { name: 'CAR', mod: '−1', score: 8 }
+    ],
+    actions: [
+      {
+        title: 'Schianto Ultraterreno',
+        summary: 'Azione · +7 al colpire · 1d8+2 danni',
+        detail: 'Schianto Ultraterreno (azione): +7 al colpire (tuo mod. d\'attacco incantesimi), portata 1,5 m, 1d8+2 danni (tipo secondo la forma). Con slot più alti: Schianto = 1d8 + livello slot.'
+      },
+      {
+        title: 'Legame Vitale',
+        summary: 'Cura condivisa · iniziativa condivisa',
+        detail: 'Quando recuperi PF da un incantesimo (liv. 1+) e il destriero è entro 1,5 m, recupera i tuoi stessi PF. Combattimento: condivide la tua iniziativa, è una cavalcatura controllata. Scompare a 0 PF o se muori.'
+      }
+    ],
+    forms: [
+      {
+        name: 'Celestiale',
+        tag: 'Radioso',
+        tagClass: 'g',
+        detail: 'Tocco Guaritore (az. bonus, ricarica: riposo lungo): una creatura entro 1,5 m recupera 2d8+2 PF.'
+      },
+      {
+        name: 'Folletto (Fey)',
+        tag: 'Psichico',
+        tagClass: '',
+        detail: 'Passo Fatato (az. bonus, ricarica: riposo lungo): il destriero si teletrasporta (con te in sella) in uno spazio libero entro 18 m.'
+      },
+      {
+        name: 'Immondo (Fiend)',
+        tag: 'Necrotico',
+        tagClass: 'c',
+        detail: 'Sguardo Maligno (az. bonus, ricarica: riposo lungo): una creatura entro 18 m fa TS Saggezza CD 15 o è Spaventata fino alla fine del tuo prossimo turno.'
+      }
+    ],
+    note: 'PP 11 · Telepatia con te (1,6 km). Volo 18 m solo con slot di 4°+. Con slot più alti: CA = 10 + livello slot · PF max = 5 + 10 × livello.'
+  },
+
+  SWORD_TIERS: [
+    {
+      level: 'Livello I',
+      name: 'Sentinella',
+      active: true,
+      text: 'La lama si illumina quando ti trovi vicino alle Vesti Purpuree. Allarme e rivelatore della loro presenza.'
+    },
+    {
+      level: 'Livello II',
+      name: 'Ascesa',
+      active: true,
+      text: '+1 a incantesimi (colpire e CD) · +1 a colpire · +1 ai danni. Vantaggio ai TS per resistere a Spaventato, essere gettato Prono o Spinto.'
+    }
+  ],
+
+  FEATURES: [
+    {
+      title: 'Aura di Protezione',
+      tag: '3 m',
+      tagClass: 'g',
+      detail: 'Tu e gli alleati nell\'aura +3 (CAR) a tutti i TS.'
+    },
+    {
+      title: 'Aura di Devozione',
+      tag: '3 m',
+      tagClass: 'g',
+      detail: 'Tu e gli alleati nell\'aura siete immuni ad Affascinato.'
+    },
+    {
+      title: 'Destriero Fedele',
+      detail: 'Trova Destriero sempre preparata; 1 lancio gratis/riposo lungo.'
+    },
+    {
+      title: 'Maestria nelle Armi',
+      detail: 'Vex (spada) e Rallentare (giavellotto).'
+    },
+    {
+      title: 'Soffio (Fuoco)',
+      tag: '3 usi/rip. lungo',
+      tagClass: 'c',
+      detail: 'In sostituzione di un attacco: cono 4,5 m o linea 9 m. TS DES CD 13, 2d10 fuoco (metà se supera).'
+    },
+    {
+      title: 'Resistenza al Danno',
+      detail: 'Resistenza ai danni da Fuoco.'
+    },
+    {
+      title: 'Volo Draconico',
+      tag: '1/rip. lungo',
+      tagClass: 'c',
+      detail: 'Az. bonus: ali spettrali, velocità di volo 9 m per 10 min.'
+    },
+    {
+      title: 'Scurovisione',
+      detail: '18 metri.'
+    },
+    {
+      title: 'Arma Sacra',
+      tag: 'azione attacco',
+      tagClass: 'g',
+      detail: 'Per 10 min aggiungi +3 (CAR) al colpire con un\'arma da mischia e infliggi danni Radiosi a scelta; emana luce intensa (6 m).'
+    },
+    {
+      title: 'Percezione Divina',
+      tag: 'azione bonus',
+      detail: 'Per 10 min localizzi Celestiali, Immondi e Non Morti entro 18 m e luoghi consacrati/profanati.'
+    }
+  ],
+
+  SPELLS: [
+    { id: 'punizione-divina', name: 'Punizione Divina', level: 1, school: 'Evocazione', always: true,
+      meta: 'Azione bonus (dopo un colpo in mischia) · Sé · Istantaneo · V',
+      desc: 'Il bersaglio subisce 2d8 radiosi extra dal colpo; +1d8 contro Immondi e Non Morti. Con slot di 2° livello diventa 3d8. Gratis 1 volta a riposo lungo senza spendere slot.' },
+    { id: 'protezione-mal-bene', name: 'Protezione dal Male e dal Bene', level: 1, school: 'Abiurazione', always: true,
+      meta: 'Azione · Tocco · 10 min CONC · V, S, M (acqua santa, consumata)',
+      desc: 'Una creatura volontaria è protetta da Aberrazioni, Celestiali, Elementali, Folletti, Immondi e Non Morti: questi hanno svantaggio ad attaccarla, e lei non può essere posseduta né resa Affascinata o Spaventata da loro (vantaggio ai TS se già soggetta).' },
+    { id: 'scudo-della-fede', name: 'Scudo della Fede', level: 1, school: 'Abiurazione', always: true,
+      meta: 'Azione bonus · 18 m · 10 min CONC · V, S, M',
+      desc: 'Una creatura a scelta entro gittata ottiene +2 alla CA per tutta la durata.' },
+    { id: 'trova-destriero', name: 'Trova Destriero', level: 2, school: 'Evocazione', always: true,
+      meta: 'Azione · 9 m · Istantaneo · V, S',
+      desc: 'Evochi un destriero ultraterreno fedele (Grande e cavalcabile). Scegli il tipo: Celestiale, Folletto o Immondo. Sostituisce un destriero precedente. Gratis 1/riposo lungo.' },
+    { id: 'aiuto', name: 'Aiuto', level: 2, school: 'Abiurazione', always: true,
+      meta: 'Azione · 9 m · 8 ore · V, S, M',
+      desc: 'Fino a 3 creature: i PF massimi e attuali aumentano di 5 per la durata. Con slot superiori, +5 per ogni livello oltre il 2°.' },
+    { id: 'zona-di-verita', name: 'Zona di Verità', level: 2, school: 'Incantamento', always: true,
+      meta: 'Azione · 18 m · 10 min · V, S',
+      desc: 'Sfera di raggio 4,5 m. Chi entra o inizia il turno nell\'area fa TS Carisma (CD 15): se fallisce non può mentire deliberatamente. Sai chi supera o fallisce il tiro.' },
+    { id: 'benedizione', name: 'Benedizione', level: 1, school: 'Incantamento', always: false,
+      meta: 'Azione · 9 m · 1 min CONC · V, S, M',
+      desc: 'Fino a 3 creature aggiungono 1d4 ai tiri per colpire e ai tiri salvezza finché dura. +1 bersaglio per ogni slot oltre il 1°.' },
+    { id: 'cura-ferite', name: 'Cura Ferite', level: 1, school: 'Abiurazione', always: false,
+      meta: 'Azione · Tocco · Istantaneo · V, S',
+      desc: 'La creatura toccata recupera 2d8 + 3 PF (CAR). La cura aumenta di 2d8 per ogni slot oltre il 1°.' },
+    { id: 'comando', name: 'Comando', level: 1, school: 'Incantamento', always: false,
+      meta: 'Azione · 18 m · 1 round · V',
+      desc: 'Un nemico che capisca una lingua fa TS Saggezza (CD 15): se fallisce esegue un comando di una parola per il suo prossimo turno. Comandi tipici: Avanzare, Cadere, Fuggi, Rannicchiati, Vieni. Niente concentrazione.' },
+    { id: 'punizione-collerica', name: 'Punizione Collerica', level: 1, school: 'Negromanzia', always: false,
+      meta: 'Az. bonus subito dopo aver colpito · Sé · 1 min · V',
+      desc: '+1d6 necrotico al colpo. Il bersaglio fa TS Saggezza (CD 15): se fallisce è Spaventato da te per tutta la durata. Nessuna concentrazione.' },
+    { id: 'punizione-ardente', name: 'Punizione Ardente', level: 1, school: 'Evocazione', always: false,
+      meta: 'Azione bonus (dopo un colpo in mischia) · Sé · 1 min · V',
+      desc: '+1d6 fuoco al colpo. Poi a inizio di ogni suo turno il bersaglio subisce 1d6 fuoco e fa TS Costituzione (CD 15): se riesce, l\'incantesimo termina. Non richiede concentrazione.' },
+    { id: 'punizione-radiosa', name: 'Punizione Radiosa', level: 2, school: 'Evocazione', always: false,
+      meta: 'Azione bonus (dopo un colpo in mischia) · Sé · 1 min CONC · V',
+      desc: '+2d8 radiosi al colpo. Il bersaglio emana luce intensa: tutti gli attacchi contro di esso hanno vantaggio automatico. Quando l\'incantesimo termina, il bersaglio subisce altri 2d8 radiosi.' },
+    { id: 'ristorare-inferiore', name: 'Ristorare Inferiore', level: 2, school: 'Abiurazione', always: false,
+      meta: 'Azione bonus · Tocco · Istantaneo · V, S',
+      desc: 'Rimuovi dalla creatura toccata una condizione tra: Accecato, Assordato, Paralizzato o Avvelenato.' }
+  ],
+
+  SLOT_LEVELS: [
+    { key: '0', label: 'Trucchetti', max: 0 },
+    { key: '1', label: '1° Livello', max: 4 },
+    { key: '2', label: '2° Liv', max: 3 },
+    { key: '3', label: '3°+ Liv', max: 0 }
+  ],
+
+  DEFAULT_STATE: {
+    version: 2,
+    pools: { loh: 35, hp: 60, steedhp: 25, tempHp: 0 },
+    spent: {},
+    coins: { mp: 10, mo: 4696, ma: 250, mr: 928 },
+    steed: { name: 'Destriero Ultraterreno' },
+    treasury: {
+      carryMax: 280,
+      partyItems: [
+        { name: 'Statuetta — testa di drago nero', desc: "Oggetto d'arte; valore da stimare/vendere.", qty: 1, weight: 2 },
+        { name: 'Rotolo di velluto', desc: 'Stoffa pregiata da rivendere.', qty: 25, weight: 0.5 },
+        { name: 'Gemma piccola e chiara', desc: '1 pietra limpida; valore da stimare.', qty: 1, weight: 0.1 },
+        { name: 'Tesoro della cassa (culto del drago)', desc: '≈ 3.000 MO di valore complessivo.', qty: 1, weight: 15 },
+        { name: 'Tunica del Mago Rosso di Thay', desc: 'Scuola di Invocazione (effetto da confermare col Master).', qty: 1, weight: 1 }
+      ],
+      personalItems: [
+        { name: 'Pozione di Cura', desc: 'Recupera 2d4+2 PF', qty: 1, weight: 0.5 }
+      ]
+    },
+    diary: {
+      sessions: [],
+      png: [],
+      quests: { active: [], completed: [] }
+    },
+    inspiration: false,
+    deathSaves: { success: 0, fail: 0 }
+  }
+};
