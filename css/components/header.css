@@ -46,19 +46,6 @@
   flex-shrink: 0;
 }
 
-.header-ca {
-  font-family: var(--font-title);
-  font-size: 12px;
-  color: var(--accent-gold);
-  font-weight: 700;
-}
-
-.header-init {
-  font-size: 11px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
 .header-options {
   width: 36px;
   height: 36px;

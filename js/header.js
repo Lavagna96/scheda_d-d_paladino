@@ -11,14 +11,6 @@
     if (metaEl) {
       metaEl.textContent = ch.classLine.split('·')[0].trim();
     }
-    var caEl = document.getElementById('header-ca');
-    if (caEl) {
-      caEl.textContent = 'CA: ' + ch.ac;
-    }
-    var initEl = document.getElementById('header-init');
-    if (initEl) {
-      initEl.textContent = 'Iniz: ' + (ch.initiative >= 0 ? '+' : '') + ch.initiative;
-    }
   }
 
   function init() {
