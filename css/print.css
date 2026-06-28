@@ -1,0 +1,40 @@
+@media print {
+  #app-header,
+  #bottom-nav {
+    position: static;
+    margin: 0;
+    border-radius: 0;
+  }
+  #bottom-sheet-overlay,
+  .fab,
+  .options-panel,
+  .hp-actions-inline,
+  .rest-bar,
+  .segbar,
+  .loh-actions {
+    display: none !important;
+  }
+
+  #main-content {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .view-panel.hidden {
+    display: block !important;
+  }
+
+  .subpanel {
+    display: block !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  .card {
+    break-inside: avoid;
+  }
+}

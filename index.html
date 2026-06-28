@@ -3,1380 +3,563 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Scheda — Paladino Lv7 · Giuramento della Devozione</title>
+<title>Tharion Velnar — Paladino Lv.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --ink:#2b2419;
-    --ink-soft:#574b38;
-    --parch:#f4ecd8;
-    --parch-2:#efe4c9;
-    --gold:#a8842c;
-    --gold-bright:#c9a443;
-    --celest:#1a5c44;
-    --celest-soft:#2a7a5c;
-    --celest-bright:#3d9470;
-    --ruby:#9e0922;
-    --ruby-bright:#cc2440;
-    --ruby-dark:#660514;
-    --crimson:#9e0922;
-    --line:#c9b483;
-    --shadow:rgba(60,45,15,.18);
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  button,.use-pip,.rest-btn,.pbtn{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-  html,body{max-width:100%;overflow-x:hidden}
-  h1,.subtitle,.sc-desc,.fd,.grim-intro{overflow-wrap:break-word}
-  body{
-    font-family:'EB Garamond',serif;
-    color:var(--ink);
-    background:
-      radial-gradient(circle at 20% 15%, #4a3b22 0%, transparent 55%),
-      radial-gradient(circle at 85% 85%, #3c2f1c 0%, transparent 55%),
-      #241c11;
-    padding:26px 16px;
-    line-height:1.4;
-    position:relative;
-  }
-  body::before{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    opacity:.32;mix-blend-mode:multiply;
-  }
-  .sheet{
-    max-width:1080px;margin:0 auto;
-    background:linear-gradient(160deg,var(--parch),var(--parch-2));
-    border:1px solid var(--gold);
-    border-radius:16px;
-    box-shadow:0 22px 60px rgba(0,0,0,.55), inset 0 0 0 6px rgba(168,132,44,.10);
-    padding:30px 34px 34px;
-    position:relative;
-  }
-  .sheet::before{
-    content:"";position:absolute;inset:10px;border:1.5px solid rgba(168,132,44,.4);
-    border-radius:10px;pointer-events:none;
-  }
-  .sheet::after{
-    content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;z-index:2;
-    background:
-      radial-gradient(ellipse at 8% 6%, rgba(124,93,30,.16), transparent 26%),
-      radial-gradient(ellipse at 93% 10%, rgba(124,93,30,.13), transparent 24%),
-      radial-gradient(ellipse at 12% 95%, rgba(124,93,30,.15), transparent 26%),
-      radial-gradient(ellipse at 90% 92%, rgba(124,93,30,.14), transparent 24%),
-      radial-gradient(ellipse at center, transparent 55%, rgba(80,58,18,.14) 100%);
-    mix-blend-mode:multiply;
-  }
-  /* ---- Header ---- */
-  header{
-    display:flex;justify-content:space-between;align-items:flex-end;
-    gap:20px;border-bottom:2.5px solid var(--gold);padding-bottom:14px;margin-bottom:18px;
-    position:relative;z-index:1;
-  }
-  header::after{
-    content:"\2756";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);
-    background:var(--parch);color:var(--gold);font-size:13px;padding:0 8px;line-height:1;
-  }
-  .crest{display:flex;align-items:center;gap:16px}
-  .sigil{
-    width:58px;height:58px;flex:none;border-radius:50%;
-    background:radial-gradient(circle at 42% 32%, var(--ruby-bright), var(--ruby) 52%, var(--ruby-dark) 100%);
-    display:grid;place-items:center;color:#ffe6c4;font-size:30px;
-    box-shadow:0 4px 13px rgba(102,5,20,.5), inset 0 2px 5px rgba(255,255,255,.4), inset 0 -3px 6px rgba(60,3,12,.45),
-      0 0 0 3px var(--parch), 0 0 0 5px var(--gold);
-  }
-  h1{font-family:'Cinzel',serif;font-weight:700;font-size:30px;letter-spacing:1px;color:var(--ink);line-height:1;
-    text-shadow:0 1px 0 rgba(255,251,238,.6), 0 -1px 0 rgba(60,45,15,.12)}
-  .subtitle{font-style:italic;color:var(--ink-soft);font-size:16px;margin-top:4px}
-  .meta{text-align:right;font-size:14.5px;color:var(--ink-soft)}
-  .meta b{font-family:'Cinzel',serif;font-weight:600;color:var(--ink);font-size:13px}
-  /* ---- Layout ---- */
-  .grid{display:grid;grid-template-columns:182px minmax(0,1fr) minmax(0,1fr);gap:16px;position:relative;z-index:1}
-  .col{display:flex;flex-direction:column;gap:14px;min-width:0}
-  .card{
-    background:rgba(255,250,235,.78);
-    border:1px solid var(--line);border-radius:10px;padding:11px 13px;
-    box-shadow:0 2px 5px rgba(120,90,20,.07);
-  }
-  .card h2{
-    font-family:'Cinzel',serif;font-size:12.5px;font-weight:700;letter-spacing:1.2px;
-    text-transform:uppercase;color:var(--celest);margin-bottom:8px;padding-left:14px;position:relative;
-    border-bottom:1px solid var(--line);padding-bottom:4px;display:flex;justify-content:space-between;align-items:baseline;
-  }
-  .card h2::before{content:"\2666";color:var(--gold);font-size:10px;position:absolute;left:0;top:1px}
-  .card h2 small{font-family:'EB Garamond';font-weight:400;font-size:11px;letter-spacing:0;color:var(--ink-soft);font-style:italic}
-  /* ---- Abilities ---- */
-  .abil-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .abil-card{text-align:center;border:1px solid var(--gold);border-radius:12px;padding:9px 4px 8px;
-    background:linear-gradient(165deg,#fffaec 0%,#f0e3c2 55%,#e6d6ad 100%);
-    box-shadow:0 2px 5px rgba(120,90,20,.12)}
-  .abil-card .name{display:block;font-family:'Cinzel';font-size:10px;font-weight:700;letter-spacing:1.2px;
-    text-transform:uppercase;color:var(--gold);margin-bottom:2px}
-  .abil-card .mod{display:block;font-family:'Cinzel';font-size:25px;font-weight:700;color:var(--ink);line-height:1}
-  .abil-card .score{display:inline-block;font-family:'Cinzel';font-size:11px;color:var(--ink-soft);
-    background:rgba(168,132,44,.18);border-radius:10px;padding:1px 9px;margin-top:5px}
-  /* ---- Stat band ---- */
-  .stats-band{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:14px;position:relative;z-index:1}
-  .stat{
-    text-align:center;border:1px solid var(--gold);border-radius:10px;padding:8px 4px;
-    background:linear-gradient(180deg,rgba(255,251,238,.8),rgba(239,228,201,.6));
-    box-shadow:0 2px 6px rgba(120,90,20,.15);
-  }
-  .stat .big{font-family:'Cinzel';font-size:27px;font-weight:700;color:var(--crimson);line-height:1}
-  .stat .lab{font-family:'Cinzel';font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
-  .stat .sub{font-size:11.5px;color:var(--ink-soft);font-style:italic}
-  .stat.celest .big{color:var(--celest)}
-  .stat.gold .big{color:var(--gold)}
-  /* ---- Stat band ---- */
-  .row{display:flex;justify-content:space-between;font-size:13.5px;padding:2.5px 0}
-  .row .v{font-weight:600;font-family:'Cinzel';font-size:13.5px}
-  .prof{color:var(--crimson);font-weight:700}
-  .dim{color:var(--ink-soft);opacity:.7}
-  /* features */
-  .feat{margin-bottom:8px}
-  .feat .ft{font-family:'Cinzel';font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.3px}
-  .feat .fd{font-size:12.5px;color:var(--ink-soft);line-height:1.32}
-  .tag{display:inline-block;background:var(--celest);color:#fdf6e3;font-size:9px;font-family:'Cinzel';
-    letter-spacing:.5px;padding:1px 6px;border-radius:5px;vertical-align:middle;margin-left:4px}
-  .tag.g{background:var(--gold)}
-  .tag.c{background:var(--crimson)}
-  /* attacks */
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  th{font-family:'Cinzel';font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:3px 5px;border-bottom:1px solid var(--line)}
-  td{padding:6px 5px;border-bottom:1px dotted var(--line);vertical-align:top}
-  td.atk{font-weight:600;font-family:'Cinzel';font-size:13px}
-  td .mast{font-size:11.5px;color:var(--celest);font-style:italic}
-  .combat-card{
-    background:linear-gradient(150deg,#23222d 0%,#332515 60%,#4a3413 100%);
-    border:1px solid var(--gold) !important;color:#ede2c8;
-    box-shadow:0 4px 14px rgba(0,0,0,.4), inset 0 0 22px rgba(201,164,67,.12);
-  }
-  .col-combat .card:not(.combat-card) h2{color:var(--ruby)}
-  .combat-card h2{color:var(--gold-bright);border-bottom-color:rgba(201,164,67,.35)}
-  .combat-card h2 small{color:#cdb98f}
-  .combat-card h2::before{color:var(--gold-bright)}
-  .combat-card th{color:#cdb98f;border-bottom-color:rgba(201,164,67,.3)}
-  .combat-card td{border-bottom-color:rgba(201,164,67,.2);color:#ede2c8}
-  .combat-card td.atk{color:var(--gold-bright)}
-  .combat-card td .mast{color:#6db89a}
-  .combat-card .note{color:#cdb98f;border-top-color:rgba(201,164,67,.3)}
-  .combat-card .note b{color:var(--gold-bright)}
-  /* spells */
-  .slots{display:flex;gap:14px;margin-bottom:9px;flex-wrap:wrap}
-  .slotgrp{display:flex;align-items:center;gap:5px;font-size:12px;font-family:'Cinzel'}
-  .pip{width:13px;height:13px;border:1.6px solid var(--gold);border-radius:50%;display:inline-block;background:rgba(201,164,67,.25)}
-  .spell{font-size:12.8px;padding:2px 0;display:flex;gap:6px;align-items:baseline}
-  .spell .lv{font-family:'Cinzel';font-size:10px;color:#fff8e6;background:var(--celest-soft);border-radius:5px;padding:0 5px;flex:none}
-  .spell.free .lv{background:var(--gold)}
-  a.spell-link{color:inherit;text-decoration:none;border-radius:5px;padding:1px 3px;margin:-1px -3px;
-    cursor:pointer;transition:color .12s,background .12s;-webkit-tap-highlight-color:transparent}
-  a.spell-link:active{background:rgba(168,132,44,.18)}
-  @media(hover:hover) and (pointer:fine){a.spell-link:hover{color:var(--celest);background:rgba(26,92,68,.08)}}
-  .spell-sep{color:var(--ink-soft);pointer-events:none}
-  .ctx{font-size:11px;color:var(--ink-soft);font-style:italic}
-  .note{font-size:11.5px;color:var(--ink-soft);font-style:italic;margin-top:7px;border-top:1px dotted var(--line);padding-top:6px}
-  .full{grid-column:1 / -1}
-  footer{margin-top:16px;text-align:center;font-size:11px;color:var(--ink-soft);font-style:italic;position:relative;z-index:1}
-  /* ---- Sword banner ---- */
-  .sword-banner{
-    grid-column:1 / -1;margin-bottom:14px;position:relative;z-index:1;
-    background:linear-gradient(135deg,#1f2a38 0%,#33271a 55%,#4a3413 100%);
-    border:1px solid var(--gold);border-radius:12px;padding:13px 18px;overflow:hidden;
-    box-shadow:0 4px 14px rgba(40,30,10,.35), inset 0 0 22px rgba(201,164,67,.18);
-  }
-  .sword-banner::after{
-    content:"";position:absolute;top:-40%;right:-6%;width:240px;height:240px;
-    background:radial-gradient(circle,rgba(201,164,67,.30),transparent 65%);pointer-events:none;
-  }
-  .sword-banner h2{font-family:'Cinzel';font-size:14px;font-weight:700;letter-spacing:1.5px;
-    color:var(--gold-bright);border:none;text-transform:uppercase;margin-bottom:9px;
-    display:flex;align-items:center;gap:9px}
-  .sword-banner h2 .blade{color:#f3e6c0;font-size:18px}
-  .sw-tiers{display:flex;gap:16px;flex-wrap:wrap}
-  .sw-tier{flex:1;min-width:170px;background:rgba(255,250,235,.06);border:1px solid rgba(201,164,67,.4);
-    border-radius:10px;padding:9px 12px}
-  .sw-tier .lvl{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
-  .sw-tier .lvl-title{display:flex;flex-direction:column;gap:1px;min-width:0}
-  .sw-tier .lvl-num{font-family:'Cinzel';font-size:9px;letter-spacing:1.3px;text-transform:uppercase;
-    color:var(--ruby-bright);line-height:1.2}
-  .sw-tier .lvl-name{font-family:'Cinzel';font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;
-    color:var(--gold-bright);line-height:1.2}
-  .sw-tier .badge{flex:none;font-family:'Cinzel';font-size:8px;letter-spacing:.6px;text-transform:uppercase;
-    padding:2px 8px;border-radius:5px;font-weight:700;
-    background:linear-gradient(180deg,var(--ruby-bright),var(--ruby));
-    color:#fff5ee;box-shadow:0 1px 3px rgba(102,5,20,.35)}
-  .sw-tier p{font-size:13px;color:#ede2c8;line-height:1.42}
-  .sw-tier b{color:var(--gold-bright)}
-  /* ---- Interactive resources ---- */
-  .res-panel{grid-column:1/-1;margin-bottom:14px;position:relative;z-index:1;
-    background:linear-gradient(160deg,rgba(255,251,238,.7),rgba(239,228,201,.5));
-    border:1px solid var(--gold);border-radius:12px;padding:14px 16px;
-    box-shadow:0 3px 8px rgba(120,90,20,.1)}
-  .res-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
-    border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px}
-  .res-head h2{font-family:'Cinzel';font-size:13px;font-weight:700;letter-spacing:1.3px;
-    text-transform:uppercase;color:var(--celest);border:none}
-  .rest-bar{display:flex;gap:8px}
-  .rest-btn{font-family:'Cinzel';font-size:10px;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;
-    padding:8px 14px;border-radius:8px;border:1px solid var(--gold);color:var(--ink);
-    background:linear-gradient(180deg,rgba(255,251,238,.95),rgba(239,228,201,.75));transition:.12s}
-  @media(hover:hover) and (pointer:fine){.rest-btn:hover{background:var(--gold);color:#fff8e6}}
-  .rest-btn:active{transform:translateY(1px) scale(.96);filter:brightness(.9)}
-  .userow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;padding:8px 0;
-    border-bottom:1px dotted var(--line);flex-wrap:wrap}
-  .userow .lbl{color:var(--ink-soft)}
-  .userow .lbl b{color:var(--ink);font-family:'Cinzel';font-size:11.5px;font-weight:600;letter-spacing:.2px}
-  .res-cards{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:12px 0}
-  .res-card{background:rgba(255,250,235,.78);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
-  .rc-top{display:flex;align-items:baseline;gap:6px;margin-bottom:7px;flex-wrap:wrap}
-  .rc-name{font-family:'Cinzel';font-size:12px;font-weight:700;color:var(--ink);letter-spacing:.6px;text-transform:uppercase}
-  .rc-name::before{content:"\2666";color:var(--gold);font-size:9px;margin-right:5px}
-  .rc-top .ctx{font-size:10.5px;color:var(--ink-soft);font-style:italic}
-  .rc-count{margin-left:auto;font-family:'Cinzel';font-size:12px;font-weight:700;color:var(--gold)}
-  .segbar{display:flex;gap:4px;height:24px}
-  .seg{flex:1;border-radius:5px;border:1.5px solid var(--gold);cursor:pointer;transition:.13s;
-    background:linear-gradient(180deg,var(--gold-bright),var(--gold));
-    box-shadow:inset 0 1px 2px rgba(255,255,255,.4)}
-  @media(hover:hover) and (pointer:fine){.seg:hover{filter:brightness(1.1)}}
-  .seg:active{transform:scaleY(.82)}
-  .seg.empty{background:transparent;border-color:#c5b68c;opacity:.45;box-shadow:none}
-  .pbtn{font-family:'Cinzel';font-size:11.5px;cursor:pointer;border:1px solid var(--line);
-    background:rgba(255,251,238,.85);border-radius:8px;padding:6px 10px;color:var(--ink);transition:.12s}
-  @media(hover:hover) and (pointer:fine){.pbtn:hover{background:var(--gold);color:#fff8e6;border-color:var(--gold)}}
-  .pbtn:active{transform:translateY(1px) scale(.96);filter:brightness(.92)}
-  .res-hint{font-size:11px;color:var(--ink-soft);font-style:italic;margin-top:10px;text-align:right}
-  .hp-row{grid-column:1/-1;display:block;
-    background:linear-gradient(160deg,rgba(255,251,238,.8),rgba(239,228,201,.6));
-    border:1.5px solid var(--ruby);border-radius:12px;padding:18px 20px;margin-bottom:8px;
-    box-shadow:0 2px 6px rgba(102,5,20,.14), inset 0 0 0 1px rgba(204,36,64,.12)}
-  .hp-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
-    border-bottom:1px dotted var(--line);padding-bottom:11px;margin-bottom:13px}
-  .hp-row .lbl b{color:var(--crimson);font-size:13px;white-space:nowrap}
-  .hp-val{font-family:'Cinzel';font-weight:700;line-height:1;white-space:nowrap}
-  .hp-val #pv-hp{font-size:25px;color:var(--crimson)}
-  .hp-val .hp-max{font-size:14px;color:var(--ink-soft);font-weight:600}
-  .hp-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .hp-actions .pbtn{padding:9px 14px;font-size:13px}
-  .hp-actions .pbtn.step{min-width:44px;text-align:center}
-  .hp-dmgheal{display:flex;gap:8px;flex:1 1 100%}
-  .hp-dmgheal .pbtn{flex:1;text-align:center}
-  .hp-in{flex:1;min-width:96px;font-family:'EB Garamond';font-size:14px;padding:9px;
-    border:1px solid var(--line);border-radius:10px;background:#fffdf6;color:var(--ink);text-align:center}
-  .pbtn.dmg{background:linear-gradient(180deg,var(--ruby-bright),var(--ruby) 55%,var(--ruby-dark));color:#fff5ee;
-    border-color:var(--ruby-dark);font-family:'Cinzel';letter-spacing:.4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
-  .pbtn.heal{background:linear-gradient(180deg,var(--celest-soft),var(--celest));color:#f0faf5;
-    border-color:#144a36;font-family:'Cinzel';letter-spacing:.4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.15)}
-  @media(hover:hover) and (pointer:fine){.pbtn.dmg:hover,.pbtn.heal:hover{filter:brightness(1.12)}}
-  .loh-card{background:linear-gradient(160deg,rgba(255,251,238,.8),rgba(239,228,201,.6));
-    border:1px solid var(--gold);border-radius:12px;padding:16px 18px;margin-top:10px;
-    box-shadow:0 2px 6px rgba(120,90,20,.08)}
-  .loh-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:11px}
-  .loh-top .lbl b{color:var(--ink);font-family:'Cinzel';font-size:12.5px;font-weight:700;letter-spacing:.5px;
-    text-transform:uppercase;white-space:nowrap}
-  .loh-top .lbl b::before{content:"\2666";color:var(--gold);font-size:10px;margin-right:6px}
-  .loh-val{font-family:'Cinzel';font-weight:700;color:var(--gold);white-space:nowrap;line-height:1;
-    font-variant-numeric:tabular-nums}
-  .loh-val #pv-loh{font-size:21px;display:inline-block;min-width:2.3ch;text-align:right}
-  .loh-val small{font-size:12px;color:var(--ink-soft);font-weight:400}
-  .loh-bar-track{position:relative;width:100%;height:24px;border-radius:12px;
-    background:rgba(168,132,44,.16);border:1px solid var(--line);overflow:hidden;
-    cursor:ew-resize;touch-action:pan-y;margin-bottom:11px}
-  .loh-bar-fill{height:100%;width:100%;
-    background:linear-gradient(90deg,var(--gold-bright),var(--gold));
-    box-shadow:inset 0 1px 2px rgba(255,255,255,.45);pointer-events:none}
-  .loh-bar-track::after{content:"";position:absolute;inset:0;pointer-events:none;
-    background:repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/7 - 1.5px),rgba(80,58,18,.22) calc(100%/7 - 1.5px),rgba(80,58,18,.22) calc(100%/7))}
-  .loh-actions{display:flex;gap:8px}
-  .loh-actions .pbtn{flex:1;text-align:center;padding:8px 0;font-size:12.5px}
-  /* ---- Grimoire page ---- */
-  .grimoire{margin-top:26px}
-  .spell-search{width:100%;font-family:'EB Garamond';font-size:15px;padding:10px 14px;margin-bottom:12px;
-    border:1px solid var(--line);border-radius:12px;background:#fffdf6;color:var(--ink);
-    position:relative;z-index:1}
-  .spell-search:focus{outline:none;border-color:var(--gold)}
-  .grim-sec.hidden,.spellcard.hidden,.steed-block.hidden,.spell-section.hidden{display:none}
-  .grim-intro{font-size:12.5px;color:var(--ink-soft);background:rgba(26,92,68,.08);
-    border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin-bottom:16px;line-height:1.45}
-  .grim-intro b{color:var(--ink);font-family:'Cinzel';font-size:11.5px}
-  .grim-sec{font-family:'Cinzel';font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
-    color:var(--gold);border-bottom:2px solid var(--gold);padding-bottom:5px;margin:18px 0 12px;position:relative;z-index:1}
-  .grim-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;position:relative;z-index:1}
-  .spellcard{background:rgba(255,250,235,.78);border:1px solid var(--line);border-radius:10px;
-    padding:10px 13px;box-shadow:0 2px 5px rgba(120,90,20,.06);
-    scroll-margin-top:18px;scroll-margin-bottom:calc(100px + env(safe-area-inset-bottom))}
-  .spellcard.spell-focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,164,67,.35),0 2px 8px rgba(120,90,20,.12);
-    transition:border-color .25s,box-shadow .25s}
-  .sc-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:3px}
-  .sc-name{font-family:'Cinzel';font-size:14px;font-weight:600;color:var(--ink)}
-  .sc-lvl{font-size:10px;font-family:'Cinzel';letter-spacing:.4px;color:var(--celest);white-space:nowrap}
-  .sc-meta{font-size:11.5px;color:var(--ink-soft);font-style:italic;margin-bottom:5px;
-    border-bottom:1px dotted var(--line);padding-bottom:5px}
-  .sc-meta .conc{font-style:normal;background:var(--crimson);color:#fdf3ee;font-family:'Cinzel';
-    font-size:8.5px;letter-spacing:.5px;padding:1px 5px;border-radius:5px;margin-left:2px}
-  .sc-desc{font-size:12.8px;color:var(--ink);line-height:1.4}
-  .sc-desc b{color:var(--crimson)}
-  @media(max-width:760px){.grim-grid{grid-template-columns:1fr}}
-  @media print{.grimoire{page-break-before:always}}
-  /* ---- Find Steed detail ---- */
-  .steed-block{margin-top:8px;position:relative;z-index:1}
-  .steed-hp-row{background:rgba(158,9,34,.07);border:1px solid rgba(158,9,34,.3);border-radius:12px;
-    padding:10px 13px;margin-bottom:12px}
-  .steed-hp-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
-  .steed-hp-row .lbl b{color:var(--crimson);font-size:13px}
-  #pv-steedhp{font-family:'Cinzel';font-weight:700;font-size:22px;color:var(--crimson)}
-  .hp-bar-track{width:100%;height:14px;border-radius:7px;background:rgba(158,9,34,.14);
-    border:1px solid var(--line);overflow:hidden;margin-bottom:9px}
-  .hp-bar-fill{height:100%;background:linear-gradient(90deg,var(--celest),var(--celest-bright));
-    transition:width .25s ease,background .25s ease}
-  .hp-bar-fill.mid{background:linear-gradient(90deg,#b5832a,var(--gold))}
-  .hp-bar-fill.low{background:linear-gradient(90deg,var(--ruby-dark),var(--ruby))}
-  .steed-core{background:rgba(26,92,68,.08);border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin-bottom:12px}
-  .steed-mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-  .steed-core .fd{margin-bottom:7px}
-  .steed-core .fd:last-child{margin-bottom:0}
-  .steed-abil-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
-  .sa{text-align:center;border:1px solid var(--line);border-radius:8px;padding:4px 2px;
-    background:rgba(255,251,238,.7)}
-  .sa-n{display:block;font-family:'Cinzel';font-size:9px;letter-spacing:.4px;color:var(--ink-soft)}
-  .sa-m{display:block;font-family:'Cinzel';font-size:14px;font-weight:600;color:var(--ink)}
-  .sa-s{display:block;font-size:9.5px;color:var(--ink-soft)}
-  @media(max-width:380px){.steed-abil-grid{grid-template-columns:repeat(3,1fr)}}
-  .steed-forms{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
-  .steed-form{background:rgba(255,250,235,.78);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
-  .sf-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:5px}
-  .sf-name{font-family:'Cinzel';font-size:13px;font-weight:600;color:var(--ink)}
-  .sf-name i{font-style:italic;font-weight:400;font-size:11px;color:var(--ink-soft)}
-  @media(max-width:760px){.steed-mini-stats{grid-template-columns:1fr 1fr 1fr}.steed-forms{grid-template-columns:1fr}}
-  /* ---- Notes page ---- */
-  .notes-page{margin-top:26px}
-  .notes-area{width:100%;min-height:520px;font-family:'EB Garamond',serif;font-size:15px;line-height:1.7;
-    color:var(--ink);background:repeating-linear-gradient(transparent,transparent 30px,rgba(168,132,44,.18) 31px);
-    border:1px solid var(--line);border-radius:12px;padding:8px 14px;resize:vertical;position:relative;z-index:1}
-  .notes-area:focus{outline:none;border-color:var(--gold)}
-  .notes-hint{font-size:11.5px;color:var(--ink-soft);font-style:italic;margin-bottom:10px;position:relative;z-index:1}
-  @media print{.notes-page{page-break-before:always}.notes-area{background:none;min-height:600px}}
-  /* ---- Treasury page ---- */
-  .coin-band{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:6px;position:relative;z-index:1}
-  .coin{text-align:center;border:1px solid var(--line);border-radius:12px;padding:10px 6px;
-    background:linear-gradient(180deg,rgba(255,251,238,.85),rgba(239,228,201,.6))}
-  .coin .cv{font-family:'Cinzel';font-size:24px;font-weight:700;line-height:1}
-  .coin .cv-in{font-family:'Cinzel';font-size:24px;font-weight:700;text-align:center;width:100%;line-height:1;
-    border:none;background:transparent;color:inherit;padding:0;
-    -moz-appearance:textfield;cursor:text}
-  .coin .cv-in:focus{outline:none;border-bottom:1.5px solid var(--gold)}
-  .coin .cv-in::-webkit-outer-spin-button,.coin .cv-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-  .coin.pt .cv-in{color:#6b7b86}.coin.au .cv-in{color:var(--gold)}
-  .coin.ag .cv-in{color:#8a8a8a}.coin.cu .cv-in{color:#a5673f}
-  .coin-steps{display:flex;gap:4px;justify-content:center;margin-top:6px}
-  .coin-steps .pbtn{padding:3px 7px;font-size:11px;font-family:'Cinzel'}
-  .coin .cl{font-family:'Cinzel';font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);margin-top:4px}
-  .coin.pt .cv{color:#6b7b86}.coin.au .cv{color:var(--gold)}
-  .coin.ag .cv{color:#8a8a8a}.coin.cu .cv{color:#a5673f}
-  .coin .calc{font-size:10px;color:var(--ink-soft);font-style:italic;margin-top:3px;line-height:1.25}
-  .total-line{text-align:right;font-size:13px;color:var(--ink-soft);margin:8px 2px 0;position:relative;z-index:1}
-  .total-line b{font-family:'Cinzel';font-size:15px;color:var(--gold)}
-  .edit-list{margin-bottom:2px}
-  .edit-row{background:rgba(201,164,67,.1);
-    border:1px solid var(--gold);border-radius:10px;
-    padding:10px 34px 10px 13px;margin-bottom:9px;position:relative;
-    box-shadow:0 2px 5px rgba(120,90,20,.07);
-    display:flex;flex-wrap:wrap;gap:7px 14px;align-items:center}
-  .edit-main{flex:1;min-width:140px}
-  .edit-name{font-family:'Cinzel';font-size:13.5px;font-weight:600;color:var(--ink);outline:none;
-    border-radius:5px;padding:1px 3px;margin:-1px -3px}
-  .edit-name::before{content:"\2666";color:var(--gold);font-size:9px;margin-right:6px}
-  .edit-desc{font-size:12.5px;color:var(--ink-soft);margin-top:3px;outline:none;line-height:1.4;
-    border-radius:5px;padding:1px 3px;margin-left:-3px;font-style:italic}
-  .edit-name:focus,.edit-desc:focus{background:rgba(201,164,67,.12)}
-  .edit-name:empty::before{color:var(--gold)}
-  .edit-name:empty::after{content:attr(data-ph);color:var(--ink-soft);font-style:italic;font-weight:400}
-  .edit-desc:empty::before{content:attr(data-ph);color:var(--ink-soft);font-style:italic}
-  .edit-qty{display:flex;align-items:center;gap:8px;flex:none;background:rgba(255,255,255,.5);
-    border:1px solid var(--line);border-radius:24px;padding:5px 7px;
-    box-shadow:inset 0 1px 2px rgba(120,90,20,.08)}
-  .edit-qty .qbtn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--gold);
-    background:linear-gradient(180deg,rgba(255,251,238,.95),rgba(239,228,201,.75));
-    color:var(--ink);font-family:'Cinzel';font-size:15px;font-weight:600;line-height:1;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;padding:0;transition:.12s;
-    box-shadow:0 1px 3px rgba(120,90,20,.18)}
-  .edit-qty .qbtn:active{transform:scale(.88);filter:brightness(.92)}
-  @media(hover:hover) and (pointer:fine){.edit-qty .qbtn:hover{background:var(--gold);color:#fff8e6}}
-  .edit-qty .qval{font-family:'Cinzel';font-size:17px;font-weight:700;color:var(--gold);min-width:28px;text-align:center}
-  .edit-del{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;
-    font-size:11px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center}
-  .edit-add{
-    margin-top:2px;margin-right:8px;font-family:'Cinzel';font-size:11.5px;font-weight:600;
-    letter-spacing:.6px;text-transform:uppercase;color:#fff8e6;
-    background:linear-gradient(160deg,var(--gold-bright),var(--gold));
-    border:1px solid #8a6a1f;border-radius:20px;padding:9px 18px;
-    box-shadow:0 3px 8px rgba(120,90,20,.35), inset 0 1px 0 rgba(255,255,255,.3);
-  }
-  .edit-add:active{transform:translateY(1px) scale(.97);filter:brightness(.95);box-shadow:0 1px 3px rgba(120,90,20,.3)}
-  @media(hover:hover) and (pointer:fine){.edit-add:hover{filter:brightness(1.08)}}
-  @media(max-width:760px){.coin-band{grid-template-columns:repeat(2,1fr)}}
-  @media print{.treasury{page-break-before:always}}
-  @media print{
-    .res-panel{display:none}
-    .sword-banner h2,.sword-banner h2 .blade{color:#7c5a14 !important}
-    .sw-tier .lvl-num{color:var(--crimson) !important}
-    .sw-tier .lvl-name{color:#7c5a14 !important}
-    .sw-tier .badge{background:var(--crimson) !important;color:#fff !important;box-shadow:none !important}
-    .sw-tier p,.sw-tier b{color:#2b2419 !important}
-    .combat-card{background:none !important;color:var(--ink) !important;box-shadow:none !important}
-    .combat-card h2,.combat-card h2::before{color:#7c5a14 !important}
-    .combat-card h2 small,.combat-card th,.combat-card .note{color:var(--ink-soft) !important}
-    .combat-card td,.combat-card td.atk{color:var(--ink) !important}
-    .combat-card td .mast{color:var(--celest) !important}
-    body{background:#fff;padding:0}
-    body::before,.sheet::after,header::after{display:none}
-    .sheet{box-shadow:none;border:none;max-width:none}
-    .card{box-shadow:none}
-  }
-  @media(max-width:760px){
-    body{padding:12px 8px}
-    .sheet{padding:18px 14px 20px}
-    .sheet::before{inset:6px}
-    header{flex-direction:column;align-items:flex-start;gap:10px}
-    h1{font-size:25px}
-    .subtitle{font-size:14px}
-    .meta{text-align:left;font-size:13.5px}
-    .grid{grid-template-columns:1fr}
-    .stats-band{grid-template-columns:repeat(2,1fr)}
-    .res-grid{grid-template-columns:1fr}
-    .grim-grid{grid-template-columns:1fr}
-    .grim-intro{font-size:13px}
-    /* mobile: priorità a ciò che serve durante il combattimento */
-    .res-panel{order:1}
-    .col-abilities{order:2}
-    .col-combat{order:3}
-    .sword-banner{order:4}
-    .col-features{order:5}
-    /* mobile: ogni riga risorsa si impila — etichetta sopra, controlli sotto a piena larghezza */
-    .userow{flex-direction:column;align-items:flex-start;gap:7px;padding:9px 0}
-    .userow .lbl{width:100%}
-    .abil-grid{grid-template-columns:repeat(3,1fr)}
-    .hp-in{min-height:40px;font-size:15px}
-    .coin-steps .pbtn{padding:6px 10px;font-size:12px}
-    .coin .cv-in{padding:5px 0;font-size:22px}
-    /* mobile: pagina Scheda più densa — più info per schermata */
-    .grid{gap:9px}
-    .col{gap:9px}
-    .card{padding:8px 11px}
-    .card h2{margin-bottom:5px;padding-bottom:3px}
-    .stats-band{gap:7px;margin-bottom:9px}
-    .stat{padding:6px 4px}
-    .stat .big{font-size:23px}
-    .stat .sub{font-size:11px}
-    .res-panel{padding:11px 13px;margin-bottom:10px}
-    .res-cards{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;margin:9px 0}
-    .res-card{padding:7px 9px}
-    .feat{margin-bottom:5px}
-    .feat .fd{line-height:1.28}
-    .row{padding:2px 0}
-    .sword-banner{padding:10px 13px;margin-bottom:10px}
-    .abil-grid{gap:6px}
-    .abil-card{padding:7px 4px 6px}
-    .abil-card .mod{font-size:22px}
-  }
-  @media(max-width:380px){
-    .stats-band{grid-template-columns:1fr 1fr;gap:6px}
-    .stat .big{font-size:21px}
-    h1{font-size:22px}
-  }
-  /* ---- Floating bottom nav ---- */
-  html{scroll-behavior:smooth}
-  body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
-  .sheet{scroll-margin-top:10px}
-  .floatnav{
-    position:fixed;left:50%;transform:translate(-50%,0);
-    bottom:calc(12px + env(safe-area-inset-bottom));z-index:60;
-    display:flex;gap:3px;padding:6px;
-    background:linear-gradient(160deg,#26211a,#14110c);
-    border:1px solid var(--gold);border-radius:16px;
-    box-shadow:0 8px 26px rgba(20,15,5,.5), inset 0 0 18px rgba(201,164,67,.12);
-    max-width:calc(100% - 18px);
-    -webkit-tap-highlight-color:transparent;
-    transition:transform .35s ease, opacity .35s ease;
-  }
-  .floatnav.nav-hidden{transform:translate(-50%,140%);opacity:0;pointer-events:none}
-  .floatnav a{
-    flex:1;text-decoration:none;cursor:pointer;
-    display:flex;flex-direction:column;align-items:center;gap:2px;
-    min-width:62px;padding:7px 9px;border-radius:11px;
-    color:#d9c389;font-family:'Cinzel',serif;transition:.15s;
-  }
-  .floatnav a .ic{font-size:18px;line-height:1;color:var(--gold-bright)}
-  .floatnav a .tx{font-size:9.5px;letter-spacing:.5px;text-transform:uppercase}
-  .floatnav a:active{transform:scale(.95)}
-  .floatnav a.active{background:linear-gradient(180deg,rgba(201,164,67,.30),rgba(168,132,44,.14))}
-  .floatnav a.active .tx{color:#fff8e6}
-  @media(max-width:380px){
-    .floatnav a{min-width:54px;padding:6px 5px}
-    .floatnav a .tx{font-size:8.5px}
-  }
-  @media print{.floatnav{display:none}body{padding-bottom:0}}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Tharion">
-<meta name="theme-color" content="#0c0a10">
+<meta name="theme-color" content="#1a1816">
 </head>
 <body>
-<div class="sheet" id="scheda">
 
-  <header>
-    <div class="crest">
-      <div class="sigil">&#10050;</div>
-      <div>
-        <h1>Tharion Velnar</h1>
-        <div class="subtitle">Dragonide d'Oro &middot; Paladino 7 &middot; Giuramento della Devozione</div>
-      </div>
+<header id="app-header">
+  <div class="header-top">
+    <div class="header-avatar" aria-hidden="true">✦</div>
+    <div class="header-info">
+      <div class="header-name" id="header-name">Tharion Velnar — Paladino Lv.7</div>
+      <div class="header-meta" id="header-meta">Dragonide d'Oro</div>
     </div>
-    <div class="meta">
-      <div><b>Background</b> &nbsp;Nobile</div>
-      <div><b>Allineamento</b> &nbsp;Legale Buono</div>
-      <div><b>Velocità</b> &nbsp;9 m &middot; <b>Scurovisione</b> 18 m</div>
-      <div><b>Resistenza</b> &nbsp;Fuoco</div>
-    </div>
-  </header>
-
-  <!-- top stat band -->
-  <div class="stats-band">
-    <div class="stat"><div class="big">20</div><div class="lab">Classe Armatura</div><div class="sub">Piastre + Scudo</div></div>
-    <div class="stat gold"><div class="big">60</div><div class="lab">Punti Ferita</div><div class="sub">Dadi Vita 7d10</div></div>
-    <div class="stat"><div class="big">+3</div><div class="lab">Bonus Comp.</div><div class="sub">Iniz. &minus;1 · vantaggio</div></div>
-    <div class="stat celest"><div class="big">CD 15</div><div class="lab">Tiro Salv. Incant.</div><div class="sub">Attacco incant. +7</div></div>
-    <div class="stat" id="insp-cell" onclick="toggleInsp()" style="cursor:pointer;transition:.2s" title="Clicca per attivare/disattivare">
-      <div class="big" id="insp-display" style="font-size:30px;color:var(--ink-soft)">☆</div>
-      <div class="lab">Ispirazione</div>
-      <div id="insp-sub" class="sub">nessuna</div>
+    <div class="header-right">
+      <span class="header-ca" id="header-ca">CA: 20</span>
+      <span class="header-init" id="header-init">Iniz: −1</span>
+      <span class="insp-badge" id="insp-badge" title="Ispirazione">☆</span>
+      <button type="button" class="header-options" id="header-options" aria-label="Opzioni">⚙</button>
     </div>
   </div>
+</header>
 
-  <div class="grid">
+<div id="options-panel" class="options-panel hidden">
+  <button type="button" id="opt-reset">Ripristina dati</button>
+  <button type="button" id="opt-export">Esporta JSON</button>
+  <button type="button" id="opt-import">Importa JSON</button>
+</div>
 
-    <!-- magic sword banner -->
-    <div class="sword-banner">
-      <h2><span class="blade">&#10013;</span> Lama Vincolante &middot; livelli di potere</h2>
-      <div class="sw-tiers">
-        <div class="sw-tier">
-          <div class="lvl">
-            <div class="lvl-title"><span class="lvl-num">Livello I</span><span class="lvl-name">Sentinella</span></div>
-            <span class="badge">attivo</span>
-          </div>
-          <p>La lama <b>si illumina</b> quando ti trovi vicino alle <b>Vesti Purpuree</b>. Allarme e rivelatore della loro presenza.</p>
+<main id="main-content">
+
+  <!-- ========== SCHEDA ========== -->
+  <section id="view-scheda" class="view-panel">
+    <nav class="subtabs" aria-label="Sotto-tab Scheda">
+      <button type="button" class="subtab active" data-subtab="comb">Info/Comb</button>
+      <button type="button" class="subtab" data-subtab="stats">Caratteristiche</button>
+      <button type="button" class="subtab" data-subtab="traits">Tratti</button>
+    </nav>
+
+    <!-- Info/Comb -->
+    <div class="subpanel active" data-subpanel="comb">
+      <div class="combat-stats-band">
+        <div class="combat-stat-init">
+          <div class="big" id="combat-init">−1</div>
+          <div class="lab">Iniziativa</div>
+          <div class="sub" id="combat-init-note">vant. iniziativa</div>
         </div>
-        <div class="sw-tier">
-          <div class="lvl">
-            <div class="lvl-title"><span class="lvl-num">Livello II</span><span class="lvl-name">Ascesa</span></div>
-            <span class="badge">attivo</span>
+        <div class="combat-stats-core">
+          <div class="combat-stats-row">
+            <div class="ac-ruby-wrap" aria-label="Classe Armatura">
+              <div class="ac-ruby-gem-box">
+                <svg class="ac-ruby-art" viewBox="28 2 80 88" aria-hidden="true" focusable="false">
+                <defs>
+                  <linearGradient id="acRubyDeep" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ff8a9a"/>
+                    <stop offset="22%" stop-color="#e8324f"/>
+                    <stop offset="55%" stop-color="#9e0922"/>
+                    <stop offset="100%" stop-color="#4a0612"/>
+                  </linearGradient>
+                  <linearGradient id="acRubyMid" x1="20%" y1="0%" x2="80%" y2="100%">
+                    <stop offset="0%" stop-color="#ff6b82"/>
+                    <stop offset="100%" stop-color="#7a0818"/>
+                  </linearGradient>
+                  <linearGradient id="acRubyLight" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(255,255,255,0.65)"/>
+                    <stop offset="45%" stop-color="rgba(255,220,220,0.15)"/>
+                    <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                  </linearGradient>
+                  <linearGradient id="acRubyTable" x1="50%" y1="0%" x2="50%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(255,245,235,0.55)"/>
+                    <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                  </linearGradient>
+                  <linearGradient id="acGoldBezel" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#e8c96a"/>
+                    <stop offset="50%" stop-color="#c9a443"/>
+                    <stop offset="100%" stop-color="#8a6820"/>
+                  </linearGradient>
+                  <filter id="acRubyGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#9e0922" flood-opacity="0.55"/>
+                  </filter>
+                </defs>
+                <g filter="url(#acRubyGlow)">
+                  <path d="M68 5 L96 18 L106 44 L90 74 L68 87 L46 74 L30 44 L40 18 Z" fill="url(#acRubyDeep)" stroke="url(#acGoldBezel)" stroke-width="1.2" stroke-linejoin="round"/>
+                  <path d="M68 5 L96 18 L68 24 L40 18 Z" fill="url(#acRubyTable)"/>
+                  <path d="M68 5 L78 8 L68 24 L58 8 Z" fill="url(#acRubyLight)" opacity="0.85"/>
+                  <path d="M68 24 L96 18 L106 44 L68 52 Z" fill="url(#acRubyMid)" opacity="0.55"/>
+                  <path d="M68 24 L40 18 L30 44 L68 52 Z" fill="#7a0818" opacity="0.35"/>
+                  <path d="M68 52 L106 44 L90 74 L68 87 Z" fill="#5a0612" opacity="0.45"/>
+                  <path d="M68 52 L30 44 L46 74 L68 87 Z" fill="#8a1028" opacity="0.4"/>
+                  <path d="M68 24 L68 87" stroke="rgba(255,255,255,0.14)" stroke-width="0.65"/>
+                  <path d="M40 18 L96 44" stroke="rgba(255,255,255,0.1)" stroke-width="0.55"/>
+                  <path d="M96 18 L40 44" stroke="rgba(0,0,0,0.28)" stroke-width="0.55"/>
+                  <path d="M68 24 L40 18" stroke="rgba(255,255,255,0.18)" stroke-width="0.5"/>
+                  <path d="M68 24 L96 18" stroke="rgba(255,255,255,0.18)" stroke-width="0.5"/>
+                  <path d="M68 24 L30 44" stroke="rgba(0,0,0,0.22)" stroke-width="0.5"/>
+                  <path d="M68 24 L106 44" stroke="rgba(0,0,0,0.22)" stroke-width="0.5"/>
+                  <path d="M68 52 L90 74" stroke="rgba(0,0,0,0.25)" stroke-width="0.5"/>
+                  <path d="M68 52 L46 74" stroke="rgba(0,0,0,0.25)" stroke-width="0.5"/>
+                  <ellipse cx="58" cy="14" rx="5" ry="2.2" fill="rgba(255,255,255,0.35)" transform="rotate(-18 58 14)"/>
+                </g>
+              </svg>
+              <span class="ac-ruby-val" id="combat-ac">20</span>
+              </div>
+              <div class="ac-ruby-meta">
+                <span class="ac-ruby-lab">Classe Armatura</span>
+                <span class="ac-ruby-sub" id="combat-ac-note">Piastre + Scudo</span>
+              </div>
+            </div>
+            <div class="death-saves-simple">
+              <div class="death-saves-head">
+                <span class="death-saves-title">Tiri Morte</span>
+                <button type="button" class="ds-reset" id="death-reset" aria-label="Azzera tiri morte">↺</button>
+              </div>
+              <div class="ds-row">
+                <span class="ds-lab">Fall.</span>
+                <div class="ds-pips ds-fail" id="ds-fail-bar" role="group" aria-label="Fallimenti"></div>
+              </div>
+              <div class="ds-row">
+                <span class="ds-lab">Succ.</span>
+                <div class="ds-pips ds-success" id="ds-success-bar" role="group" aria-label="Successi"></div>
+              </div>
+              <div class="death-status" id="death-status" aria-live="polite"></div>
+            </div>
           </div>
-          <p><b>+1</b> a incantesimi (colpire e CD) &middot; <b>+1</b> a colpire &middot; <b>+1</b> ai danni. <b>Vantaggio</b> ai TS per resistere a Spaventato, essere gettato Prono o Spinto.</p>
         </div>
       </div>
-    </div>
-
-    <!-- interactive resource tracker -->
-    <div class="res-panel">
-      <div class="res-head">
-        <h2>&#9670; Risorse &amp; Usi</h2>
-        <div class="rest-bar">
-          <button class="rest-btn" onclick="shortRest()">Riposo Breve</button>
-          <button class="rest-btn" onclick="longRest()">Riposo Lungo</button>
-        </div>
-      </div>
-      <div class="hp-row">
+      <div class="card hp-combat-card">
         <div class="hp-top">
-          <span class="lbl"><b>&#10084; Punti Ferita</b></span>
-          <span class="hp-val"><span id="pv-hp">60</span><span class="hp-max"> / 60</span></span>
+          <span class="hp-title"><span class="hp-heart" aria-hidden="true">❤</span> Punti Ferita</span>
+          <span class="hp-val"><span id="pv-hp">60</span><span class="hp-max" id="hp-max"> / 60</span></span>
         </div>
         <div class="hp-bar-track"><div class="hp-bar-fill" id="hp-bar-fill" style="width:100%"></div></div>
+        <div class="hp-temp-bar-wrap hidden" id="temp-hp-bar-wrap" aria-hidden="true">
+          <div class="hp-bar-track hp-temp-track"><div class="hp-bar-fill hp-temp-fill" id="temp-hp-bar-fill" style="width:0%"></div></div>
+          <span class="hp-temp-caption"><span id="pv-temp-hp">0</span> PF temporanei</span>
+        </div>
         <div class="hp-actions">
-          <button class="pbtn step" onclick="adjustPool('hp',-1)">&minus;1</button>
-          <button class="pbtn step" onclick="adjustPool('hp',1)">+1</button>
-          <input class="hp-in" id="hp-in" type="number" min="0" inputmode="numeric" placeholder="quantità">
+          <button type="button" class="pbtn step" id="hp-minus" aria-label="−1 PF">−1</button>
+          <button type="button" class="pbtn step" id="hp-plus" aria-label="+1 PF">+1</button>
+          <input class="hp-in" id="hp-in" type="number" min="0" inputmode="numeric" placeholder="quantità" aria-label="Quantità PF">
           <div class="hp-dmgheal">
-            <button class="pbtn dmg" onclick="applyHP(-1)">Danno</button>
-            <button class="pbtn heal" onclick="applyHP(1)">Cura</button>
+            <button type="button" class="pbtn dmg" id="hp-dmg">Danno</button>
+            <button type="button" class="pbtn heal" id="hp-heal">Cura</button>
           </div>
         </div>
-      </div>
-
-      <div class="res-cards">
-        <div class="res-card" data-key="hd" data-max="7">
-          <div class="rc-top"><span class="rc-name">Dadi Ferita</span><span class="ctx">7d10 · riposo breve</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
-        </div>
-        <div class="res-card" data-key="cd" data-max="2">
-          <div class="rc-top"><span class="rc-name">Channel Divinity</span><span class="ctx">1 al rip. breve</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
-        </div>
-        <div class="res-card" data-key="sl1" data-max="4">
-          <div class="rc-top"><span class="rc-name">Slot 1&deg; livello</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
-        </div>
-        <div class="res-card" data-key="sl2" data-max="3">
-          <div class="rc-top"><span class="rc-name">Slot 2&deg; livello</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
-        </div>
-        <div class="res-card" data-key="breath" data-max="3">
-          <div class="rc-top"><span class="rc-name">Soffio del Drago</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
-        </div>
-        <div class="res-card" data-key="smitefree" data-max="1">
-          <div class="rc-top"><span class="rc-name">Punizione Divina gratis</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
-        </div>
-        <div class="res-card" data-key="steedfree" data-max="1">
-          <div class="rc-top"><span class="rc-name">Trova Destriero gratis</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
-        </div>
-        <div class="res-card" data-key="flight" data-max="1">
-          <div class="rc-top"><span class="rc-name">Volo Draconico</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
-        </div>
-        <div class="res-card" data-key="shield" data-max="1">
-          <div class="rc-top"><span class="rc-name">Scudo magico</span><span class="ctx">+5 CA, reazione · 1/giorno</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
+        <div class="hp-temp-add">
+          <input class="hp-in hp-temp-in" id="temp-hp-in" type="number" min="0" inputmode="numeric" placeholder="PF temporanei" aria-label="Quantità PF temporanei">
+          <button type="button" class="pbtn temp-add" id="temp-add">Aggiungi PF temp</button>
         </div>
       </div>
 
-      <div class="loh-card">
-        <div class="loh-top">
-          <span class="lbl"><b>Imposizione delle Mani</b></span>
-          <span class="loh-val"><span id="pv-loh">35</span><small> / 35 PF</small></span>
-        </div>
-        <div class="loh-bar-track" id="loh-bar-track"><div class="loh-bar-fill" id="loh-bar-fill"></div></div>
-        <div class="loh-actions">
-          <button class="pbtn" onclick="adjustPool('loh',-5)">&minus;5</button>
-          <button class="pbtn" onclick="adjustPool('loh',-1)">&minus;1</button>
-          <button class="pbtn" onclick="adjustPool('loh',1)">+1</button>
-          <button class="pbtn" onclick="adjustPool('loh',5)">+5</button>
-        </div>
+      <div class="card combat-card">
+        <h2 class="card-title">Attacchi <small>Attacco Extra: 2 colpi</small></h2>
+        <table class="combat-table">
+          <thead><tr><th>Arma</th><th>Colpire</th><th>Danni</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="atk-name">Spada lunga ✦ (magica)</span><div class="mast">Maestria: Vex</div></td>
+              <td>+8</td><td>1d8+7 tagl.</td>
+            </tr>
+            <tr>
+              <td><span class="atk-name">Soffio (Fuoco)</span><div class="mast">cono 4,5 m / linea 9 m</div></td>
+              <td>TS DES 13</td><td>2d10 fuoco</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note">Colpire/danni includono spada +1. Stile Duellante +2 ai danni. Con Arma Sacra: +3 al colpire (→ +11) e danni Radiosi.</p>
       </div>
-      <div class="res-hint">Tocca un segmento della barra per impostare quanti usi restano &middot; i Riposi azzerano in automatico</div>
+
+      <div class="card">
+        <h2 class="card-title">Punizione Divina <small>Az. bonus dopo colpo in mischia</small></h2>
+        <div class="smite-rows">
+          <div class="stat-row"><span>Slot 1° livello</span><span class="v">2d8 radiosi</span></div>
+          <div class="stat-row"><span>Slot 2° livello</span><span class="v">3d8 radiosi</span></div>
+          <div class="stat-row"><span>vs Immondo / Non Morto</span><span class="v">+1d8</span></div>
+        </div>
+        <p class="note">Sempre preparata. 1/riposo lungo senza spendere slot.</p>
+      </div>
+
+      <div class="card res-panel">
+        <div class="res-head">
+          <h2 class="card-title" style="margin:0;border:none;padding:0">Risorse &amp; Usi</h2>
+          <div class="rest-bar">
+            <button type="button" class="rest-btn" id="btn-short-rest">Riposo Breve</button>
+            <button type="button" class="rest-btn" id="btn-long-rest">Riposo Lungo</button>
+          </div>
+        </div>
+        <div class="loh-card">
+          <div class="loh-top">
+            <span><b>Imposizione delle Mani</b></span>
+            <span><span id="pv-loh">35</span> / 35 PF</span>
+          </div>
+          <div class="loh-bar-track" id="loh-bar-track"><div class="loh-bar-fill" id="loh-bar-fill"></div></div>
+          <div class="loh-actions">
+            <button type="button" class="pbtn" data-delta="-5">−5</button>
+            <button type="button" class="pbtn" data-delta="-1">−1</button>
+            <button type="button" class="pbtn" data-delta="1">+1</button>
+            <button type="button" class="pbtn" data-delta="5">+5</button>
+          </div>
+        </div>
+        <div class="res-cards">
+          <div class="res-card" data-key="hd" data-max="7">
+            <div class="rc-top"><span class="rc-name">Dadi Ferita</span><span class="ctx">7d10</span><span class="rc-count"></span></div>
+            <div class="segbar"></div>
+          </div>
+          <div class="res-card" data-key="cd" data-max="2">
+            <div class="rc-top"><span class="rc-name">Channel Divinity</span><span class="ctx">1 al rip. breve</span><span class="rc-count"></span></div>
+            <div class="segbar"></div>
+          </div>
+          <div class="res-card" data-key="breath" data-max="3">
+            <div class="rc-top"><span class="rc-name">Soffio del Drago</span><span class="rc-count"></span></div>
+            <div class="segbar"></div>
+          </div>
+          <div class="res-card" data-key="smitefree" data-max="1">
+            <div class="rc-top"><span class="rc-name">Punizione Divina gratis</span><span class="rc-count"></span></div>
+            <div class="segbar"></div>
+          </div>
+          <div class="res-card" data-key="steedfree" data-max="1">
+            <div class="rc-top"><span class="rc-name">Trova Destriero gratis</span><span class="rc-count"></span></div>
+            <div class="segbar"></div>
+          </div>
+          <div class="res-card" data-key="flight" data-max="1">
+            <div class="rc-top"><span class="rc-name">Volo Draconico</span><span class="rc-count"></span></div>
+            <div class="segbar"></div>
+          </div>
+          <div class="res-card" data-key="shield" data-max="1">
+            <div class="rc-top"><span class="rc-name">Scudo magico</span><span class="ctx">+5 CA · 1/giorno</span><span class="rc-count"></span></div>
+            <div class="segbar"></div>
+          </div>
+        </div>
+        <p class="res-hint">Tocca un segmento per impostare gli usi restanti · Long press per dettagli</p>
+      </div>
     </div>
 
-    <!-- ===== COLUMN 1 ===== -->
-    <div class="col col-abilities">
+    <!-- Caratteristiche -->
+    <div class="subpanel" data-subpanel="stats">
       <div class="card">
-        <h2>Caratteristiche</h2>
+        <h2 class="card-title">Caratteristiche</h2>
         <div class="abil-grid">
           <div class="abil-card"><span class="name">FOR</span><span class="mod">+4</span><span class="score">18</span></div>
-          <div class="abil-card"><span class="name">DES</span><span class="mod">&minus;1</span><span class="score">8</span></div>
+          <div class="abil-card"><span class="name">DES</span><span class="mod">−1</span><span class="score">8</span></div>
           <div class="abil-card"><span class="name">COS</span><span class="mod">+2</span><span class="score">14</span></div>
           <div class="abil-card"><span class="name">INT</span><span class="mod">+0</span><span class="score">10</span></div>
           <div class="abil-card"><span class="name">SAG</span><span class="mod">+0</span><span class="score">10</span></div>
           <div class="abil-card"><span class="name">CAR</span><span class="mod">+3</span><span class="score">16</span></div>
         </div>
       </div>
-
       <div class="card">
-        <h2>Tiri Salvezza <small>Aura +3 inclusa</small></h2>
-        <div class="row"><span>Forza</span><span class="v">+7</span></div>
-        <div class="row"><span>Destrezza</span><span class="v">+2</span></div>
-        <div class="row"><span>Costituzione</span><span class="v">+5</span></div>
-        <div class="row"><span>Intelligenza</span><span class="v">+3</span></div>
-        <div class="row"><span class="prof">&#9670; Saggezza</span><span class="v prof">+6</span></div>
-        <div class="row"><span class="prof">&#9670; Carisma</span><span class="v prof">+9</span></div>
-        <div class="note">Valori già comprensivi dell'Aura di Protezione (+3); lo stesso bonus vale per gli alleati entro 3 m.</div>
-        <div class="note" style="border-top:none;padding-top:3px">Spada: <b>vantaggio</b> contro Spaventato, Prono e Spinto.</div>
+        <h2 class="card-title">Tiri Salvezza <small>Aura +3 inclusa</small></h2>
+        <div class="stat-row"><span>Forza</span><span class="v">+7</span></div>
+        <div class="stat-row"><span>Destrezza</span><span class="v">+2</span></div>
+        <div class="stat-row"><span>Costituzione</span><span class="v">+5</span></div>
+        <div class="stat-row"><span>Intelligenza</span><span class="v">+3</span></div>
+        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Saggezza</span><span class="v prof">+6</span></div>
+        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Carisma</span><span class="v prof">+9</span></div>
       </div>
-
       <div class="card">
-        <h2>Abilità <small>solo con modificatore</small></h2>
-        <div class="row"><span class="prof">&#9670; Atletica <span class="dim">(For)</span></span><span class="v prof">+7</span></div>
-        <div class="row"><span class="prof">&#9670; Intimidire <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
-        <div class="row"><span class="prof">&#9670; Persuasione <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
-        <div class="row"><span class="prof">&#9670; Percezione <span class="dim">(Sag)</span></span><span class="v prof">+3</span></div>
-        <div class="row"><span>Inganno <span class="dim">(Car)</span></span><span class="v">+3</span></div>
-        <div class="row"><span>Intrattenere <span class="dim">(Car)</span></span><span class="v">+3</span></div>
-        <div class="row"><span>Acrobazia <span class="dim">(Des)</span></span><span class="v">&minus;1</span></div>
-        <div class="row"><span>Furtività <span class="dim">(Des)</span></span><span class="v">&minus;1</span></div>
-        <div class="row"><span>Rapidità di Mano <span class="dim">(Des)</span></span><span class="v">&minus;1</span></div>
-        <div class="row"><span class="dim">Percez. passiva</span><span class="v dim">13</span></div>
+        <h2 class="card-title">Abilità</h2>
+        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Atletica <span class="dim">(For)</span></span><span class="v prof">+7</span></div>
+        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Intimidire <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
+        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Persuasione <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
+        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Percezione <span class="dim">(Sag)</span></span><span class="v prof">+3</span></div>
+        <div class="stat-row"><span>Inganno <span class="dim">(Car)</span></span><span class="v">+3</span></div>
+        <div class="stat-row"><span>Intrattenere <span class="dim">(Car)</span></span><span class="v">+3</span></div>
+        <div class="stat-row"><span>Acrobazia <span class="dim">(Des)</span></span><span class="v">−1</span></div>
+        <div class="stat-row"><span>Furtività <span class="dim">(Des)</span></span><span class="v">−1</span></div>
+        <div class="stat-row"><span>Rapidità di Mano <span class="dim">(Des)</span></span><span class="v">−1</span></div>
+        <div class="stat-row"><span class="dim">Percez. passiva</span><span class="v dim">13</span></div>
       </div>
     </div>
 
-    <!-- ===== COLUMN 2 ===== -->
-    <div class="col col-combat">
-      <div class="card combat-card">
-        <h2>Attacchi <small>Attacco Extra: 2 colpi</small></h2>
-        <table>
-          <tr><th>Arma</th><th>Colpire</th><th>Danni</th></tr>
-          <tr>
-            <td class="atk">Spada lunga &#10013; <span style="font-weight:400;font-style:italic">(magica)</span><div class="mast">Maestria: Vex (se colpisci → vantaggio al prossimo attacco sullo stesso bersaglio)</div></td>
-            <td>+8</td><td>1d8+7 taglienti</td>
-          </tr>
-          <tr>
-            <td class="atk">Soffio (Fuoco) <span style="font-weight:400;font-style:italic">(cono 4,5 m / linea 9 m)</span></td>
-            <td>TS DES 13</td><td>2d10 fuoco (metà se supera)</td>
-          </tr>
-        </table>
-        <div class="note">Colpire/danni includono la <b>spada +1</b>. Stile <b>Duellante</b> +2 ai danni (incluso). Con <b>Arma Sacra</b> attiva: +3 al colpire (→ +11) e danni Radiosi a scelta.</div>
-      </div>
-
+    <!-- Tratti -->
+    <div class="subpanel" data-subpanel="traits">
       <div class="card">
-        <h2>Punizione Divina <small>Azione bonus dopo un colpo in mischia</small></h2>
-        <div class="row"><span>Slot di 1° livello</span><span class="v">2d8 radiosi</span></div>
-        <div class="row"><span>Slot di 2° livello</span><span class="v">3d8 radiosi</span></div>
-        <div class="row"><span>vs Immondo / Non Morto</span><span class="v">+1d8</span></div>
-        <div class="note">Sempre preparata. <b>1 volta/riposo lungo</b> puoi lanciarla senza spendere slot (Punizione del Paladino).</div>
-      </div>
-
-      <div class="card">
-        <h2>Channel Divinity <small>2 usi · 1 al riposo breve</small></h2>
-        <div class="feat">
-          <span class="ft">Arma Sacra</span><span class="tag g">azione attacco</span>
-          <div class="fd">Per 10 min aggiungi +3 (CAR) al colpire con un'arma da mischia e infliggi danni Radiosi a scelta; emana luce intensa (6 m).</div>
-        </div>
-        <div class="feat">
-          <span class="ft">Percezione Divina</span><span class="tag">azione bonus</span>
-          <div class="fd">Per 10 min localizzi Celestiali, Immondi e Non Morti entro 18 m e luoghi consacrati/profanati.</div>
+        <h2 class="card-title">Lama Vincolante</h2>
+        <div class="sword-tiers">
+          <div class="sw-tier">
+            <div class="lvl"><div class="lvl-title"><span class="lvl-num">Livello I</span> Sentinella</div><span class="badge">attivo</span></div>
+            <p>La lama si illumina vicino alle Vesti Purpuree. Allarme e rivelatore.</p>
+          </div>
+          <div class="sw-tier">
+            <div class="lvl"><div class="lvl-title"><span class="lvl-num">Livello II</span> Ascesa</div><span class="badge">attivo</span></div>
+            <p>+1 incantesimi e colpire · +1 danni · Vantaggio vs Spaventato, Prono, Spinto.</p>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- ===== COLUMN 3 ===== -->
-    <div class="col col-features">
       <div class="card">
-        <h2>Privilegi di Classe & Aure</h2>
-        <div class="feat"><span class="ft">Aura di Protezione</span><span class="tag g">3 m</span>
-          <div class="fd">Tu e gli alleati nell'aura +3 (CAR) a tutti i TS.</div></div>
-        <div class="feat"><span class="ft">Aura di Devozione</span><span class="tag g">3 m</span>
-          <div class="fd">Tu e gli alleati nell'aura siete <b>immuni</b> ad Affascinato.</div></div>
-        <div class="feat"><span class="ft">Destriero Fedele</span>
-          <div class="fd">Trova Destriero sempre preparata; 1 lancio gratis/riposo lungo.</div></div>
-        <div class="feat"><span class="ft">Maestria nelle Armi</span>
-          <div class="fd">Vex (spada) e Rallentare (giavellotto).</div></div>
+        <h2 class="card-title">Privilegi di Classe &amp; Aure</h2>
+        <div class="feat pressable" data-detail-title="Aura di Protezione" data-detail-body="Tu e gli alleati nell'aura (3 m) +3 (CAR) a tutti i TS.">
+          <div class="feat-head"><span class="ft">Aura di Protezione</span><span class="tag g">3 m</span></div>
+          <div class="fd">+3 (CAR) a tutti i TS per te e alleati entro 3 m.</div>
+        </div>
+        <div class="feat pressable" data-detail-title="Aura di Devozione" data-detail-body="Tu e gli alleati nell'aura (3 m) siete immuni ad Affascinato.">
+          <div class="feat-head"><span class="ft">Aura di Devozione</span><span class="tag g">3 m</span></div>
+          <div class="fd">Immuni ad Affascinato entro 3 m.</div>
+        </div>
+        <div class="feat pressable" data-detail-title="Destriero Fedele" data-detail-body="Trova Destriero sempre preparata; 1 lancio gratis/riposo lungo.">
+          <div class="feat-head"><span class="ft">Destriero Fedele</span></div>
+          <div class="fd">Trova Destriero sempre preparata; 1 gratis/riposo lungo.</div>
+        </div>
+        <div class="feat pressable" data-detail-title="Maestria nelle Armi" data-detail-body="Vex (spada) e Rallentare (giavellotto).">
+          <div class="feat-head"><span class="ft">Maestria nelle Armi</span></div>
+          <div class="fd">Vex (spada) e Rallentare (giavellotto).</div>
+        </div>
+        <div class="feat pressable" data-detail-title="Arma Sacra" data-detail-body="Per 10 min +3 (CAR) al colpire con arma da mischia, danni Radiosi a scelta, luce intensa 6 m.">
+          <div class="feat-head"><span class="ft">Arma Sacra</span><span class="tag g">CD</span></div>
+          <div class="fd">+3 colpire, danni Radiosi, luce 6 m per 10 min.</div>
+        </div>
+        <div class="feat pressable" data-detail-title="Percezione Divina" data-detail-body="Per 10 min localizzi Celestiali, Immondi, Non Morti entro 18 m e luoghi consacrati/profanati.">
+          <div class="feat-head"><span class="ft">Percezione Divina</span><span class="tag">CD</span></div>
+          <div class="fd">Individua tipi ultraterreni entro 18 m per 10 min.</div>
+        </div>
       </div>
-
       <div class="card">
-        <h2>Tratti Dragonide d'Oro</h2>
-        <div class="feat"><span class="ft">Soffio (Fuoco)</span><span class="tag c">3 usi/rip. lungo</span>
-          <div class="fd">In sostituzione di un attacco: cono 4,5 m o linea 9 m. TS DES <b>CD 13</b>, <b>2d10</b> fuoco (metà se supera).</div></div>
-        <div class="feat"><span class="ft">Resistenza al Danno</span>
-          <div class="fd">Resistenza ai danni da <b>Fuoco</b>.</div></div>
-        <div class="feat"><span class="ft">Volo Draconico</span><span class="tag c">1/rip. lungo</span>
-          <div class="fd">Az. bonus: ali spettrali, velocità di volo 9 m per 10 min.</div></div>
-        <div class="feat"><span class="ft">Scurovisione</span>
-          <div class="fd">18 metri.</div></div>
-      </div>
-
-      <div class="card">
-        <h2>Incantesimi <small>recupero: riposo lungo</small></h2>
-        <div class="slots" style="font-style:italic;color:var(--ink-soft);font-size:11.5px;margin-bottom:9px">Slot: 1&deg; &times;4 &middot; 2&deg; &times;3 &mdash; segnali nel riquadro <b>Risorse &amp; Usi</b>.</div>
-        <div class="spell free"><span class="lv">★</span><span><a class="spell-link" href="#spell-punizione-divina" data-spell="punizione-divina">Punizione Divina</a><span class="spell-sep"> · </span><a class="spell-link" href="#spell-trova-destriero" data-spell="trova-destriero">Trova Destriero</a></span></div>
-        <div class="spell free"><span class="lv">★</span><span><a class="spell-link" href="#spell-protezione-mal-bene" data-spell="protezione-mal-bene">Prot. dal Male e dal Bene</a><span class="spell-sep"> · </span><a class="spell-link" href="#spell-scudo-della-fede" data-spell="scudo-della-fede">Scudo della Fede</a></span></div>
-        <div class="spell free"><span class="lv">★</span><span><a class="spell-link" href="#spell-aiuto" data-spell="aiuto">Aiuto</a><span class="spell-sep"> · </span><a class="spell-link" href="#spell-zona-di-verita" data-spell="zona-di-verita">Zona di Verità</a> <span class="ctx">(Giuramento)</span></span></div>
-        <div style="height:6px"></div>
-        <div class="spell"><span class="lv">1</span><a class="spell-link" href="#spell-benedizione" data-spell="benedizione">Benedizione <span class="ctx">(C)</span></a></div>
-        <div class="spell"><span class="lv">1</span><a class="spell-link" href="#spell-comando" data-spell="comando">Comando</a></div>
-        <div class="spell"><span class="lv">1</span><a class="spell-link" href="#spell-cura-ferite" data-spell="cura-ferite">Cura Ferite</a></div>
-        <div class="spell"><span class="lv">1</span><a class="spell-link" href="#spell-punizione-ardente" data-spell="punizione-ardente">Punizione Ardente <span class="ctx">(no C)</span></a></div>
-        <div class="spell"><span class="lv">1</span><a class="spell-link" href="#spell-punizione-collerica" data-spell="punizione-collerica">Punizione Collerica</a></div>
-        <div class="spell"><span class="lv">2</span><a class="spell-link" href="#spell-punizione-radiosa" data-spell="punizione-radiosa">Punizione Radiosa <span class="ctx">(C)</span></a></div>
-        <div class="spell"><span class="lv">2</span><a class="spell-link" href="#spell-ristorare-inferiore" data-spell="ristorare-inferiore">Ristorare Inferiore</a></div>
-        <div class="note">★ = sempre preparati (non contano sul limite). CD/attacco includono la <b>spada +1</b>. Punizione Divina è azione bonus: niente altro incant. a slot nello stesso turno.</div>
+        <h2 class="card-title">Tratti Dragonide d'Oro</h2>
+        <div class="feat pressable" data-detail-title="Soffio (Fuoco)" data-detail-body="In sostituzione di un attacco: cono 4,5 m o linea 9 m. TS DES CD 13, 2d10 fuoco (metà se supera). 3 usi/riposo lungo.">
+          <div class="feat-head"><span class="ft">Soffio (Fuoco)</span><span class="tag c">3/rip. lungo</span></div>
+          <div class="fd">TS DES 13, 2d10 fuoco. Cono o linea.</div>
+        </div>
+        <div class="feat pressable" data-detail-title="Resistenza al Danno" data-detail-body="Resistenza ai danni da Fuoco.">
+          <div class="feat-head"><span class="ft">Resistenza al Danno</span></div>
+          <div class="fd">Resistenza al Fuoco.</div>
+        </div>
+        <div class="feat pressable" data-detail-title="Volo Draconico" data-detail-body="Az. bonus: ali spettrali, volo 9 m per 10 min. 1/riposo lungo.">
+          <div class="feat-head"><span class="ft">Volo Draconico</span><span class="tag c">1/rip. lungo</span></div>
+          <div class="fd">Volo 9 m per 10 min.</div>
+        </div>
+        <div class="feat pressable" data-detail-title="Scurovisione" data-detail-body="Scurovisione 18 metri.">
+          <div class="feat-head"><span class="ft">Scurovisione</span></div>
+          <div class="fd">18 metri.</div>
+        </div>
       </div>
     </div>
+  </section>
 
-  </div>
-
-  <footer>Manuale del Giocatore D&amp;D 2024 &middot; Dragonide d'Oro · build sword-and-board FOR/CAR · poteri spada concessi dal Master</footer>
-</div>
-
-<div class="sheet grimoire" id="grimorio">
-  <header>
-    <div class="crest">
-      <div class="sigil">&#9883;</div>
-      <div>
-        <h1>Grimorio</h1>
-        <div class="subtitle">Incantesimi di Tharion Velnar &middot; Paladino 7</div>
+  <!-- ========== GRIMORIO ========== -->
+  <section id="view-grimorio" class="view-panel hidden">
+    <div class="grim-header">
+      <h2 class="card-title">Grimorio — Tharion Velnar</h2>
+    </div>
+    <div class="grim-stats" aria-label="Statistiche incantesimi">
+      <div class="grim-stat celest">
+        <div class="big" id="grim-dc">15</div>
+        <div class="lab">CD Incantesimi</div>
+      </div>
+      <div class="grim-stat">
+        <div class="big" id="grim-atk">+7</div>
+        <div class="lab">Attacco incant.</div>
+      </div>
+      <div class="grim-stat gold">
+        <div class="big" id="grim-cha">+3</div>
+        <div class="lab">Carisma</div>
       </div>
     </div>
-    <div class="meta">
-      <div><b>CD Incantesimi</b> &nbsp;15</div>
-      <div><b>Attacco</b> &nbsp;+7 &middot; <b>CAR</b> +3</div>
-      <div><b>Slot</b> &nbsp;1&deg; &times;4 &middot; 2&deg; &times;3</div>
+    <div class="card grim-slots">
+      <h2 class="card-title">Slot disponibili</h2>
+      <div class="res-cards">
+        <div class="res-card" data-key="sl1" data-max="4">
+          <div class="rc-top"><span class="rc-name">Slot 1° livello</span><span class="rc-count"></span></div>
+          <div class="segbar"></div>
+        </div>
+        <div class="res-card" data-key="sl2" data-max="3">
+          <div class="rc-top"><span class="rc-name">Slot 2° livello</span><span class="rc-count"></span></div>
+          <div class="segbar"></div>
+        </div>
+      </div>
+      <p class="res-hint">Tocca un segmento per segnare gli slot usati</p>
     </div>
-  </header>
+    <input class="spell-search" id="spell-search" type="search" inputmode="search" placeholder="🔍 Cerca incantesimo…" autocomplete="off">
+    <p class="grim-intro"><b>Promemoria.</b> Un solo incantesimo di concentrazione per volta. Punizione Divina = az. bonus: niente altri incantesimi a slot nello stesso turno.</p>
 
-  <input class="spell-search" id="spell-search" type="search" inputmode="search" placeholder="&#128269; Cerca incantesimo per nome…" autocomplete="off">
+    <nav class="level-tabs" aria-label="Cerchi incantesimo">
+      <button type="button" class="level-tab" data-level="0">Trucchetti</button>
+      <button type="button" class="level-tab active" data-level="1">1° Livello</button>
+      <button type="button" class="level-tab" data-level="2">2° Liv</button>
+      <button type="button" class="level-tab" data-level="3">3°+ Liv</button>
+    </nav>
 
-  <div class="grim-intro">
-    <b>Promemoria.</b> Puoi mantenere la <b>Concentrazione</b> su un solo incantesimo per volta (un nuovo incantesimo di concentrazione interrompe il precedente). La <b>Punizione Divina</b> è un'azione bonus: nel turno in cui la lanci non puoi lanciare altri incantesimi che spendono uno slot. I valori "CD 15" nei tiri salvezza nemici sono già comprensivi del +1 della spada.
-  </div>
+    <div id="spell-list-container" class="spell-list"></div>
+  </section>
 
-  <div class="spell-section">
-  <div class="grim-sec">&#9670; Sempre preparati <span style="font-family:'EB Garamond';font-weight:400;font-size:11px;text-transform:none;letter-spacing:0;color:var(--ink-soft);font-style:italic">(non contano sul limite)</span></div>
-  <div class="grim-grid">
-    <div class="spellcard" id="spell-punizione-divina">
-      <div class="sc-head"><span class="sc-name">Punizione Divina</span><span class="sc-lvl">1&deg; · Evocazione</span></div>
-      <div class="sc-meta">Azione bonus (dopo un colpo in mischia) · Sé · Istantaneo · V</div>
-      <p class="sc-desc">Il bersaglio subisce <b>2d8 radiosi</b> extra dal colpo; <b>+1d8</b> contro Immondi e Non Morti. Con slot di 2&deg; livello diventa <b>3d8</b>. Gratis 1 volta a riposo lungo senza spendere slot.</p>
+  <!-- ========== CAVALCATURA ========== -->
+  <section id="view-cavalcatura" class="view-panel hidden">
+    <div class="steed-name-row">
+      <span class="steed-icon" aria-hidden="true">🐴</span>
+      <input type="text" class="steed-name-input" id="steed-name" value="Destriero Ultraterreno" aria-label="Nome cavalcatura">
     </div>
-    <div class="spellcard" id="spell-protezione-mal-bene">
-      <div class="sc-head"><span class="sc-name">Protezione dal Male e dal Bene</span><span class="sc-lvl">1&deg; · Abiurazione</span></div>
-      <div class="sc-meta">Azione · Tocco · 10 min <span class="conc">CONC</span> · V, S, M <span style="font-style:normal">(acqua santa, consumata)</span></div>
-      <p class="sc-desc">Una creatura volontaria è protetta da Aberrazioni, Celestiali, Elementali, Folletti, Immondi e Non Morti: questi hanno <b>svantaggio</b> ad attaccarla, e lei non può essere posseduta né resa <b>Affascinata o Spaventata</b> da loro (vantaggio ai TS se già soggetta).</p>
-    </div>
-    <div class="spellcard" id="spell-scudo-della-fede">
-      <div class="sc-head"><span class="sc-name">Scudo della Fede</span><span class="sc-lvl">1&deg; · Abiurazione</span></div>
-      <div class="sc-meta">Azione bonus · 18 m · 10 min <span class="conc">CONC</span> · V, S, M</div>
-      <p class="sc-desc">Una creatura a scelta entro gittata ottiene <b>+2 alla CA</b> per tutta la durata.</p>
-    </div>
-    <div class="spellcard" id="spell-trova-destriero">
-      <div class="sc-head"><span class="sc-name">Trova Destriero</span><span class="sc-lvl">2&deg; · Evocazione</span></div>
-      <div class="sc-meta">Azione · 9 m · Istantaneo · V, S</div>
-      <p class="sc-desc">Evochi un destriero ultraterreno fedele (Grande e cavalcabile: cavallo, lupo gigante, alce…). Scegli il tipo: <b>Celestiale, Folletto o Immondo</b>. Usa il blocco "Destriero Ultraterreno"; sostituisce un destriero precedente. Gratis 1/riposo lungo.</p>
-    </div>
-    <div class="spellcard" id="spell-aiuto">
-      <div class="sc-head"><span class="sc-name">Aiuto</span><span class="sc-lvl">2&deg; · Abiurazione</span></div>
-      <div class="sc-meta">Azione · 9 m · 8 ore · V, S, M</div>
-      <p class="sc-desc">Fino a <b>3 creature</b>: i PF massimi e attuali aumentano di <b>5</b> per la durata. Con slot superiori, +5 per ogni livello oltre il 2&deg;.</p>
-    </div>
-    <div class="spellcard" id="spell-zona-di-verita">
-      <div class="sc-head"><span class="sc-name">Zona di Verità</span><span class="sc-lvl">2&deg; · Incantamento</span></div>
-      <div class="sc-meta">Azione · 18 m · 10 min · V, S</div>
-      <p class="sc-desc">Sfera di raggio 4,5 m. Chi entra o inizia il turno nell'area fa <b>TS Carisma (CD 15)</b>: se fallisce non può <b>mentire</b> deliberatamente (può restare evasivo). Sai chi supera o fallisce il tiro.</p>
-    </div>
-  </div>
-  </div>
-
-  <div class="spell-section">
-  <div class="grim-sec">&#9670; Preparati a scelta</div>
-  <div class="grim-grid">
-    <div class="spellcard" id="spell-benedizione">
-      <div class="sc-head"><span class="sc-name">Benedizione</span><span class="sc-lvl">1&deg; · Incantamento</span></div>
-      <div class="sc-meta">Azione · 9 m · 1 min <span class="conc">CONC</span> · V, S, M</div>
-      <p class="sc-desc">Fino a <b>3 creature</b> aggiungono <b>1d4</b> ai tiri per colpire e ai tiri salvezza finché dura. +1 bersaglio per ogni slot oltre il 1&deg;.</p>
-    </div>
-    <div class="spellcard" id="spell-cura-ferite">
-      <div class="sc-head"><span class="sc-name">Cura Ferite</span><span class="sc-lvl">1&deg; · Abiurazione</span></div>
-      <div class="sc-meta">Azione · Tocco · Istantaneo · V, S</div>
-      <p class="sc-desc">La creatura toccata recupera <b>2d8 + 3</b> PF (CAR). La cura aumenta di 2d8 per ogni slot oltre il 1&deg;.</p>
-    </div>
-    <div class="spellcard" id="spell-comando">
-      <div class="sc-head"><span class="sc-name">Comando</span><span class="sc-lvl">1&deg; · Incantamento</span></div>
-      <div class="sc-meta">Azione · 18 m · 1 round · V</div>
-      <p class="sc-desc">Un nemico che capisca una lingua fa <b>TS Saggezza (CD 15)</b>: se fallisce esegue un comando di una parola per il suo prossimo turno. Comandi tipici: <b>Avanzare</b> (allontanati da me), <b>Cadere</b> (diventa Prono e salta il turno), <b>Fuggi</b> (scappa → attacchi di opportunità da tutto il party), <b>Rannicchiati</b> (Prono e salta il turno → vantaggio automatico per chiunque in corpo a corpo), <b>Vieni</b> (avvicinati). <b>Niente concentrazione.</b> +1 bersaglio per slot oltre il 1&deg;.</p>
-    </div>
-    <div class="spellcard" id="spell-punizione-collerica">
-      <div class="sc-head"><span class="sc-name">Punizione Collerica</span><span class="sc-lvl">1&deg; · Negromanzia</span></div>
-      <div class="sc-meta">Az. bonus subito dopo aver colpito · Sé · 1 min · V</div>
-      <p class="sc-desc">+<b>1d6 necrotico</b> al colpo. Il bersaglio fa <b>TS Saggezza (CD 15)</b>: se fallisce è <b>Spaventato</b> da te per tutta la durata — non si può avvicinare a te e ha svantaggio ad attaccare e ai tiri di abilità mentre ti vede. Alla <b>fine di ogni suo turno</b> ripete il TS: se riesce l'incantesimo termina. <i>Nessuna concentrazione. Upcast: +1d6 necrotico per slot oltre il 1°.</i></p>
-    </div>
-    <div class="spellcard" id="spell-punizione-ardente">
-      <div class="sc-head"><span class="sc-name">Punizione Ardente</span><span class="sc-lvl">1&deg; · Evocazione</span></div>
-      <div class="sc-meta">Azione bonus (dopo un colpo in mischia) · Sé · 1 min · V</div>
-      <p class="sc-desc">+1d6 fuoco al colpo. Poi a inizio di ogni suo turno il bersaglio subisce <b>1d6 fuoco</b> e fa <b>TS Costituzione (CD 15)</b>: se riesce, l'incantesimo termina. +1d6 a tutto per ogni slot oltre il 1&deg;. <i>Non richiede concentrazione.</i></p>
-    </div>
-    <div class="spellcard" id="spell-punizione-radiosa">
-      <div class="sc-head"><span class="sc-name">Punizione Radiosa</span><span class="sc-lvl">2&deg; · Evocazione</span></div>
-      <div class="sc-meta">Azione bonus (dopo un colpo in mischia) · Sé · 1 min <span class="conc">CONC</span> · V</div>
-      <p class="sc-desc">+<b>2d8 radiosi</b> al colpo. Il bersaglio emana <b>luce intensa</b> (1,5 m) e luce fioca (1,5 m) in più per tutta la durata: tutti gli attacchi contro di esso hanno <b>vantaggio automatico</b> (non può nascondersi né ricevere mezze coperture). Quando l'incantesimo termina, il bersaglio subisce altri <b>2d8 radiosi</b>. Perfetto per fissare un bersaglio prioritario e dare vantaggio a tutto il party.</p>
-    </div>
-    <div class="spellcard" id="spell-ristorare-inferiore">
-      <div class="sc-head"><span class="sc-name">Ristorare Inferiore</span><span class="sc-lvl">2&deg; · Abiurazione</span></div>
-      <div class="sc-meta">Azione bonus · Tocco · Istantaneo · V, S</div>
-      <p class="sc-desc">Rimuovi dalla creatura toccata <b>una</b> condizione tra: <b>Accecato, Assordato, Paralizzato o Avvelenato</b>.</p>
-    </div>
-  </div>
-  </div>
-
-  <div class="grim-sec">&#9670; Trova Destriero &mdash; il Destriero Ultraterreno</div>
-  <div class="steed-block" id="destriero">
-
-    <div class="steed-hp-row">
-      <div class="steed-hp-top">
-        <span class="lbl"><b>&#10084; Punti Ferita Destriero</b></span>
-        <span class="hp-val"><span id="pv-steedhp">25</span><span class="hp-max"> / 25</span></span>
+    <div class="card hp-combat-card steed-hp-card">
+      <div class="hp-top">
+        <span class="hp-title"><span class="steed-hp-icon" aria-hidden="true">🐴</span> Punti Ferita</span>
+        <span class="hp-val"><span id="pv-steedhp">25</span><span class="hp-max" id="steed-hp-max"> / 25</span></span>
       </div>
       <div class="hp-bar-track"><div class="hp-bar-fill" id="steed-bar-fill" style="width:100%"></div></div>
       <div class="hp-actions">
-        <button class="pbtn step" onclick="adjustPool('steedhp',-1)">&minus;1</button>
-        <button class="pbtn step" onclick="adjustPool('steedhp',1)">+1</button>
-        <input class="hp-in" id="steed-hp-in" type="number" min="0" inputmode="numeric" placeholder="quantità">
+        <button type="button" class="pbtn step" id="steed-minus" aria-label="−1 PF destriero">−1</button>
+        <button type="button" class="pbtn step" id="steed-plus" aria-label="+1 PF destriero">+1</button>
+        <input class="hp-in" id="steed-hp-in" type="number" min="0" inputmode="numeric" placeholder="quantità" aria-label="Quantità PF destriero">
         <div class="hp-dmgheal">
-          <button class="pbtn dmg" onclick="applySteedHP(-1)">Danno</button>
-          <button class="pbtn heal" onclick="applySteedHP(1)">Cura</button>
+          <button type="button" class="pbtn dmg" id="steed-dmg">Danno</button>
+          <button type="button" class="pbtn heal" id="steed-heal">Cura</button>
         </div>
       </div>
     </div>
-
-    <div class="steed-core">
-      <div class="steed-mini-stats">
-        <div class="stat"><div class="big">12</div><div class="lab">Classe Armatura</div></div>
-        <div class="stat"><div class="big">18 m</div><div class="lab">Velocità</div></div>
-        <div class="stat"><div class="big">+3</div><div class="lab">Bonus Comp.</div></div>
-      </div>
-      <div class="fd" style="margin-bottom:5px"><b>Caratteristiche</b> (lanciato a 2&deg; livello, Grande, tipo a scelta):</div>
+    <div class="steed-mini-stats">
+      <div class="mini-stat"><div class="big">12</div><div class="lab">Classe Armatura</div></div>
+      <div class="mini-stat"><div class="big">18 m</div><div class="lab">Velocità</div></div>
+      <div class="mini-stat"><div class="big">+3</div><div class="lab">Bonus Comp.</div></div>
+    </div>
+    <div class="card">
+      <h2 class="card-title">Statistiche Base</h2>
       <div class="steed-abil-grid">
         <div class="sa"><span class="sa-n">FOR</span><span class="sa-m">+4</span><span class="sa-s">18</span></div>
         <div class="sa"><span class="sa-n">DES</span><span class="sa-m">+1</span><span class="sa-s">12</span></div>
         <div class="sa"><span class="sa-n">COS</span><span class="sa-m">+2</span><span class="sa-s">14</span></div>
-        <div class="sa"><span class="sa-n">INT</span><span class="sa-m">&minus;2</span><span class="sa-s">6</span></div>
+        <div class="sa"><span class="sa-n">INT</span><span class="sa-m">−2</span><span class="sa-s">6</span></div>
         <div class="sa"><span class="sa-n">SAG</span><span class="sa-m">+1</span><span class="sa-s">12</span></div>
-        <div class="sa"><span class="sa-n">CAR</span><span class="sa-m">&minus;1</span><span class="sa-s">8</span></div>
+        <div class="sa"><span class="sa-n">CAR</span><span class="sa-m">−1</span><span class="sa-s">8</span></div>
       </div>
-      <div class="fd" style="margin-top:7px">PP 11 · Telepatia con te (1,6 km). Volo 18 m solo con slot di 4&deg;+.</div>
-      <div class="fd"><b>Schianto Ultraterreno</b> (azione): <b>+7</b> al colpire (tuo mod. d'attacco incantesimi), portata 1,5 m, <b>1d8+2</b> danni (tipo secondo la forma, vedi sotto).</div>
-      <div class="fd"><b>Legame Vitale:</b> quando recuperi PF da un incantesimo (liv. 1+) e il destriero è entro 1,5 m, recupera i tuoi stessi PF. <b>Combattimento:</b> condivide la tua iniziativa, è una cavalcatura controllata. Scompare a 0 PF o se muori.</div>
+      <p class="note">PP 11 · Telepatia 1,6 km · Volo 18 m con slot 4°+</p>
     </div>
-
+    <h2 class="card-title">Azioni della Cavalcatura</h2>
+    <div class="action-card pressable" data-detail-title="Schianto Ultraterreno" data-detail-body="Schianto Ultraterreno (azione): +7 al colpire, portata 1,5 m, 1d8+2 danni (tipo secondo la forma). Con slot più alti: 1d8 + livello slot.">
+      <div class="action-title">Schianto Ultraterreno</div>
+      <p>Attacco da mischia, +7 al tiro per colpire. Danno: 1d8+2 (tipo secondo forma).</p>
+    </div>
+    <div class="action-card pressable" data-detail-title="Legame Vitale" data-detail-body="Quando recuperi PF da un incantesimo (liv. 1+) e il destriero è entro 1,5 m, recupera i tuoi stessi PF. Condivide la tua iniziativa. Scompare a 0 PF o se muori.">
+      <div class="action-title">Legame Vitale</div>
+      <p>Cura condivisa con incantesimi · iniziativa condivisa · cavalcatura controllata.</p>
+    </div>
     <div class="steed-forms">
-      <div class="steed-form">
+      <div class="steed-form pressable" data-detail-title="Celestiale — Tocco Guaritore" data-detail-body="Tocco Guaritore (az. bonus, ricarica: riposo lungo): una creatura entro 1,5 m recupera 2d8+2 PF.">
         <div class="sf-head"><span class="sf-name">Celestiale</span><span class="tag g">Radioso</span></div>
-        <div class="fd"><b>Tocco Guaritore</b> (az. bonus, ricarica: riposo lungo): una creatura entro 1,5 m recupera <b>2d8+2</b> PF.</div>
+        <p class="fd">Tocco Guaritore: 2d8+2 PF (az. bonus, 1/rip. lungo)</p>
       </div>
-      <div class="steed-form">
-        <div class="sf-head"><span class="sf-name">Folletto <i>(Fey)</i></span><span class="tag">Psichico</span></div>
-        <div class="fd"><b>Passo Fatato</b> (az. bonus, ricarica: riposo lungo): il destriero si teletrasporta (con te in sella) in uno spazio libero entro 18 m.</div>
+      <div class="steed-form pressable" data-detail-title="Folletto — Passo Fatato" data-detail-body="Passo Fatato (az. bonus, ricarica: riposo lungo): teletrasporto entro 18 m con te in sella.">
+        <div class="sf-head"><span class="sf-name">Folletto (Fey)</span><span class="tag">Psichico</span></div>
+        <p class="fd">Passo Fatato: teletrasporto 18 m (az. bonus, 1/rip. lungo)</p>
       </div>
-      <div class="steed-form">
-        <div class="sf-head"><span class="sf-name">Immondo <i>(Fiend)</i></span><span class="tag c">Necrotico</span></div>
-        <div class="fd"><b>Sguardo Maligno</b> (az. bonus, ricarica: riposo lungo): una creatura entro 18 m fa <b>TS Saggezza CD 15</b> o è <b>Spaventata</b> fino alla fine del tuo prossimo turno.</div>
-      </div>
-    </div>
-
-    <div class="notes-hint" style="margin-top:8px">Con slot più alti: CA = 10 + livello slot · PF max = 5 + 10 × livello · Schianto = 1d8 + livello · Cura = 2d8 + livello · Volo da 4&deg;+.</div>
-  </div>
-
-  <footer>Descrizioni riassunte dal Manuale del Giocatore D&amp;D 2024 · per uso al tavolo</footer>
-</div>
-
-<div class="sheet treasury" id="tesoreria">
-  <header>
-    <div class="crest">
-      <div class="sigil">&#9878;</div>
-      <div>
-        <h1>Tesoreria</h1>
-        <div class="subtitle">Cassa Comune del gruppo &amp; bottino</div>
+      <div class="steed-form pressable" data-detail-title="Immondo — Sguardo Maligno" data-detail-body="Sguardo Maligno (az. bonus, ricarica: riposo lungo): TS Saggezza CD 15 o Spaventata fino al tuo prossimo turno.">
+        <div class="sf-head"><span class="sf-name">Immondo (Fiend)</span><span class="tag c">Necrotico</span></div>
+        <p class="fd">Sguardo Maligno: TS Sag CD 15 o Spaventata (az. bonus, 1/rip. lungo)</p>
       </div>
     </div>
-    <div class="meta">
-      <div><b>Conversioni</b></div>
-      <div>1 MP = 10 MO</div>
-      <div>1 MO = 10 MA = 100 MR</div>
+    <p class="steed-note">Con slot più alti: CA = 10 + livello · PF max = 5 + 10×livello · Volo da 4°+</p>
+  </section>
+
+  <!-- ========== TESORERIA ========== -->
+  <section id="view-tesoreria" class="view-panel hidden">
+    <nav class="subtabs" aria-label="Sotto-tab Tesoreria">
+      <button type="button" class="subtab active" data-subtab="cassa">Cassa Comune</button>
+      <button type="button" class="subtab" data-subtab="party">Bottino Party</button>
+      <button type="button" class="subtab" data-subtab="sacca">Sacca</button>
+    </nav>
+
+    <div class="carry-bar-block">
+      <div class="carry-label">
+        <span><b>Capacità di carico massima</b></span>
+        <span id="carry-label-val">0 / 280 kg</span>
+      </div>
+      <div class="carry-bar-track"><div class="carry-bar-fill" id="carry-bar-fill" style="width:0%"></div></div>
     </div>
-  </header>
 
-  <div class="grim-sec">&#9670; Cassa Comune &mdash; monete</div>
-  <div class="coin-band">
-    <div class="coin pt"><input class="cv-in" id="coin-mp" type="number" min="0" inputmode="numeric" value="10"><div class="cl">Platino · MP</div></div>
-    <div class="coin au"><input class="cv-in" id="coin-mo" type="number" min="0" inputmode="numeric" value="4696"><div class="cl">Oro · MO</div></div>
-    <div class="coin ag"><input class="cv-in" id="coin-ma" type="number" min="0" inputmode="numeric" value="250"><div class="cl">Argento · MA</div></div>
-    <div class="coin cu"><input class="cv-in" id="coin-mr" type="number" min="0" inputmode="numeric" value="928"><div class="cl">Rame · MR</div></div>
-  </div>
-  <div class="total-line">Valore monete convertito: <b id="coin-value">&asymp; 4.830 MO</b></div>
-  <div class="total-line" style="margin-top:3px">Peso delle monete: <b id="coin-weight">&asymp; 53,4 kg</b> <span style="font-style:italic">(50 monete = ~0,45 kg)</span></div>
-
-  <div class="grim-sec">&#9670; Pozioni &amp; Effetti <span style="font-family:'EB Garamond';font-weight:400;font-size:11px;text-transform:none;letter-spacing:0;color:var(--ink-soft);font-style:italic">(tocca per modificare)</span></div>
-  <div class="edit-list" id="potion-list"></div>
-  <button class="pbtn edit-add" onclick="addPotion()">&#10133; Aggiungi pozione</button>
-
-  <div class="grim-sec">&#9670; Oggetti &amp; valori <span style="font-family:'EB Garamond';font-weight:400;font-size:11px;text-transform:none;letter-spacing:0;color:var(--ink-soft);font-style:italic">(tutto ciò che trovate in avventura)</span></div>
-  <div class="edit-list" id="item-list"></div>
-  <button class="pbtn edit-add" onclick="addItem()">&#10133; Aggiungi oggetto</button>
-
-  <div class="total-line" style="margin-top:14px;font-size:14px">Patrimonio stimato del gruppo: <b>&asymp; 7.830 MO</b> <span style="font-style:italic">(monete + oggetti &amp; valori, esclusi oggetti da stimare)</span></div>
-
-  <footer>Tesoreria condivisa &middot; aggiorna i totali dopo vendite e spese</footer>
-</div>
-
-<div class="sheet notes-page" id="diario">
-  <header>
-    <div class="crest">
-      <div class="sigil">&#9998;</div>
-      <div>
-        <h1>Diario</h1>
-        <div class="subtitle">Appunti di sessione &middot; Tharion Velnar</div>
+    <div class="subpanel active" data-subpanel="cassa">
+      <div class="card">
+        <h2 class="card-title">Monete totali del gruppo</h2>
+        <div class="coin-band">
+          <div class="coin pt"><input class="cv-in" id="coin-mp" type="number" min="0" inputmode="numeric" value="10"><div class="cl">MP</div></div>
+          <div class="coin au"><input class="cv-in" id="coin-mo" type="number" min="0" inputmode="numeric" value="4696"><div class="cl">MO</div></div>
+          <div class="coin ag"><input class="cv-in" id="coin-ma" type="number" min="0" inputmode="numeric" value="250"><div class="cl">MA</div></div>
+          <div class="coin cu"><input class="cv-in" id="coin-mr" type="number" min="0" inputmode="numeric" value="928"><div class="cl">MR</div></div>
+        </div>
+        <p class="total-line">Valore monete convertito: <b id="coin-value">≈ 4.830 MO</b></p>
+        <p class="total-line">Peso monete: <b id="coin-weight">≈ 53,4 kg</b> <span class="coin-weight-note">(50 monete ≈ 0,45 kg)</span></p>
       </div>
     </div>
-    <div class="meta">
-      <div><b>Salvataggio</b></div>
-      <div>automatico</div>
+
+    <div class="subpanel" data-subpanel="party">
+      <div class="loot-sec-head">
+        <div class="loot-sec-title">◆ Oggetti &amp; Valori</div>
+        <div class="loot-sec-hint">(tutto ciò che trovate in avventura)</div>
+      </div>
+      <div class="edit-list" id="party-list"></div>
     </div>
-  </header>
-  <div class="notes-hint">Scrivi qui i tuoi appunti durante la sessione: eventi, PNG, indizi, missioni. Vengono salvati da soli a ogni modifica.</div>
-  <textarea class="notes-area" id="notes-area" placeholder="Sessione del…&#10;&#10;• "></textarea>
-  <footer>Diario di gioco &middot; il testo resta salvato sul dispositivo</footer>
-</div>
-<script>
-(function(){
-  var POOLMAX={loh:35,hp:60,steedhp:25};
-  var spent={}, pools={loh:35,hp:60,steedhp:25};
-  var coins={mp:10,mo:4696,ma:250,mr:928};
-  var notes='';
-  var potions=[{name:'Pozione di Cura',desc:'Recupera 2d4+2 PF',qty:1}];
-  var items=[
-    {name:'Statuetta — testa di drago nero',desc:"Oggetto d'arte; valore da stimare/vendere.",qty:1},
-    {name:'Rotolo di velluto',desc:'Stoffa pregiata da rivendere.',qty:25},
-    {name:'Gemma piccola e chiara',desc:'1 pietra limpida; valore da stimare.',qty:1},
-    {name:'Tesoro della cassa (culto del drago)',desc:'≈ 3.000 MO di valore complessivo.',qty:1},
-    {name:'Tunica del Mago Rosso di Thay',desc:'Chi la indossa è specializzato nella scuola di Invocazione (effetto da confermare col Master).',qty:1}
-  ];
-  var KEY='tharion-velnar-sheet';
 
-  function persist(){
-    var data=JSON.stringify({spent:spent,pools:pools,coins:coins,notes:notes,potions:potions,items:items});
-    var saved=false;
-    try{
-      if(window.storage&&typeof window.storage.set==='function'){
-        var p=window.storage.set(KEY,data,false);
-        if(p&&typeof p.then==='function'){ p.then(function(){},function(){}); }
-        saved=true;
-      }
-    }catch(e){}
-    try{ window.localStorage&&window.localStorage.setItem(KEY,data); }catch(e){}
-  }
-  function migrateLoot(it){
-    return {name:it.name||'',desc:(it.desc!=null?it.desc:it.effect)||'',qty:it.qty==null?1:it.qty};
-  }
-  function applyData(d){
-    if(!d) return;
-    spent=d.spent||{}; pools=Object.assign({loh:35,hp:60,steedhp:25},d.pools||{});
-    coins=Object.assign({mp:10,mo:4696,ma:250,mr:928},d.coins||{});
-    notes=(typeof d.notes==='string')?d.notes:notes;
-    potions=Array.isArray(d.potions)?d.potions.map(migrateLoot):potions;
-    items=Array.isArray(d.items)?d.items.map(migrateLoot):items;
-    renderAll();
-  }
-  function restore(){
-    renderAll();           // draw pips right away, no dependency on storage
-    // 1) try browser localStorage (instant, persists per device/browser)
-    try{
-      var ls=window.localStorage&&window.localStorage.getItem(KEY);
-      if(ls){ applyData(JSON.parse(ls)); }
-    }catch(e){}
-    // 2) also try the artifact persistent storage; if present it overrides
-    try{
-      if(window.storage&&typeof window.storage.get==='function'){
-        var p=window.storage.get(KEY,false);
-        if(p&&typeof p.then==='function'){
-          p.then(function(r){ if(r&&r.value){ try{ applyData(JSON.parse(r.value)); }catch(e){} } },function(){});
-        }
-      }
-    }catch(e){}
-  }
+    <div class="subpanel" data-subpanel="sacca">
+      <div class="loot-sec-head">
+        <div class="loot-sec-title">◆ Pozioni &amp; Effetti</div>
+        <div class="loot-sec-hint">(tocca per modificare)</div>
+      </div>
+      <div class="edit-list" id="personal-list"></div>
+    </div>
+  </section>
 
-  function renderUses(card){
-    var k=card.getAttribute('data-key'), max=+card.getAttribute('data-max'),
-        sp=spent[k]||0, avail=Math.max(0,max-sp);
-    var cnt=card.querySelector('.rc-count'); if(cnt){ cnt.textContent=avail+' / '+max; }
-    var bar=card.querySelector('.segbar'); if(!bar) return;
-    bar.innerHTML='';
-    for(var i=0;i<max;i++){
-      var seg=document.createElement('div'); seg.className='seg'+(i<avail?'':' empty');
-      (function(idx){
-        seg.onclick=function(){
-          var cur=avail===idx+1?idx:idx+1;
-          spent[k]=Math.max(0,max-cur); renderUses(card); persist();
-        };
-      })(i);
-      bar.appendChild(seg);
-    }
-  }
-  function renderHpBar(val,max,txtId,fillId){
-    var pct=Math.max(0,Math.min(100,val/max*100));
-    var txt=document.getElementById(txtId); if(txt){ txt.textContent=val; }
-    var fill=document.getElementById(fillId);
-    if(fill){
-      fill.style.width=pct+'%';
-      fill.classList.remove('mid','low');
-      if(pct<=10){ fill.classList.add('low'); } else if(pct<=50){ fill.classList.add('mid'); }
-    }
-  }
-  function renderPool(k){
-    if(k==='hp'){ renderHpBar(pools.hp,POOLMAX.hp,'pv-hp','hp-bar-fill'); return; }
-    if(k==='steedhp'){ renderHpBar(pools.steedhp,POOLMAX.steedhp,'pv-steedhp','steed-bar-fill'); return; }
-    if(k==='loh'){
-      var lv=document.getElementById('pv-loh'); if(lv){ lv.textContent=pools.loh; }
-      var lf=document.getElementById('loh-bar-fill');
-      if(lf){ lf.style.width=Math.max(0,Math.min(100,pools.loh/POOLMAX.loh*100))+'%'; }
-      return;
-    }
-    var el=document.getElementById('pv-'+k);
-    if(el){ el.innerHTML=(pools[k])+' <small>/ '+POOLMAX[k]+' PF</small>'; }
-  }
-  function bindLohBar(){
-    var track=document.getElementById('loh-bar-track');
-    if(!track || track._bound) return;
-    track._bound=true;
-    var active=false, decided=false, startX=0, startY=0, pid=null;
-    function setFromX(clientX){
-      var r=track.getBoundingClientRect();
-      var pct=Math.max(0,Math.min(1,(clientX-r.left)/r.width));
-      pools.loh=Math.round(pct*POOLMAX.loh); renderPool('loh'); persist();
-    }
-    track.addEventListener('pointerdown',function(e){
-      active=true; decided=false; startX=e.clientX; startY=e.clientY; pid=e.pointerId;
-    });
-    track.addEventListener('pointermove',function(e){
-      if(!active) return;
-      if(!decided){
-        var dx=Math.abs(e.clientX-startX), dy=Math.abs(e.clientY-startY);
-        if(dx<6 && dy<6) return;            // movimento minimo: aspetta
-        if(dy>dx){ active=false; return; }  // verticale → lascia scorrere la pagina
-        decided=true; try{ track.setPointerCapture(pid); }catch(_){}
-      }
-      setFromX(e.clientX); e.preventDefault();
-    });
-    track.addEventListener('pointerup',function(e){
-      if(active && !decided){ setFromX(e.clientX); }  // tocco singolo → imposta
-      active=false; decided=false;
-    });
-    track.addEventListener('pointercancel',function(){ active=false; decided=false; });
-  }
-  function fmt(n){ return n.toLocaleString('it-IT'); }
-  function renderCoins(){
-    ['mp','mo','ma','mr'].forEach(function(k){
-      var inp=document.getElementById('coin-'+k);
-      if(inp && document.activeElement!==inp){ inp.value=coins[k]; }
-    });
-    var total=coins.mp+coins.mo+coins.ma+coins.mr;
-    var gp=coins.mp*10+coins.mo+coins.ma/10+coins.mr/100;
-    var kg=total/50*0.4536;
-    var v=document.getElementById('coin-value'); if(v){ v.innerHTML='&asymp; '+fmt(Math.round(gp))+' MO'; }
-    var w=document.getElementById('coin-weight'); if(w){ w.innerHTML='&asymp; '+kg.toLocaleString('it-IT',{maximumFractionDigits:1})+' kg <span style="font-style:italic;font-weight:400">('+fmt(total)+' monete)</span>'; }
-  }
-  function bindCoins(){
-    ['mp','mo','ma','mr'].forEach(function(k){
-      var inp=document.getElementById('coin-'+k);
-      if(inp && !inp._bound){
-        inp._bound=true;
-        inp.addEventListener('input',function(){
-          var n=parseInt(inp.value,10); coins[k]=isNaN(n)||n<0?0:n; renderCoins(); persist();
-        });
-      }
-    });
-  }
-  window.stepCoin=function(k,d){ coins[k]=Math.max(0,(coins[k]||0)+d); renderCoins(); persist(); };
-  function bindNotes(){
-    var ta=document.getElementById('notes-area');
-    if(ta){
-      if(document.activeElement!==ta){ ta.value=notes; }
-      if(!ta._bound){ ta._bound=true; ta.addEventListener('input',function(){ notes=ta.value; persist(); }); }
-    }
-  }
-  function renderEditableList(containerId,arr,namePh,descPh){
-    var list=document.getElementById(containerId);
-    if(!list) return;
-    list.innerHTML='';
-    arr.forEach(function(it,i){
-      var row=document.createElement('div'); row.className='edit-row';
-      var main=document.createElement('div'); main.className='edit-main';
-      var nameEl=document.createElement('div'); nameEl.className='edit-name';
-      nameEl.contentEditable='true'; nameEl.setAttribute('data-ph',namePh); nameEl.textContent=it.name||'';
-      var descEl=document.createElement('div'); descEl.className='edit-desc';
-      descEl.contentEditable='true'; descEl.setAttribute('data-ph',descPh); descEl.textContent=it.desc||'';
-      main.appendChild(nameEl); main.appendChild(descEl);
-      if(it.qty==null) it.qty=1;
-      var qtyWrap=document.createElement('div'); qtyWrap.className='edit-qty';
-      var minus=document.createElement('button'); minus.className='qbtn'; minus.type='button'; minus.innerHTML='&minus;';
-      var qval=document.createElement('span'); qval.className='qval'; qval.textContent='×'+it.qty;
-      var plus=document.createElement('button'); plus.className='qbtn'; plus.type='button'; plus.innerHTML='+';
-      minus.onclick=function(){ it.qty=Math.max(0,it.qty-1); qval.textContent='×'+it.qty; persist(); };
-      plus.onclick=function(){ it.qty=it.qty+1; qval.textContent='×'+it.qty; persist(); };
-      qtyWrap.appendChild(minus); qtyWrap.appendChild(qval); qtyWrap.appendChild(plus);
-      var del=document.createElement('button'); del.className='pbtn edit-del'; del.innerHTML='&#10005;';
-      del.onclick=function(){ arr.splice(i,1); renderEditableList(containerId,arr,namePh,descPh); persist(); };
-      nameEl.addEventListener('input',function(){ it.name=nameEl.textContent; persist(); });
-      descEl.addEventListener('input',function(){ it.desc=descEl.textContent; persist(); });
-      row.appendChild(main); row.appendChild(qtyWrap); row.appendChild(del);
-      list.appendChild(row);
-    });
-  }
-  window.addPotion=function(){
-    potions.push({name:'',desc:'',qty:1});
-    renderEditableList('potion-list',potions,'Nome pozione','Effetto / note'); persist();
-    var rows=document.querySelectorAll('#potion-list .edit-name'); var last=rows[rows.length-1];
-    if(last){ last.focus(); }
-  };
-  window.addItem=function(){
-    items.push({name:'',desc:'',qty:1});
-    renderEditableList('item-list',items,'Nome oggetto','Descrizione / valore'); persist();
-    var rows=document.querySelectorAll('#item-list .edit-name'); var last=rows[rows.length-1];
-    if(last){ last.focus(); }
-  };
-  function renderAll(){
-    Array.prototype.forEach.call(document.querySelectorAll('.res-card'),renderUses);
-    Object.keys(POOLMAX).forEach(renderPool);
-    bindCoins(); renderCoins(); bindNotes(); bindLohBar();
-    renderEditableList('potion-list',potions,'Nome pozione','Effetto / note');
-    renderEditableList('item-list',items,'Nome oggetto','Descrizione / valore');
-  }
-  window.adjustPool=function(k,d){ pools[k]=Math.max(0,Math.min(POOLMAX[k],(pools[k]||0)+d)); renderPool(k); persist(); };
-  window.applyHP=function(sign){
-    var inp=document.getElementById('hp-in'); var n=parseInt(inp.value,10);
-    if(!isNaN(n)&&n!==0){ adjustPool('hp',sign*Math.abs(n)); }
-    inp.value='';
-  };
-  window.applySteedHP=function(sign){
-    var inp=document.getElementById('steed-hp-in'); var n=parseInt(inp.value,10);
-    if(!isNaN(n)&&n!==0){ adjustPool('steedhp',sign*Math.abs(n)); }
-    inp.value='';
-  };
-  window.rollHD=function(){};
-  window.longRest=function(){
-    spent={}; pools={loh:35,hp:60,steedhp:25}; renderAll();
-    persist();
-  };
-  window.shortRest=function(){ spent.cd=Math.max(0,(spent.cd||0)-1); renderAll(); persist(); };
+  <!-- ========== DIARIO ========== -->
+  <section id="view-diario" class="view-panel hidden">
+    <nav class="subtabs" aria-label="Sotto-tab Diario">
+      <button type="button" class="subtab active" data-subtab="cronache">Cronache</button>
+      <button type="button" class="subtab" data-subtab="png">PNG &amp; Luoghi</button>
+      <button type="button" class="subtab" data-subtab="quest">Quest</button>
+    </nav>
 
+    <div class="subpanel active" data-subpanel="cronache">
+      <div class="accordion" id="sessions-accordion"></div>
+    </div>
 
-  if(document.readyState!=='loading') restore();
-  else document.addEventListener('DOMContentLoaded',restore);
-})();
+    <div class="subpanel" data-subpanel="png">
+      <div class="edit-list" id="png-list"></div>
+    </div>
 
-// --- Ispirazione ---
-(function(){
-  var IKEY='tharion-insp';
-  var hasInsp=false;
-  try{ hasInsp=localStorage.getItem(IKEY)==='1'; }catch(e){}
+    <div class="subpanel" data-subpanel="quest">
+      <h3 class="quest-section-title">Missioni Attive</h3>
+      <div class="edit-list" id="quest-active"></div>
+      <h3 class="quest-section-title">Missioni Completate</h3>
+      <div class="edit-list" id="quest-completed"></div>
+    </div>
+  </section>
 
-  function renderInsp(){
-    var cell=document.getElementById('insp-cell');
-    var el=document.getElementById('insp-display');
-    var sub=document.getElementById('insp-sub');
-    if(!el) return;
-    if(hasInsp){
-      el.textContent='★'; el.style.color='var(--gold-bright)';
-      if(sub) sub.textContent='ATTIVA · vantaggio';
-      if(cell){ cell.style.background='linear-gradient(180deg,rgba(201,164,67,.28),rgba(168,132,44,.12))'; cell.style.border='1.5px solid var(--gold)'; }
-    } else {
-      el.textContent='☆'; el.style.color='var(--ink-soft)';
-      if(sub) sub.textContent='nessuna';
-      if(cell){ cell.style.background=''; cell.style.border=''; }
-    }
-  }
-  window.toggleInsp=function(){
-    hasInsp=!hasInsp; renderInsp();
-    try{ localStorage.setItem(IKEY,hasInsp?'1':'0'); }catch(e){}
-  };
+</main>
 
-  if(document.readyState!=='loading') renderInsp();
-  else document.addEventListener('DOMContentLoaded',renderInsp);
-})();
-
-// --- Ricerca incantesimi + navigazione dalla scheda ---
-(function(){
-  var input=document.getElementById('spell-search');
-  var sections=Array.prototype.slice.call(document.querySelectorAll('.spell-section'));
-  var focusTimer=null;
-
-  function filterSpells(q){
-    sections.forEach(function(sec){
-      var anyVisible=false;
-      Array.prototype.forEach.call(sec.querySelectorAll('.spellcard'),function(card){
-        var name=(card.querySelector('.sc-name')||{}).textContent||'';
-        var match=!q||name.toLowerCase().indexOf(q)!==-1;
-        card.classList.toggle('hidden',!match);
-        if(match) anyVisible=true;
-      });
-      sec.classList.toggle('hidden',!anyVisible);
-    });
-  }
-
-  function clearSpellFilter(){
-    if(input){ input.value=''; }
-    filterSpells('');
-  }
-
-  function highlightSpell(card){
-    Array.prototype.forEach.call(document.querySelectorAll('.spellcard.spell-focus'),function(el){
-      el.classList.remove('spell-focus');
-    });
-    card.classList.add('spell-focus');
-    clearTimeout(focusTimer);
-    focusTimer=setTimeout(function(){ card.classList.remove('spell-focus'); },2200);
-  }
-
-  window.goToSpell=function(spellId){
-    var card=document.getElementById('spell-'+spellId);
-    if(!card) return;
-    clearSpellFilter();
-    card.scrollIntoView({behavior:'smooth',block:'center'});
-    highlightSpell(card);
-    if(history.replaceState){
-      history.replaceState(null,'','#spell-'+spellId);
-    } else {
-      location.hash='spell-'+spellId;
-    }
-    var grimLink=document.querySelector('.floatnav a[data-target="grimorio"]');
-    if(grimLink){ grimLink.classList.add('active'); }
-  };
-
-  if(input){
-    input.addEventListener('input',function(){
-      filterSpells(input.value.trim().toLowerCase());
-    });
-  }
-
-  Array.prototype.forEach.call(document.querySelectorAll('a.spell-link[data-spell]'),function(link){
-    link.addEventListener('click',function(ev){
-      ev.preventDefault();
-      goToSpell(link.getAttribute('data-spell'));
-    });
-  });
-
-  function openSpellFromHash(){
-    var hash=(location.hash||'').replace(/^#/,'');
-    if(hash.indexOf('spell-')===0){
-      var id=hash.slice(6);
-      setTimeout(function(){ goToSpell(id); },120);
-    }
-  }
-
-  if(document.readyState!=='loading') openSpellFromHash();
-  else document.addEventListener('DOMContentLoaded',openSpellFromHash);
-  window.addEventListener('hashchange',openSpellFromHash);
-})();
-</script>
-<nav class="floatnav">
-  <a href="#scheda" data-target="scheda"><span class="ic">&#10050;</span><span class="tx">Scheda</span></a>
-  <a href="#grimorio" data-target="grimorio"><span class="ic">&#9883;</span><span class="tx">Grimorio</span></a>
-  <a href="#destriero" data-target="destriero"><span class="ic">&#9831;</span><span class="tx">Destriero</span></a>
-  <a href="#tesoreria" data-target="tesoreria"><span class="ic">&#9878;</span><span class="tx">Tesoreria</span></a>
-  <a href="#diario" data-target="diario"><span class="ic">&#9998;</span><span class="tx">Diario</span></a>
+<nav id="bottom-nav" aria-label="Navigazione principale">
+  <button type="button" class="nav-link active" data-view="scheda"><span class="nav-icon">⚔</span><span>Scheda</span></button>
+  <button type="button" class="nav-link" data-view="grimorio"><span class="nav-icon">📖</span><span>Grimorio</span></button>
+  <button type="button" class="nav-link" data-view="cavalcatura"><span class="nav-icon">🐴</span><span>Cavalcatura</span></button>
+  <button type="button" class="nav-link" data-view="tesoreria"><span class="nav-icon">💰</span><span>Tesoreria</span></button>
+  <button type="button" class="nav-link" data-view="diario"><span class="nav-icon">📜</span><span>Diario</span></button>
 </nav>
-<script>
-(function(){
-  var links=Array.prototype.slice.call(document.querySelectorAll('.floatnav a'));
-  links.forEach(function(a){
-    a.addEventListener('click',function(ev){
-      ev.preventDefault();
-      var el=document.getElementById(a.getAttribute('data-target'));
-      if(el){ el.scrollIntoView({behavior:'smooth',block:'start'}); }
-    });
-  });
-  function setActive(id){
-    links.forEach(function(a){ a.classList.toggle('active',a.getAttribute('data-target')===id); });
-  }
-  if('IntersectionObserver' in window){
-    var obs=new IntersectionObserver(function(entries){
-      entries.forEach(function(e){ if(e.isIntersecting){ setActive(e.target.id); } });
-    },{rootMargin:'-45% 0px -45% 0px',threshold:0});
-    ['scheda','grimorio','destriero','tesoreria','diario'].forEach(function(id){
-      var el=document.getElementById(id); if(el){ obs.observe(el); }
-    });
-  }
 
-  var nav=document.querySelector('.floatnav'), hideTimer=null;
-  function showNav(){
-    nav.classList.remove('nav-hidden');
-    clearTimeout(hideTimer);
-    hideTimer=setTimeout(function(){ nav.classList.add('nav-hidden'); },2200);
-  }
-  ['scroll','touchstart','touchmove','wheel'].forEach(function(ev){
-    window.addEventListener(ev,showNav,{passive:true});
-  });
-  showNav();
-})();
-</script>
+<button type="button" class="fab hidden" id="global-fab" aria-label="Aggiungi">+</button>
+
+<div id="bottom-sheet-overlay" class="hidden" role="dialog" aria-modal="true">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h2 class="sheet-title" id="sheet-title"></h2>
+      <button type="button" class="sheet-close" id="sheet-close" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="sheet-body" id="sheet-body"></div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/hp-bar.js"></script>
+<script src="js/header.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/grimorio.js"></script>
+<script src="js/treasury.js"></script>
+<script src="js/diary.js"></script>
+<script src="js/inspiration.js"></script>
+<script src="js/bottom-sheet.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,140 @@
+.quest-edit-row {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.quest-edit-row .quest-check {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  margin-top: 1px;
+  border: 2px solid var(--border-gold-soft);
+  border-radius: var(--radius-sm);
+  background: var(--bg-principal);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--accent-gold);
+  padding: 0;
+}
+
+.quest-edit-row .quest-check.checked {
+  background: var(--accent-gold);
+  color: var(--bg-principal);
+  border-color: var(--accent-gold);
+}
+
+.quest-edit-row .edit-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.quest-section-title {
+  font-family: var(--font-title);
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: var(--space-4) 0 var(--space-2);
+  letter-spacing: 0.8px;
+}
+
+.quest-section-title:first-of-type {
+  margin-top: 0;
+}
+
+.diary-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  padding: var(--space-6);
+  font-style: italic;
+}
+
+.accordion-item {
+  border: 1px solid var(--border-gold-soft);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  min-height: var(--touch-min);
+  background: var(--bg-principal);
+}
+
+.accordion-header h3 {
+  font-family: var(--font-title);
+  font-size: 14px;
+  color: var(--accent-gold);
+}
+
+.accordion-chevron {
+  color: var(--text-secondary);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.accordion-item.open .accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.accordion-body {
+  display: none;
+  padding: var(--space-3) var(--space-4);
+}
+
+.accordion-item.open .accordion-body {
+  display: block;
+}
+
+.session-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-principal);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.session-title-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--accent-gold);
+  font-family: var(--font-title);
+  font-size: 14px;
+  outline: none;
+}
+
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.png-type {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 11px;
+  min-height: 28px;
+}
