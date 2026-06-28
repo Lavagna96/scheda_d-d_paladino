@@ -55,8 +55,14 @@
           <div class="lab">Iniziativa</div>
           <div class="sub" id="combat-init-note">vant. iniziativa</div>
         </div>
-        <div class="combat-stats-core">
-          <div class="combat-stats-row">
+        <div class="combat-stats-core ac-ds-frame">
+          <div class="ds-frame-title"><span>Tiri Morte</span></div>
+          <button type="button" class="ds-reset" id="death-reset" aria-label="Azzera tiri morte">↺</button>
+          <div class="ac-ds-medallion">
+            <div class="ds-wing">
+              <span class="ds-wing-lab ds-wing-lab-fail">Fall.</span>
+              <div class="ds-pips ds-fail" id="ds-fail-bar" role="group" aria-label="Fallimenti tiri morte"></div>
+            </div>
             <div class="ac-ruby-wrap" aria-label="Classe Armatura">
               <div class="ac-ruby-gem-box">
                 <svg class="ac-ruby-art" viewBox="28 2 80 88" aria-hidden="true" focusable="false">
@@ -116,22 +122,12 @@
                 <span class="ac-ruby-sub" id="combat-ac-note">Piastre + Scudo</span>
               </div>
             </div>
-            <div class="death-saves-simple">
-              <div class="death-saves-head">
-                <span class="death-saves-title">Tiri Morte</span>
-                <button type="button" class="ds-reset" id="death-reset" aria-label="Azzera tiri morte">↺</button>
-              </div>
-              <div class="ds-row">
-                <span class="ds-lab">Fall.</span>
-                <div class="ds-pips ds-fail" id="ds-fail-bar" role="group" aria-label="Fallimenti"></div>
-              </div>
-              <div class="ds-row">
-                <span class="ds-lab">Succ.</span>
-                <div class="ds-pips ds-success" id="ds-success-bar" role="group" aria-label="Successi"></div>
-              </div>
-              <div class="death-status" id="death-status" aria-live="polite"></div>
+            <div class="ds-wing">
+              <span class="ds-wing-lab ds-wing-lab-succ">Succ.</span>
+              <div class="ds-pips ds-success" id="ds-success-bar" role="group" aria-label="Successi tiri morte"></div>
             </div>
           </div>
+          <div class="death-status" id="death-status" aria-live="polite"></div>
         </div>
       </div>
       <div class="card hp-combat-card">

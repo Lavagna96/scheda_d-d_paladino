@@ -40,24 +40,162 @@
   line-height: 1.2;
 }
 
+/* ===== Cartiglio CA + Tiri Morte (medaglione) ===== */
 .combat-stats-core {
   flex: 1;
   min-width: 0;
   position: relative;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-gold);
-  background: var(--bg-stat-tile);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  padding: 21px var(--space-3) var(--space-2);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(158, 9, 34, 0.16), rgba(158, 9, 34, 0) 60%),
+    var(--bg-stat-tile);
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.32),
+    inset 0 0 0 1px rgba(201, 164, 67, 0.16),
+    inset 0 0 26px rgba(158, 9, 34, 0.08);
 }
 
-.combat-stats-row {
+/* anello dorato metallico della cornice */
+.combat-stats-core::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  padding: 2px;
+  background: linear-gradient(145deg, #f2d889 0%, #c9a443 26%, #8a6820 50%, #c9a443 74%, #f2d889 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.ds-frame-title {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  pointer-events: none;
+}
+
+.ds-frame-title span {
+  position: relative;
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  padding: 0 20px;
+}
+
+.ds-frame-title span::before,
+.ds-frame-title span::after {
+  content: "◆";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 6px;
+  color: var(--accent-gold-dim);
+}
+
+.ds-frame-title span::before {
+  left: 4px;
+}
+
+.ds-frame-title span::after {
+  right: 4px;
+}
+
+.ac-ds-medallion {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
 }
 
+/* ali tiri morte: gemme verticali */
+.ds-wing {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.ds-wing-lab {
+  font-family: var(--font-title);
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.ds-wing-lab-fail {
+  color: var(--ruby-bright);
+}
+
+.ds-wing-lab-succ {
+  color: var(--celest-bright);
+}
+
+.ds-pips {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ds-pip {
+  position: relative;
+  width: 28px;
+  height: 24px;
+  min-width: 28px;
+  min-height: 24px;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1.5px solid #8a6820;
+  background: radial-gradient(circle at 50% 32%, #2c2522, #14100e 78%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.7),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.05),
+    0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/* lucentezza cabochon sulle gemme accese */
+.ds-pip.filled::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  width: 8px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: rotate(-18deg);
+}
+
+.ds-fail .ds-pip.filled {
+  border-color: #e8c96a;
+  background: radial-gradient(circle at 42% 30%, #ff7c92 0%, #e8324f 32%, #9e0922 64%, #4a0612 100%);
+  box-shadow:
+    0 0 9px rgba(204, 36, 64, 0.6),
+    inset 0 2px 3px rgba(255, 255, 255, 0.35),
+    inset 0 -2px 3px rgba(74, 6, 18, 0.55);
+}
+
+.ds-success .ds-pip.filled {
+  border-color: #e8c96a;
+  background: radial-gradient(circle at 42% 30%, #86e6ba 0%, #2fae7c 32%, #1a7a55 64%, #0d3a28 100%);
+  box-shadow:
+    0 0 9px rgba(45, 148, 112, 0.55),
+    inset 0 2px 3px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 3px rgba(13, 58, 40, 0.55);
+}
+
+/* ===== gemma CA centrale ===== */
 .ac-ruby-wrap {
   position: relative;
   flex: 0 0 auto;
@@ -67,12 +205,22 @@
 
 .ac-ruby-gem-box {
   position: relative;
-  width: 88px;
-  height: 96px;
+  width: 82px;
+  height: 90px;
   margin: 0 auto;
 }
 
+.ac-ruby-gem-box::before {
+  content: "";
+  position: absolute;
+  inset: -8px -4px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 42%, rgba(255, 120, 140, 0.32), rgba(158, 9, 34, 0) 70%);
+  pointer-events: none;
+}
+
 .ac-ruby-art {
+  position: relative;
   display: block;
   width: 100%;
   height: 100%;
@@ -84,7 +232,7 @@
   top: 46%;
   transform: translate(-50%, -50%);
   font-family: var(--font-title);
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
   color: #fff0dc;
   line-height: 1;
@@ -106,7 +254,7 @@
   font-size: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-secondary);
+  color: var(--accent-gold);
 }
 
 .ac-ruby-sub {
@@ -116,91 +264,27 @@
   font-style: italic;
 }
 
-.death-saves-simple {
-  flex: 1;
-  min-width: 0;
-  max-width: 160px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.death-saves-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.death-saves-title {
-  font-family: var(--font-title);
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-}
-
-.ds-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.ds-lab {
-  flex: 0 0 32px;
-  font-family: var(--font-title);
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: var(--text-secondary);
-}
-
-.death-saves-simple .ds-pips {
-  display: flex;
-  flex: 1;
-  gap: 5px;
-  justify-content: flex-start;
-}
-
-.death-saves-simple .ds-pip {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid var(--border-gold-soft);
-  background: var(--bg-principal);
-  cursor: pointer;
-}
-
-.ds-fail .ds-pip.filled {
-  background: var(--ruby);
-  border-color: var(--ruby-bright);
-}
-
-.ds-success .ds-pip.filled {
-  background: var(--celest);
-  border-color: var(--celest-bright);
-}
-
+/* reset tiri morte */
 .ds-reset {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  z-index: 2;
   width: 22px;
   height: 22px;
   min-width: 22px;
   min-height: 22px;
   padding: 0;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-gold-soft);
   border-radius: 50%;
-  background: var(--bg-principal);
-  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--accent-gold);
   font-size: 12px;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .ds-reset:active {
@@ -214,6 +298,7 @@
   font-weight: 600;
   letter-spacing: 0.3px;
   min-height: 12px;
+  margin-top: var(--space-1);
   text-align: center;
   line-height: 1.2;
 }
