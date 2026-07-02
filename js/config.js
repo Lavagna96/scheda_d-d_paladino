@@ -192,6 +192,12 @@ window.APP_CONFIG = {
   ],
 
   SPELLS: [
+    { id: 'luce', name: 'Luce', level: 0, school: 'Evocazione', always: true,
+      meta: 'Azione · Tocco · 1 ora · V, M',
+      desc: 'Un oggetto toccato (max 3 m di lato) emette luce intensa in un raggio di 6 m e luce fioca per altri 6 m. Colore a scelta. Se l\'oggetto è tenuto o indossato da una creatura ostile, questa lo evita con un TS Destrezza. A volontà, senza slot.' },
+    { id: 'dardo-di-fuoco', name: 'Dardo di Fuoco (Fire Bolt)', level: 0, school: 'Evocazione', always: true,
+      meta: 'Azione · 36 m · Istantaneo · V, S',
+      desc: 'Scagli un dardo di fiamma: attacco con incantesimo a distanza, 2d10 danni da fuoco (al tuo livello). Un oggetto infiammabile colpito prende fuoco se non è indossato o trasportato. A volontà, senza slot.' },
     { id: 'punizione-divina', name: 'Punizione Divina', level: 1, school: 'Evocazione', always: true,
       meta: 'Azione bonus (dopo un colpo in mischia) · Sé · Istantaneo · V',
       desc: 'Il bersaglio subisce 2d8 radiosi extra dal colpo; +1d8 contro Immondi e Non Morti. Con slot di 2° livello diventa 3d8. Gratis 1 volta a riposo lungo senza spendere slot.' },

@@ -25,7 +25,8 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: var(--space-3) var(--space-3) var(--space-4);
+  /* padding-bottom: lascia spazio alla pillola di navigazione fissa */
+  padding: var(--space-3) var(--space-3) calc(var(--nav-height) + var(--space-4));
 }
 
 .view-panel {
@@ -130,7 +131,7 @@ body {
 .fab {
   position: fixed;
   right: var(--space-4);
-  bottom: calc(var(--nav-height) + var(--space-5) + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--nav-height) + var(--space-4));
   width: 56px;
   height: 56px;
   border-radius: var(--radius-pill);

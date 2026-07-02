@@ -69,7 +69,7 @@
         card.innerHTML =
           '<div class="sc-head">' +
             '<span class="sc-name">' + spell.name + (spell.always ? ' ★' : '') + '</span>' +
-            '<span class="sc-lvl">' + spell.level + '° · ' + spell.school + '</span>' +
+            '<span class="sc-lvl">' + (spell.level === 0 ? 'Trucchetto' : spell.level + '°') + ' · ' + spell.school + '</span>' +
           '</div>' +
           '<div class="sc-meta">' + spell.meta.replace(/CONC/g, '<span class="conc">CONC</span>') + '</div>' +
           '<p class="sc-desc">' + spell.desc + '</p>';
