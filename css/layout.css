@@ -1,8 +1,10 @@
 body {
+  /* Shell fissa ancorata all'intero viewport: su iOS standalone evita i vuoti
+     da 100vh/100dvh e blocca il rubber-band del documento. */
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
   overflow: hidden;
   gap: 0;
 }
@@ -25,6 +27,8 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  /* lo scroll interno non propaga il rimbalzo al documento */
+  overscroll-behavior-y: contain;
   /* padding-bottom: lascia spazio alla pillola di navigazione fissa */
   padding: var(--space-3) var(--space-3) calc(var(--nav-height) + var(--space-4));
 }

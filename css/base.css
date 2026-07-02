@@ -12,6 +12,9 @@ html, body {
   max-width: 100%;
   overflow: hidden;
   height: 100%;
+  /* niente rubber-band del documento su iOS: il rimbalzo trascinerebbe
+     anche gli elementi fixed, aprendo un vuoto sotto il menu */
+  overscroll-behavior: none;
 }
 
 body {
