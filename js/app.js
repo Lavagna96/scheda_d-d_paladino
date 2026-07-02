@@ -156,7 +156,36 @@
     });
   }
 
+  function bindViewportGuard() {
+    // iOS standalone: quando la tastiera si apre il sistema trasla il
+    // viewport per mostrare l'input e alla chiusura spesso non lo riporta
+    // giù: la shell (e il menu fixed) resta sollevata con un vuoto sotto.
+    // Riportiamo il pan a zero appena non c'è più un campo attivo.
+    function isTyping() {
+      var ae = document.activeElement;
+
+      return !!ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable);
+    }
+
+    function resetPan() {
+      if (!isTyping() && (window.scrollY !== 0 || window.scrollX !== 0)) {
+        window.scrollTo(0, 0);
+      }
+    }
+
+    window.addEventListener('scroll', resetPan, { passive: true });
+    document.addEventListener('focusout', function () {
+      setTimeout(resetPan, 60);
+    });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', function () {
+        setTimeout(resetPan, 60);
+      });
+    }
+  }
+
   function init() {
+    bindViewportGuard();
     bindNav();
     initSubTabs('#view-scheda');
     initSubTabs('#view-tesoreria');
