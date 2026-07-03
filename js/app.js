@@ -184,8 +184,45 @@
     }
   }
 
+  function bindStandaloneViewportFix() {
+    // iOS standalone: al lancio la webview a volte è più corta dello schermo
+    // e il menu fisso resta sollevato con un vuoto sotto. Finora la correzione
+    // avveniva per caso con lo zoom della tastiera; qui forziamo lo stesso
+    // ricalcolo ritoccando il meta viewport, senza zoom.
+    if (!navigator.standalone) {
+      return;
+    }
+    var meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+      return;
+    }
+    var content = meta.getAttribute('content');
+
+    function kick() {
+      if (Math.abs(window.innerHeight - screen.height) <= 2) {
+        return; // altezza già corretta
+      }
+      meta.setAttribute('content', content.replace('initial-scale=1.0', 'initial-scale=1.0001'));
+      requestAnimationFrame(function () {
+        meta.setAttribute('content', content);
+        window.scrollTo(0, 0);
+      });
+    }
+
+    [0, 150, 600, 1500].forEach(function (delay) {
+      setTimeout(kick, delay);
+    });
+    window.addEventListener('pageshow', kick);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) {
+        setTimeout(kick, 100);
+      }
+    });
+  }
+
   function init() {
     bindViewportGuard();
+    bindStandaloneViewportFix();
     bindNav();
     initSubTabs('#view-scheda');
     initSubTabs('#view-tesoreria');
