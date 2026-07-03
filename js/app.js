@@ -184,45 +184,42 @@
     }
   }
 
-  function bindStandaloneViewportFix() {
-    // iOS standalone: al lancio la webview a volte è più corta dello schermo
-    // e il menu fisso resta sollevato con un vuoto sotto. Finora la correzione
-    // avveniva per caso con lo zoom della tastiera; qui forziamo lo stesso
-    // ricalcolo ritoccando il meta viewport, senza zoom.
-    if (!navigator.standalone) {
+  function bindViewportDebug() {
+    // Diagnostica nascosta: 5 tap rapidi sul sigillo dell'header mostrano
+    // le misure reali del viewport (per capire i problemi iOS standalone).
+    var avatar = document.querySelector('.header-avatar');
+    if (!avatar) {
       return;
     }
-    var meta = document.querySelector('meta[name="viewport"]');
-    if (!meta) {
-      return;
-    }
-    var content = meta.getAttribute('content');
-
-    function kick() {
-      if (Math.abs(window.innerHeight - screen.height) <= 2) {
-        return; // altezza già corretta
+    var taps = 0;
+    var timer = null;
+    avatar.addEventListener('click', function () {
+      taps += 1;
+      clearTimeout(timer);
+      timer = setTimeout(function () { taps = 0; }, 800);
+      if (taps < 5) {
+        return;
       }
-      meta.setAttribute('content', content.replace('initial-scale=1.0', 'initial-scale=1.0001'));
-      requestAnimationFrame(function () {
-        meta.setAttribute('content', content);
-        window.scrollTo(0, 0);
-      });
-    }
-
-    [0, 150, 600, 1500].forEach(function (delay) {
-      setTimeout(kick, delay);
+      taps = 0;
+      var vv = window.visualViewport;
+      alert(
+        'innerH: ' + window.innerHeight +
+        '\nscreenH: ' + screen.height +
+        '\nvv.h: ' + (vv ? Math.round(vv.height) : '-') +
+        '\nvv.top: ' + (vv ? Math.round(vv.offsetTop) : '-') +
+        '\nscrollY: ' + window.scrollY +
+        '\nsafeTop/Bot: ' + getComputedStyle(document.documentElement).getPropertyValue('--dbg-sat') + '/' +
+        getComputedStyle(document.documentElement).getPropertyValue('--dbg-sab') +
+        '\nstandalone: ' + !!navigator.standalone
+      );
     });
-    window.addEventListener('pageshow', kick);
-    document.addEventListener('visibilitychange', function () {
-      if (!document.hidden) {
-        setTimeout(kick, 100);
-      }
-    });
+    document.documentElement.style.setProperty('--dbg-sat', 'env(safe-area-inset-top)');
+    document.documentElement.style.setProperty('--dbg-sab', 'env(safe-area-inset-bottom)');
   }
 
   function init() {
     bindViewportGuard();
-    bindStandaloneViewportFix();
+    bindViewportDebug();
     bindNav();
     initSubTabs('#view-scheda');
     initSubTabs('#view-tesoreria');
