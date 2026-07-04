@@ -95,17 +95,3 @@
   background: var(--border-color);
 }
 
-.insp-badge {
-  font-size: 15px;
-  cursor: pointer;
-  padding: var(--space-1);
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-pill);
-}
-
-.insp-badge.active {
-  color: var(--accent-gold);
-}

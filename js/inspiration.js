@@ -5,9 +5,11 @@
     if (!badge) {
       return;
     }
-    badge.textContent = state.inspiration ? '★' : '☆';
+    var star = badge.querySelector('.insp-star') || badge;
+    star.textContent = state.inspiration ? '★' : '☆';
     badge.classList.toggle('active', state.inspiration);
-    badge.title = state.inspiration ? 'Ispirazione attiva' : 'Nessuna ispirazione';
+    badge.setAttribute('aria-pressed', state.inspiration ? 'true' : 'false');
+    badge.setAttribute('title', state.inspiration ? 'Ispirazione attiva' : 'Nessuna ispirazione');
   }
 
   function toggle() {

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=6">
+<link rel="stylesheet" href="css/styles.css?v=7">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,7 +25,6 @@
       <div class="header-meta" id="header-meta">Dragonide d'Oro</div>
     </div>
     <div class="header-right">
-      <span class="insp-badge" id="insp-badge" title="Ispirazione">☆</span>
       <button type="button" class="header-options" id="header-options" aria-label="Opzioni">⚙</button>
     </div>
   </div>
@@ -50,10 +49,16 @@
     <!-- Info/Comb -->
     <div class="subpanel active" data-subpanel="comb">
       <div class="combat-stats-band">
-        <div class="combat-stat-init">
-          <div class="big" id="combat-init">−1</div>
-          <div class="lab">Iniziativa</div>
-          <div class="sub" id="combat-init-note">vant. iniziativa</div>
+        <div class="combat-left">
+          <div class="combat-stat-init">
+            <div class="big" id="combat-init">−1</div>
+            <div class="lab">Iniziativa</div>
+            <div class="sub" id="combat-init-note">vant. iniziativa</div>
+          </div>
+          <button type="button" class="insp-tile" id="insp-badge" aria-label="Ispirazione" aria-pressed="false">
+            <span class="insp-star" id="insp-star">☆</span>
+            <span class="insp-lab">Ispirazione</span>
+          </button>
         </div>
         <div class="combat-stats-core ac-ds-frame">
           <div class="ds-frame-title"><span>Tiri Morte</span></div>
@@ -544,16 +549,16 @@
   </div>
 </div>
 
-<script src="js/config.js?v=6"></script>
-<script src="js/storage.js?v=6"></script>
-<script src="js/hp-bar.js?v=6"></script>
-<script src="js/header.js?v=6"></script>
-<script src="js/sheet.js?v=6"></script>
-<script src="js/grimorio.js?v=6"></script>
-<script src="js/treasury.js?v=6"></script>
-<script src="js/diary.js?v=6"></script>
-<script src="js/inspiration.js?v=6"></script>
-<script src="js/bottom-sheet.js?v=6"></script>
-<script src="js/app.js?v=6"></script>
+<script src="js/config.js?v=7"></script>
+<script src="js/storage.js?v=7"></script>
+<script src="js/hp-bar.js?v=7"></script>
+<script src="js/header.js?v=7"></script>
+<script src="js/sheet.js?v=7"></script>
+<script src="js/grimorio.js?v=7"></script>
+<script src="js/treasury.js?v=7"></script>
+<script src="js/diary.js?v=7"></script>
+<script src="js/inspiration.js?v=7"></script>
+<script src="js/bottom-sheet.js?v=7"></script>
+<script src="js/app.js?v=7"></script>
 </body>
 </html>

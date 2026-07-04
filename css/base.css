@@ -66,7 +66,7 @@ button:not(.edit-del):not(.ds-reset):not(.ds-pip):not(.quest-check):not(.qbtn):n
   .sheet-close,
   .seg,
   .accordion-header,
-  .insp-badge,
+  .insp-tile,
   .ds-reset,
   .ds-pip
 ) {
@@ -101,7 +101,7 @@ button:not(.edit-del):not(.ds-reset):not(.ds-pip):not(.quest-check):not(.qbtn):n
   .sheet-close:active,
   .seg:active,
   .accordion-header:active,
-  .insp-badge:active
+  .insp-tile:active
 ) {
   transform: scale(var(--press-scale));
   filter: brightness(var(--press-brightness));
