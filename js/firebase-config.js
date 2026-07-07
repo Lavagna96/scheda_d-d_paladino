@@ -16,4 +16,11 @@
  *   appId: "..."
  * };
  */
-window.FIREBASE_CONFIG = null;
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAj4geVeoIHMzh54lGIsfVQvQ8cCU1D8v8",
+  authDomain: "scheda-dnd-8d651.firebaseapp.com",
+  projectId: "scheda-dnd-8d651",
+  storageBucket: "scheda-dnd-8d651.firebasestorage.app",
+  messagingSenderId: "646076622919",
+  appId: "1:646076622919:web:4ac594f8179873e4342962"
+};
