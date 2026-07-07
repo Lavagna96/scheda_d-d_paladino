@@ -1,0 +1,174 @@
+/* ===== Modale Account e sincronizzazione ===== */
+.account-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background: rgba(0, 0, 0, 0.72);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
+.account-modal.hidden {
+  display: none !important;
+}
+
+.account-card {
+  position: relative;
+  width: min(92vw, 360px);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  background: var(--bg-card);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(201, 164, 67, 0.12);
+}
+
+.account-title {
+  font-family: var(--font-title);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-gold);
+  margin-bottom: var(--space-3);
+}
+
+.account-title::before {
+  content: "◆";
+  font-size: 9px;
+  margin-right: 6px;
+}
+
+.account-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  background: var(--bg-principal);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-hint {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-bottom: var(--space-3);
+}
+
+.account-in {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-principal);
+  color: var(--text-primary);
+  font-size: 16px; /* >=16px: evita lo zoom automatico di iOS */
+}
+
+.account-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.account-btn {
+  flex: 1;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--accent-gold);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--accent-gold);
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+.account-btn.primary {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: #241a08;
+  border-color: var(--accent-gold-dim);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.account-btn.danger {
+  border-color: var(--ruby-bright);
+  color: var(--ruby-bright);
+  background: rgba(158, 9, 34, 0.12);
+}
+
+.account-link {
+  display: block;
+  margin: var(--space-3) auto 0;
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  min-height: auto;
+}
+
+.account-user {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+.account-user b {
+  color: var(--accent-gold);
+}
+
+.account-sync {
+  font-family: var(--font-title);
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  color: var(--celest-bright);
+  margin-bottom: var(--space-2);
+}
+
+.account-error {
+  min-height: 1.4em;
+  margin-top: var(--space-3);
+  font-size: 12px;
+  color: var(--ruby-bright);
+  text-align: center;
+}
+
+/* puntino oro sull'ingranaggio quando si è connessi al cloud */
+.header-options.cloud-on::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  box-shadow: 0 0 6px rgba(201, 164, 67, 0.8);
+}
+
+.header-options {
+  position: relative;
+}

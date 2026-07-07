@@ -108,13 +108,23 @@
     return next;
   }
 
+  function notifyCloud() {
+    if (window.AppCloud && window.AppCloud.schedulePush) {
+      window.AppCloud.schedulePush();
+    }
+  }
+
   function saveState(data, immediate) {
     state = data;
+    if (!window.__applyingRemoteState) {
+      state.lastModifiedMs = Date.now();
+    }
     if (immediate) {
       try {
         localStorage.setItem(cfg.STORAGE_KEY, JSON.stringify(state));
         localStorage.setItem(cfg.INSPIRATION_KEY, state.inspiration ? '1' : '0');
       } catch (e) { /* ignore */ }
+      notifyCloud();
 
       return;
     }
@@ -124,6 +134,7 @@
         localStorage.setItem(cfg.STORAGE_KEY, JSON.stringify(state));
         localStorage.setItem(cfg.INSPIRATION_KEY, state.inspiration ? '1' : '0');
       } catch (e) { /* ignore */ }
+      notifyCloud();
     }, 200);
   }
 

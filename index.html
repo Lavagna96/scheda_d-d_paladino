@@ -35,6 +35,7 @@
 </header>
 
 <div id="options-panel" class="options-panel hidden">
+  <button type="button" id="opt-account" class="hidden">Account e sincronizzazione</button>
   <button type="button" id="opt-reset">Ripristina dati</button>
   <button type="button" id="opt-export">Esporta JSON</button>
   <button type="button" id="opt-import">Importa JSON</button>
@@ -553,6 +554,34 @@
   </div>
 </div>
 
+<div id="account-modal" class="account-modal hidden" role="dialog" aria-modal="true" aria-label="Account e sincronizzazione">
+  <div class="account-card">
+    <button type="button" class="account-close" id="account-close" aria-label="Chiudi">✕</button>
+    <h2 class="account-title">Account</h2>
+
+    <div id="account-logged-out">
+      <p class="account-hint">Accedi per salvare la scheda nel cloud e ritrovarla su ogni dispositivo.</p>
+      <input type="email" id="acc-email" class="account-in" placeholder="Email" autocomplete="email" inputmode="email">
+      <input type="password" id="acc-pass" class="account-in" placeholder="Password" autocomplete="current-password">
+      <div class="account-actions">
+        <button type="button" id="acc-login" class="account-btn primary">Accedi</button>
+        <button type="button" id="acc-register" class="account-btn">Crea account</button>
+      </div>
+      <button type="button" id="acc-forgot" class="account-link">Password dimenticata?</button>
+    </div>
+
+    <div id="account-logged-in" class="hidden">
+      <p class="account-user">Connesso come <b id="acc-user-email"></b></p>
+      <p class="account-sync" id="acc-sync-status">—</p>
+      <div class="account-actions">
+        <button type="button" id="acc-logout" class="account-btn danger">Esci</button>
+      </div>
+    </div>
+
+    <p class="account-error" id="acc-error" aria-live="polite"></p>
+  </div>
+</div>
+
 <div id="avatar-modal" class="avatar-modal hidden" role="dialog" aria-modal="true" aria-label="Ritratto del personaggio">
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
@@ -566,6 +595,7 @@
   </figure>
 </div>
 
+<script src="js/firebase-config.js?v=10"></script>
 <script src="js/config.js?v=10"></script>
 <script src="js/storage.js?v=10"></script>
 <script src="js/hp-bar.js?v=10"></script>
@@ -577,5 +607,6 @@
 <script src="js/inspiration.js?v=10"></script>
 <script src="js/bottom-sheet.js?v=10"></script>
 <script src="js/app.js?v=10"></script>
+<script type="module" src="js/cloud.js?v=10"></script>
 </body>
 </html>
