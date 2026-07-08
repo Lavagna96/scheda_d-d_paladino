@@ -187,53 +187,179 @@
     renderDeathSaves();
   }
 
-  function addTempHpFromInput() {
-    var inp = document.getElementById('temp-hp-in');
-    if (!inp) {
-      return;
-    }
-    var n = parseInt(inp.value, 10);
-    if (isNaN(n) || n <= 0) {
-      return;
-    }
+  function addTempHp(n) {
     var state = window.AppStorage.getState();
     state.pools.tempHp = (state.pools.tempHp || 0) + n;
     window.AppStorage.saveState(state);
     renderHp();
-    inp.value = '';
+  }
+
+  var SVG_ATTRS = 'class="hp-ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+  var IC_SWORD = '<svg ' + SVG_ATTRS + '><path d="M20 4v5l-9 7l-4 4l-3 -3l4 -4l7 -9z"/><path d="M6.5 11.5l6 6"/></svg>';
+  var IC_HEART_PLUS = '<svg ' + SVG_ATTRS + '><path d="M12 20l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.566"/><path d="M16 19h6"/><path d="M19 16v6"/></svg>';
+  var IC_SHIELD = '<svg ' + SVG_ATTRS + '><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"/></svg>';
+
+  var MODE_META = {
+    dmg: { ic: IC_SWORD, title: 'Segna danno', apply: 'Applica danno' },
+    heal: { ic: IC_HEART_PLUS, title: 'Cura', apply: 'Applica cura' },
+    temp: { ic: IC_SHIELD, title: 'PF temporanei', apply: 'Aggiungi temporanei' }
+  };
+
+  var hpModalMode = 'dmg';
+
+  function hpModalEls() {
+    return {
+      modal: document.getElementById('hp-modal'),
+      input: document.getElementById('hp-modal-input'),
+      cur: document.getElementById('hp-modal-cur'),
+      next: document.getElementById('hp-modal-next'),
+      max: document.getElementById('hp-modal-max'),
+      ic: document.getElementById('hp-modal-ic'),
+      titletext: document.getElementById('hp-modal-titletext'),
+      apply: document.getElementById('hp-modal-apply'),
+      temprow: document.getElementById('hp-modal-temprow'),
+      temptext: document.getElementById('hp-modal-temptext'),
+      toggle: document.getElementById('hp-modal-temp-toggle')
+    };
+  }
+
+  function updateHpModalPreview() {
+    var e = hpModalEls();
+    if (!e.modal) {
+      return;
+    }
+    var state = window.AppStorage.getState();
+    var hp = state.pools.hp;
+    var temp = state.pools.tempHp || 0;
+    var maxHp = cfg.POOLMAX.hp;
+    var n = Math.max(0, parseInt(e.input.value, 10) || 0);
+
+    if (hpModalMode === 'temp') {
+      e.cur.textContent = temp;
+      e.next.textContent = temp + n;
+      e.max.classList.add('hidden');
+      e.temprow.classList.add('hidden');
+
+      return;
+    }
+
+    e.max.classList.remove('hidden');
+    e.max.textContent = '/ ' + maxHp;
+    e.cur.textContent = hp;
+
+    if (hpModalMode === 'dmg') {
+      var absorbed = Math.min(temp, n);
+      var toHp = n - absorbed;
+      e.next.textContent = Math.max(0, hp - toHp);
+      if (temp > 0 && n > 0) {
+        e.temprow.classList.remove('hidden');
+        e.temptext.textContent = 'assorbe ' + absorbed + ' di ' + temp + ' PF temporanei';
+      } else {
+        e.temprow.classList.add('hidden');
+      }
+    } else {
+      e.next.textContent = Math.min(maxHp, hp + n);
+      e.temprow.classList.add('hidden');
+    }
+  }
+
+  function setHpModalMode(mode) {
+    var e = hpModalEls();
+    if (!e.modal) {
+      return;
+    }
+    hpModalMode = mode;
+    var meta = MODE_META[mode];
+    e.modal.setAttribute('data-mode', mode);
+    e.ic.innerHTML = meta.ic;
+    e.titletext.textContent = meta.title;
+    e.apply.textContent = meta.apply;
+    e.input.value = '';
+    if (mode === 'heal') {
+      e.toggle.textContent = '＋ PF temporanei';
+      e.toggle.classList.remove('hidden');
+    } else if (mode === 'temp') {
+      e.toggle.textContent = '← Torna a cura';
+      e.toggle.classList.remove('hidden');
+    } else {
+      e.toggle.classList.add('hidden');
+    }
+    updateHpModalPreview();
+  }
+
+  function openHpModal(mode) {
+    var e = hpModalEls();
+    if (!e.modal) {
+      return;
+    }
+    setHpModalMode(mode);
+    e.modal.classList.remove('hidden');
+    setTimeout(function () { e.input.focus(); }, 60);
+  }
+
+  function closeHpModal() {
+    var modal = document.getElementById('hp-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+
+  function applyHpModal() {
+    var e = hpModalEls();
+    var n = Math.max(0, parseInt(e.input.value, 10) || 0);
+    if (n > 0) {
+      if (hpModalMode === 'dmg') {
+        applyHpChange(-n);
+      } else if (hpModalMode === 'heal') {
+        applyHpChange(n);
+      } else {
+        addTempHp(n);
+      }
+    }
+    closeHpModal();
   }
 
   function bindHpControls() {
-    var minus = document.getElementById('hp-minus');
-    var plus = document.getElementById('hp-plus');
-    var dmg = document.getElementById('hp-dmg');
-    var heal = document.getElementById('hp-heal');
-    var tempAdd = document.getElementById('temp-add');
+    var dmgOpen = document.getElementById('hp-dmg-open');
+    var healOpen = document.getElementById('hp-heal-open');
+    if (dmgOpen && !dmgOpen._bound) {
+      dmgOpen._bound = true;
+      dmgOpen.addEventListener('click', function () { openHpModal('dmg'); });
+    }
+    if (healOpen && !healOpen._bound) {
+      healOpen._bound = true;
+      healOpen.addEventListener('click', function () { openHpModal('heal'); });
+    }
 
-    if (minus && !minus._bound) {
-      minus._bound = true;
-      minus.addEventListener('click', function () { applyHpChange(-1); });
+    var e = hpModalEls();
+    if (!e.modal || e.modal._bound) {
+      return;
     }
-    if (plus && !plus._bound) {
-      plus._bound = true;
-      plus.addEventListener('click', function () { applyHpChange(1); });
-    }
-    if (dmg && !dmg._bound) {
-      dmg._bound = true;
-      dmg.addEventListener('click', function () {
-        window.AppHpBar.applyFromInput('hp', 'hp-in', -1);
+    e.modal._bound = true;
+    e.modal.addEventListener('click', function (ev) {
+      if (ev.target === e.modal) {
+        closeHpModal();
+      }
+    });
+    document.getElementById('hp-modal-close').addEventListener('click', closeHpModal);
+    e.input.addEventListener('input', updateHpModalPreview);
+    e.apply.addEventListener('click', applyHpModal);
+    e.toggle.addEventListener('click', function () {
+      setHpModalMode(hpModalMode === 'temp' ? 'heal' : 'temp');
+      e.input.focus();
+    });
+    e.modal.querySelectorAll('.hp-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var add = parseInt(chip.getAttribute('data-add'), 10);
+        e.input.value = (parseInt(e.input.value, 10) || 0) + add;
+        updateHpModalPreview();
       });
-    }
-    if (heal && !heal._bound) {
-      heal._bound = true;
-      heal.addEventListener('click', function () {
-        window.AppHpBar.applyFromInput('hp', 'hp-in', 1);
-      });
-    }
-    if (tempAdd && !tempAdd._bound) {
-      tempAdd._bound = true;
-      tempAdd.addEventListener('click', addTempHpFromInput);
-    }
+    });
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && !e.modal.classList.contains('hidden')) {
+        closeHpModal();
+      }
+    });
   }
 
   function renderLoh() {
