@@ -636,24 +636,33 @@
   z-index: 85;
   background: var(--overlay);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
+  padding: var(--space-4);
 }
 
 .hp-modal.hidden {
   display: none !important;
 }
 
+.hp-modal .sheet-handle {
+  display: none;
+}
+
 .hp-modal-sheet {
-  width: calc(100% - var(--space-6));
-  max-width: 480px;
-  margin-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  width: 100%;
+  max-width: 460px;
   background: var(--bg-card);
   border: 1px solid var(--dh-accent, var(--border-color));
   border-radius: var(--radius-xl);
   padding: var(--space-4);
   box-shadow: var(--shadow-lg);
-  animation: slideUp 0.25s ease-out;
+  animation: hpModalPop 0.2s ease-out;
+}
+
+@keyframes hpModalPop {
+  from { transform: translateY(12px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 .hp-modal-head {
