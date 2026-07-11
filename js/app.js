@@ -150,7 +150,14 @@
         return;
       }
       var t = e.target;
-      if (t.closest && t.closest('.loh-bar-track, .subtabs, input, textarea, select, [contenteditable="true"]')) {
+      if (t.closest && t.closest('.loh-bar-track, .subtabs')) {
+        return;
+      }
+      // Campi di testo: lo swipe parte anche sopra input e textarea,
+      // ma non mentre ne stai modificando uno (cursore/selezione attivi).
+      var ae = document.activeElement;
+      if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable)
+        && (t === ae || ae.contains(t))) {
         return;
       }
       startX = e.touches[0].clientX;
