@@ -17,6 +17,20 @@
     updateFab();
   }
 
+  function animatePanelIn(panel, dir) {
+    if (!panel || !dir) {
+      return;
+    }
+    var cls = dir > 0 ? 'slide-in-right' : 'slide-in-left';
+    panel.classList.remove('slide-in-right', 'slide-in-left');
+    void panel.offsetWidth;
+    panel.classList.add(cls);
+    panel.addEventListener('animationend', function handler() {
+      panel.classList.remove(cls);
+      panel.removeEventListener('animationend', handler);
+    });
+  }
+
   function initSubTabs(containerSelector) {
     var container = document.querySelector(containerSelector);
     if (!container) {
@@ -24,13 +38,27 @@
     }
     var tabs = container.querySelectorAll('.subtab');
     var panels = container.querySelectorAll('.subpanel');
-    tabs.forEach(function (tab) {
+    tabs.forEach(function (tab, tabIdx) {
       tab.addEventListener('click', function () {
         var target = tab.getAttribute('data-subtab');
-        tabs.forEach(function (t) { t.classList.toggle('active', t === tab); });
-        panels.forEach(function (p) {
-          p.classList.toggle('active', p.getAttribute('data-subpanel') === target);
+        var oldIdx = -1;
+        tabs.forEach(function (t, i) {
+          if (t.classList.contains('active')) {
+            oldIdx = i;
+          }
         });
+        tabs.forEach(function (t) { t.classList.toggle('active', t === tab); });
+        var activePanel = null;
+        panels.forEach(function (p) {
+          var on = p.getAttribute('data-subpanel') === target;
+          p.classList.toggle('active', on);
+          if (on) {
+            activePanel = p;
+          }
+        });
+        if (oldIdx !== -1 && oldIdx !== tabIdx) {
+          animatePanelIn(activePanel, tabIdx > oldIdx ? 1 : -1);
+        }
         updateFab();
       });
     });
@@ -59,14 +87,14 @@
     fab.setAttribute('data-context', currentView + '-' + (sub || ''));
   }
 
-  function navigateSubtabs(dir) {
+  function getSubtabContext() {
     var view = document.getElementById('view-' + currentView);
     if (!view) {
-      return;
+      return null;
     }
     var tabs = view.querySelectorAll('.subtabs .subtab');
     if (!tabs.length) {
-      return;
+      return null;
     }
     var idx = -1;
     tabs.forEach(function (t, i) {
@@ -74,18 +102,16 @@
         idx = i;
       }
     });
-    var next = idx + dir;
-    if (idx < 0 || next < 0 || next >= tabs.length) {
-      return;
-    }
-    tabs[next].click();
-    tabs[next].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    var panel = view.querySelector('.subpanel.active');
+
+    return { tabs: tabs, idx: idx, panel: panel };
   }
 
   function bindSwipeTabs() {
-    // Swipe orizzontale su mobile per passare tra le sotto-tab della vista
-    // attiva. Il menu in basso resta solo al click. Escludiamo i controlli
-    // che gestiscono già il drag/scroll orizzontale.
+    // Swipe orizzontale su mobile tra le sotto-tab della vista attiva:
+    // il pannello segue il dito e al rilascio la pagina scivola avanti o
+    // indietro. Il menu in basso resta solo al click. Escludiamo i
+    // controlli che gestiscono già il drag/scroll orizzontale.
     var main = document.getElementById('main-content');
     if (!main) {
       return;
@@ -93,9 +119,33 @@
     var startX = 0;
     var startY = 0;
     var tracking = false;
+    var following = false;
+    var ctx = null;
+
+    function goTo(tabList, targetIdx) {
+      tabList[targetIdx].click();
+      tabList[targetIdx].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    }
+
+    function endFollow(snapBack) {
+      if (!ctx || !ctx.panel) {
+        return;
+      }
+      var p = ctx.panel;
+      p.classList.remove('swipe-follow');
+      if (snapBack) {
+        p.classList.add('swipe-reset');
+        p.style.transform = '';
+        setTimeout(function () { p.classList.remove('swipe-reset'); }, 260);
+      } else {
+        p.style.transform = '';
+      }
+    }
 
     main.addEventListener('touchstart', function (e) {
       tracking = false;
+      following = false;
+      ctx = null;
       if (e.touches.length !== 1) {
         return;
       }
@@ -108,6 +158,38 @@
       tracking = true;
     }, { passive: true });
 
+    main.addEventListener('touchmove', function (e) {
+      if (!tracking) {
+        return;
+      }
+      var dx = e.touches[0].clientX - startX;
+      var dy = e.touches[0].clientY - startY;
+      if (!following) {
+        if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx)) {
+          // gesto verticale: lasciamo lo scroll normale
+          tracking = false;
+
+          return;
+        }
+        if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+          ctx = getSubtabContext();
+          if (!ctx || !ctx.panel || ctx.idx < 0) {
+            tracking = false;
+
+            return;
+          }
+          following = true;
+          ctx.panel.classList.add('swipe-follow');
+        } else {
+          return;
+        }
+      }
+      // segue il dito; se non c'è una tab in quella direzione fa elastico
+      var hasNeighbor = dx < 0 ? ctx.idx < ctx.tabs.length - 1 : ctx.idx > 0;
+      var damp = hasNeighbor ? 0.9 : 0.25;
+      ctx.panel.style.transform = 'translateX(' + Math.round(dx * damp) + 'px)';
+    }, { passive: true });
+
     main.addEventListener('touchend', function (e) {
       if (!tracking) {
         return;
@@ -116,10 +198,35 @@
       var touch = e.changedTouches[0];
       var dx = touch.clientX - startX;
       var dy = touch.clientY - startY;
-      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.8) {
-        return;
+      var horizontal = Math.abs(dx) >= 60 && Math.abs(dx) > Math.abs(dy) * 1.5;
+      if (following) {
+        var target = ctx.idx + (dx < 0 ? 1 : -1);
+        if (horizontal && target >= 0 && target < ctx.tabs.length) {
+          endFollow(false);
+          goTo(ctx.tabs, target);
+        } else {
+          endFollow(true);
+        }
+      } else if (horizontal) {
+        var c = getSubtabContext();
+        if (c && c.idx >= 0) {
+          var t2 = c.idx + (dx < 0 ? 1 : -1);
+          if (t2 >= 0 && t2 < c.tabs.length) {
+            goTo(c.tabs, t2);
+          }
+        }
       }
-      navigateSubtabs(dx < 0 ? 1 : -1);
+      following = false;
+      ctx = null;
+    }, { passive: true });
+
+    main.addEventListener('touchcancel', function () {
+      if (following) {
+        endFollow(true);
+      }
+      tracking = false;
+      following = false;
+      ctx = null;
     }, { passive: true });
   }
 

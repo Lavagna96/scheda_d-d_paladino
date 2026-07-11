@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=14">
+<link rel="stylesheet" href="css/styles.css?v=15">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=14" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=15" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -460,7 +460,8 @@
     <nav class="subtabs" aria-label="Sotto-tab Tesoreria">
       <button type="button" class="subtab active" data-subtab="cassa">Cassa Comune</button>
       <button type="button" class="subtab" data-subtab="party">Bottino Party</button>
-      <button type="button" class="subtab" data-subtab="sacca">Sacca</button>
+      <button type="button" class="subtab" data-subtab="sacca">Zaino</button>
+      <button type="button" class="subtab" data-subtab="oggetti">Oggetti</button>
     </nav>
 
     <div class="carry-bar-block">
@@ -499,6 +500,124 @@
         <div class="loot-sec-hint">(tocca per modificare)</div>
       </div>
       <div class="edit-list" id="personal-list"></div>
+    </div>
+
+    <div class="subpanel" data-subpanel="oggetti">
+      <div class="loot-sec-head">
+        <div class="loot-sec-title">◆ Reliquie &amp; Equipaggiamento</div>
+        <div class="loot-sec-hint">(i tesori leggendari di Tharion)</div>
+      </div>
+
+      <div class="relic-card">
+        <div class="relic-art">
+          <svg viewBox="0 0 140 150" aria-hidden="true" focusable="false">
+            <defs>
+              <radialGradient id="rlGlowSword" cx="50%" cy="45%" r="52%">
+                <stop offset="0%" stop-color="rgba(201,164,67,0.38)"/>
+                <stop offset="65%" stop-color="rgba(201,164,67,0.1)"/>
+                <stop offset="100%" stop-color="rgba(201,164,67,0)"/>
+              </radialGradient>
+              <linearGradient id="rlBlade" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#e8eef5"/>
+                <stop offset="45%" stop-color="#aabccf"/>
+                <stop offset="100%" stop-color="#5d6f84"/>
+              </linearGradient>
+              <linearGradient id="rlGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#e8c96a"/>
+                <stop offset="50%" stop-color="#c9a443"/>
+                <stop offset="100%" stop-color="#8a6820"/>
+              </linearGradient>
+              <radialGradient id="rlRuby" cx="35%" cy="30%" r="75%">
+                <stop offset="0%" stop-color="#ff8a9a"/>
+                <stop offset="45%" stop-color="#cc2440"/>
+                <stop offset="100%" stop-color="#660514"/>
+              </radialGradient>
+            </defs>
+            <circle cx="70" cy="72" r="64" fill="url(#rlGlowSword)"/>
+            <path d="M70 6 L78 24 L76 92 L64 92 L62 24 Z" fill="url(#rlBlade)" stroke="#39445a" stroke-width="1" stroke-linejoin="round"/>
+            <path d="M69 26 L71 26 L70.6 88 L69.4 88 Z" fill="rgba(255,255,255,0.5)"/>
+            <path d="M70 36 l3.2 5 -3.2 5 -3.2 -5 Z" fill="#c9a443" opacity="0.9"/>
+            <path d="M70 56 l3.2 5 -3.2 5 -3.2 -5 Z" fill="#c9a443" opacity="0.65"/>
+            <path d="M70 76 l2.6 4 -2.6 4 -2.6 -4 Z" fill="#c9a443" opacity="0.4"/>
+            <path d="M44 92 Q70 83 96 92 L96 100 Q70 91 44 100 Z" fill="url(#rlGold)" stroke="#6b5116" stroke-width="1" stroke-linejoin="round"/>
+            <rect x="65.5" y="99" width="9" height="26" rx="3.5" fill="#4a1420" stroke="#2e0c15" stroke-width="1"/>
+            <path d="M65.5 104 h9 M65.5 110 h9 M65.5 116 h9" stroke="#7a2438" stroke-width="1.4"/>
+            <circle cx="70" cy="132" r="8" fill="url(#rlRuby)" stroke="url(#rlGold)" stroke-width="2"/>
+            <ellipse cx="67" cy="129" rx="2.6" ry="1.6" fill="rgba(255,255,255,0.55)" transform="rotate(-24 67 129)"/>
+          </svg>
+        </div>
+        <div class="relic-head">
+          <h3 class="relic-name">Lama Vincolante</h3>
+          <span class="relic-rarity leg">Leggendaria</span>
+        </div>
+        <p class="relic-type">Spada lunga · magica · evolve con il legame</p>
+        <ul class="relic-effects">
+          <li>+1 a colpire e ai danni · +1 agli incantesimi</li>
+          <li>Vantaggio contro Spaventato, Prono, Spinto</li>
+          <li>Sentinella: si illumina vicino alle Vesti Purpuree — allarme e rivelatore</li>
+        </ul>
+        <div class="relic-tiers">
+          <span class="relic-tier">Liv. I · Sentinella</span>
+          <span class="relic-tier">Liv. II · Ascesa</span>
+          <span class="relic-tier locked">Liv. III · ???</span>
+        </div>
+      </div>
+
+      <div class="relic-card">
+        <div class="relic-art">
+          <svg viewBox="0 0 140 150" aria-hidden="true" focusable="false">
+            <defs>
+              <radialGradient id="rlGlowShield" cx="50%" cy="45%" r="52%">
+                <stop offset="0%" stop-color="rgba(74,118,168,0.4)"/>
+                <stop offset="65%" stop-color="rgba(74,118,168,0.1)"/>
+                <stop offset="100%" stop-color="rgba(74,118,168,0)"/>
+              </radialGradient>
+              <linearGradient id="rlSteel" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#39455c"/>
+                <stop offset="55%" stop-color="#242e40"/>
+                <stop offset="100%" stop-color="#141b28"/>
+              </linearGradient>
+              <linearGradient id="rlGold2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#e8c96a"/>
+                <stop offset="50%" stop-color="#c9a443"/>
+                <stop offset="100%" stop-color="#8a6820"/>
+              </linearGradient>
+              <radialGradient id="rlSapphire" cx="35%" cy="30%" r="75%">
+                <stop offset="0%" stop-color="#9fd0ff"/>
+                <stop offset="45%" stop-color="#3d7ab8"/>
+                <stop offset="100%" stop-color="#12304f"/>
+              </radialGradient>
+            </defs>
+            <circle cx="70" cy="74" r="64" fill="url(#rlGlowShield)"/>
+            <path d="M70 16 C88 26 104 28 112 26 C112 68 102 106 70 128 C38 106 28 68 28 26 C36 28 52 26 70 16 Z" fill="url(#rlSteel)" stroke="url(#rlGold2)" stroke-width="3.5" stroke-linejoin="round"/>
+            <path d="M70 26 C84 33 96 35 103 34 C102 66 94 96 70 114 C46 96 38 66 37 34 C44 35 56 33 70 26 Z" fill="none" stroke="rgba(201,164,67,0.35)" stroke-width="1.2"/>
+            <path d="M70 30 L70 110" stroke="rgba(201,164,67,0.4)" stroke-width="2"/>
+            <path d="M70 58 C60 52 50 54 44 48 C50 44 62 44 70 50 C78 44 90 44 96 48 C90 54 80 52 70 58 Z" fill="url(#rlGold2)" opacity="0.9"/>
+            <path d="M70 50 l7 10 -7 10 -7 -10 Z" fill="url(#rlSapphire)" stroke="url(#rlGold2)" stroke-width="1.6"/>
+            <ellipse cx="67.4" cy="54.5" rx="2.1" ry="1.3" fill="rgba(255,255,255,0.6)" transform="rotate(-20 67.4 54.5)"/>
+            <path d="M62 84 L70 72 L78 84 L72 84 L72 96 L68 96 L68 84 Z" fill="rgba(201,164,67,0.55)"/>
+            <circle cx="70" cy="21.5" r="2" fill="url(#rlGold2)"/>
+            <circle cx="41" cy="30" r="2" fill="url(#rlGold2)"/>
+            <circle cx="99" cy="30" r="2" fill="url(#rlGold2)"/>
+            <circle cx="33.5" cy="58" r="2" fill="url(#rlGold2)"/>
+            <circle cx="106.5" cy="58" r="2" fill="url(#rlGold2)"/>
+            <circle cx="45" cy="92" r="2" fill="url(#rlGold2)"/>
+            <circle cx="95" cy="92" r="2" fill="url(#rlGold2)"/>
+            <circle cx="70" cy="121" r="2" fill="url(#rlGold2)"/>
+          </svg>
+        </div>
+        <div class="relic-head">
+          <h3 class="relic-name">Scudo Magico</h3>
+          <span class="relic-rarity rare">Raro</span>
+        </div>
+        <p class="relic-type">Scudo · magico</p>
+        <ul class="relic-effects">
+          <li>Vantaggio ai tiri di iniziativa</li>
+          <li>+5 CA contro un attacco · 1/giorno <span class="relic-note">(uso tracciato in Scheda → Risorse)</span></li>
+        </ul>
+      </div>
+
+      <div class="relic-slot">✦ &nbsp;Uno spazio attende la prossima reliquia della campagna…</div>
     </div>
   </section>
 
@@ -608,7 +727,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=14" alt="Ritratto di Tharion Velnar">
+      <img src="avatar-full.jpg?v=15" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -617,18 +736,18 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=14"></script>
-<script src="js/config.js?v=14"></script>
-<script src="js/storage.js?v=14"></script>
-<script src="js/hp-bar.js?v=14"></script>
-<script src="js/header.js?v=14"></script>
-<script src="js/sheet.js?v=14"></script>
-<script src="js/grimorio.js?v=14"></script>
-<script src="js/treasury.js?v=14"></script>
-<script src="js/diary.js?v=14"></script>
-<script src="js/inspiration.js?v=14"></script>
-<script src="js/bottom-sheet.js?v=14"></script>
-<script src="js/app.js?v=14"></script>
-<script type="module" src="js/cloud.js?v=14"></script>
+<script src="js/firebase-config.js?v=15"></script>
+<script src="js/config.js?v=15"></script>
+<script src="js/storage.js?v=15"></script>
+<script src="js/hp-bar.js?v=15"></script>
+<script src="js/header.js?v=15"></script>
+<script src="js/sheet.js?v=15"></script>
+<script src="js/grimorio.js?v=15"></script>
+<script src="js/treasury.js?v=15"></script>
+<script src="js/diary.js?v=15"></script>
+<script src="js/inspiration.js?v=15"></script>
+<script src="js/bottom-sheet.js?v=15"></script>
+<script src="js/app.js?v=15"></script>
+<script type="module" src="js/cloud.js?v=15"></script>
 </body>
 </html>

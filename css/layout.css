@@ -88,6 +88,35 @@ body {
   display: block;
 }
 
+/* Swipe fluido tra sotto-tab: il pannello segue il dito e la nuova
+   pagina entra scivolando nella direzione del gesto. */
+.subpanel.swipe-follow {
+  transition: none;
+  will-change: transform;
+}
+
+.subpanel.swipe-reset {
+  transition: transform 0.22s ease-out;
+}
+
+.subpanel.slide-in-right {
+  animation: subSlideInRight 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.subpanel.slide-in-left {
+  animation: subSlideInLeft 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes subSlideInRight {
+  from { transform: translateX(88%); opacity: 0.35; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes subSlideInLeft {
+  from { transform: translateX(-88%); opacity: 0.35; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-gold-soft);
