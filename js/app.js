@@ -59,6 +59,70 @@
     fab.setAttribute('data-context', currentView + '-' + (sub || ''));
   }
 
+  function navigateSubtabs(dir) {
+    var view = document.getElementById('view-' + currentView);
+    if (!view) {
+      return;
+    }
+    var tabs = view.querySelectorAll('.subtabs .subtab');
+    if (!tabs.length) {
+      return;
+    }
+    var idx = -1;
+    tabs.forEach(function (t, i) {
+      if (t.classList.contains('active')) {
+        idx = i;
+      }
+    });
+    var next = idx + dir;
+    if (idx < 0 || next < 0 || next >= tabs.length) {
+      return;
+    }
+    tabs[next].click();
+    tabs[next].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }
+
+  function bindSwipeTabs() {
+    // Swipe orizzontale su mobile per passare tra le sotto-tab della vista
+    // attiva. Il menu in basso resta solo al click. Escludiamo i controlli
+    // che gestiscono già il drag/scroll orizzontale.
+    var main = document.getElementById('main-content');
+    if (!main) {
+      return;
+    }
+    var startX = 0;
+    var startY = 0;
+    var tracking = false;
+
+    main.addEventListener('touchstart', function (e) {
+      tracking = false;
+      if (e.touches.length !== 1) {
+        return;
+      }
+      var t = e.target;
+      if (t.closest && t.closest('.loh-bar-track, .subtabs, input, textarea, select, [contenteditable="true"]')) {
+        return;
+      }
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      tracking = true;
+    }, { passive: true });
+
+    main.addEventListener('touchend', function (e) {
+      if (!tracking) {
+        return;
+      }
+      tracking = false;
+      var touch = e.changedTouches[0];
+      var dx = touch.clientX - startX;
+      var dy = touch.clientY - startY;
+      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.8) {
+        return;
+      }
+      navigateSubtabs(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  }
+
   function bindNav() {
     document.querySelectorAll('#bottom-nav .nav-link[data-view]').forEach(function (link) {
       link.addEventListener('click', function (e) {
@@ -221,6 +285,7 @@
     bindViewportGuard();
     bindViewportDebug();
     bindNav();
+    bindSwipeTabs();
     initSubTabs('#view-scheda');
     initSubTabs('#view-tesoreria');
     initSubTabs('#view-diario');

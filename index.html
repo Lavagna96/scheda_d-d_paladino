@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=13">
+<link rel="stylesheet" href="css/styles.css?v=14">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=13" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=14" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -47,6 +47,7 @@
   <section id="view-scheda" class="view-panel">
     <nav class="subtabs" aria-label="Sotto-tab Scheda">
       <button type="button" class="subtab active" data-subtab="comb">Info/Comb</button>
+      <button type="button" class="subtab" data-subtab="res">Risorse</button>
       <button type="button" class="subtab" data-subtab="stats">Caratteristiche</button>
       <button type="button" class="subtab" data-subtab="traits">Tratti</button>
     </nav>
@@ -183,7 +184,10 @@
         </div>
         <p class="note">Sempre preparata. 1/riposo lungo senza spendere slot.</p>
       </div>
+    </div>
 
+    <!-- Risorse -->
+    <div class="subpanel" data-subpanel="res">
       <div class="card res-panel">
         <div class="res-head">
           <h2 class="card-title" style="margin:0;border:none;padding:0">Risorse &amp; Usi</h2>
@@ -604,7 +608,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=13" alt="Ritratto di Tharion Velnar">
+      <img src="avatar-full.jpg?v=14" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -613,18 +617,18 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=13"></script>
-<script src="js/config.js?v=13"></script>
-<script src="js/storage.js?v=13"></script>
-<script src="js/hp-bar.js?v=13"></script>
-<script src="js/header.js?v=13"></script>
-<script src="js/sheet.js?v=13"></script>
-<script src="js/grimorio.js?v=13"></script>
-<script src="js/treasury.js?v=13"></script>
-<script src="js/diary.js?v=13"></script>
-<script src="js/inspiration.js?v=13"></script>
-<script src="js/bottom-sheet.js?v=13"></script>
-<script src="js/app.js?v=13"></script>
-<script type="module" src="js/cloud.js?v=13"></script>
+<script src="js/firebase-config.js?v=14"></script>
+<script src="js/config.js?v=14"></script>
+<script src="js/storage.js?v=14"></script>
+<script src="js/hp-bar.js?v=14"></script>
+<script src="js/header.js?v=14"></script>
+<script src="js/sheet.js?v=14"></script>
+<script src="js/grimorio.js?v=14"></script>
+<script src="js/treasury.js?v=14"></script>
+<script src="js/diary.js?v=14"></script>
+<script src="js/inspiration.js?v=14"></script>
+<script src="js/bottom-sheet.js?v=14"></script>
+<script src="js/app.js?v=14"></script>
+<script type="module" src="js/cloud.js?v=14"></script>
 </body>
 </html>
