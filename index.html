@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=17">
+<link rel="stylesheet" href="css/styles.css?v=18">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=17" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=18" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -508,6 +508,14 @@
         <div class="loot-sec-hint">(i tesori leggendari di Tharion)</div>
       </div>
 
+      <div class="relic-acc">
+        <button type="button" class="relic-acc-head" aria-expanded="false">
+          <span class="relic-acc-gem" aria-hidden="true">✦</span>
+          <span class="relic-acc-name">Lama Vincolante</span>
+          <span class="relic-rarity leg">Leggendaria</span>
+          <span class="relic-acc-arrow" aria-hidden="true">▾</span>
+        </button>
+        <div class="relic-acc-body">
       <div class="relic-card">
         <div class="relic-art">
           <svg viewBox="0 0 140 150" aria-hidden="true" focusable="false">
@@ -562,7 +570,17 @@
           <span class="relic-tier locked">Liv. III · ???</span>
         </div>
       </div>
+        </div>
+      </div>
 
+      <div class="relic-acc">
+        <button type="button" class="relic-acc-head" aria-expanded="false">
+          <span class="relic-acc-gem" aria-hidden="true">✦</span>
+          <span class="relic-acc-name">Scudo Magico</span>
+          <span class="relic-rarity rare">Raro</span>
+          <span class="relic-acc-arrow" aria-hidden="true">▾</span>
+        </button>
+        <div class="relic-acc-body">
       <div class="relic-card">
         <div class="relic-art">
           <svg viewBox="0 0 140 150" aria-hidden="true" focusable="false">
@@ -613,8 +631,9 @@
         <p class="relic-type">Scudo · magico</p>
         <ul class="relic-effects">
           <li>Vantaggio ai tiri di iniziativa</li>
-          <li>+5 CA contro un attacco · 1/giorno <span class="relic-note">(uso tracciato in Scheda → Risorse)</span></li>
         </ul>
+      </div>
+        </div>
       </div>
 
       <div class="relic-slot">✦ &nbsp;Uno spazio attende la prossima reliquia della campagna…</div>
@@ -727,7 +746,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=17" alt="Ritratto di Tharion Velnar">
+      <img src="avatar-full.jpg?v=18" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -736,18 +755,18 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=17"></script>
-<script src="js/config.js?v=17"></script>
-<script src="js/storage.js?v=17"></script>
-<script src="js/hp-bar.js?v=17"></script>
-<script src="js/header.js?v=17"></script>
-<script src="js/sheet.js?v=17"></script>
-<script src="js/grimorio.js?v=17"></script>
-<script src="js/treasury.js?v=17"></script>
-<script src="js/diary.js?v=17"></script>
-<script src="js/inspiration.js?v=17"></script>
-<script src="js/bottom-sheet.js?v=17"></script>
-<script src="js/app.js?v=17"></script>
-<script type="module" src="js/cloud.js?v=17"></script>
+<script src="js/firebase-config.js?v=18"></script>
+<script src="js/config.js?v=18"></script>
+<script src="js/storage.js?v=18"></script>
+<script src="js/hp-bar.js?v=18"></script>
+<script src="js/header.js?v=18"></script>
+<script src="js/sheet.js?v=18"></script>
+<script src="js/grimorio.js?v=18"></script>
+<script src="js/treasury.js?v=18"></script>
+<script src="js/diary.js?v=18"></script>
+<script src="js/inspiration.js?v=18"></script>
+<script src="js/bottom-sheet.js?v=18"></script>
+<script src="js/app.js?v=18"></script>
+<script type="module" src="js/cloud.js?v=18"></script>
 </body>
 </html>

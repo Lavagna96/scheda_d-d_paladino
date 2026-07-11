@@ -444,3 +444,84 @@
   font-style: italic;
   opacity: 0.85;
 }
+
+/* Accordion reliquie: elenco chiuso di default, espandi per la card */
+.relic-acc {
+  margin-bottom: var(--space-3);
+}
+
+.relic-acc-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-3) var(--space-4);
+  background:
+    radial-gradient(circle at 0% 50%, rgba(201, 164, 67, 0.08), transparent 55%),
+    var(--bg-card);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-align: left;
+}
+
+.relic-acc-gem {
+  color: var(--accent-gold);
+  font-size: 13px;
+  flex: none;
+}
+
+.relic-acc-name {
+  font-family: var(--font-title);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gold-bright);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relic-acc-head .relic-rarity {
+  flex: none;
+}
+
+.relic-acc-arrow {
+  color: var(--text-secondary);
+  font-size: 13px;
+  flex: none;
+  transition: transform 0.2s ease;
+}
+
+.relic-acc.open .relic-acc-arrow {
+  transform: rotate(180deg);
+}
+
+.relic-acc.open .relic-acc-head {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: var(--border-soft);
+}
+
+.relic-acc-body {
+  display: none;
+}
+
+.relic-acc.open .relic-acc-body {
+  display: block;
+  animation: relicReveal 0.24s ease-out;
+}
+
+@keyframes relicReveal {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.relic-acc-body .relic-card {
+  margin-bottom: 0;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}

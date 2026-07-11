@@ -19,6 +19,20 @@
     }, 0);
   }
 
+  function carryMaxKg() {
+    // Formula ufficiale D&D 5e: capacità di carico = Forza × 15 libbre,
+    // convertita in kg (1 lb ≈ 0,4536 kg).
+    var cfg = window.APP_CONFIG;
+    var str = 10;
+    ((cfg && cfg.ABILITIES) || []).forEach(function (a) {
+      if (a.name === 'FOR') {
+        str = a.score;
+      }
+    });
+
+    return Math.round(str * 15 * 0.4536 * 10) / 10;
+  }
+
   function renderCarryBar() {
     var state = window.AppStorage.getState();
     var coins = state.coins;
@@ -26,7 +40,7 @@
     var personalW = itemsWeight(state.treasury.personalItems);
     var coinW = coinWeightKg(coins);
     var total = coinW + partyW + personalW;
-    var max = state.treasury.carryMax || 280;
+    var max = carryMaxKg();
     var pct = Math.min(100, total / max * 100);
     var fill = document.getElementById('carry-bar-fill');
     var label = document.getElementById('carry-label-val');
@@ -40,7 +54,8 @@
       }
     }
     if (label) {
-      label.textContent = total.toFixed(1) + ' / ' + max + ' kg';
+      label.textContent = total.toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+        + ' / ' + max.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' kg';
     }
   }
 
@@ -216,8 +231,23 @@
     renderCoins();
   }
 
+  function bindRelicAccordions() {
+    document.querySelectorAll('.relic-acc-head').forEach(function (head) {
+      if (head._bound) {
+        return;
+      }
+      head._bound = true;
+      head.addEventListener('click', function () {
+        var acc = head.parentElement;
+        var open = acc.classList.toggle('open');
+        head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+  }
+
   function init() {
     render();
+    bindRelicAccordions();
   }
 
   window.AppTreasury = {
