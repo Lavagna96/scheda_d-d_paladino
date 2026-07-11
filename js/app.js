@@ -17,7 +17,14 @@
     updateFab();
   }
 
+  var suppressSlideAnim = false;
+
   function animatePanelIn(panel, dir) {
+    if (suppressSlideAnim) {
+      suppressSlideAnim = false;
+
+      return;
+    }
     if (!panel || !dir) {
       return;
     }
@@ -108,47 +115,107 @@
   }
 
   function bindSwipeTabs() {
-    // Swipe orizzontale su mobile tra le sotto-tab della vista attiva:
-    // il pannello segue il dito e al rilascio la pagina scivola avanti o
-    // indietro. Il menu in basso resta solo al click. Escludiamo i
-    // controlli che gestiscono già il drag/scroll orizzontale.
+    // Swipe orizzontale su mobile tra le sotto-tab della vista attiva,
+    // stile Telegram: le pagine sono affiancate, il pannello adiacente
+    // entra attaccato a quello corrente mentre trascini (niente vuoto).
+    // Il menu in basso resta solo al click. Escludiamo i controlli che
+    // gestiscono già il drag/scroll orizzontale.
     var main = document.getElementById('main-content');
     if (!main) {
       return;
     }
     var startX = 0;
     var startY = 0;
+    var startT = 0;
     var tracking = false;
     var following = false;
+    var animating = false;
     var ctx = null;
+    var neighbor = null;
+    var neighborDir = 0;
+    var panelW = 0;
 
-    function goTo(tabList, targetIdx) {
-      tabList[targetIdx].click();
-      tabList[targetIdx].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-    }
-
-    function endFollow(snapBack) {
-      if (!ctx || !ctx.panel) {
+    function clearPanelStyles(p) {
+      if (!p) {
         return;
       }
-      var p = ctx.panel;
-      p.classList.remove('swipe-follow');
-      if (snapBack) {
-        p.classList.add('swipe-reset');
-        p.style.transform = '';
-        setTimeout(function () { p.classList.remove('swipe-reset'); }, 260);
-      } else {
-        p.style.transform = '';
+      p.classList.remove('swipe-follow', 'swipe-anim');
+      p.style.display = '';
+      p.style.position = '';
+      p.style.top = '';
+      p.style.left = '';
+      p.style.width = '';
+      p.style.transform = '';
+    }
+
+    function hideNeighbor() {
+      clearPanelStyles(neighbor);
+      neighbor = null;
+      neighborDir = 0;
+    }
+
+    function showNeighbor(dir) {
+      var targetIdx = ctx.idx + dir;
+      if (targetIdx < 0 || targetIdx >= ctx.tabs.length) {
+        return;
       }
+      var view = document.getElementById('view-' + currentView);
+      var name = ctx.tabs[targetIdx].getAttribute('data-subtab');
+      var np = view ? view.querySelector('.subpanel[data-subpanel="' + name + '"]') : null;
+      if (!np) {
+        return;
+      }
+      // pannello adiacente affiancato a quello attivo, fuori schermo
+      np.classList.add('swipe-follow');
+      np.style.display = 'block';
+      np.style.position = 'absolute';
+      np.style.top = ctx.panel.offsetTop + 'px';
+      np.style.left = '0';
+      np.style.width = '100%';
+      np.style.transform = 'translateX(' + (dir > 0 ? panelW : -panelW) + 'px)';
+      neighbor = np;
+      neighborDir = dir;
+    }
+
+    function finish(commit) {
+      animating = true;
+      var active = ctx.panel;
+      var nb = neighbor;
+      var dir = neighborDir;
+      var targetIdx = ctx.idx + dir;
+      var tabsRef = ctx.tabs;
+      active.classList.add('swipe-anim');
+      if (nb) {
+        nb.classList.add('swipe-anim');
+      }
+      if (commit && nb) {
+        active.style.transform = 'translateX(' + (dir > 0 ? -panelW : panelW) + 'px)';
+        nb.style.transform = 'translateX(0px)';
+      } else {
+        active.style.transform = 'translateX(0px)';
+        if (nb) {
+          nb.style.transform = 'translateX(' + (dir > 0 ? panelW : -panelW) + 'px)';
+        }
+      }
+      setTimeout(function () {
+        clearPanelStyles(active);
+        hideNeighbor();
+        if (commit && targetIdx >= 0 && targetIdx < tabsRef.length) {
+          suppressSlideAnim = true;
+          tabsRef[targetIdx].click();
+          tabsRef[targetIdx].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+        }
+        animating = false;
+      }, 250);
     }
 
     main.addEventListener('touchstart', function (e) {
       tracking = false;
       following = false;
-      ctx = null;
-      if (e.touches.length !== 1) {
+      if (animating || e.touches.length !== 1) {
         return;
       }
+      ctx = null;
       var t = e.target;
       if (t.closest && t.closest('.loh-bar-track, .subtabs')) {
         return;
@@ -162,6 +229,7 @@
       }
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
+      startT = Date.now();
       tracking = true;
     }, { passive: true });
 
@@ -185,16 +253,26 @@
 
             return;
           }
+          panelW = ctx.panel.offsetWidth || main.clientWidth;
           following = true;
           ctx.panel.classList.add('swipe-follow');
         } else {
           return;
         }
       }
-      // segue il dito; se non c'è una tab in quella direzione fa elastico
-      var hasNeighbor = dx < 0 ? ctx.idx < ctx.tabs.length - 1 : ctx.idx > 0;
-      var damp = hasNeighbor ? 0.9 : 0.25;
-      ctx.panel.style.transform = 'translateX(' + Math.round(dx * damp) + 'px)';
+      var dir = dx < 0 ? 1 : -1;
+      if (neighborDir !== dir) {
+        hideNeighbor();
+        showNeighbor(dir);
+      }
+      if (neighbor) {
+        // le due pagine scorrono insieme, attaccate
+        ctx.panel.style.transform = 'translateX(' + Math.round(dx) + 'px)';
+        neighbor.style.transform = 'translateX(' + Math.round((dir > 0 ? panelW : -panelW) + dx) + 'px)';
+      } else {
+        // nessuna tab in quella direzione: effetto elastico
+        ctx.panel.style.transform = 'translateX(' + Math.round(dx * 0.25) + 'px)';
+      }
     }, { passive: true });
 
     main.addEventListener('touchend', function (e) {
@@ -202,38 +280,25 @@
         return;
       }
       tracking = false;
-      var touch = e.changedTouches[0];
-      var dx = touch.clientX - startX;
-      var dy = touch.clientY - startY;
-      var horizontal = Math.abs(dx) >= 60 && Math.abs(dx) > Math.abs(dy) * 1.5;
-      if (following) {
-        var target = ctx.idx + (dx < 0 ? 1 : -1);
-        if (horizontal && target >= 0 && target < ctx.tabs.length) {
-          endFollow(false);
-          goTo(ctx.tabs, target);
-        } else {
-          endFollow(true);
-        }
-      } else if (horizontal) {
-        var c = getSubtabContext();
-        if (c && c.idx >= 0) {
-          var t2 = c.idx + (dx < 0 ? 1 : -1);
-          if (t2 >= 0 && t2 < c.tabs.length) {
-            goTo(c.tabs, t2);
-          }
-        }
+      if (!following) {
+        return;
       }
       following = false;
-      ctx = null;
+      var touch = e.changedTouches[0];
+      var dx = touch.clientX - startX;
+      var dt = Date.now() - startT;
+      // conferma se hai trascinato abbastanza o con un colpo rapido
+      var commit = !!neighbor
+        && (Math.abs(dx) >= panelW * 0.3 || (Math.abs(dx) >= 40 && dt < 250));
+      finish(commit);
     }, { passive: true });
 
     main.addEventListener('touchcancel', function () {
       if (following) {
-        endFollow(true);
+        finish(false);
       }
       tracking = false;
       following = false;
-      ctx = null;
     }, { passive: true });
   }
 

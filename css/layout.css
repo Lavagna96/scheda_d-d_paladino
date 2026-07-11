@@ -36,6 +36,8 @@ body {
 .view-panel {
   max-width: 720px;
   margin: 0 auto;
+  /* contesto per il pannello adiacente mostrato durante lo swipe */
+  position: relative;
 }
 
 .subtabs {
@@ -88,15 +90,15 @@ body {
   display: block;
 }
 
-/* Swipe fluido tra sotto-tab: il pannello segue il dito e la nuova
-   pagina entra scivolando nella direzione del gesto. */
+/* Swipe fluido tra sotto-tab, stile pagine affiancate: il pannello
+   attivo segue il dito e quello adiacente entra attaccato. */
 .subpanel.swipe-follow {
   transition: none;
   will-change: transform;
 }
 
-.subpanel.swipe-reset {
-  transition: transform 0.22s ease-out;
+.subpanel.swipe-anim {
+  transition: transform 0.24s ease-out;
 }
 
 .subpanel.slide-in-right {
