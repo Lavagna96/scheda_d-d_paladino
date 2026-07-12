@@ -38,7 +38,7 @@ button {
   font-family: inherit;
 }
 
-button:not(.edit-del):not(.ds-reset):not(.ds-pip):not(.quest-check):not(.qbtn):not(.header-options),
+button:not(.edit-del):not(.ds-reset):not(.ds-pip):not(.quest-check):not(.qbtn):not(.header-options):not(.res-rest-btn),
 .btn, .nav-link, .subtab, .fab {
   min-width: var(--touch-min);
   min-height: var(--touch-min);

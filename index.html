@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=18">
+<link rel="stylesheet" href="css/styles.css?v=23">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=18" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=23" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -189,13 +189,7 @@
     <!-- Risorse -->
     <div class="subpanel" data-subpanel="res">
       <div class="card res-panel">
-        <div class="res-head">
-          <h2 class="card-title" style="margin:0;border:none;padding:0">Risorse &amp; Usi</h2>
-          <div class="rest-bar">
-            <button type="button" class="rest-btn" id="btn-short-rest">Riposo Breve</button>
-            <button type="button" class="rest-btn" id="btn-long-rest">Riposo Lungo</button>
-          </div>
-        </div>
+        <h2 class="card-title">Risorse &amp; Usi</h2>
         <div class="loh-card">
           <div class="loh-top">
             <span><b>Imposizione delle Mani</b></span>
@@ -209,37 +203,93 @@
             <button type="button" class="pbtn" data-delta="5">+5</button>
           </div>
         </div>
-        <div class="res-cards">
-          <div class="res-card" data-key="hd" data-max="7">
-            <div class="rc-top"><span class="rc-name">Dadi Ferita</span><span class="ctx">7d10</span><span class="rc-count"></span></div>
-            <div class="segbar"></div>
+        <div class="res-sec res-sec-short">
+          <div class="res-sec-head">
+            <span class="res-plaque"><span class="res-plaque-gem" aria-hidden="true"></span>Riposo breve</span>
+            <span class="res-sec-line" aria-hidden="true"></span>
+            <button type="button" class="res-rest-btn" id="btn-short-rest">Riposa ↻</button>
           </div>
           <div class="res-card" data-key="cd" data-max="2">
-            <div class="rc-top"><span class="rc-name">Channel Divinity</span><span class="ctx">1 al rip. breve</span><span class="rc-count"></span></div>
-            <div class="segbar"></div>
-          </div>
-          <div class="res-card" data-key="breath" data-max="3">
-            <div class="rc-top"><span class="rc-name">Soffio del Drago</span><span class="rc-count"></span></div>
-            <div class="segbar"></div>
-          </div>
-          <div class="res-card" data-key="smitefree" data-max="1">
-            <div class="rc-top"><span class="rc-name">Punizione Divina gratis</span><span class="rc-count"></span></div>
-            <div class="segbar"></div>
-          </div>
-          <div class="res-card" data-key="steedfree" data-max="1">
-            <div class="rc-top"><span class="rc-name">Trova Destriero gratis</span><span class="rc-count"></span></div>
-            <div class="segbar"></div>
-          </div>
-          <div class="res-card" data-key="flight" data-max="1">
-            <div class="rc-top"><span class="rc-name">Volo Draconico</span><span class="rc-count"></span></div>
-            <div class="segbar"></div>
-          </div>
-          <div class="res-card" data-key="shield" data-max="1">
-            <div class="rc-top"><span class="rc-name">Scudo magico</span><span class="ctx">+5 CA · 1/giorno</span><span class="rc-count"></span></div>
-            <div class="segbar"></div>
+            <span class="rc-med" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></span>
+            <div class="rc-info">
+              <span class="rc-name">Channel Divinity</span>
+              <span class="rc-ctx">1 al riposo breve</span>
+              <div class="segbar"></div>
+            </div>
+            <span class="rc-count"></span>
           </div>
         </div>
-        <p class="res-hint">Tocca un segmento per impostare gli usi restanti · Long press per dettagli</p>
+
+        <div class="res-sec res-sec-long">
+          <div class="res-sec-head">
+            <span class="res-plaque"><span class="res-plaque-gem" aria-hidden="true"></span>Riposo lungo</span>
+            <span class="res-sec-line" aria-hidden="true"></span>
+            <button type="button" class="res-rest-btn" id="btn-long-rest">Riposa ↻</button>
+          </div>
+          <div class="res-card" data-key="hd" data-max="7">
+            <span class="rc-med" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 5v10l-8 5-8-5V7z"/><path d="M12 7l5 9H7z"/></svg></span>
+            <div class="rc-info">
+              <span class="rc-name">Dadi Ferita</span>
+              <span class="rc-ctx">7d10</span>
+              <div class="segbar"></div>
+            </div>
+            <span class="rc-count"></span>
+          </div>
+          <div class="res-card" data-key="breath" data-max="3">
+            <span class="rc-med" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c2-2.96 0-7-1-8 0 3.04-1.77 4.74-3 6-1.23 1.26-2 3.24-2 5a6 6 0 1 0 12 0c0-1.53-1.06-3.94-2-5-1.79 3-2.79 3-4 2z"/></svg></span>
+            <div class="rc-info">
+              <span class="rc-name">Soffio del Drago</span>
+              <span class="rc-ctx">2d10 fuoco</span>
+              <div class="segbar"></div>
+            </div>
+            <span class="rc-count"></span>
+          </div>
+          <div class="res-card" data-key="smitefree" data-max="1">
+            <span class="rc-med" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4v5l-9 7l-4 4l-3 -3l4 -4l7 -9z"/><path d="M6.5 11.5l6 6"/></svg></span>
+            <div class="rc-info">
+              <span class="rc-name">Punizione Divina gratis</span>
+              <span class="rc-ctx">senza spendere slot</span>
+              <div class="segbar"></div>
+            </div>
+            <span class="rc-count"></span>
+          </div>
+          <div class="res-card" data-key="steedfree" data-max="1">
+            <span class="rc-med" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4c-2.4 3.5-2.4 8.6.5 11.6a6.3 6.3 0 0 0 9 0c2.9-3 2.9-8.1.5-11.6"/><circle cx="6.2" cy="9.5" r="0.4"/><circle cx="17.8" cy="9.5" r="0.4"/><circle cx="7.5" cy="14.5" r="0.4"/><circle cx="16.5" cy="14.5" r="0.4"/></svg></span>
+            <div class="rc-info">
+              <span class="rc-name">Trova Destriero gratis</span>
+              <span class="rc-ctx">evocazione senza slot</span>
+              <div class="segbar"></div>
+            </div>
+            <span class="rc-count"></span>
+          </div>
+          <div class="res-card" data-key="flight" data-max="1">
+            <span class="rc-med" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c9 0 15-6 15-15v-1h-1C9 4 4 10 4 19z"/><path d="M4 20L18 6"/></svg></span>
+            <div class="rc-info">
+              <span class="rc-name">Volo Draconico</span>
+              <span class="rc-ctx">volo 10 minuti</span>
+              <div class="segbar"></div>
+            </div>
+            <span class="rc-count"></span>
+          </div>
+        </div>
+
+        <div class="res-sec res-sec-day">
+          <div class="res-sec-head">
+            <span class="res-plaque"><span class="res-plaque-gem" aria-hidden="true"></span>1 al giorno</span>
+            <span class="res-sec-line" aria-hidden="true"></span>
+          </div>
+          <div class="res-card" data-key="shield" data-max="1">
+            <span class="rc-med" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3A12 12 0 0 1 12 21 12 12 0 0 1 3.5 6 12 12 0 0 0 12 3"/></svg></span>
+            <div class="rc-info">
+              <span class="rc-name">Scudo magico</span>
+              <span class="rc-ctx">+5 CA · reazione</span>
+              <div class="segbar"></div>
+            </div>
+            <span class="rc-count"></span>
+          </div>
+        </div>
+
+        <p class="res-hint">Tocca una gemma per impostare gli usi restanti · Long press per dettagli</p>
       </div>
     </div>
 
@@ -746,7 +796,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=18" alt="Ritratto di Tharion Velnar">
+      <img src="avatar-full.jpg?v=23" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -755,18 +805,18 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=18"></script>
-<script src="js/config.js?v=18"></script>
-<script src="js/storage.js?v=18"></script>
-<script src="js/hp-bar.js?v=18"></script>
-<script src="js/header.js?v=18"></script>
-<script src="js/sheet.js?v=18"></script>
-<script src="js/grimorio.js?v=18"></script>
-<script src="js/treasury.js?v=18"></script>
-<script src="js/diary.js?v=18"></script>
-<script src="js/inspiration.js?v=18"></script>
-<script src="js/bottom-sheet.js?v=18"></script>
-<script src="js/app.js?v=18"></script>
-<script type="module" src="js/cloud.js?v=18"></script>
+<script src="js/firebase-config.js?v=23"></script>
+<script src="js/config.js?v=23"></script>
+<script src="js/storage.js?v=23"></script>
+<script src="js/hp-bar.js?v=23"></script>
+<script src="js/header.js?v=23"></script>
+<script src="js/sheet.js?v=23"></script>
+<script src="js/grimorio.js?v=23"></script>
+<script src="js/treasury.js?v=23"></script>
+<script src="js/diary.js?v=23"></script>
+<script src="js/inspiration.js?v=23"></script>
+<script src="js/bottom-sheet.js?v=23"></script>
+<script src="js/app.js?v=23"></script>
+<script type="module" src="js/cloud.js?v=23"></script>
 </body>
 </html>
