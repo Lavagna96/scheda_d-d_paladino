@@ -90,15 +90,23 @@ body {
   display: block;
 }
 
-/* Swipe fluido tra sotto-tab, stile pagine affiancate: il pannello
-   attivo segue il dito e quello adiacente entra attaccato. */
+/* Swipe fluido tra sotto-tab, stile iOS: la pagina che entra scorre
+   sopra con ombra sul bordo, quella attiva fa parallasse e si scurisce.
+   Sfondo e angoli arrotondati servono a rendere la pagina in transito
+   un "foglio" solido: l'ombra segue la curva, niente spigoli vivi. */
+.subpanel.swipe-follow,
+.subpanel.swipe-anim {
+  background: var(--bg-principal);
+  border-radius: var(--radius-lg);
+}
+
 .subpanel.swipe-follow {
   transition: none;
   will-change: transform;
 }
 
 .subpanel.swipe-anim {
-  transition: transform 0.24s ease-out;
+  transition: transform 0.24s ease-out, filter 0.24s ease-out;
 }
 
 .subpanel.slide-in-right {

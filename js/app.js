@@ -64,6 +64,11 @@
           }
         });
         if (oldIdx !== -1 && oldIdx !== tabIdx) {
+          // ogni nuova pagina riparte dall'inizio
+          var mc = document.getElementById('main-content');
+          if (mc) {
+            mc.scrollTop = 0;
+          }
           animatePanelIn(activePanel, tabIdx > oldIdx ? 1 : -1);
         }
         updateFab();
@@ -146,6 +151,9 @@
       p.style.left = '';
       p.style.width = '';
       p.style.transform = '';
+      p.style.zIndex = '';
+      p.style.boxShadow = '';
+      p.style.filter = '';
     }
 
     function hideNeighbor() {
@@ -165,13 +173,21 @@
       if (!np) {
         return;
       }
-      // pannello adiacente affiancato a quello attivo, fuori schermo
+      // pannello adiacente sopra quello attivo, fuori schermo, con ombra
+      // sul bordo d'ingresso (profondità stile iOS). Il suo inizio è
+      // allineato alla parte visibile dello schermo: la nuova pagina si
+      // vede sempre dall'inizio, non al livello di scroll della vecchia.
+      var mainRect = main.getBoundingClientRect();
+      var hostRect = ctx.panel.parentElement.getBoundingClientRect();
+      var visTop = Math.max(ctx.panel.offsetTop, Math.round(mainRect.top - hostRect.top));
       np.classList.add('swipe-follow');
       np.style.display = 'block';
       np.style.position = 'absolute';
-      np.style.top = ctx.panel.offsetTop + 'px';
+      np.style.top = visTop + 'px';
       np.style.left = '0';
       np.style.width = '100%';
+      np.style.zIndex = '2';
+      np.style.boxShadow = (dir > 0 ? '-14px' : '14px') + ' 0 26px rgba(0, 0, 0, 0.55)';
       np.style.transform = 'translateX(' + (dir > 0 ? panelW : -panelW) + 'px)';
       neighbor = np;
       neighborDir = dir;
@@ -189,10 +205,12 @@
         nb.classList.add('swipe-anim');
       }
       if (commit && nb) {
-        active.style.transform = 'translateX(' + (dir > 0 ? -panelW : panelW) + 'px)';
+        active.style.transform = 'translateX(' + Math.round((dir > 0 ? -1 : 1) * panelW * 0.3) + 'px)';
+        active.style.filter = 'brightness(0.55)';
         nb.style.transform = 'translateX(0px)';
       } else {
         active.style.transform = 'translateX(0px)';
+        active.style.filter = '';
         if (nb) {
           nb.style.transform = 'translateX(' + (dir > 0 ? panelW : -panelW) + 'px)';
         }
@@ -260,20 +278,28 @@
           return;
         }
       }
+      // swipe agganciato: la pagina non deve muoversi in verticale
+      if (e.cancelable) {
+        e.preventDefault();
+      }
       var dir = dx < 0 ? 1 : -1;
       if (neighborDir !== dir) {
         hideNeighbor();
         showNeighbor(dir);
       }
       if (neighbor) {
-        // le due pagine scorrono insieme, attaccate
-        ctx.panel.style.transform = 'translateX(' + Math.round(dx) + 'px)';
+        // la pagina che entra segue il dito sopra quella attiva, che
+        // scorre più lenta (parallasse) e si scurisce progressivamente
+        var prog = Math.min(1, Math.abs(dx) / panelW);
         neighbor.style.transform = 'translateX(' + Math.round((dir > 0 ? panelW : -panelW) + dx) + 'px)';
+        ctx.panel.style.transform = 'translateX(' + Math.round(dx * 0.3) + 'px)';
+        ctx.panel.style.filter = 'brightness(' + (1 - 0.45 * prog).toFixed(3) + ')';
       } else {
         // nessuna tab in quella direzione: effetto elastico
         ctx.panel.style.transform = 'translateX(' + Math.round(dx * 0.25) + 'px)';
+        ctx.panel.style.filter = '';
       }
-    }, { passive: true });
+    }, { passive: false });
 
     main.addEventListener('touchend', function (e) {
       if (!tracking) {
