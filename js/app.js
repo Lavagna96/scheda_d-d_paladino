@@ -1,6 +1,83 @@
 (function () {
   var cfg = window.APP_CONFIG;
   var currentView = 'scheda';
+  var IND_EASE = 'transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1), width 0.26s cubic-bezier(0.22, 0.61, 0.36, 1)';
+
+  function subIndicator(bar) {
+    if (!bar) {
+      return null;
+    }
+    var ind = bar.querySelector('.subtab-ind');
+    if (!ind) {
+      ind = document.createElement('span');
+      ind.className = 'subtab-ind';
+      ind.setAttribute('aria-hidden', 'true');
+      bar.insertBefore(ind, bar.firstChild);
+    }
+
+    return ind;
+  }
+
+  // segna con .on-gold (testo scuro) le tab coperte dalla pillola per più
+  // di un terzo della loro larghezza, così il contrasto regge anche a metà
+  function applyGoldCoverage(bar, left, width) {
+    var right = left + width;
+    bar.querySelectorAll('.subtab').forEach(function (t) {
+      var tl = t.offsetLeft;
+      var overlap = Math.max(0, Math.min(right, tl + t.offsetWidth) - Math.max(left, tl));
+      t.classList.toggle('on-gold', t.offsetWidth > 0 && overlap / t.offsetWidth > 0.33);
+    });
+  }
+
+  function moveSubIndicator(bar, tab, animate) {
+    if (!bar || !tab || !tab.offsetWidth) {
+      return;
+    }
+    var ind = subIndicator(bar);
+    ind.style.transition = animate ? IND_EASE : 'none';
+    ind.style.top = tab.offsetTop + 'px';
+    ind.style.height = tab.offsetHeight + 'px';
+    ind.style.width = tab.offsetWidth + 'px';
+    ind.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
+    applyGoldCoverage(bar, tab.offsetLeft, tab.offsetWidth);
+  }
+
+  // Durante il trascinamento l'indicatore interpola tra la tab attuale e
+  // quella di destinazione (p = 0..1), muovendosi in sincrono con la pagina.
+  function lerpSubIndicator(bar, fromTab, toTab, p) {
+    if (!bar || !fromTab || !fromTab.offsetWidth) {
+      return;
+    }
+    var ind = subIndicator(bar);
+    var l = fromTab.offsetLeft;
+    var w = fromTab.offsetWidth;
+    if (toTab && toTab.offsetWidth) {
+      l += (toTab.offsetLeft - fromTab.offsetLeft) * p;
+      w += (toTab.offsetWidth - fromTab.offsetWidth) * p;
+    }
+    ind.style.transition = 'none';
+    ind.style.top = fromTab.offsetTop + 'px';
+    ind.style.height = fromTab.offsetHeight + 'px';
+    ind.style.width = w + 'px';
+    ind.style.transform = 'translateX(' + l + 'px)';
+    applyGoldCoverage(bar, l, w);
+  }
+
+  function repositionActiveIndicator(view, animate) {
+    if (!view) {
+      return;
+    }
+    var bar = view.querySelector('.subtabs');
+    if (bar) {
+      moveSubIndicator(bar, bar.querySelector('.subtab.active'), animate);
+    }
+  }
+
+  function currentSubtabBar() {
+    var v = document.getElementById('view-' + currentView);
+
+    return v ? v.querySelector('.subtabs') : null;
+  }
 
   function showView(viewId) {
     currentView = viewId;
@@ -11,6 +88,8 @@
       link.classList.toggle('active', link.getAttribute('data-view') === viewId);
     });
     document.getElementById('main-content').scrollTop = 0;
+    // la barra ora è visibile: l'indicatore va posizionato sulla tab attiva
+    repositionActiveIndicator(document.getElementById('view-' + viewId), false);
     if (viewId === 'cavalcatura' && window.AppSheet && window.AppSheet.renderSteedHp) {
       window.AppSheet.renderSteedHp();
     }
@@ -63,6 +142,7 @@
             activePanel = p;
           }
         });
+        moveSubIndicator(container.querySelector('.subtabs'), tab, true);
         if (oldIdx !== -1 && oldIdx !== tabIdx) {
           // ogni nuova pagina riparte dall'inizio
           var mc = document.getElementById('main-content');
@@ -74,6 +154,7 @@
         updateFab();
       });
     });
+    repositionActiveIndicator(container, false);
   }
 
   function getActiveSubtab(viewId) {
@@ -150,6 +231,7 @@
       p.style.top = '';
       p.style.left = '';
       p.style.width = '';
+      p.style.minHeight = '';
       p.style.transform = '';
       p.style.zIndex = '';
       p.style.boxShadow = '';
@@ -186,6 +268,9 @@
       np.style.top = visTop + 'px';
       np.style.left = '0';
       np.style.width = '100%';
+      // pagina piena: riempie l'altezza visibile così anche una pagina con
+      // un solo modulo gira come una pagina intera (niente foglietto corto)
+      np.style.minHeight = main.clientHeight + 'px';
       np.style.zIndex = '2';
       np.style.boxShadow = (dir > 0 ? '-14px' : '14px') + ' 0 26px rgba(0, 0, 0, 0.55)';
       np.style.transform = 'translateX(' + (dir > 0 ? panelW : -panelW) + 'px)';
@@ -200,6 +285,9 @@
       var dir = neighborDir;
       var targetIdx = ctx.idx + dir;
       var tabsRef = ctx.tabs;
+      // l'indicatore del menu completa la corsa insieme alla pagina
+      var finalIdx = (commit && targetIdx >= 0 && targetIdx < tabsRef.length) ? targetIdx : ctx.idx;
+      moveSubIndicator(currentSubtabBar(), tabsRef[finalIdx], true);
       active.classList.add('swipe-anim');
       if (nb) {
         nb.classList.add('swipe-anim');
@@ -274,6 +362,7 @@
           panelW = ctx.panel.offsetWidth || main.clientWidth;
           following = true;
           ctx.panel.classList.add('swipe-follow');
+          ctx.panel.style.minHeight = main.clientHeight + 'px';
         } else {
           return;
         }
@@ -299,6 +388,15 @@
         ctx.panel.style.transform = 'translateX(' + Math.round(dx * 0.25) + 'px)';
         ctx.panel.style.filter = '';
       }
+      // il menu si muove in sincrono con la pagina
+      var indTgt = ctx.idx + dir;
+      var indValid = indTgt >= 0 && indTgt < ctx.tabs.length;
+      lerpSubIndicator(
+        currentSubtabBar(),
+        ctx.tabs[ctx.idx],
+        indValid ? ctx.tabs[indTgt] : null,
+        indValid ? Math.min(1, Math.abs(dx) / panelW) : 0
+      );
     }, { passive: false });
 
     main.addEventListener('touchend', function (e) {
@@ -505,6 +603,17 @@
     window.AppDiary.init();
     window.AppInspiration.init();
     window.AppBottomSheet.init();
+
+    // riallinea l'indicatore quando i font (larghezze diverse) o il resize
+    // cambiano la geometria delle tab
+    function realignIndicator() {
+      repositionActiveIndicator(document.getElementById('view-' + currentView), false);
+    }
+    window.addEventListener('load', realignIndicator);
+    window.addEventListener('resize', realignIndicator);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(realignIndicator);
+    }
   }
 
   window.App = {
