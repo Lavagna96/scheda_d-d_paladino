@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=23">
+<link rel="stylesheet" href="css/styles.css?v=27">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=23" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=27" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -537,26 +537,22 @@
     </div>
 
     <div class="subpanel" data-subpanel="party">
-      <div class="loot-sec-head">
-        <div class="loot-sec-title">◆ Oggetti &amp; Valori</div>
-        <div class="loot-sec-hint">(tutto ciò che trovate in avventura)</div>
+      <div class="card">
+        <h2 class="card-title">Oggetti &amp; Valori <small>tutto ciò che trovate in avventura</small></h2>
+        <div class="edit-list" id="party-list"></div>
       </div>
-      <div class="edit-list" id="party-list"></div>
     </div>
 
     <div class="subpanel" data-subpanel="sacca">
-      <div class="loot-sec-head">
-        <div class="loot-sec-title">◆ Pozioni &amp; Effetti</div>
-        <div class="loot-sec-hint">(tocca per modificare)</div>
+      <div class="card">
+        <h2 class="card-title">Pozioni &amp; Effetti <small>tocca per modificare</small></h2>
+        <div class="edit-list" id="personal-list"></div>
       </div>
-      <div class="edit-list" id="personal-list"></div>
     </div>
 
     <div class="subpanel" data-subpanel="oggetti">
-      <div class="loot-sec-head">
-        <div class="loot-sec-title">◆ Reliquie &amp; Equipaggiamento</div>
-        <div class="loot-sec-hint">(i tesori leggendari di Tharion)</div>
-      </div>
+      <div class="card">
+        <h2 class="card-title">Reliquie &amp; Equipaggiamento <small>i tesori leggendari di Tharion</small></h2>
 
       <div class="relic-acc">
         <button type="button" class="relic-acc-head" aria-expanded="false">
@@ -687,6 +683,7 @@
       </div>
 
       <div class="relic-slot">✦ &nbsp;Uno spazio attende la prossima reliquia della campagna…</div>
+      </div>
     </div>
   </section>
 
@@ -796,7 +793,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=23" alt="Ritratto di Tharion Velnar">
+      <img src="avatar-full.jpg?v=27" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -805,18 +802,18 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=23"></script>
-<script src="js/config.js?v=23"></script>
-<script src="js/storage.js?v=23"></script>
-<script src="js/hp-bar.js?v=23"></script>
-<script src="js/header.js?v=23"></script>
-<script src="js/sheet.js?v=23"></script>
-<script src="js/grimorio.js?v=23"></script>
-<script src="js/treasury.js?v=23"></script>
-<script src="js/diary.js?v=23"></script>
-<script src="js/inspiration.js?v=23"></script>
-<script src="js/bottom-sheet.js?v=23"></script>
-<script src="js/app.js?v=23"></script>
-<script type="module" src="js/cloud.js?v=23"></script>
+<script src="js/firebase-config.js?v=27"></script>
+<script src="js/config.js?v=27"></script>
+<script src="js/storage.js?v=27"></script>
+<script src="js/hp-bar.js?v=27"></script>
+<script src="js/header.js?v=27"></script>
+<script src="js/sheet.js?v=27"></script>
+<script src="js/grimorio.js?v=27"></script>
+<script src="js/treasury.js?v=27"></script>
+<script src="js/diary.js?v=27"></script>
+<script src="js/inspiration.js?v=27"></script>
+<script src="js/bottom-sheet.js?v=27"></script>
+<script src="js/app.js?v=27"></script>
+<script type="module" src="js/cloud.js?v=27"></script>
 </body>
 </html>
