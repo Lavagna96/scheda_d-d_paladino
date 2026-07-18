@@ -3,9 +3,10 @@
   "configurations": [
     {
       "name": "scheda",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "5599"],
-      "port": 5599
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "python3 -m http.server ${PORT:-5599}"],
+      "port": 5599,
+      "autoPort": true
     }
   ]
 }
