@@ -16,9 +16,25 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
+  position: relative;
+}
+
+/* evidenziazione scorrevole del menu principale, in sincrono con lo swipe */
+.nav-ind {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  width: 0;
+  height: 0;
+  background: rgba(201, 164, 67, 0.08);
+  border-radius: var(--radius-md);
+  pointer-events: none;
 }
 
 .nav-link {
+  position: relative;
+  z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -37,13 +53,12 @@
   padding: var(--space-1);
   min-width: 0;
   border-radius: var(--radius-md);
-  transition: color 0.2s, background 0.2s;
+  transition: color 0.2s;
   min-height: 52px;
 }
 
-.nav-link.active {
+.nav-link.nav-lit {
   color: var(--accent-gold);
-  background: rgba(201, 164, 67, 0.08);
 }
 
 .nav-link .nav-icon {

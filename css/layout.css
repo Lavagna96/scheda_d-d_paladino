@@ -24,6 +24,7 @@ body {
 #main-content {
   flex: 1 1 auto;
   min-height: 0;
+  position: relative;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -40,9 +41,24 @@ body {
   position: relative;
 }
 
+/* durante lo swipe tra sezioni: sfondo pieno + transizione sull'intera vista */
+.view-panel.view-swiping {
+  background: var(--bg-principal);
+  will-change: transform;
+}
+
+.view-panel.swipe-anim {
+  transition: transform 0.24s ease-out, filter 0.24s ease-out;
+}
+
 .subtabs {
   position: relative;
   display: flex;
+  /* quando le tab (poche/corte, es. Diario) non riempiono la barra si
+     distribuiscono su tutta la larghezza invece di ammassarsi a sinistra;
+     se invece sono più larghe della barra (es. Scheda, Tesoreria) questa
+     proprietà non ha effetto e resta lo scroll orizzontale come prima */
+  justify-content: space-between;
   gap: var(--space-2);
   overflow-x: auto;
   padding: var(--space-1);
@@ -85,6 +101,9 @@ body {
   color: var(--text-secondary);
   font-family: var(--font-title);
   font-size: 11px;
+  /* peso costante in tutti gli stati: così l'attiva non cambia larghezza
+     e l'indicatore scorrevole resta allineato al pixel */
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   cursor: pointer;
@@ -94,10 +113,10 @@ body {
 }
 
 /* testo scuro sulle tab coperte dalla pillola dorata (anche a metà swipe),
-   così restano leggibili durante la transizione */
+   così restano leggibili durante la transizione — solo il colore cambia,
+   il peso resta costante per non spostare le larghezze */
 .subtab.on-gold {
   color: var(--bg-principal);
-  font-weight: 700;
 }
 
 .subpanel {
@@ -177,6 +196,49 @@ body {
   color: var(--text-secondary);
   text-transform: none;
   letter-spacing: 0;
+}
+
+/* ===== Pagina incapsulata: una card esterna per la pagina, e dentro ogni
+   argomento è un riquadro proprio (stile "Azioni della Cavalcatura"),
+   così i temi si distinguono visivamente senza un bordo pesante come
+   quello della card esterna. ===== */
+.page-card > .card {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--border-gold-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  padding: var(--space-4);
+  margin: 0 0 var(--space-3);
+}
+
+.page-card > .card:last-child {
+  margin-bottom: 0;
+}
+
+/* intestazione di argomento: titolo + filo dorato sfumato (niente ◆, niente riga piena) */
+.card-title.sec {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.card-title.sec:first-child {
+  margin-top: 0;
+}
+
+.card-title.sec::before {
+  content: none;
+}
+
+.card-title.sec::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-gold), transparent);
 }
 
 .note {

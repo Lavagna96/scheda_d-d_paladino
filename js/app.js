@@ -1,7 +1,42 @@
 (function () {
   var cfg = window.APP_CONFIG;
   var currentView = 'scheda';
+  var NAV_ORDER = ['scheda', 'grimorio', 'cavalcatura', 'tesoreria', 'diario'];
   var IND_EASE = 'transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1), width 0.26s cubic-bezier(0.22, 0.61, 0.36, 1)';
+
+  // Riporta il documento a x=0/y=0 se qualcosa (rubber-band iOS, uno
+  // scrollIntoView che risale agli antenati, ecc.) l'ha spostato: senza
+  // questo la pagina resta permanentemente disassata verso un lato.
+  function resetDocScroll() {
+    var ae = document.activeElement;
+    var typing = !!ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable);
+    if (typing) {
+      return;
+    }
+    if (window.scrollX !== 0 || window.scrollY !== 0) {
+      window.scrollTo(0, 0);
+    }
+    if (document.documentElement.scrollLeft !== 0) {
+      document.documentElement.scrollLeft = 0;
+    }
+    if (document.body.scrollLeft !== 0) {
+      document.body.scrollLeft = 0;
+    }
+  }
+
+  // Centra la tab attiva dentro la sua barra scorrevole SENZA usare
+  // scrollIntoView: quando la barra non ha nulla da scorrere (ci sta già
+  // tutta), scrollIntoView può risalire a un antenato (anche con
+  // overflow:hidden, che resta comunque uno scroll-container valido per lo
+  // scroll programmatico) e spostare quello invece — da cui il bug del
+  // documento disassato.
+  function centerSubtabInBar(bar, tab) {
+    if (!bar || !tab) {
+      return;
+    }
+    var target = tab.offsetLeft + tab.offsetWidth / 2 - bar.clientWidth / 2;
+    bar.scrollLeft = Math.max(0, Math.min(bar.scrollWidth - bar.clientWidth, target));
+  }
 
   function subIndicator(bar) {
     if (!bar) {
@@ -18,15 +53,76 @@
     return ind;
   }
 
-  // segna con .on-gold (testo scuro) le tab coperte dalla pillola per più
-  // di un terzo della loro larghezza, così il contrasto regge anche a metà
-  function applyGoldCoverage(bar, left, width) {
+  // segna con litClass gli elementi coperti dall'indicatore per più di un
+  // terzo della loro larghezza, così il contrasto regge anche a metà corsa
+  function applyCoverage(items, litClass, left, width) {
     var right = left + width;
-    bar.querySelectorAll('.subtab').forEach(function (t) {
+    items.forEach(function (t) {
       var tl = t.offsetLeft;
       var overlap = Math.max(0, Math.min(right, tl + t.offsetWidth) - Math.max(left, tl));
-      t.classList.toggle('on-gold', t.offsetWidth > 0 && overlap / t.offsetWidth > 0.33);
+      t.classList.toggle(litClass, t.offsetWidth > 0 && overlap / t.offsetWidth > 0.33);
     });
+  }
+
+  function applyGoldCoverage(bar, left, width) {
+    applyCoverage([].slice.call(bar.querySelectorAll('.subtab')), 'on-gold', left, width);
+  }
+
+  // ----- indicatore scorrevole del menu principale (in basso) -----
+  function navLinks() {
+    return [].slice.call(document.querySelectorAll('#bottom-nav .nav-link[data-view]'));
+  }
+
+  function navLinkFor(view) {
+    return document.querySelector('#bottom-nav .nav-link[data-view="' + view + '"]');
+  }
+
+  function navIndicator() {
+    var bar = document.getElementById('bottom-nav');
+    if (!bar) {
+      return null;
+    }
+    var ind = bar.querySelector('.nav-ind');
+    if (!ind) {
+      ind = document.createElement('span');
+      ind.className = 'nav-ind';
+      ind.setAttribute('aria-hidden', 'true');
+      bar.insertBefore(ind, bar.firstChild);
+    }
+
+    return ind;
+  }
+
+  function moveNavIndicator(link, animate) {
+    if (!link || !link.offsetWidth) {
+      return;
+    }
+    var ind = navIndicator();
+    ind.style.transition = animate ? IND_EASE : 'none';
+    ind.style.top = link.offsetTop + 'px';
+    ind.style.height = link.offsetHeight + 'px';
+    ind.style.width = link.offsetWidth + 'px';
+    ind.style.transform = 'translateX(' + link.offsetLeft + 'px)';
+    applyCoverage(navLinks(), 'nav-lit', link.offsetLeft, link.offsetWidth);
+  }
+
+  function lerpNavIndicator(fromLink, toLink, p) {
+    if (!fromLink || !fromLink.offsetWidth) {
+      return;
+    }
+    var ind = navIndicator();
+    var l = fromLink.offsetLeft;
+    var w = fromLink.offsetWidth;
+    if (toLink && toLink.offsetWidth) {
+      l += (toLink.offsetLeft - fromLink.offsetLeft) * p;
+      w += (toLink.offsetWidth - fromLink.offsetWidth) * p;
+    }
+    ind.style.transition = 'none';
+    ind.style.top = fromLink.offsetTop + 'px';
+    ind.style.height = fromLink.offsetHeight + 'px';
+    ind.style.width = w + 'px';
+    ind.style.transform = 'translateX(' + l + 'px)';
+    applyCoverage(navLinks(), 'nav-lit', l, w);
   }
 
   function moveSubIndicator(bar, tab, animate) {
@@ -79,7 +175,7 @@
     return v ? v.querySelector('.subtabs') : null;
   }
 
-  function showView(viewId) {
+  function showView(viewId, animateNav) {
     currentView = viewId;
     document.querySelectorAll('.view-panel').forEach(function (panel) {
       panel.classList.toggle('hidden', panel.id !== 'view-' + viewId);
@@ -87,6 +183,7 @@
     document.querySelectorAll('#bottom-nav .nav-link').forEach(function (link) {
       link.classList.toggle('active', link.getAttribute('data-view') === viewId);
     });
+    moveNavIndicator(navLinkFor(viewId), animateNav !== false);
     document.getElementById('main-content').scrollTop = 0;
     // la barra ora è visibile: l'indicatore va posizionato sulla tab attiva
     repositionActiveIndicator(document.getElementById('view-' + viewId), false);
@@ -94,6 +191,7 @@
       window.AppSheet.renderSteedHp();
     }
     updateFab();
+    resetDocScroll();
   }
 
   var suppressSlideAnim = false;
@@ -109,12 +207,23 @@
     }
     var cls = dir > 0 ? 'slide-in-right' : 'slide-in-left';
     panel.classList.remove('slide-in-right', 'slide-in-left');
+    // rimuove eventuale transform residuo da un'animazione precedente mai
+    // conclusa, altrimenti la pagina resta bloccata a metà scorrimento
+    panel.style.transform = '';
     void panel.offsetWidth;
     panel.classList.add(cls);
-    panel.addEventListener('animationend', function handler() {
+    var cleaned = false;
+    function cleanup() {
+      if (cleaned) {
+        return;
+      }
+      cleaned = true;
       panel.classList.remove(cls);
-      panel.removeEventListener('animationend', handler);
-    });
+    }
+    panel.addEventListener('animationend', cleanup, { once: true });
+    // rete di sicurezza: se l'evento animationend non arriva (tap ripetuti,
+    // animazioni ridotte di sistema, ecc.) la classe va rimossa comunque
+    setTimeout(cleanup, 350);
   }
 
   function initSubTabs(containerSelector) {
@@ -152,6 +261,7 @@
           animatePanelIn(activePanel, tabIdx > oldIdx ? 1 : -1);
         }
         updateFab();
+        resetDocScroll();
       });
     });
     repositionActiveIndicator(container, false);
@@ -180,32 +290,63 @@
     fab.setAttribute('data-context', currentView + '-' + (sub || ''));
   }
 
-  function getSubtabContext() {
+  function getSwipeContext() {
     var view = document.getElementById('view-' + currentView);
     if (!view) {
       return null;
     }
     var tabs = view.querySelectorAll('.subtabs .subtab');
-    if (!tabs.length) {
-      return null;
-    }
-    var idx = -1;
+    var idx = 0;
     tabs.forEach(function (t, i) {
       if (t.classList.contains('active')) {
         idx = i;
       }
     });
-    var panel = view.querySelector('.subpanel.active');
 
-    return { tabs: tabs, idx: idx, panel: panel };
+    // panel è la sotto-pagina attiva (null per le viste senza sotto-tab)
+    return { view: view, tabs: tabs, idx: idx, panel: view.querySelector('.subpanel.active') };
+  }
+
+  function adjacentView(dir) {
+    var j = NAV_ORDER.indexOf(currentView) + dir;
+
+    return (j >= 0 && j < NAV_ORDER.length) ? NAV_ORDER[j] : null;
+  }
+
+  function activeSubtabIndex(view) {
+    var tabs = view.querySelectorAll('.subtabs .subtab');
+    var idx = 0;
+    tabs.forEach(function (t, i) {
+      if (t.classList.contains('active')) {
+        idx = i;
+      }
+    });
+
+    return idx;
+  }
+
+  function setActiveSubtab(view, idx) {
+    var tabs = view.querySelectorAll('.subtabs .subtab');
+    if (!tabs.length) {
+      return null;
+    }
+    idx = Math.max(0, Math.min(tabs.length - 1, idx));
+    var name = tabs[idx].getAttribute('data-subtab');
+    tabs.forEach(function (t, i) { t.classList.toggle('active', i === idx); });
+    view.querySelectorAll('.subpanel').forEach(function (p) {
+      p.classList.toggle('active', p.getAttribute('data-subpanel') === name);
+    });
+
+    return tabs[idx];
   }
 
   function bindSwipeTabs() {
-    // Swipe orizzontale su mobile tra le sotto-tab della vista attiva,
-    // stile Telegram: le pagine sono affiancate, il pannello adiacente
-    // entra attaccato a quello corrente mentre trascini (niente vuoto).
-    // Il menu in basso resta solo al click. Escludiamo i controlli che
-    // gestiscono già il drag/scroll orizzontale.
+    // Swipe orizzontale stile Telegram: le pagine sono affiancate e quella
+    // adiacente entra attaccata mentre trascini. Se sei in fondo (o in cima)
+    // ai sotto-menu, il gesto porta alla sezione successiva/precedente del
+    // menu principale, facendo scorrere l'intera sezione e l'evidenziazione
+    // del menu in basso in sincrono. Escludiamo i controlli che gestiscono
+    // già il drag/scroll orizzontale.
     var main = document.getElementById('main-content');
     if (!main) {
       return;
@@ -217,48 +358,49 @@
     var following = false;
     var animating = false;
     var ctx = null;
-    var neighbor = null;
-    var neighborDir = 0;
     var panelW = 0;
+    var neighbor = null;       // elemento che entra (sotto-pagina o sezione)
+    var outEl = null;          // elemento che esce
+    var neighborDir = 0;
+    var neighborKind = null;   // 'sub' | 'view'
+    var viewPrevIdx = 0;       // sotto-tab della sezione di destinazione (per annullare)
 
-    function clearPanelStyles(p) {
+    function clearStyles(p) {
       if (!p) {
         return;
       }
-      p.classList.remove('swipe-follow', 'swipe-anim');
-      p.style.display = '';
-      p.style.position = '';
-      p.style.top = '';
-      p.style.left = '';
-      p.style.width = '';
-      p.style.minHeight = '';
-      p.style.transform = '';
-      p.style.zIndex = '';
-      p.style.boxShadow = '';
-      p.style.filter = '';
+      p.classList.remove('swipe-follow', 'swipe-anim', 'view-swiping');
+      ['display', 'position', 'top', 'left', 'width', 'minHeight',
+        'transform', 'transition', 'zIndex', 'boxShadow', 'filter'].forEach(function (k) {
+        p.style[k] = '';
+      });
     }
 
-    function hideNeighbor() {
-      clearPanelStyles(neighbor);
-      neighbor = null;
-      neighborDir = 0;
-    }
-
-    function showNeighbor(dir) {
-      var targetIdx = ctx.idx + dir;
-      if (targetIdx < 0 || targetIdx >= ctx.tabs.length) {
-        return;
+    function teardown() {
+      if (neighborKind === 'view' && neighbor) {
+        setActiveSubtab(neighbor, viewPrevIdx);
+        clearStyles(neighbor);
+        neighbor.classList.add('hidden');
+      } else {
+        clearStyles(neighbor);
       }
-      var view = document.getElementById('view-' + currentView);
-      var name = ctx.tabs[targetIdx].getAttribute('data-subtab');
-      var np = view ? view.querySelector('.subpanel[data-subpanel="' + name + '"]') : null;
+      clearStyles(outEl);
+      neighbor = null;
+      outEl = null;
+      neighborDir = 0;
+      neighborKind = null;
+    }
+
+    function setupSub(dir) {
+      var name = ctx.tabs[ctx.idx + dir].getAttribute('data-subtab');
+      var np = ctx.view.querySelector('.subpanel[data-subpanel="' + name + '"]');
       if (!np) {
         return;
       }
-      // pannello adiacente sopra quello attivo, fuori schermo, con ombra
-      // sul bordo d'ingresso (profondità stile iOS). Il suo inizio è
-      // allineato alla parte visibile dello schermo: la nuova pagina si
-      // vede sempre dall'inizio, non al livello di scroll della vecchia.
+      outEl = ctx.panel;
+      panelW = ctx.panel.offsetWidth || main.clientWidth;
+      outEl.classList.add('swipe-follow');
+      outEl.style.minHeight = main.clientHeight + 'px';
       var mainRect = main.getBoundingClientRect();
       var hostRect = ctx.panel.parentElement.getBoundingClientRect();
       var visTop = Math.max(ctx.panel.offsetTop, Math.round(mainRect.top - hostRect.top));
@@ -268,50 +410,129 @@
       np.style.top = visTop + 'px';
       np.style.left = '0';
       np.style.width = '100%';
-      // pagina piena: riempie l'altezza visibile così anche una pagina con
-      // un solo modulo gira come una pagina intera (niente foglietto corto)
       np.style.minHeight = main.clientHeight + 'px';
       np.style.zIndex = '2';
       np.style.boxShadow = (dir > 0 ? '-14px' : '14px') + ' 0 26px rgba(0, 0, 0, 0.55)';
       np.style.transform = 'translateX(' + (dir > 0 ? panelW : -panelW) + 'px)';
       neighbor = np;
       neighborDir = dir;
+      neighborKind = 'sub';
+    }
+
+    function setupView(dir) {
+      var tvName = adjacentView(dir);
+      if (!tvName) {
+        return;
+      }
+      var tv = document.getElementById('view-' + tvName);
+      if (!tv) {
+        return;
+      }
+      outEl = ctx.view;
+      panelW = outEl.offsetWidth || main.clientWidth;
+      tv.classList.remove('hidden');
+      tv.classList.add('view-swiping');
+      tv.style.position = 'absolute';
+      // in cima al viewport corrente, rispettando il margine della vista
+      tv.style.top = (main.scrollTop + outEl.offsetTop) + 'px';
+      tv.style.left = outEl.offsetLeft + 'px';
+      tv.style.width = outEl.offsetWidth + 'px';
+      tv.style.minHeight = main.clientHeight + 'px';
+      tv.style.zIndex = '2';
+      tv.style.boxShadow = (dir > 0 ? '-14px' : '14px') + ' 0 26px rgba(0, 0, 0, 0.55)';
+      tv.style.transform = 'translateX(' + (dir > 0 ? panelW : -panelW) + 'px)';
+      // atterra sulla prima sotto-tab se vai avanti, sull'ultima se torni
+      viewPrevIdx = activeSubtabIndex(tv);
+      var landing = setActiveSubtab(tv, dir > 0 ? 0 : 9999);
+      if (landing) {
+        moveSubIndicator(tv.querySelector('.subtabs'), landing, false);
+      }
+      outEl.classList.add('view-swiping');
+      neighbor = tv;
+      neighborDir = dir;
+      neighborKind = 'view';
+    }
+
+    function showNeighbor(dir) {
+      var subTgt = ctx.idx + dir;
+      if (ctx.tabs.length && subTgt >= 0 && subTgt < ctx.tabs.length) {
+        setupSub(dir);
+      } else {
+        setupView(dir);
+      }
+    }
+
+    function elasticEl() {
+      return ctx.panel || ctx.view;
     }
 
     function finish(commit) {
       animating = true;
-      var active = ctx.panel;
-      var nb = neighbor;
       var dir = neighborDir;
-      var targetIdx = ctx.idx + dir;
-      var tabsRef = ctx.tabs;
-      // l'indicatore del menu completa la corsa insieme alla pagina
-      var finalIdx = (commit && targetIdx >= 0 && targetIdx < tabsRef.length) ? targetIdx : ctx.idx;
-      moveSubIndicator(currentSubtabBar(), tabsRef[finalIdx], true);
-      active.classList.add('swipe-anim');
-      if (nb) {
-        nb.classList.add('swipe-anim');
+      var kind = neighborKind;
+      var nb = neighbor;
+      var out = outEl;
+      var ctxRef = ctx;
+      var doCommit = commit && !!nb;
+
+      if (kind === 'sub') {
+        var subFinal = doCommit ? ctxRef.idx + dir : ctxRef.idx;
+        moveSubIndicator(currentSubtabBar(), ctxRef.tabs[subFinal], true);
+      } else if (kind === 'view') {
+        moveNavIndicator(navLinkFor(doCommit ? adjacentView(dir) : currentView), true);
       }
-      if (commit && nb) {
-        active.style.transform = 'translateX(' + Math.round((dir > 0 ? -1 : 1) * panelW * 0.3) + 'px)';
-        active.style.filter = 'brightness(0.55)';
-        nb.style.transform = 'translateX(0px)';
-      } else {
-        active.style.transform = 'translateX(0px)';
-        active.style.filter = '';
-        if (nb) {
+
+      if (nb) {
+        out.classList.add('swipe-anim');
+        nb.classList.add('swipe-anim');
+        if (doCommit) {
+          out.style.transform = 'translateX(' + Math.round((dir > 0 ? -1 : 1) * panelW * 0.3) + 'px)';
+          out.style.filter = 'brightness(0.55)';
+          nb.style.transform = 'translateX(0px)';
+        } else {
+          out.style.transform = 'translateX(0px)';
+          out.style.filter = '';
           nb.style.transform = 'translateX(' + (dir > 0 ? panelW : -panelW) + 'px)';
         }
+      } else {
+        var el = elasticEl();
+        el.style.transition = 'transform 0.2s ease-out';
+        el.style.transform = 'translateX(0px)';
+        el.style.filter = '';
       }
+
       setTimeout(function () {
-        clearPanelStyles(active);
-        hideNeighbor();
-        if (commit && targetIdx >= 0 && targetIdx < tabsRef.length) {
-          suppressSlideAnim = true;
-          tabsRef[targetIdx].click();
-          tabsRef[targetIdx].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+        if (kind === 'view') {
+          if (doCommit) {
+            var target = adjacentView(dir);
+            clearStyles(out);
+            clearStyles(nb);
+            showView(target, true);
+          } else {
+            if (nb) {
+              setActiveSubtab(nb, viewPrevIdx);
+              clearStyles(nb);
+              nb.classList.add('hidden');
+            }
+            clearStyles(out);
+          }
+        } else {
+          clearStyles(out);
+          clearStyles(nb);
+          clearStyles(elasticEl());
+          if (doCommit) {
+            var tgt = ctxRef.idx + dir;
+            suppressSlideAnim = true;
+            ctxRef.tabs[tgt].click();
+            centerSubtabInBar(currentSubtabBar(), ctxRef.tabs[tgt]);
+          }
         }
+        neighbor = null;
+        outEl = null;
+        neighborDir = 0;
+        neighborKind = null;
         animating = false;
+        resetDocScroll();
       }, 250);
     }
 
@@ -353,16 +574,14 @@
           return;
         }
         if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-          ctx = getSubtabContext();
-          if (!ctx || !ctx.panel || ctx.idx < 0) {
+          ctx = getSwipeContext();
+          if (!ctx) {
             tracking = false;
 
             return;
           }
-          panelW = ctx.panel.offsetWidth || main.clientWidth;
+          panelW = (ctx.panel ? ctx.panel.offsetWidth : ctx.view.offsetWidth) || main.clientWidth;
           following = true;
-          ctx.panel.classList.add('swipe-follow');
-          ctx.panel.style.minHeight = main.clientHeight + 'px';
         } else {
           return;
         }
@@ -373,30 +592,25 @@
       }
       var dir = dx < 0 ? 1 : -1;
       if (neighborDir !== dir) {
-        hideNeighbor();
+        teardown();
         showNeighbor(dir);
       }
+      var prog = Math.min(1, Math.abs(dx) / panelW);
       if (neighbor) {
-        // la pagina che entra segue il dito sopra quella attiva, che
-        // scorre più lenta (parallasse) e si scurisce progressivamente
-        var prog = Math.min(1, Math.abs(dx) / panelW);
         neighbor.style.transform = 'translateX(' + Math.round((dir > 0 ? panelW : -panelW) + dx) + 'px)';
-        ctx.panel.style.transform = 'translateX(' + Math.round(dx * 0.3) + 'px)';
-        ctx.panel.style.filter = 'brightness(' + (1 - 0.45 * prog).toFixed(3) + ')';
+        outEl.style.transform = 'translateX(' + Math.round(dx * 0.3) + 'px)';
+        outEl.style.filter = 'brightness(' + (1 - 0.45 * prog).toFixed(3) + ')';
+        if (neighborKind === 'sub') {
+          lerpSubIndicator(currentSubtabBar(), ctx.tabs[ctx.idx], ctx.tabs[ctx.idx + dir], prog);
+        } else {
+          lerpNavIndicator(navLinkFor(currentView), navLinkFor(adjacentView(dir)), prog);
+        }
       } else {
-        // nessuna tab in quella direzione: effetto elastico
-        ctx.panel.style.transform = 'translateX(' + Math.round(dx * 0.25) + 'px)';
-        ctx.panel.style.filter = '';
+        // nessun vicino (bordo estremo): effetto elastico
+        var el = elasticEl();
+        el.style.transform = 'translateX(' + Math.round(dx * 0.25) + 'px)';
+        el.style.filter = '';
       }
-      // il menu si muove in sincrono con la pagina
-      var indTgt = ctx.idx + dir;
-      var indValid = indTgt >= 0 && indTgt < ctx.tabs.length;
-      lerpSubIndicator(
-        currentSubtabBar(),
-        ctx.tabs[ctx.idx],
-        indValid ? ctx.tabs[indTgt] : null,
-        indValid ? Math.min(1, Math.abs(dx) / panelW) : 0
-      );
     }, { passive: false });
 
     main.addEventListener('touchend', function (e) {
@@ -419,10 +633,10 @@
 
     main.addEventListener('touchcancel', function () {
       if (following) {
+        following = false;
         finish(false);
       }
       tracking = false;
-      following = false;
     }, { passive: true });
   }
 
@@ -528,25 +742,13 @@
     // viewport per mostrare l'input e alla chiusura spesso non lo riporta
     // giù: la shell (e il menu fixed) resta sollevata con un vuoto sotto.
     // Riportiamo il pan a zero appena non c'è più un campo attivo.
-    function isTyping() {
-      var ae = document.activeElement;
-
-      return !!ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable);
-    }
-
-    function resetPan() {
-      if (!isTyping() && (window.scrollY !== 0 || window.scrollX !== 0)) {
-        window.scrollTo(0, 0);
-      }
-    }
-
-    window.addEventListener('scroll', resetPan, { passive: true });
+    window.addEventListener('scroll', resetDocScroll, { passive: true });
     document.addEventListener('focusout', function () {
-      setTimeout(resetPan, 60);
+      setTimeout(resetDocScroll, 60);
     });
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', function () {
-        setTimeout(resetPan, 60);
+        setTimeout(resetDocScroll, 60);
       });
     }
   }
@@ -604,10 +806,13 @@
     window.AppInspiration.init();
     window.AppBottomSheet.init();
 
-    // riallinea l'indicatore quando i font (larghezze diverse) o il resize
-    // cambiano la geometria delle tab
+    moveNavIndicator(navLinkFor(currentView), false);
+
+    // riallinea gli indicatori quando i font (larghezze diverse) o il resize
+    // cambiano la geometria delle tab / del menu
     function realignIndicator() {
       repositionActiveIndicator(document.getElementById('view-' + currentView), false);
+      moveNavIndicator(navLinkFor(currentView), false);
     }
     window.addEventListener('load', realignIndicator);
     window.addEventListener('resize', realignIndicator);
