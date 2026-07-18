@@ -83,6 +83,7 @@
           if (parsed.deathSaves) {
             next.deathSaves = Object.assign(getDefaultState().deathSaves, parsed.deathSaves);
           }
+          next.grimoire = Object.assign(getDefaultState().grimoire, parsed.grimoire || {});
 
           return next;
         }

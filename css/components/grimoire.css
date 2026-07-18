@@ -10,9 +10,22 @@
 
 .grim-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-2);
   margin-bottom: var(--space-3);
+}
+
+.grim-stat.prep {
+  border: 1px solid rgba(201, 164, 67, 0.45);
+  border-radius: var(--radius-md);
+}
+
+.grim-stat.prep .big {
+  color: var(--accent-gold);
+}
+
+.grim-stat.prep.over .big {
+  color: var(--ruby-bright);
 }
 
 .grim-slots {
@@ -192,4 +205,322 @@
 
 .spell-level-group.hidden {
   display: none;
+}
+
+/* ===== Grimorio B: gemme, badge e slot in stile risorse ===== */
+.grim-stat .big {
+  font-size: 20px;
+}
+
+.grim-slots .res-sec {
+  margin-top: var(--space-2);
+}
+
+.rc-med-txt {
+  font-family: var(--font-title);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.grim-gloss-btn {
+  width: 100%;
+  min-height: var(--touch-min);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--accent-gold);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #2e2921, #221d16);
+  color: #e8c96a;
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.grim-gloss-btn:active {
+  background: rgba(201, 164, 67, 0.15);
+}
+
+.spellcard-compact {
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+}
+
+.spellcard-compact .sc-head {
+  margin-bottom: 3px;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.spellcard-compact .sc-meta {
+  margin-bottom: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sc-badge {
+  flex: none;
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.sc-badge-fixed {
+  color: #e8c96a;
+  background: rgba(201, 164, 67, 0.12);
+  border: 1px solid rgba(201, 164, 67, 0.55);
+}
+
+.sc-badge-chosen {
+  color: #aabccf;
+  background: rgba(74, 118, 168, 0.14);
+  border: 1px solid rgba(122, 149, 180, 0.5);
+}
+
+/* ===== Glossario e Manuale (pannelli a schermo pieno) ===== */
+.gloss-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-principal);
+  padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) var(--space-3)
+    calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+}
+
+.gloss-modal.hidden {
+  display: none;
+}
+
+.gloss-head {
+  flex: none;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: var(--space-2);
+}
+
+.gloss-head-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gloss-title {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent-gold);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gloss-count {
+  flex: none;
+  font-family: var(--font-title);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--celest-bright);
+}
+
+.gloss-count.full {
+  color: var(--accent-gold);
+}
+
+.gloss-count.shake {
+  animation: gloss-shake 0.3s;
+  color: var(--ruby-bright);
+}
+
+@keyframes gloss-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.gloss-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
+.gloss-list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.gloss-sec {
+  font-family: var(--font-title);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-gold);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.gloss-sec:first-child {
+  margin-top: var(--space-2);
+}
+
+.gloss-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2);
+  min-height: var(--touch-min);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.gloss-check {
+  position: relative;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: transparent;
+  cursor: pointer;
+}
+
+/* area di tocco allargata: il quadratino è piccolo */
+button.gloss-check::after {
+  content: "";
+  position: absolute;
+  inset: -11px;
+}
+
+.gloss-check.on {
+  border-color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.15);
+  color: var(--accent-gold);
+}
+
+.gloss-check.locked {
+  border-color: var(--accent-gold-dim);
+  background: rgba(201, 164, 67, 0.25);
+  color: #e8c96a;
+}
+
+.gloss-row.locked {
+  cursor: default;
+}
+
+.gloss-row.locked .gloss-name {
+  color: var(--accent-gold);
+}
+
+.gloss-lvl-dot {
+  flex: none;
+  width: 28px;
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-gold);
+  text-align: center;
+}
+
+.gloss-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.gloss-name {
+  display: block;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.gloss-row.on .gloss-name {
+  color: #e8dcc0;
+}
+
+.gloss-sub {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gloss-sub .conc {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.gloss-tag {
+  flex: none;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.gloss-close {
+  flex: none;
+}
+
+.manual-classes {
+  flex: none;
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.manual-chip {
+  font-family: var(--font-title);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.manual-chip.active {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.1);
+}
+
+/* ===== Parole chiave evidenziate nelle descrizioni ===== */
+.sheet-body .kw {
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.sheet-body .kw-save {
+  color: var(--celest-bright);
+  font-weight: 600;
+}
+
+.sheet-body .kw-cond {
+  color: #e0655f;
+  font-weight: 600;
 }

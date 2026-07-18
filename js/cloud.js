@@ -13,7 +13,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   initializeFirestore, persistentLocalCache, persistentSingleTabManager,
-  doc, setDoc, onSnapshot, serverTimestamp
+  doc, getDoc, setDoc, onSnapshot, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 (function () {
@@ -118,6 +118,33 @@ import {
       applyingRemote = false;
       window.__applyingRemoteState = false;
     }
+  }
+
+  /*
+   * Manuale 5.5: mantiene su Firestore una copia della lista incantesimi
+   * per classe (manuals/5.5/classes/{classe}). Il file locale
+   * js/manual-paladino.js è la fonte di verità: se la sua versione è più
+   * nuova di quella nel cloud, il documento viene (ri)caricato.
+   * Richiede nelle regole Firestore: match /manuals/{document=**}
+   * { allow read, write: if request.auth != null; }
+   */
+  function syncManual() {
+    var manual = window.MANUAL_55;
+    if (!user || !manual) {
+      return;
+    }
+    Object.keys(manual.classes).forEach(function (classId) {
+      var ref = doc(db, 'manuals', '5.5', 'classes', classId);
+      getDoc(ref).then(function (snap) {
+        var remoteVersion = snap.exists() ? (snap.data().version || 0) : 0;
+        if (manual.version > remoteVersion) {
+          return setDoc(ref, Object.assign({
+            version: manual.version,
+            updatedAt: serverTimestamp()
+          }, JSON.parse(JSON.stringify(manual.classes[classId]))));
+        }
+      }).catch(function () { /* regole non aggiornate o offline: ignora */ });
+    });
   }
 
   function watchDoc() {
@@ -242,6 +269,7 @@ import {
     if (user) {
       setSyncStatus('Connessione…');
       watchDoc();
+      syncManual();
     } else {
       if (unsubscribeDoc) {
         unsubscribeDoc();

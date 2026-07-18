@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=27">
+<link rel="stylesheet" href="css/styles.css?v=35">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=27" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=35" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -36,6 +36,7 @@
 
 <div id="options-panel" class="options-panel hidden">
   <button type="button" id="opt-account" class="hidden">Account e sincronizzazione</button>
+  <button type="button" id="opt-manual">Manuale 5.5</button>
   <button type="button" id="opt-reset">Ripristina dati</button>
   <button type="button" id="opt-export">Esporta JSON</button>
   <button type="button" id="opt-import">Importa JSON</button>
@@ -141,6 +142,7 @@
           <div class="death-status" id="death-status" aria-live="polite"></div>
         </div>
       </div>
+      <div class="card page-card">
       <div class="card hp-combat-card">
         <div class="hp-top">
           <span class="hp-title"><span class="hp-heart" aria-hidden="true">❤</span> Punti Ferita</span>
@@ -158,7 +160,7 @@
       </div>
 
       <div class="card combat-card">
-        <h2 class="card-title">Attacchi <small>Attacco Extra: 2 colpi</small></h2>
+        <h2 class="card-title sec">Attacchi <small>Attacco Extra: 2 colpi</small></h2>
         <table class="combat-table">
           <thead><tr><th>Arma</th><th>Colpire</th><th>Danni</th></tr></thead>
           <tbody>
@@ -176,13 +178,14 @@
       </div>
 
       <div class="card">
-        <h2 class="card-title">Punizione Divina <small>Az. bonus dopo colpo in mischia</small></h2>
+        <h2 class="card-title sec">Punizione Divina <small>Az. bonus dopo colpo in mischia</small></h2>
         <div class="smite-rows">
           <div class="stat-row"><span>Slot 1° livello</span><span class="v">2d8 radiosi</span></div>
           <div class="stat-row"><span>Slot 2° livello</span><span class="v">3d8 radiosi</span></div>
           <div class="stat-row"><span>vs Immondo / Non Morto</span><span class="v">+1d8</span></div>
         </div>
         <p class="note">Sempre preparata. 1/riposo lungo senza spendere slot.</p>
+      </div>
       </div>
     </div>
 
@@ -295,6 +298,7 @@
 
     <!-- Caratteristiche -->
     <div class="subpanel" data-subpanel="stats">
+      <div class="card page-card">
       <div class="card">
         <h2 class="card-title">Caratteristiche</h2>
         <div class="abil-grid">
@@ -307,7 +311,7 @@
         </div>
       </div>
       <div class="card">
-        <h2 class="card-title">Tiri Salvezza <small>Aura +3 inclusa</small></h2>
+        <h2 class="card-title sec">Tiri Salvezza <small>Aura +3 inclusa</small></h2>
         <div class="stat-row"><span>Forza</span><span class="v">+7</span></div>
         <div class="stat-row"><span>Destrezza</span><span class="v">+2</span></div>
         <div class="stat-row"><span>Costituzione</span><span class="v">+5</span></div>
@@ -316,7 +320,7 @@
         <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Carisma</span><span class="v prof">+9</span></div>
       </div>
       <div class="card">
-        <h2 class="card-title">Abilità</h2>
+        <h2 class="card-title sec">Abilità</h2>
         <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Atletica <span class="dim">(For)</span></span><span class="v prof">+7</span></div>
         <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Intimidire <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
         <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Persuasione <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
@@ -328,10 +332,12 @@
         <div class="stat-row"><span>Rapidità di Mano <span class="dim">(Des)</span></span><span class="v">−1</span></div>
         <div class="stat-row"><span class="dim">Percez. passiva</span><span class="v dim">13</span></div>
       </div>
+      </div>
     </div>
 
     <!-- Tratti -->
     <div class="subpanel" data-subpanel="traits">
+      <div class="card page-card">
       <div class="card">
         <h2 class="card-title">Lama Vincolante</h2>
         <div class="sword-tiers">
@@ -346,7 +352,7 @@
         </div>
       </div>
       <div class="card">
-        <h2 class="card-title">Privilegi di Classe &amp; Aure</h2>
+        <h2 class="card-title sec">Privilegi di Classe &amp; Aure</h2>
         <div class="feat pressable" data-detail-title="Aura di Protezione" data-detail-body="Tu e gli alleati nell'aura (3 m) +3 (CAR) a tutti i TS.">
           <div class="feat-head"><span class="ft">Aura di Protezione</span><span class="tag g">3 m</span></div>
           <div class="fd">+3 (CAR) a tutti i TS per te e alleati entro 3 m.</div>
@@ -373,7 +379,7 @@
         </div>
       </div>
       <div class="card">
-        <h2 class="card-title">Tratti Dragonide d'Oro</h2>
+        <h2 class="card-title sec">Tratti Dragonide d'Oro</h2>
         <div class="feat pressable" data-detail-title="Soffio (Fuoco)" data-detail-body="In sostituzione di un attacco: cono 4,5 m o linea 9 m. TS DES CD 13, 2d10 fuoco (metà se supera). 3 usi/riposo lungo.">
           <div class="feat-head"><span class="ft">Soffio (Fuoco)</span><span class="tag c">3/rip. lungo</span></div>
           <div class="fd">TS DES 13, 2d10 fuoco. Cono o linea.</div>
@@ -391,6 +397,7 @@
           <div class="fd">18 metri.</div>
         </div>
       </div>
+      </div>
     </div>
   </section>
 
@@ -402,32 +409,51 @@
     <div class="grim-stats" aria-label="Statistiche incantesimi">
       <div class="grim-stat celest">
         <div class="big" id="grim-dc">15</div>
-        <div class="lab">CD Incantesimi</div>
+        <div class="lab">CD Incant.</div>
       </div>
       <div class="grim-stat">
         <div class="big" id="grim-atk">+7</div>
-        <div class="lab">Attacco incant.</div>
+        <div class="lab">Attacco</div>
       </div>
       <div class="grim-stat gold">
         <div class="big" id="grim-cha">+3</div>
         <div class="lab">Carisma</div>
       </div>
+      <div class="grim-stat prep">
+        <div class="big" id="grim-prep">–</div>
+        <div class="lab">Preparati</div>
+      </div>
     </div>
+    <div class="card page-card">
     <div class="card grim-slots">
-      <h2 class="card-title">Slot disponibili</h2>
-      <div class="res-cards">
+      <div class="res-sec res-sec-slots">
+        <div class="res-sec-head">
+          <span class="res-plaque"><span class="res-plaque-gem" aria-hidden="true"></span>Slot incantesimi</span>
+          <span class="res-sec-line" aria-hidden="true"></span>
+        </div>
         <div class="res-card" data-key="sl1" data-max="4">
-          <div class="rc-top"><span class="rc-name">Slot 1° livello</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
+          <span class="rc-med rc-med-txt" aria-hidden="true">I</span>
+          <div class="rc-info">
+            <span class="rc-name">Slot 1° livello</span>
+            <span class="rc-ctx">recupero: riposo lungo</span>
+            <div class="segbar"></div>
+          </div>
+          <span class="rc-count"></span>
         </div>
         <div class="res-card" data-key="sl2" data-max="3">
-          <div class="rc-top"><span class="rc-name">Slot 2° livello</span><span class="rc-count"></span></div>
-          <div class="segbar"></div>
+          <span class="rc-med rc-med-txt" aria-hidden="true">II</span>
+          <div class="rc-info">
+            <span class="rc-name">Slot 2° livello</span>
+            <span class="rc-ctx">recupero: riposo lungo</span>
+            <div class="segbar"></div>
+          </div>
+          <span class="rc-count"></span>
         </div>
       </div>
-      <p class="res-hint">Tocca un segmento per segnare gli slot usati</p>
+      <p class="res-hint">Tocca una gemma per segnare gli slot usati</p>
     </div>
     <input class="spell-search" id="spell-search" type="search" inputmode="search" placeholder="🔍 Cerca incantesimo…" autocomplete="off">
+    <button type="button" class="grim-gloss-btn" id="grim-gloss-open">✦ &nbsp;Glossario incantesimi</button>
     <p class="grim-intro"><b>Promemoria.</b> Un solo incantesimo di concentrazione per volta. Punizione Divina = az. bonus: niente altri incantesimi a slot nello stesso turno.</p>
 
     <nav class="level-tabs" aria-label="Cerchi incantesimo">
@@ -438,6 +464,7 @@
     </nav>
 
     <div id="spell-list-container" class="spell-list"></div>
+    </div>
   </section>
 
   <!-- ========== CAVALCATURA ========== -->
@@ -467,6 +494,7 @@
       <div class="mini-stat"><div class="big">18 m</div><div class="lab">Velocità</div></div>
       <div class="mini-stat"><div class="big">+3</div><div class="lab">Bonus Comp.</div></div>
     </div>
+    <div class="card page-card">
     <div class="card">
       <h2 class="card-title">Statistiche Base</h2>
       <div class="steed-abil-grid">
@@ -479,7 +507,7 @@
       </div>
       <p class="note">PP 11 · Telepatia 1,6 km · Volo 18 m con slot 4°+</p>
     </div>
-    <h2 class="card-title">Azioni della Cavalcatura</h2>
+    <h2 class="card-title sec">Azioni della Cavalcatura</h2>
     <div class="action-card pressable" data-detail-title="Schianto Ultraterreno" data-detail-body="Schianto Ultraterreno (azione): +7 al colpire, portata 1,5 m, 1d8+2 danni (tipo secondo la forma). Con slot più alti: 1d8 + livello slot.">
       <div class="action-title">Schianto Ultraterreno</div>
       <p>Attacco da mischia, +7 al tiro per colpire. Danno: 1d8+2 (tipo secondo forma).</p>
@@ -503,6 +531,7 @@
       </div>
     </div>
     <p class="steed-note">Con slot più alti: CA = 10 + livello · PF max = 5 + 10×livello · Volo da 4°+</p>
+    </div>
   </section>
 
   <!-- ========== TESORERIA ========== -->
@@ -696,18 +725,24 @@
     </nav>
 
     <div class="subpanel active" data-subpanel="cronache">
+      <div class="card page-card">
       <div class="accordion" id="sessions-accordion"></div>
+      </div>
     </div>
 
     <div class="subpanel" data-subpanel="png">
+      <div class="card page-card">
       <div class="edit-list" id="png-list"></div>
+      </div>
     </div>
 
     <div class="subpanel" data-subpanel="quest">
+      <div class="card page-card">
       <h3 class="quest-section-title">Missioni Attive</h3>
       <div class="edit-list" id="quest-active"></div>
       <h3 class="quest-section-title">Missioni Completate</h3>
       <div class="edit-list" id="quest-completed"></div>
+      </div>
     </div>
   </section>
 
@@ -761,6 +796,30 @@
   </div>
 </div>
 
+<div id="gloss-modal" class="gloss-modal hidden" role="dialog" aria-modal="true" aria-label="Glossario incantesimi">
+  <div class="gloss-head">
+    <div class="gloss-head-row">
+      <span class="gloss-title" id="gloss-title">Glossario del Paladino</span>
+      <span class="gloss-count" id="gloss-count">–</span>
+      <button type="button" class="sheet-close gloss-close" id="gloss-close" aria-label="Chiudi">✕</button>
+    </div>
+    <p class="gloss-hint" id="gloss-hint">Quadratino per preparare o rimuovere · tocca il nome per i dettagli</p>
+  </div>
+  <div class="gloss-list" id="gloss-list"></div>
+</div>
+
+<div id="manual-modal" class="gloss-modal hidden" role="dialog" aria-modal="true" aria-label="Manuale 5.5">
+  <div class="gloss-head">
+    <div class="gloss-head-row">
+      <span class="gloss-title">Manuale 5.5 — Incantesimi</span>
+      <button type="button" class="sheet-close gloss-close" id="manual-close" aria-label="Chiudi">✕</button>
+    </div>
+    <p class="gloss-hint">Tocca un incantesimo per leggere i dettagli</p>
+  </div>
+  <div class="manual-classes" id="manual-classes"></div>
+  <div class="gloss-list" id="manual-list"></div>
+</div>
+
 <div id="account-modal" class="account-modal hidden" role="dialog" aria-modal="true" aria-label="Account e sincronizzazione">
   <div class="account-card">
     <button type="button" class="account-close" id="account-close" aria-label="Chiudi">✕</button>
@@ -793,7 +852,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=27" alt="Ritratto di Tharion Velnar">
+      <img src="avatar-full.jpg?v=35" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -802,18 +861,19 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=27"></script>
-<script src="js/config.js?v=27"></script>
-<script src="js/storage.js?v=27"></script>
-<script src="js/hp-bar.js?v=27"></script>
-<script src="js/header.js?v=27"></script>
-<script src="js/sheet.js?v=27"></script>
-<script src="js/grimorio.js?v=27"></script>
-<script src="js/treasury.js?v=27"></script>
-<script src="js/diary.js?v=27"></script>
-<script src="js/inspiration.js?v=27"></script>
-<script src="js/bottom-sheet.js?v=27"></script>
-<script src="js/app.js?v=27"></script>
-<script type="module" src="js/cloud.js?v=27"></script>
+<script src="js/firebase-config.js?v=35"></script>
+<script src="js/manual-paladino.js?v=35"></script>
+<script src="js/config.js?v=35"></script>
+<script src="js/storage.js?v=35"></script>
+<script src="js/hp-bar.js?v=35"></script>
+<script src="js/header.js?v=35"></script>
+<script src="js/sheet.js?v=35"></script>
+<script src="js/grimorio.js?v=35"></script>
+<script src="js/treasury.js?v=35"></script>
+<script src="js/diary.js?v=35"></script>
+<script src="js/inspiration.js?v=35"></script>
+<script src="js/bottom-sheet.js?v=35"></script>
+<script src="js/app.js?v=35"></script>
+<script type="module" src="js/cloud.js?v=35"></script>
 </body>
 </html>

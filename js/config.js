@@ -19,6 +19,8 @@ window.APP_CONFIG = {
 
   CHARACTER: {
     name: 'Tharion Velnar',
+    level: 7,
+    classId: 'paladino',
     classLine: 'Dragonide d\'Oro · Paladino 7 · Devozione',
     ac: 20,
     acNote: 'Piastre + Scudo',
@@ -215,28 +217,7 @@ window.APP_CONFIG = {
       desc: 'Fino a 3 creature: i PF massimi e attuali aumentano di 5 per la durata. Con slot superiori, +5 per ogni livello oltre il 2°.' },
     { id: 'zona-di-verita', name: 'Zona di Verità', level: 2, school: 'Incantamento', always: true,
       meta: 'Azione · 18 m · 10 min · V, S',
-      desc: 'Sfera di raggio 4,5 m. Chi entra o inizia il turno nell\'area fa TS Carisma (CD 15): se fallisce non può mentire deliberatamente. Sai chi supera o fallisce il tiro.' },
-    { id: 'benedizione', name: 'Benedizione', level: 1, school: 'Incantamento', always: false,
-      meta: 'Azione · 9 m · 1 min CONC · V, S, M',
-      desc: 'Fino a 3 creature aggiungono 1d4 ai tiri per colpire e ai tiri salvezza finché dura. +1 bersaglio per ogni slot oltre il 1°.' },
-    { id: 'cura-ferite', name: 'Cura Ferite', level: 1, school: 'Abiurazione', always: false,
-      meta: 'Azione · Tocco · Istantaneo · V, S',
-      desc: 'La creatura toccata recupera 2d8 + 3 PF (CAR). La cura aumenta di 2d8 per ogni slot oltre il 1°.' },
-    { id: 'comando', name: 'Comando', level: 1, school: 'Incantamento', always: false,
-      meta: 'Azione · 18 m · 1 round · V',
-      desc: 'Un nemico che capisca una lingua fa TS Saggezza (CD 15): se fallisce esegue un comando di una parola per il suo prossimo turno. Comandi tipici: Avanzare, Cadere, Fuggi, Rannicchiati, Vieni. Niente concentrazione.' },
-    { id: 'punizione-collerica', name: 'Punizione Collerica', level: 1, school: 'Negromanzia', always: false,
-      meta: 'Az. bonus subito dopo aver colpito · Sé · 1 min · V',
-      desc: '+1d6 necrotico al colpo. Il bersaglio fa TS Saggezza (CD 15): se fallisce è Spaventato da te per tutta la durata. Nessuna concentrazione.' },
-    { id: 'punizione-ardente', name: 'Punizione Ardente', level: 1, school: 'Evocazione', always: false,
-      meta: 'Azione bonus (dopo un colpo in mischia) · Sé · 1 min · V',
-      desc: '+1d6 fuoco al colpo. Poi a inizio di ogni suo turno il bersaglio subisce 1d6 fuoco e fa TS Costituzione (CD 15): se riesce, l\'incantesimo termina. Non richiede concentrazione.' },
-    { id: 'punizione-radiosa', name: 'Punizione Radiosa', level: 2, school: 'Evocazione', always: false,
-      meta: 'Azione bonus (dopo un colpo in mischia) · Sé · 1 min CONC · V',
-      desc: '+2d8 radiosi al colpo. Il bersaglio emana luce intensa: tutti gli attacchi contro di esso hanno vantaggio automatico. Quando l\'incantesimo termina, il bersaglio subisce altri 2d8 radiosi.' },
-    { id: 'ristorare-inferiore', name: 'Ristorare Inferiore', level: 2, school: 'Abiurazione', always: false,
-      meta: 'Azione bonus · Tocco · Istantaneo · V, S',
-      desc: 'Rimuovi dalla creatura toccata una condizione tra: Accecato, Assordato, Paralizzato o Avvelenato.' }
+      desc: 'Sfera di raggio 4,5 m. Chi entra o inizia il turno nell\'area fa TS Carisma (CD 15): se fallisce non può mentire deliberatamente. Sai chi supera o fallisce il tiro.' }
   ],
 
   SLOT_LEVELS: [
@@ -271,6 +252,12 @@ window.APP_CONFIG = {
       quests: { active: [], completed: [] }
     },
     inspiration: false,
-    deathSaves: { success: 0, fail: 0 }
+    deathSaves: { success: 0, fail: 0 },
+    grimoire: {
+      prepared: [
+        'benedizione', 'cura-ferite', 'comando', 'punizione-collerica',
+        'punizione-ardente', 'punizione-radiosa', 'ristorare-inferiore'
+      ]
+    }
   }
 };

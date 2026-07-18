@@ -664,6 +664,11 @@
     });
     panel.addEventListener('click', function (e) { e.stopPropagation(); });
 
+    document.getElementById('opt-manual').addEventListener('click', function () {
+      window.AppGrimorio.openManual();
+      panel.classList.add('hidden');
+    });
+
     document.getElementById('opt-reset').addEventListener('click', function () {
       if (confirm('Ripristinare tutti i dati ai valori iniziali?')) {
         window.AppStorage.resetState();
