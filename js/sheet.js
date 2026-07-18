@@ -206,6 +206,8 @@
   };
 
   var hpModalMode = 'dmg';
+  /* 'hp' = personaggio, 'steedhp' = destriero: stesso popup per entrambi */
+  var hpModalTarget = 'hp';
 
   function hpModalEls() {
     return {
@@ -229,9 +231,9 @@
       return;
     }
     var state = window.AppStorage.getState();
-    var hp = state.pools.hp;
-    var temp = state.pools.tempHp || 0;
-    var maxHp = cfg.POOLMAX.hp;
+    var hp = state.pools[hpModalTarget];
+    var temp = hpModalTarget === 'hp' ? (state.pools.tempHp || 0) : 0;
+    var maxHp = cfg.POOLMAX[hpModalTarget];
     var n = Math.max(0, parseInt(e.input.value, 10) || 0);
 
     if (hpModalMode === 'temp') {
@@ -272,10 +274,10 @@
     var meta = MODE_META[mode];
     e.modal.setAttribute('data-mode', mode);
     e.ic.innerHTML = meta.ic;
-    e.titletext.textContent = meta.title;
+    e.titletext.textContent = meta.title + (hpModalTarget === 'steedhp' ? ' — Destriero' : '');
     e.apply.textContent = meta.apply;
     e.input.value = '';
-    if (mode === 'heal') {
+    if (mode === 'heal' && hpModalTarget === 'hp') {
       e.toggle.textContent = '＋ PF temporanei';
       e.toggle.classList.remove('hidden');
     } else if (mode === 'temp') {
@@ -287,11 +289,12 @@
     updateHpModalPreview();
   }
 
-  function openHpModal(mode) {
+  function openHpModal(mode, target) {
     var e = hpModalEls();
     if (!e.modal) {
       return;
     }
+    hpModalTarget = target || 'hp';
     setHpModalMode(mode);
     e.modal.classList.remove('hidden');
     setTimeout(function () { e.input.focus(); }, 60);
@@ -308,7 +311,9 @@
     var e = hpModalEls();
     var n = Math.max(0, parseInt(e.input.value, 10) || 0);
     if (n > 0) {
-      if (hpModalMode === 'dmg') {
+      if (hpModalTarget === 'steedhp') {
+        adjustPool('steedhp', hpModalMode === 'dmg' ? -n : n);
+      } else if (hpModalMode === 'dmg') {
         applyHpChange(-n);
       } else if (hpModalMode === 'heal') {
         applyHpChange(n);
@@ -329,6 +334,16 @@
     if (healOpen && !healOpen._bound) {
       healOpen._bound = true;
       healOpen.addEventListener('click', function () { openHpModal('heal'); });
+    }
+    var steedDmg = document.getElementById('steed-dmg-open');
+    var steedHeal = document.getElementById('steed-heal-open');
+    if (steedDmg && !steedDmg._bound) {
+      steedDmg._bound = true;
+      steedDmg.addEventListener('click', function () { openHpModal('dmg', 'steedhp'); });
+    }
+    if (steedHeal && !steedHeal._bound) {
+      steedHeal._bound = true;
+      steedHeal.addEventListener('click', function () { openHpModal('heal', 'steedhp'); });
     }
 
     var e = hpModalEls();
@@ -466,15 +481,6 @@
     }
   }
 
-  function applySteedHP(sign) {
-    var inp = document.getElementById('steed-hp-in');
-    var n = parseInt(inp.value, 10);
-    if (!isNaN(n) && n !== 0) {
-      adjustPool('steedhp', sign * Math.abs(n));
-    }
-    inp.value = '';
-  }
-
   function shortRest() {
     var state = window.AppStorage.getState();
     state.spent.cd = Math.max(0, (state.spent.cd || 0) - 1);
@@ -540,10 +546,6 @@
     bindHpControls();
     bindDeathSaves();
     render();
-    document.getElementById('steed-minus').addEventListener('click', function () { adjustPool('steedhp', -1); });
-    document.getElementById('steed-plus').addEventListener('click', function () { adjustPool('steedhp', 1); });
-    document.getElementById('steed-dmg').addEventListener('click', function () { applySteedHP(-1); });
-    document.getElementById('steed-heal').addEventListener('click', function () { applySteedHP(1); });
     document.getElementById('btn-short-rest').addEventListener('click', shortRest);
     document.getElementById('btn-long-rest').addEventListener('click', longRest);
     document.querySelectorAll('.loh-actions .pbtn').forEach(function (btn) {

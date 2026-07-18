@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=35">
+<link rel="stylesheet" href="css/styles.css?v=36">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=35" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=36" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -479,14 +479,9 @@
         <span class="hp-val"><span id="pv-steedhp">25</span><span class="hp-max" id="steed-hp-max"> / 25</span></span>
       </div>
       <div class="hp-bar-track"><div class="hp-bar-fill" id="steed-bar-fill" style="width:100%"></div></div>
-      <div class="hp-actions">
-        <button type="button" class="pbtn step" id="steed-minus" aria-label="−1 PF destriero">−1</button>
-        <button type="button" class="pbtn step" id="steed-plus" aria-label="+1 PF destriero">+1</button>
-        <input class="hp-in" id="steed-hp-in" type="number" min="0" inputmode="numeric" placeholder="quantità" aria-label="Quantità PF destriero">
-        <div class="hp-dmgheal">
-          <button type="button" class="pbtn dmg" id="steed-dmg">Danno</button>
-          <button type="button" class="pbtn heal" id="steed-heal">Cura</button>
-        </div>
+      <div class="hp-actions hp-actions-dh">
+        <button type="button" class="pbtn dmg" id="steed-dmg-open"><svg class="hp-ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 4v5l-9 7l-4 4l-3 -3l4 -4l7 -9z"/><path d="M6.5 11.5l6 6"/></svg> Danno</button>
+        <button type="button" class="pbtn heal" id="steed-heal-open"><svg class="hp-ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.566"/><path d="M16 19h6"/><path d="M19 16v6"/></svg> Cura</button>
       </div>
     </div>
     <div class="steed-mini-stats">
@@ -852,7 +847,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=35" alt="Ritratto di Tharion Velnar">
+      <img src="avatar-full.jpg?v=36" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -861,19 +856,19 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=35"></script>
-<script src="js/manual-paladino.js?v=35"></script>
-<script src="js/config.js?v=35"></script>
-<script src="js/storage.js?v=35"></script>
-<script src="js/hp-bar.js?v=35"></script>
-<script src="js/header.js?v=35"></script>
-<script src="js/sheet.js?v=35"></script>
-<script src="js/grimorio.js?v=35"></script>
-<script src="js/treasury.js?v=35"></script>
-<script src="js/diary.js?v=35"></script>
-<script src="js/inspiration.js?v=35"></script>
-<script src="js/bottom-sheet.js?v=35"></script>
-<script src="js/app.js?v=35"></script>
-<script type="module" src="js/cloud.js?v=35"></script>
+<script src="js/firebase-config.js?v=36"></script>
+<script src="js/manual-paladino.js?v=36"></script>
+<script src="js/config.js?v=36"></script>
+<script src="js/storage.js?v=36"></script>
+<script src="js/hp-bar.js?v=36"></script>
+<script src="js/header.js?v=36"></script>
+<script src="js/sheet.js?v=36"></script>
+<script src="js/grimorio.js?v=36"></script>
+<script src="js/treasury.js?v=36"></script>
+<script src="js/diary.js?v=36"></script>
+<script src="js/inspiration.js?v=36"></script>
+<script src="js/bottom-sheet.js?v=36"></script>
+<script src="js/app.js?v=36"></script>
+<script type="module" src="js/cloud.js?v=36"></script>
 </body>
 </html>
