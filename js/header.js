@@ -1,19 +1,17 @@
 (function () {
-  var cfg = window.APP_CONFIG;
-
   function render() {
-    var ch = cfg.CHARACTER;
+    var view = window.AppEngine.getView();
     var nameEl = document.getElementById('header-name');
     var classEl = document.getElementById('header-class');
     var metaEl = document.getElementById('header-meta');
     if (nameEl) {
-      nameEl.textContent = ch.name;
+      nameEl.textContent = view.name;
     }
     if (classEl) {
-      classEl.textContent = 'Paladino · Livello 7';
+      classEl.textContent = view.headerLine;
     }
     if (metaEl) {
-      metaEl.textContent = ch.classLine.split('·')[0].trim();
+      metaEl.textContent = view.speciesLabel;
     }
   }
 

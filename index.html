@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=49">
+<link rel="stylesheet" href="css/styles.css?v=50">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=49" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=50" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -165,16 +165,16 @@
           <thead><tr><th>Arma</th><th>Colpire</th><th>Danni</th></tr></thead>
           <tbody>
             <tr>
-              <td><span class="atk-name">Spada lunga ✦ (magica)</span><div class="mast">Maestria: Vex</div></td>
-              <td>+8</td><td>1d8+7 tagl.</td>
+              <td><span class="atk-name" id="atk-weapon-name">Spada lunga ✦ (magica)</span><div class="mast">Maestria: Vex</div></td>
+              <td id="atk-weapon-hit">+8</td><td id="atk-weapon-dmg">1d8+7 tagl.</td>
             </tr>
             <tr>
               <td><span class="atk-name">Soffio (Fuoco)</span><div class="mast">cono 4,5 m / linea 9 m</div></td>
-              <td>TS DES 13</td><td>2d10 fuoco</td>
+              <td id="atk-breath-hit">TS DES 13</td><td id="atk-breath-dmg">2d10 fuoco</td>
             </tr>
           </tbody>
         </table>
-        <p class="note">Colpire/danni includono spada +1. Stile Duellante +2 ai danni. Con Arma Sacra: +3 al colpire (→ +11) e danni Radiosi.</p>
+        <p class="note" id="atk-note">Colpire/danni includono spada +1. Stile Duellante +2 ai danni. Con Arma Sacra: +3 al colpire (→ +11) e danni Radiosi.</p>
       </div>
 
       <div class="card">
@@ -196,7 +196,7 @@
         <div class="loh-card">
           <div class="loh-top">
             <span><b>Imposizione delle Mani</b></span>
-            <span><span id="pv-loh">35</span> / 35 PF</span>
+            <span><span id="pv-loh">35</span> / <span id="loh-max">35</span> PF</span>
           </div>
           <div class="loh-bar-track" id="loh-bar-track"><div class="loh-bar-fill" id="loh-bar-fill"></div></div>
           <div class="loh-actions">
@@ -302,35 +302,35 @@
       <div class="card">
         <h2 class="card-title">Caratteristiche</h2>
         <div class="abil-grid">
-          <div class="abil-card"><span class="name">FOR</span><span class="mod">+4</span><span class="score">18</span></div>
-          <div class="abil-card"><span class="name">DES</span><span class="mod">−1</span><span class="score">8</span></div>
-          <div class="abil-card"><span class="name">COS</span><span class="mod">+2</span><span class="score">14</span></div>
-          <div class="abil-card"><span class="name">INT</span><span class="mod">+0</span><span class="score">10</span></div>
-          <div class="abil-card"><span class="name">SAG</span><span class="mod">+0</span><span class="score">10</span></div>
-          <div class="abil-card"><span class="name">CAR</span><span class="mod">+3</span><span class="score">16</span></div>
+          <div class="abil-card" data-abil="FOR"><span class="name">FOR</span><span class="mod">+4</span><span class="score">18</span></div>
+          <div class="abil-card" data-abil="DES"><span class="name">DES</span><span class="mod">−1</span><span class="score">8</span></div>
+          <div class="abil-card" data-abil="COS"><span class="name">COS</span><span class="mod">+2</span><span class="score">14</span></div>
+          <div class="abil-card" data-abil="INT"><span class="name">INT</span><span class="mod">+0</span><span class="score">10</span></div>
+          <div class="abil-card" data-abil="SAG"><span class="name">SAG</span><span class="mod">+0</span><span class="score">10</span></div>
+          <div class="abil-card" data-abil="CAR"><span class="name">CAR</span><span class="mod">+3</span><span class="score">16</span></div>
         </div>
       </div>
       <div class="card">
-        <h2 class="card-title sec">Tiri Salvezza <small>Aura +3 inclusa</small></h2>
-        <div class="stat-row"><span>Forza</span><span class="v">+7</span></div>
-        <div class="stat-row"><span>Destrezza</span><span class="v">+2</span></div>
-        <div class="stat-row"><span>Costituzione</span><span class="v">+5</span></div>
-        <div class="stat-row"><span>Intelligenza</span><span class="v">+3</span></div>
-        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Saggezza</span><span class="v prof">+6</span></div>
-        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Carisma</span><span class="v prof">+9</span></div>
+        <h2 class="card-title sec">Tiri Salvezza <small id="ts-aura-note">Aura +3 inclusa</small></h2>
+        <div class="stat-row" data-save="FOR"><span>Forza</span><span class="v">+7</span></div>
+        <div class="stat-row" data-save="DES"><span>Destrezza</span><span class="v">+2</span></div>
+        <div class="stat-row" data-save="COS"><span>Costituzione</span><span class="v">+5</span></div>
+        <div class="stat-row" data-save="INT"><span>Intelligenza</span><span class="v">+3</span></div>
+        <div class="stat-row" data-save="SAG"><span class="prof"><span class="skill-dot"></span>Saggezza</span><span class="v prof">+6</span></div>
+        <div class="stat-row" data-save="CAR"><span class="prof"><span class="skill-dot"></span>Carisma</span><span class="v prof">+9</span></div>
       </div>
       <div class="card">
         <h2 class="card-title sec">Abilità</h2>
-        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Atletica <span class="dim">(For)</span></span><span class="v prof">+7</span></div>
-        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Intimidire <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
-        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Persuasione <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
-        <div class="stat-row"><span class="prof"><span class="skill-dot"></span>Percezione <span class="dim">(Sag)</span></span><span class="v prof">+3</span></div>
-        <div class="stat-row"><span>Inganno <span class="dim">(Car)</span></span><span class="v">+3</span></div>
-        <div class="stat-row"><span>Intrattenere <span class="dim">(Car)</span></span><span class="v">+3</span></div>
-        <div class="stat-row"><span>Acrobazia <span class="dim">(Des)</span></span><span class="v">−1</span></div>
-        <div class="stat-row"><span>Furtività <span class="dim">(Des)</span></span><span class="v">−1</span></div>
-        <div class="stat-row"><span>Rapidità di Mano <span class="dim">(Des)</span></span><span class="v">−1</span></div>
-        <div class="stat-row"><span class="dim">Percez. passiva</span><span class="v dim">13</span></div>
+        <div class="stat-row" data-skill="atletica"><span class="prof"><span class="skill-dot"></span>Atletica <span class="dim">(For)</span></span><span class="v prof">+7</span></div>
+        <div class="stat-row" data-skill="intimidire"><span class="prof"><span class="skill-dot"></span>Intimidire <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
+        <div class="stat-row" data-skill="persuasione"><span class="prof"><span class="skill-dot"></span>Persuasione <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
+        <div class="stat-row" data-skill="percezione"><span class="prof"><span class="skill-dot"></span>Percezione <span class="dim">(Sag)</span></span><span class="v prof">+3</span></div>
+        <div class="stat-row" data-skill="inganno"><span>Inganno <span class="dim">(Car)</span></span><span class="v">+3</span></div>
+        <div class="stat-row" data-skill="intrattenere"><span>Intrattenere <span class="dim">(Car)</span></span><span class="v">+3</span></div>
+        <div class="stat-row" data-skill="acrobazia"><span>Acrobazia <span class="dim">(Des)</span></span><span class="v">−1</span></div>
+        <div class="stat-row" data-skill="furtivita"><span>Furtività <span class="dim">(Des)</span></span><span class="v">−1</span></div>
+        <div class="stat-row" data-skill="rapidita-di-mano"><span>Rapidità di Mano <span class="dim">(Des)</span></span><span class="v">−1</span></div>
+        <div class="stat-row"><span class="dim">Percez. passiva</span><span class="v dim" id="skill-passive-perception">13</span></div>
       </div>
       </div>
     </div>
@@ -353,7 +353,7 @@
       </div>
       <div class="card">
         <h2 class="card-title sec">Privilegi di Classe &amp; Aure</h2>
-        <div class="feat pressable" data-detail-title="Aura di Protezione" data-detail-body="Tu e gli alleati nell'aura (3 m) +3 (CAR) a tutti i TS.">
+        <div class="feat pressable" id="feat-aura-prot" data-detail-title="Aura di Protezione" data-detail-body="Tu e gli alleati nell'aura (3 m) +3 (CAR) a tutti i TS.">
           <div class="feat-head"><span class="ft">Aura di Protezione</span><span class="tag g">3 m</span></div>
           <div class="fd">+3 (CAR) a tutti i TS per te e alleati entro 3 m.</div>
         </div>
@@ -369,7 +369,7 @@
           <div class="feat-head"><span class="ft">Maestria nelle Armi</span></div>
           <div class="fd">Vex (spada) e Rallentare (giavellotto).</div>
         </div>
-        <div class="feat pressable" data-detail-title="Arma Sacra" data-detail-body="Per 10 min +3 (CAR) al colpire con arma da mischia, danni Radiosi a scelta, luce intensa 6 m.">
+        <div class="feat pressable" id="feat-arma-sacra" data-detail-title="Arma Sacra" data-detail-body="Per 10 min +3 (CAR) al colpire con arma da mischia, danni Radiosi a scelta, luce intensa 6 m.">
           <div class="feat-head"><span class="ft">Arma Sacra</span><span class="tag g">CD</span></div>
           <div class="fd">+3 colpire, danni Radiosi, luce 6 m per 10 min.</div>
         </div>
@@ -847,7 +847,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=49" alt="Ritratto di Tharion Velnar">
+      <img src="avatar-full.jpg?v=50" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -856,19 +856,21 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=49"></script>
-<script src="js/manual-55.js?v=49"></script>
-<script src="js/config.js?v=49"></script>
-<script src="js/storage.js?v=49"></script>
-<script src="js/hp-bar.js?v=49"></script>
-<script src="js/header.js?v=49"></script>
-<script src="js/sheet.js?v=49"></script>
-<script src="js/grimorio.js?v=49"></script>
-<script src="js/treasury.js?v=49"></script>
-<script src="js/diary.js?v=49"></script>
-<script src="js/inspiration.js?v=49"></script>
-<script src="js/bottom-sheet.js?v=49"></script>
-<script src="js/app.js?v=49"></script>
-<script type="module" src="js/cloud.js?v=49"></script>
+<script src="js/firebase-config.js?v=50"></script>
+<script src="js/manual-55.js?v=50"></script>
+<script src="js/config.js?v=50"></script>
+<script src="js/storage.js?v=50"></script>
+<script src="js/engine.js?v=50"></script>
+<script src="js/hp-bar.js?v=50"></script>
+<script src="js/header.js?v=50"></script>
+<script src="js/stats.js?v=50"></script>
+<script src="js/sheet.js?v=50"></script>
+<script src="js/grimorio.js?v=50"></script>
+<script src="js/treasury.js?v=50"></script>
+<script src="js/diary.js?v=50"></script>
+<script src="js/inspiration.js?v=50"></script>
+<script src="js/bottom-sheet.js?v=50"></script>
+<script src="js/app.js?v=50"></script>
+<script type="module" src="js/cloud.js?v=50"></script>
 </body>
 </html>

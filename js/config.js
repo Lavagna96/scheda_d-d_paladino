@@ -3,78 +3,8 @@ window.APP_CONFIG = {
   STORAGE_KEY_V1: 'tharion-velnar-sheet',
   INSPIRATION_KEY: 'tharion-insp',
 
-  POOLMAX: { loh: 35, hp: 60, steedhp: 25, tempHp: 0 },
-
-  RESOURCES: [
-    { key: 'hd', max: 7, name: 'Dadi Ferita', ctx: '7d10 · riposo breve' },
-    { key: 'cd', max: 2, name: 'Channel Divinity', ctx: '1 al rip. breve' },
-    { key: 'sl1', max: 4, name: 'Slot 1° livello' },
-    { key: 'sl2', max: 3, name: 'Slot 2° livello' },
-    { key: 'breath', max: 3, name: 'Soffio del Drago' },
-    { key: 'smitefree', max: 1, name: 'Punizione Divina gratis' },
-    { key: 'steedfree', max: 1, name: 'Trova Destriero gratis' },
-    { key: 'flight', max: 1, name: 'Volo Draconico' },
-    { key: 'shield', max: 1, name: 'Scudo magico', ctx: '+5 CA, reazione · 1/giorno' }
-  ],
-
-  CHARACTER: {
-    name: 'Tharion Velnar',
-    level: 7,
-    classId: 'paladino',
-    classLine: 'Dragonide d\'Oro · Paladino 7 · Devozione',
-    ac: 20,
-    acNote: 'Piastre + Scudo',
-    initiative: -1,
-    initiativeNote: 'vant. iniziativa',
-    avatar: '✦',
-    spellDc: 15,
-    spellAttack: 7
-  },
-
-  ABILITIES: [
-    { name: 'FOR', mod: '+4', score: 18 },
-    { name: 'DES', mod: '−1', score: 8 },
-    { name: 'COS', mod: '+2', score: 14 },
-    { name: 'INT', mod: '+0', score: 10 },
-    { name: 'SAG', mod: '+0', score: 10 },
-    { name: 'CAR', mod: '+3', score: 16 }
-  ],
-
-  SAVES: [
-    { name: 'Forza', value: '+7' },
-    { name: 'Destrezza', value: '+2' },
-    { name: 'Costituzione', value: '+5' },
-    { name: 'Intelligenza', value: '+3' },
-    { name: 'Saggezza', value: '+6', prof: true },
-    { name: 'Carisma', value: '+9', prof: true }
-  ],
-
-  SKILLS: [
-    { name: 'Atletica', attr: 'For', value: '+7', prof: true },
-    { name: 'Intimidire', attr: 'Car', value: '+6', prof: true },
-    { name: 'Persuasione', attr: 'Car', value: '+6', prof: true },
-    { name: 'Percezione', attr: 'Sag', value: '+3', prof: true },
-    { name: 'Inganno', attr: 'Car', value: '+3' },
-    { name: 'Intrattenere', attr: 'Car', value: '+3' },
-    { name: 'Acrobazia', attr: 'Des', value: '−1' },
-    { name: 'Furtività', attr: 'Des', value: '−1' },
-    { name: 'Rapidità di Mano', attr: 'Des', value: '−1' },
-    { name: 'Percez. passiva', value: '13', dim: true }
-  ],
-
-  ATTACKS: [
-    {
-      name: 'Spada lunga ✦ (magica)',
-      hit: '+8',
-      damage: '1d8+7 taglienti',
-      note: 'Maestria: Vex (se colpisci → vantaggio al prossimo attacco sullo stesso bersaglio)'
-    },
-    {
-      name: 'Soffio (Fuoco) (cono 4,5 m / linea 9 m)',
-      hit: 'TS DES 13',
-      damage: '2d10 fuoco (metà se supera)'
-    }
-  ],
+  /* I valori derivati (mod, TS, CD, CA, PF max, risorse…) NON vivono più qui:
+     li calcola js/engine.js dai fatti base in DEFAULT_STATE.character. */
 
   STEED: {
     defaultName: 'Destriero Ultraterreno',
@@ -220,15 +150,34 @@ window.APP_CONFIG = {
       desc: 'Sfera di raggio 4,5 m. Chi entra o inizia il turno nell\'area fa TS Carisma (CD 15): se fallisce non può mentire deliberatamente. Sai chi supera o fallisce il tiro.' }
   ],
 
-  SLOT_LEVELS: [
-    { key: '0', label: 'Trucchetti', max: 0 },
-    { key: '1', label: '1° Livello', max: 4 },
-    { key: '2', label: '2° Liv', max: 3 },
-    { key: '3', label: '3°+ Liv', max: 0 }
-  ],
-
   DEFAULT_STATE: {
-    version: 2,
+    version: 3,
+    character: {
+      name: 'Tharion Velnar',
+      classId: 'paladino',
+      subclassName: 'Devozione',
+      level: 7,
+      speciesId: 'dragonide',
+      speciesLabel: 'Dragonide d\'Oro',
+      avatar: '✦',
+      abilities: { FOR: 18, DES: 8, COS: 14, INT: 10, SAG: 10, CAR: 16 },
+      profSaves: ['SAG', 'CAR'],
+      profSkills: ['atletica', 'intimidire', 'persuasione', 'percezione'],
+      fightingStyle: 'duello',
+      armor: { id: 'piastre', shield: true },
+      weapon: { name: 'Spada lunga ✦ (magica)', die: '1d8', type: 'tagl.', mastery: 'Vex' },
+      steedSlotLevel: 2,
+      initiativeNote: 'vant. iniziativa',
+      modifiers: [
+        { source: 'Lama Vincolante — Ascesa (Liv. II)', target: 'attacco', value: 1 },
+        { source: 'Lama Vincolante — Ascesa (Liv. II)', target: 'danni', value: 1 },
+        { source: 'Lama Vincolante — Ascesa (Liv. II)', target: 'cd-inc', value: 1 },
+        { source: 'Lama Vincolante — Ascesa (Liv. II)', target: 'att-inc', value: 1 }
+      ],
+      extraResources: [
+        { key: 'shield', max: 1 }
+      ]
+    },
     pools: { loh: 35, hp: 60, steedhp: 25, tempHp: 0 },
     spent: {},
     coins: { mp: 10, mo: 4696, ma: 250, mr: 928 },

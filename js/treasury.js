@@ -22,13 +22,7 @@
   function carryMaxKg() {
     // Formula ufficiale D&D 5e: capacità di carico = Forza × 15 libbre,
     // convertita in kg (1 lb ≈ 0,4536 kg).
-    var cfg = window.APP_CONFIG;
-    var str = 10;
-    ((cfg && cfg.ABILITIES) || []).forEach(function (a) {
-      if (a.name === 'FOR') {
-        str = a.score;
-      }
-    });
+    var str = window.AppEngine.getView().carryStr;
 
     return Math.round(str * 15 * 0.4536 * 10) / 10;
   }

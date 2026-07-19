@@ -61,14 +61,31 @@
     return next;
   }
 
+  /* v3: i fatti base del personaggio entrano nello stato (state.character).
+     Merge conservativo sui default: gli oggetti annidati si integrano campo
+     per campo, gli array (competenze, modificatori…) vincono se presenti. */
+  function mergeCharacter(def, saved) {
+    if (!saved) {
+      return def;
+    }
+    var out = Object.assign({}, def, saved);
+    out.abilities = Object.assign({}, def.abilities, saved.abilities || {});
+    out.armor = Object.assign({}, def.armor, saved.armor || {});
+    out.weapon = Object.assign({}, def.weapon, saved.weapon || {});
+
+    return out;
+  }
+
   function loadState() {
     var next = getDefaultState();
     try {
       var v2 = localStorage.getItem(cfg.STORAGE_KEY);
       if (v2) {
         var parsed = JSON.parse(v2);
-        if (parsed && parsed.version === 2) {
+        if (parsed && (parsed.version === 2 || parsed.version === 3)) {
           next = Object.assign(next, parsed);
+          next.version = 3;
+          next.character = mergeCharacter(getDefaultState().character, parsed.character);
           next.pools = Object.assign(getDefaultState().pools, parsed.pools || {});
           next.coins = Object.assign(getDefaultState().coins, parsed.coins || {});
           next.steed = Object.assign(getDefaultState().steed, parsed.steed || {});

@@ -903,6 +903,7 @@
     showView('scheda');
 
     window.AppHeader.init();
+    window.AppStats.init(); // prima di AppSheet: imposta i data-max delle res-card
     window.AppSheet.init();
     window.AppGrimorio.init();
     initLevelTabs();

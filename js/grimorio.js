@@ -4,9 +4,13 @@
 
   /* ---------- dati ---------- */
 
+  function character() {
+    return window.AppStorage.getState().character;
+  }
+
   function getManualClass() {
     var manual = window.MANUAL_55;
-    var classId = cfg.CHARACTER.classId;
+    var classId = character().classId;
 
     return (manual && manual.classes && manual.classes[classId]) || null;
   }
@@ -47,7 +51,7 @@
       return 0;
     }
 
-    return klass.preparedByLevel[cfg.CHARACTER.level] || 0;
+    return klass.preparedByLevel[character().level] || 0;
   }
 
   function getMaxSlotLevel() {
@@ -56,7 +60,7 @@
       return 2;
     }
 
-    return klass.slotLevelByLevel[cfg.CHARACTER.level] || 0;
+    return klass.slotLevelByLevel[character().level] || 0;
   }
 
   /* Tutti gli incantesimi da mostrare nel grimorio: fissi + preparati scelti */
@@ -74,27 +78,21 @@
     return list;
   }
 
-  function getChaMod() {
-    var cha = cfg.ABILITIES.filter(function (a) { return a.name === 'CAR'; })[0];
-
-    return cha ? cha.mod : '+0';
-  }
-
   /* ---------- render statistiche ---------- */
 
   function renderGrimStats() {
-    var ch = cfg.CHARACTER;
+    var view = window.AppEngine.getView();
     var dcEl = document.getElementById('grim-dc');
     var atkEl = document.getElementById('grim-atk');
     var chaEl = document.getElementById('grim-cha');
     if (dcEl) {
-      dcEl.textContent = ch.spellDc;
+      dcEl.textContent = view.spellDc;
     }
     if (atkEl) {
-      atkEl.textContent = (ch.spellAttack >= 0 ? '+' : '') + ch.spellAttack;
+      atkEl.textContent = window.AppEngine.formatMod(view.spellAttack);
     }
     if (chaEl) {
-      chaEl.textContent = getChaMod();
+      chaEl.textContent = view.spellAbilityModText;
     }
     renderPrepCounter();
   }
@@ -337,7 +335,7 @@
     var maxLvl = getMaxSlotLevel();
     var fixedIds = getFixedIds();
     var preparedIds = getPreparedIds();
-    var classSpells = getClassSpells(cfg.CHARACTER.classId);
+    var classSpells = getClassSpells(character().classId);
     for (var lvl = 1; lvl <= maxLvl; lvl++) {
       (function (level) {
         var spells = classSpells.filter(function (s) { return s.level === level; });
@@ -397,7 +395,7 @@
       return;
     }
     if (!manualClassId) {
-      manualClassId = cfg.CHARACTER.classId;
+      manualClassId = character().classId;
     }
     if (chips) {
       chips.innerHTML = '';

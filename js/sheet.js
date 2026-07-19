@@ -2,6 +2,11 @@
   var cfg = window.APP_CONFIG;
   var DEATH_SAVE_MAX = 3;
 
+  /* Massimali derivati dai fatti base (Fase 0): sempre via motore */
+  function poolMax() {
+    return window.AppEngine.getView().poolMax;
+  }
+
   function formatMod(n) {
     if (n >= 0) {
       return '+' + n;
@@ -76,22 +81,22 @@
   }
 
   function renderCombatStats() {
-    var ch = cfg.CHARACTER;
+    var view = window.AppEngine.getView();
     var acEl = document.getElementById('combat-ac');
     var acNote = document.getElementById('combat-ac-note');
     var initEl = document.getElementById('combat-init');
     var initNote = document.getElementById('combat-init-note');
     if (acEl) {
-      acEl.textContent = ch.ac;
+      acEl.textContent = view.ac;
     }
     if (acNote) {
-      acNote.textContent = ch.acNote || '';
+      acNote.textContent = view.acNote;
     }
     if (initEl) {
-      initEl.textContent = formatMod(ch.initiative);
+      initEl.textContent = view.initiativeText;
     }
     if (initNote) {
-      initNote.textContent = ch.initiativeNote || '';
+      initNote.textContent = view.initiativeNote;
     }
   }
 
@@ -139,7 +144,7 @@
 
   function renderHp() {
     var state = window.AppStorage.getState();
-    window.AppHpBar.render(state.pools.hp, cfg.POOLMAX.hp, 'pv-hp', 'hp-bar-fill', 'hp-max');
+    window.AppHpBar.render(state.pools.hp, poolMax().hp, 'pv-hp', 'hp-bar-fill', 'hp-max');
     renderTempHp(state.pools.tempHp || 0);
   }
 
@@ -147,7 +152,7 @@
     var fill = document.getElementById('temp-hp-bar-fill');
     var txt = document.getElementById('pv-temp-hp');
     var wrap = document.getElementById('temp-hp-bar-wrap');
-    var maxHp = cfg.POOLMAX.hp;
+    var maxHp = poolMax().hp;
     var pct = val > 0 ? Math.max(0, Math.min(100, val / maxHp * 100)) : 0;
     if (txt) {
       txt.textContent = val;
@@ -175,7 +180,7 @@
         state.pools.hp = Math.max(0, state.pools.hp - remaining);
       }
     } else {
-      state.pools.hp = Math.min(cfg.POOLMAX.hp, state.pools.hp + delta);
+      state.pools.hp = Math.min(poolMax().hp, state.pools.hp + delta);
       if (state.pools.hp > 0) {
         ensureDeathSaves(state);
         state.deathSaves.success = 0;
@@ -233,7 +238,7 @@
     var state = window.AppStorage.getState();
     var hp = state.pools[hpModalTarget];
     var temp = hpModalTarget === 'hp' ? (state.pools.tempHp || 0) : 0;
-    var maxHp = cfg.POOLMAX[hpModalTarget];
+    var maxHp = poolMax()[hpModalTarget];
     var n = Math.max(0, parseInt(e.input.value, 10) || 0);
 
     if (hpModalMode === 'temp') {
@@ -385,7 +390,7 @@
       lv.textContent = state.pools.loh;
     }
     if (lf) {
-      lf.style.width = Math.max(0, Math.min(100, state.pools.loh / cfg.POOLMAX.loh * 100)) + '%';
+      lf.style.width = Math.max(0, Math.min(100, state.pools.loh / poolMax().loh * 100)) + '%';
     }
   }
 
@@ -393,7 +398,7 @@
     var state = window.AppStorage.getState();
     window.AppHpBar.render(
       state.pools.steedhp,
-      cfg.POOLMAX.steedhp,
+      poolMax().steedhp,
       'pv-steedhp',
       'steed-bar-fill',
       'steed-hp-max'
@@ -416,7 +421,7 @@
       var r = track.getBoundingClientRect();
       var pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
       var s = window.AppStorage.getState();
-      s.pools.loh = Math.round(pct * cfg.POOLMAX.loh);
+      s.pools.loh = Math.round(pct * poolMax().loh);
       window.AppStorage.saveState(s);
       renderLoh();
     }
@@ -469,7 +474,7 @@
 
       return;
     }
-    state.pools[k] = Math.max(0, Math.min(cfg.POOLMAX[k], (state.pools[k] || 0) + d));
+    state.pools[k] = Math.max(0, Math.min(poolMax()[k], (state.pools[k] || 0) + d));
     window.AppStorage.saveState(state);
     if (k === 'steedhp') {
       renderSteedHp();
@@ -494,9 +499,9 @@
   function longRest() {
     var state = window.AppStorage.getState();
     state.spent = {};
-    state.pools.loh = cfg.POOLMAX.loh;
-    state.pools.hp = cfg.POOLMAX.hp;
-    state.pools.steedhp = cfg.POOLMAX.steedhp;
+    state.pools.loh = poolMax().loh;
+    state.pools.hp = poolMax().hp;
+    state.pools.steedhp = poolMax().steedhp;
     state.pools.tempHp = 0;
     state.deathSaves = { success: 0, fail: 0 };
     window.AppStorage.saveState(state);
