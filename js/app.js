@@ -402,6 +402,7 @@
     var outEl = null;          // elemento che esce
     var neighborDir = 0;
     var neighborKind = null;   // 'sub' | 'view'
+    var neighborIsLevel = false; // il vicino è un gruppo .spell-level-group (usa .hidden, non solo display)
     var viewPrevIdx = 0;       // sotto-tab della sezione di destinazione (per annullare)
 
     function clearStyles(p) {
@@ -421,6 +422,11 @@
         clearStyles(neighbor);
         neighbor.classList.add('hidden');
       } else {
+        if (neighborIsLevel && neighbor) {
+          // .hidden ha display:none !important: senza toglierla il gruppo
+          // che entra resta invisibile per tutto il drag (niente sovrapposizione)
+          neighbor.classList.add('hidden');
+        }
         clearStyles(neighbor);
       }
       clearStyles(outEl);
@@ -428,6 +434,7 @@
       outEl = null;
       neighborDir = 0;
       neighborKind = null;
+      neighborIsLevel = false;
     }
 
     function setupSub(dir) {
@@ -445,6 +452,12 @@
       var mainRect = main.getBoundingClientRect();
       var hostRect = ctx.panel.parentElement.getBoundingClientRect();
       var visTop = Math.max(ctx.panel.offsetTop, Math.round(mainRect.top - hostRect.top));
+      if (ctx.kind === 'level') {
+        // .hidden (display:none !important) batte lo style inline sotto:
+        // va tolta esplicitamente, non basta impostare display:block
+        np.classList.remove('hidden');
+      }
+      neighborIsLevel = ctx.kind === 'level';
       np.classList.add('swipe-follow');
       np.style.display = 'block';
       np.style.position = 'absolute';
@@ -515,6 +528,7 @@
       var nb = neighbor;
       var out = outEl;
       var ctxRef = ctx;
+      var wasLevel = neighborIsLevel;
       var doCommit = commit && !!nb;
 
       if (kind === 'sub') {
@@ -567,12 +581,16 @@
             suppressSlideAnim = true;
             ctxRef.tabs[tgt].click();
             centerSubtabInBar(currentSubtabBar(), ctxRef.tabs[tgt]);
+          } else if (wasLevel && nb) {
+            // swipe annullato: il vicino non è più visibile, torna nascosto
+            nb.classList.add('hidden');
           }
         }
         neighbor = null;
         outEl = null;
         neighborDir = 0;
         neighborKind = null;
+        neighborIsLevel = false;
         animating = false;
         resetDocScroll();
       }, 250);

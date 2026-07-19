@@ -132,17 +132,21 @@ body {
    Sfondo e angoli arrotondati servono a rendere la pagina in transito
    un "foglio" solido: l'ombra segue la curva, niente spigoli vivi. */
 .subpanel.swipe-follow,
-.subpanel.swipe-anim {
+.subpanel.swipe-anim,
+.spell-level-group.swipe-follow,
+.spell-level-group.swipe-anim {
   background: var(--bg-principal);
   border-radius: var(--radius-lg);
 }
 
-.subpanel.swipe-follow {
+.subpanel.swipe-follow,
+.spell-level-group.swipe-follow {
   transition: none;
   will-change: transform;
 }
 
-.subpanel.swipe-anim {
+.subpanel.swipe-anim,
+.spell-level-group.swipe-anim {
   transition: transform 0.24s ease-out, filter 0.24s ease-out;
 }
 
