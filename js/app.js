@@ -311,12 +311,22 @@
     fab.setAttribute('data-context', currentView + '-' + (sub || ''));
   }
 
-  function getSwipeContext() {
+  function getSwipeContext(startTarget) {
     var view = document.getElementById('view-' + currentView);
     if (!view) {
       return null;
     }
     var sys = viewTabSystem(view);
+    if (sys && sys.kind === 'level') {
+      // Nel grimorio lo swipe cambia livello solo se il gesto parte
+      // dall'elenco incantesimi; più in su (slot, ricerca, glossario,
+      // promemoria) si comporta come le viste senza sotto-tab e cambia
+      // sezione, perché lì "sotto" non c'è altro livello da scorrere.
+      var spellList = view.querySelector('.spell-list');
+      if (!spellList || !startTarget || !spellList.contains(startTarget)) {
+        sys = null;
+      }
+    }
     var tabs = sys ? sys.tabs : [];
     var idx = 0;
     tabs.forEach(function (t, i) {
@@ -404,6 +414,7 @@
     var neighborKind = null;   // 'sub' | 'view'
     var neighborIsLevel = false; // il vicino è un gruppo .spell-level-group (usa .hidden, non solo display)
     var viewPrevIdx = 0;       // sotto-tab della sezione di destinazione (per annullare)
+    var startTarget = null;    // elemento toccato all'avvio: decide se il grimorio scorre i livelli o cambia sezione
 
     function clearStyles(p) {
       if (!p) {
@@ -617,6 +628,7 @@
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
       startT = Date.now();
+      startTarget = t;
       tracking = true;
     }, { passive: true });
 
@@ -634,7 +646,7 @@
           return;
         }
         if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-          ctx = getSwipeContext();
+          ctx = getSwipeContext(startTarget);
           if (!ctx) {
             tracking = false;
 
