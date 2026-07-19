@@ -12,12 +12,23 @@
   }
 
   function getManualSpell(id) {
-    var klass = getManualClass();
-    if (!klass) {
+    var manual = window.MANUAL_55;
+    if (!manual) {
       return null;
     }
 
-    return klass.spells.filter(function (s) { return s.id === id; })[0] || null;
+    return manual.spells.filter(function (s) { return s.id === id; })[0] || null;
+  }
+
+  function getClassSpells(classId) {
+    var manual = window.MANUAL_55;
+    if (!manual) {
+      return [];
+    }
+
+    return manual.spells.filter(function (s) {
+      return s.classes.indexOf(classId) >= 0;
+    });
   }
 
   function getFixedIds() {
@@ -326,9 +337,10 @@
     var maxLvl = getMaxSlotLevel();
     var fixedIds = getFixedIds();
     var preparedIds = getPreparedIds();
+    var classSpells = getClassSpells(cfg.CHARACTER.classId);
     for (var lvl = 1; lvl <= maxLvl; lvl++) {
       (function (level) {
-        var spells = klass.spells.filter(function (s) { return s.level === level; });
+        var spells = classSpells.filter(function (s) { return s.level === level; });
         if (spells.length === 0) {
           return;
         }
@@ -375,6 +387,8 @@
 
   /* ---------- manuale 5.5 (consultazione) ---------- */
 
+  var manualClassId = null;
+
   function renderManualList() {
     var list = document.getElementById('manual-list');
     var chips = document.getElementById('manual-classes');
@@ -382,22 +396,34 @@
     if (!list || !manual) {
       return;
     }
+    if (!manualClassId) {
+      manualClassId = cfg.CHARACTER.classId;
+    }
     if (chips) {
       chips.innerHTML = '';
       Object.keys(manual.classes).forEach(function (classId) {
-        var chip = document.createElement('span');
-        chip.className = 'manual-chip active';
+        if (getClassSpells(classId).length === 0) {
+          return; // classe senza incantesimi caricati: niente chip
+        }
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'manual-chip' + (classId === manualClassId ? ' active' : '');
         chip.textContent = manual.classes[classId].name;
+        chip.addEventListener('click', function () {
+          manualClassId = classId;
+          renderManualList();
+        });
         chips.appendChild(chip);
       });
+      var active = chips.querySelector('.manual-chip.active');
+      if (active) {
+        chips.scrollLeft = Math.max(0, active.offsetLeft - chips.clientWidth / 2 + active.offsetWidth / 2);
+      }
     }
     list.innerHTML = '';
-    var klass = getManualClass();
-    if (!klass) {
-      return;
-    }
+    var spells = getClassSpells(manualClassId);
     var levels = [];
-    klass.spells.forEach(function (s) {
+    spells.forEach(function (s) {
       if (levels.indexOf(s.level) === -1) {
         levels.push(s.level);
       }
@@ -408,7 +434,7 @@
       head.className = 'gloss-sec';
       head.textContent = lvl + '° livello';
       list.appendChild(head);
-      klass.spells.filter(function (s) { return s.level === lvl; }).forEach(function (spell) {
+      spells.filter(function (s) { return s.level === lvl; }).forEach(function (spell) {
         list.appendChild(spellRow(spell, { mode: 'read' }));
       });
     });
@@ -419,8 +445,8 @@
     if (!modal) {
       return;
     }
-    renderManualList();
     modal.classList.remove('hidden');
+    renderManualList(); // dopo l'apertura: serve il pannello visibile per centrare la chip attiva
   }
 
   function closeManual() {

@@ -13,7 +13,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   initializeFirestore, persistentLocalCache, persistentSingleTabManager,
-  doc, getDoc, setDoc, onSnapshot, serverTimestamp
+  doc, getDoc, setDoc, onSnapshot, serverTimestamp, writeBatch
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 (function () {
@@ -121,30 +121,65 @@ import {
   }
 
   /*
-   * Manuale 5.5: mantiene su Firestore una copia della lista incantesimi
-   * per classe (manuals/5.5/classes/{classe}). Il file locale
-   * js/manual-paladino.js è la fonte di verità: se la sua versione è più
-   * nuova di quella nel cloud, il documento viene (ri)caricato.
+   * Manuale 5.5: mantiene su Firestore una copia del manuale
+   * (manuals/5.5 + sottocollezioni spells/classes/species). Il file locale
+   * js/manual-55.js è la fonte di verità: se la sua versione è più nuova
+   * di quella nel documento radice, tutto viene (ri)caricato in un batch.
    * Richiede nelle regole Firestore: match /manuals/{document=**}
    * { allow read, write: if request.auth != null; }
    */
+  function plain(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  /* Firestore non accetta array annidati: le tabelle slot (array di array)
+     diventano mappe indicizzate per livello di classe. */
+  function slotTableAsMap(table) {
+    var map = {};
+    table.forEach(function (slots, level) {
+      if (slots) {
+        map[String(level)] = slots;
+      }
+    });
+
+    return map;
+  }
+
   function syncManual() {
     var manual = window.MANUAL_55;
     if (!user || !manual) {
       return;
     }
-    Object.keys(manual.classes).forEach(function (classId) {
-      var ref = doc(db, 'manuals', '5.5', 'classes', classId);
-      getDoc(ref).then(function (snap) {
-        var remoteVersion = snap.exists() ? (snap.data().version || 0) : 0;
-        if (manual.version > remoteVersion) {
-          return setDoc(ref, Object.assign({
-            version: manual.version,
-            updatedAt: serverTimestamp()
-          }, JSON.parse(JSON.stringify(manual.classes[classId]))));
-        }
-      }).catch(function () { /* regole non aggiornate o offline: ignora */ });
-    });
+    var rootRef = doc(db, 'manuals', '5.5');
+    getDoc(rootRef).then(function (snap) {
+      var remoteVersion = snap.exists() ? (snap.data().version || 0) : 0;
+      if (manual.version <= remoteVersion) {
+        return;
+      }
+      var batch = writeBatch(db);
+      manual.spells.forEach(function (spell) {
+        batch.set(doc(db, 'manuals', '5.5', 'spells', spell.id), plain(spell));
+      });
+      Object.keys(manual.classes).forEach(function (id) {
+        batch.set(doc(db, 'manuals', '5.5', 'classes', id), plain(manual.classes[id]));
+      });
+      Object.keys(manual.species).forEach(function (id) {
+        batch.set(doc(db, 'manuals', '5.5', 'species', id), plain(manual.species[id]));
+      });
+      batch.set(rootRef, {
+        version: manual.version,
+        name: 'Player\'s Handbook 2024 (5.5)',
+        slotTables: {
+          full: slotTableAsMap(manual.slotTables.full),
+          half: slotTableAsMap(manual.slotTables.half),
+          pactSlots: plain(manual.slotTables.pactSlots),
+          pactSlotLevel: plain(manual.slotTables.pactSlotLevel)
+        },
+        updatedAt: serverTimestamp()
+      });
+
+      return batch.commit();
+    }).catch(function () { /* regole non aggiornate o offline: ignora */ });
   }
 
   function watchDoc() {

@@ -61,3 +61,9 @@ Regole da rispettare SEMPRE in questo progetto, in ogni sessione.
   `feat(scope): descrizione`).
 - Cloud: Firebase (progetto `scheda-dnd-8d651`, account personale) —
   Auth + Firestore, sync in `js/cloud.js`, config in `js/firebase-config.js`.
+- **Fonte ufficiale regole D&D 5.5**: SOLO il PDF locale
+  `/Users/andrealavagna/Documents/D&D/Dungeons and Dragons Players Handbook 2024.pdf`
+  (leggerlo con `pdftotext -layout -f <da> -l <a> "<pdf>" -`). Non cercare
+  regole sul web né andare a memoria: ogni dato di gioco (tabelle, liste,
+  incantesimi, tratti) va verificato lì. Nell'app e nel DB vanno però solo
+  riassunti originali in italiano, MAI il testo integrale (copyright).

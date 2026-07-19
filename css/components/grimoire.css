@@ -488,10 +488,22 @@ button.gloss-check::after {
   flex: none;
   display: flex;
   gap: var(--space-2);
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.manual-classes::-webkit-scrollbar {
+  display: none;
 }
 
 .manual-chip {
+  flex: none;
+  min-width: 0;
+  min-height: 32px;
+  background: transparent;
+  cursor: pointer;
   font-family: var(--font-title);
   font-size: 11px;
   font-weight: 600;
