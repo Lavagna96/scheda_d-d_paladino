@@ -6,6 +6,11 @@
 
 html {
   color-scheme: dark;
+  /* niente "text autosizing" iOS: durante lo swipe le viste entrano
+     posizionate fuori schermo e WebKit gonfierebbe i font di quei blocchi
+     (testo che resta ingrandito dopo l'ingresso nella pagina) */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html, body {
