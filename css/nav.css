@@ -16,7 +16,8 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  position: relative;
+  /* niente position: relative qui — sovrascriverebbe il fixed e il menu
+     finirebbe spostato/tagliato; fixed fa già da contenitore per .nav-ind */
 }
 
 /* evidenziazione scorrevole del menu principale, in sincrono con lo swipe */
