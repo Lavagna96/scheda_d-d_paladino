@@ -65,7 +65,31 @@
   }
 
   function applyGoldCoverage(bar, left, width) {
-    applyCoverage([].slice.call(bar.querySelectorAll('.subtab')), 'on-gold', left, width);
+    applyCoverage([].slice.call(bar.querySelectorAll('.subtab, .level-tab')), 'on-gold', left, width);
+  }
+
+  // Sistema di tab di una vista: le sotto-tab classiche oppure, nel
+  // grimorio, le tab dei livelli incantesimo (stesse meccaniche di swipe).
+  function viewTabSystem(view) {
+    if (!view) {
+      return null;
+    }
+    var bar = view.querySelector('.subtabs');
+    if (bar) {
+      return { kind: 'sub', bar: bar, tabs: [].slice.call(bar.querySelectorAll('.subtab')) };
+    }
+    bar = view.querySelector('.level-tabs');
+    if (bar) {
+      return { kind: 'level', bar: bar, tabs: [].slice.call(bar.querySelectorAll('.level-tab')) };
+    }
+
+    return null;
+  }
+
+  function activePanelOf(view, kind) {
+    return kind === 'level'
+      ? view.querySelector('.spell-level-group:not(.hidden)')
+      : view.querySelector('.subpanel.active');
   }
 
   // ----- indicatore scorrevole del menu principale (in basso) -----
@@ -160,19 +184,16 @@
   }
 
   function repositionActiveIndicator(view, animate) {
-    if (!view) {
-      return;
-    }
-    var bar = view.querySelector('.subtabs');
-    if (bar) {
-      moveSubIndicator(bar, bar.querySelector('.subtab.active'), animate);
+    var sys = viewTabSystem(view);
+    if (sys) {
+      moveSubIndicator(sys.bar, sys.bar.querySelector('.subtab.active, .level-tab.active'), animate);
     }
   }
 
   function currentSubtabBar() {
-    var v = document.getElementById('view-' + currentView);
+    var sys = viewTabSystem(document.getElementById('view-' + currentView));
 
-    return v ? v.querySelector('.subtabs') : null;
+    return sys ? sys.bar : null;
   }
 
   function showView(viewId, animateNav) {
@@ -295,7 +316,8 @@
     if (!view) {
       return null;
     }
-    var tabs = view.querySelectorAll('.subtabs .subtab');
+    var sys = viewTabSystem(view);
+    var tabs = sys ? sys.tabs : [];
     var idx = 0;
     tabs.forEach(function (t, i) {
       if (t.classList.contains('active')) {
@@ -303,8 +325,14 @@
       }
     });
 
-    // panel è la sotto-pagina attiva (null per le viste senza sotto-tab)
-    return { view: view, tabs: tabs, idx: idx, panel: view.querySelector('.subpanel.active') };
+    // panel è la sotto-pagina attiva (null per le viste senza tab)
+    return {
+      view: view,
+      tabs: tabs,
+      idx: idx,
+      kind: sys ? sys.kind : null,
+      panel: sys ? activePanelOf(view, sys.kind) : null
+    };
   }
 
   function adjacentView(dir) {
@@ -314,9 +342,9 @@
   }
 
   function activeSubtabIndex(view) {
-    var tabs = view.querySelectorAll('.subtabs .subtab');
+    var sys = viewTabSystem(view);
     var idx = 0;
-    tabs.forEach(function (t, i) {
+    (sys ? sys.tabs : []).forEach(function (t, i) {
       if (t.classList.contains('active')) {
         idx = i;
       }
@@ -325,19 +353,30 @@
     return idx;
   }
 
+  var suppressLevelFx = false;
+
   function setActiveSubtab(view, idx) {
-    var tabs = view.querySelectorAll('.subtabs .subtab');
-    if (!tabs.length) {
+    var sys = viewTabSystem(view);
+    if (!sys || !sys.tabs.length) {
       return null;
     }
-    idx = Math.max(0, Math.min(tabs.length - 1, idx));
-    var name = tabs[idx].getAttribute('data-subtab');
-    tabs.forEach(function (t, i) { t.classList.toggle('active', i === idx); });
-    view.querySelectorAll('.subpanel').forEach(function (p) {
-      p.classList.toggle('active', p.getAttribute('data-subpanel') === name);
-    });
+    idx = Math.max(0, Math.min(sys.tabs.length - 1, idx));
+    var tab = sys.tabs[idx];
+    if (sys.kind === 'level') {
+      // il click fa sincronizzare gruppi e stato interno al grimorio;
+      // niente animazioni: è un posizionamento programmatico
+      suppressLevelFx = true;
+      tab.click();
+      suppressLevelFx = false;
+    } else {
+      var name = tab.getAttribute('data-subtab');
+      sys.tabs.forEach(function (t, i) { t.classList.toggle('active', i === idx); });
+      view.querySelectorAll('.subpanel').forEach(function (p) {
+        p.classList.toggle('active', p.getAttribute('data-subpanel') === name);
+      });
+    }
 
-    return tabs[idx];
+    return tab;
   }
 
   function bindSwipeTabs() {
@@ -392,8 +431,10 @@
     }
 
     function setupSub(dir) {
-      var name = ctx.tabs[ctx.idx + dir].getAttribute('data-subtab');
-      var np = ctx.view.querySelector('.subpanel[data-subpanel="' + name + '"]');
+      var tab = ctx.tabs[ctx.idx + dir];
+      var np = ctx.kind === 'level'
+        ? ctx.view.querySelector('.spell-level-group[data-level-group="' + tab.getAttribute('data-level') + '"]')
+        : ctx.view.querySelector('.subpanel[data-subpanel="' + tab.getAttribute('data-subtab') + '"]');
       if (!np) {
         return;
       }
@@ -445,7 +486,8 @@
       viewPrevIdx = activeSubtabIndex(tv);
       var landing = setActiveSubtab(tv, dir > 0 ? 0 : 9999);
       if (landing) {
-        moveSubIndicator(tv.querySelector('.subtabs'), landing, false);
+        var landingSys = viewTabSystem(tv);
+        moveSubIndicator(landingSys && landingSys.bar, landing, false);
       }
       outEl.classList.add('view-swiping');
       neighbor = tv;
@@ -544,7 +586,7 @@
       }
       ctx = null;
       var t = e.target;
-      if (t.closest && t.closest('.loh-bar-track, .subtabs')) {
+      if (t.closest && t.closest('.loh-bar-track, .subtabs, .level-tabs')) {
         return;
       }
       // Campi di testo: lo swipe parte anche sopra input e textarea,
@@ -638,6 +680,33 @@
       }
       tracking = false;
     }, { passive: true });
+  }
+
+  function initLevelTabs() {
+    // Le tab dei livelli del grimorio: indicatore scorrevole e slide della
+    // lista al tap, come le sotto-tab (il toggle dei gruppi lo fa il
+    // grimorio nel suo listener, registrato prima di questo).
+    var view = document.getElementById('view-grimorio');
+    var sys = viewTabSystem(view);
+    if (!sys || sys.kind !== 'level') {
+      return;
+    }
+    var lastIdx = activeSubtabIndex(view);
+    sys.tabs.forEach(function (tab, idx) {
+      tab.addEventListener('click', function () {
+        if (suppressLevelFx) {
+          lastIdx = idx;
+
+          return;
+        }
+        moveSubIndicator(sys.bar, tab, true);
+        centerSubtabInBar(sys.bar, tab);
+        if (idx !== lastIdx) {
+          animatePanelIn(activePanelOf(view, 'level'), idx > lastIdx ? 1 : -1);
+        }
+        lastIdx = idx;
+      });
+    });
   }
 
   function bindNav() {
@@ -806,6 +875,7 @@
     window.AppHeader.init();
     window.AppSheet.init();
     window.AppGrimorio.init();
+    initLevelTabs();
     window.AppTreasury.init();
     window.AppDiary.init();
     window.AppInspiration.init();

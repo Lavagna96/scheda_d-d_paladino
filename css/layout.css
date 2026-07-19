@@ -146,11 +146,13 @@ body {
   transition: transform 0.24s ease-out, filter 0.24s ease-out;
 }
 
-.subpanel.slide-in-right {
+.subpanel.slide-in-right,
+.spell-level-group.slide-in-right {
   animation: subSlideInRight 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-.subpanel.slide-in-left {
+.subpanel.slide-in-left,
+.spell-level-group.slide-in-left {
   animation: subSlideInLeft 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 

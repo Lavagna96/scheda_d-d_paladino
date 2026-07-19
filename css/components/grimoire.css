@@ -98,6 +98,7 @@
 }
 
 .level-tabs {
+  position: relative;
   display: flex;
   gap: var(--space-2);
   overflow-x: auto;
@@ -114,6 +115,8 @@
 }
 
 .level-tab {
+  position: relative;
+  z-index: 1;
   flex: 0 0 auto;
   padding: var(--space-2) var(--space-4);
   min-height: 40px;
@@ -124,19 +127,27 @@
   color: var(--text-secondary);
   font-family: var(--font-title);
   font-size: 11px;
+  /* peso costante in tutti gli stati, come le sotto-tab: l'attiva non
+     cambia larghezza e l'indicatore resta allineato al pixel */
+  font-weight: 600;
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.2s, color 0.2s;
+  transition: color 0.2s;
 }
 
+/* l'evidenziazione ora è la pillola scorrevole (.subtab-ind) creata da JS */
 .level-tab.active {
-  background: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.level-tab.on-gold {
   color: var(--bg-principal);
-  box-shadow: var(--shadow-sm);
 }
 
 .spell-list {
+  /* contenitore di posizionamento per il gruppo che entra durante lo swipe */
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
