@@ -3,6 +3,20 @@
   var state = null;
   var persistTimer = null;
 
+  /* Fase 2 (dashboard multi-personaggio): ogni personaggio ha la sua chiave
+     'char-<id>-state'. Il personaggio attivo è in 'app-active-char'
+     (localStorage), impostato dalla dashboard prima di ricaricare la pagina. */
+  var ACTIVE_CHAR_KEY = 'app-active-char';
+  var DEFAULT_CHAR_ID = 'tharion-velnar';
+
+  function activeCharId() {
+    return localStorage.getItem(ACTIVE_CHAR_KEY) || DEFAULT_CHAR_ID;
+  }
+
+  function charStateKey(id) {
+    return 'char-' + id + '-state';
+  }
+
   function deepClone(obj) {
     return JSON.parse(JSON.stringify(obj));
   }
@@ -76,47 +90,76 @@
     return out;
   }
 
-  function loadState() {
+  /* Adatta un oggetto salvato in formato v2/v3 allo stato corrente,
+     integrando i campi mancanti con i default (stessa logica di sempre,
+     estratta per essere riusata sia dalla chiave per-personaggio sia dalla
+     migrazione dalla vecchia chiave legacy). */
+  function fromSavedV2(parsed) {
     var next = getDefaultState();
-    try {
-      var v2 = localStorage.getItem(cfg.STORAGE_KEY);
-      if (v2) {
-        var parsed = JSON.parse(v2);
-        if (parsed && (parsed.version === 2 || parsed.version === 3)) {
-          next = Object.assign(next, parsed);
-          next.version = 3;
-          next.character = mergeCharacter(getDefaultState().character, parsed.character);
-          next.pools = Object.assign(getDefaultState().pools, parsed.pools || {});
-          next.coins = Object.assign(getDefaultState().coins, parsed.coins || {});
-          next.steed = Object.assign(getDefaultState().steed, parsed.steed || {});
-          next.treasury = Object.assign(getDefaultState().treasury, parsed.treasury || {});
-          next.diary = Object.assign(getDefaultState().diary, parsed.diary || {});
-          if (parsed.diary && parsed.diary.quests) {
-            next.diary.quests = Object.assign({ active: [], completed: [] }, parsed.diary.quests);
-          }
-          if (parsed.inspiration != null) {
-            next.inspiration = parsed.inspiration;
-          }
-          if (parsed.deathSaves) {
-            next.deathSaves = Object.assign(getDefaultState().deathSaves, parsed.deathSaves);
-          }
-          next.grimoire = Object.assign(getDefaultState().grimoire, parsed.grimoire || {});
+    next = Object.assign(next, parsed);
+    next.version = 3;
+    next.character = mergeCharacter(getDefaultState().character, parsed.character);
+    next.pools = Object.assign(getDefaultState().pools, parsed.pools || {});
+    next.coins = Object.assign(getDefaultState().coins, parsed.coins || {});
+    next.steed = Object.assign(getDefaultState().steed, parsed.steed || {});
+    next.treasury = Object.assign(getDefaultState().treasury, parsed.treasury || {});
+    next.diary = Object.assign(getDefaultState().diary, parsed.diary || {});
+    if (parsed.diary && parsed.diary.quests) {
+      next.diary.quests = Object.assign({ active: [], completed: [] }, parsed.diary.quests);
+    }
+    if (parsed.inspiration != null) {
+      next.inspiration = parsed.inspiration;
+    }
+    if (parsed.deathSaves) {
+      next.deathSaves = Object.assign(getDefaultState().deathSaves, parsed.deathSaves);
+    }
+    next.grimoire = Object.assign(getDefaultState().grimoire, parsed.grimoire || {});
 
-          return next;
+    return next;
+  }
+
+  function loadState() {
+    var id = activeCharId();
+    var key = charStateKey(id);
+
+    try {
+      var own = localStorage.getItem(key);
+      if (own) {
+        var parsedOwn = JSON.parse(own);
+        if (parsedOwn && (parsedOwn.version === 2 || parsedOwn.version === 3)) {
+          return fromSavedV2(parsedOwn);
         }
       }
     } catch (e) { /* ignore */ }
 
-    try {
-      var v1 = localStorage.getItem(cfg.STORAGE_KEY_V1);
-      if (v1) {
-        next = migrateV1(JSON.parse(v1));
-        saveState(next, true);
+    /* Migrazione dalle chiavi legacy: solo per il personaggio storico
+       (Tharion), solo quando non esiste ancora una chiave per-personaggio. */
+    if (id === DEFAULT_CHAR_ID) {
+      try {
+        var v2 = localStorage.getItem(cfg.STORAGE_KEY);
+        if (v2) {
+          var parsed = JSON.parse(v2);
+          if (parsed && (parsed.version === 2 || parsed.version === 3)) {
+            var migrated = fromSavedV2(parsed);
+            saveState(migrated, true);
 
-        return next;
-      }
-    } catch (e) { /* ignore */ }
+            return migrated;
+          }
+        }
+      } catch (e) { /* ignore */ }
 
+      try {
+        var v1 = localStorage.getItem(cfg.STORAGE_KEY_V1);
+        if (v1) {
+          var fromV1 = migrateV1(JSON.parse(v1));
+          saveState(fromV1, true);
+
+          return fromV1;
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    var next = getDefaultState();
     try {
       if (localStorage.getItem(cfg.INSPIRATION_KEY) === '1') {
         next.inspiration = true;
@@ -137,9 +180,10 @@
     if (!window.__applyingRemoteState) {
       state.lastModifiedMs = Date.now();
     }
+    var key = charStateKey(activeCharId());
     if (immediate) {
       try {
-        localStorage.setItem(cfg.STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(key, JSON.stringify(state));
         localStorage.setItem(cfg.INSPIRATION_KEY, state.inspiration ? '1' : '0');
       } catch (e) { /* ignore */ }
       notifyCloud();
@@ -149,7 +193,7 @@
     clearTimeout(persistTimer);
     persistTimer = setTimeout(function () {
       try {
-        localStorage.setItem(cfg.STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(key, JSON.stringify(state));
         localStorage.setItem(cfg.INSPIRATION_KEY, state.inspiration ? '1' : '0');
       } catch (e) { /* ignore */ }
       notifyCloud();

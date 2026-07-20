@@ -13,6 +13,21 @@
     if (metaEl) {
       metaEl.textContent = view.speciesLabel;
     }
+
+    // Ritratto personalizzato (Fase 2): se presente sovrascrive i jpg
+    // statici, sia nell'avatar dell'header sia nel modal a schermo intero.
+    var portrait = window.AppStorage.getState().character.portrait;
+    if (portrait) {
+      var avatarImg = document.querySelector('.avatar-img');
+      if (avatarImg) {
+        avatarImg.src = portrait;
+        avatarImg.style.display = ''; // toglie l'eventuale display:none dell'onerror
+      }
+      var fullImg = document.getElementById('avatar-full-img');
+      if (fullImg) {
+        fullImg.src = portrait;
+      }
+    }
   }
 
   function bindAvatarModal() {

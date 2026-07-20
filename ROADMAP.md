@@ -14,11 +14,10 @@
   DEPLOYATE** su GitHub Pages (`bf75403`, `5c6f2a5`, `95da6f6`; run Pages
   verde, live verificato con curl: `?v=52` servito). Login già provato da
   Andrea con credenziali vere in locale.
-- **Prossimo passo:** step 1.4 — collaudo di Andrea su iPhone in PWA
-  (https://lavagna96.github.io/scheda_d-d_paladino/): login, attivazione
-  Face ID dal modal Account, chiusura e riapertura → lucchetto. Poi:
-  decidere il nome definitivo dell'app (oggi segnaposto "Schede & Imprese")
-  e partire con la **Fase 2** (dashboard multi-personaggio, step 2.1).
+- **Prossimo passo:** commit + deploy della Fase 2 (con permesso), poi
+  collaudo di Andrea (step 2.5). A seguire: **Fase 3** (modifica valori
+  della scheda con persistenza), step 3.1: discutere l'UX di editing con
+  3 proposte.
 
 ---
 
@@ -127,14 +126,30 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
 ### Fase 2 — Dashboard profilo e multi-personaggio
 *Il punto 2 della visione.*
 
-- [ ] 2.1 Ristrutturare `cloud.js`: via il `CHAR_ID` fisso, lista dei documenti in
-      `users/{uid}/characters`, selezione del personaggio attivo (anche in localStorage
-      per l'avvio offline).
-- [ ] 2.2 Dashboard: lista dei personaggi con nome/classe/livello/avatar, click → apre la scheda.
-      3 proposte grafiche con preview.
-- [ ] 2.3 Namespace del localStorage per personaggio (oggi le chiavi sono `tharion-*`).
-- [ ] 2.4 Migrazione: il documento esistente `tharion-velnar` diventa il primo elemento della lista.
-- [ ] 2.5 Aggiornare le regole Firestore se serve + test multi-device. Commit.
+- [x] 2.1 `cloud.js` ristrutturato (2026-07-20, subagente Sonnet): via il `CHAR_ID`
+      fisso → `app-active-char` in localStorage; lista da `getDocs` su
+      `users/{uid}/characters` con fallback locale se il cloud non risponde;
+      `enterApp()` unico punto che decide dashboard vs scheda (flag
+      `app-skip-dashboard` in sessionStorage, selezione → reload pulito).
+- [x] 2.2 Dashboard "Sala degli eroi rivista" implementata (`js/dashboard.js` +
+      `css/components/dashboard.css` + `#view-dashboard`): card col ritratto,
+      sigillo livello, riga classe·sottoclasse·specie, ENTRA; riserva a
+      emblema; segnaposto "Nuovo personaggio — presto"; ingranaggio → modal
+      account; ritorno dalla scheda con "I tuoi personaggi" nel pannello
+      opzioni. **Ritratti**: `js/portrait.js` (resize canvas ≤900px, ≤~700KB),
+      "Cambia ritratto" nel modal avatar, migrazione automatica di
+      avatar-full.jpg nello stato di Tharion. Nome app "Schede & Imprese" su
+      title/PWA/manifest. Cache busting `?v=54`.
+- [x] 2.3 Chiavi localStorage per-personaggio (`char-<id>-state`) con migrazione
+      dalle legacy `tharion-*` (verificata end-to-end, chiave legacy intatta).
+- [x] 2.4 Il documento esistente `tharion-velnar` è il primo della lista (nessun
+      rename necessario: l'id era già quello).
+- [ ] 2.5 Collaudo di Andrea dopo il deploy: atterraggio in dashboard, selezione,
+      ritorno alla dashboard, upload ritratto da iPhone, sync multi-device.
+      **Se la lista non si carica** ("Impossibile aggiornare la lista dal
+      cloud"): le regole Firestore devono permettere la lettura della
+      collezione `users/{uid}/characters` (es. `match /users/{userId}/{document=**}`
+      con `allow read, write: if request.auth.uid == userId`).
 
 ### Fase 3 — Modifica valori della scheda con persistenza
 *Il punto 3 della visione. Dipende dalla Fase 0.*
@@ -193,6 +208,19 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
    standalone su iOS recenti (atteso OK da iOS 16+).
 
 ## Decisioni prese
+
+- 2026-07-20 — Fase 2, architettura: dopo login/sblocco si atterra **sempre
+  sulla dashboard**; in Fase 2 **solo lista e selezione** dei personaggi
+  (creazione guidata in fase dedicata, segnaposto "presto" nella lista);
+  **nome definitivo dell'app: "Schede & Imprese"** (non più segnaposto).
+- 2026-07-20 — Fase 2, design dashboard: scelta la **B "Sala degli eroi"
+  rivista coi ritratti veri** (card piena col ritratto, nome/classe su
+  sfumatura, livello all'angolo; riserva a emblema dorato senza ritratto).
+  **Ritratti**: salvati come immagine compressa (data URL ≤ ~700 KB) dentro
+  `state.character.portrait` → sync Firestore col resto della scheda, niente
+  Firebase Storage; upload con ridimensionamento client-side dal modal del
+  ritratto ("Cambia ritratto"); migrazione automatica di avatar-full.jpg
+  nello stato di Tharion al primo avvio.
 
 - 2026-07-19 — Roadmap creata; si lavora una fase alla volta, con discussione,
   3 alternative con preview e approvazione prima di ogni implementazione (da CLAUDE.md).

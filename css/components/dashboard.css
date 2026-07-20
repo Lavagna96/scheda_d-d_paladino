@@ -1,0 +1,225 @@
+/*
+ * Dashboard multi-personaggio (Fase 2) — design "Sala degli eroi rivista".
+ *
+ * body.in-dashboard mostra #view-dashboard e nasconde l'app normale, esattamente
+ * come body.auth-out/auth-locked fanno per la vista di login (vedi
+ * css/components/login.css). Le due classi possono coesistere: in-dashboard
+ * viene aggiunta SOPRA auth-in da js/cloud.js dopo l'autenticazione.
+ */
+
+.dashboard-view {
+  position: fixed;
+  inset: 0;
+  z-index: 250; /* sotto il login (300), sopra l'app normale */
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  padding: calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 24px);
+  background: var(--bg-principal)
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 164, 67, 0.10), transparent);
+}
+
+body.in-dashboard .dashboard-view {
+  display: flex;
+}
+
+body.in-dashboard #app-header,
+body.in-dashboard #main-content,
+body.in-dashboard #bottom-nav,
+body.in-dashboard #global-fab {
+  display: none;
+}
+
+/* ---------- intestazione ---------- */
+
+.dash-gear {
+  position: absolute;
+  top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+  right: var(--space-4);
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill);
+  background: var(--bg-principal);
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-head {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.dash-app {
+  font-family: var(--font-title);
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 13px;
+}
+
+.dash-title {
+  font-family: var(--font-title);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 6px 0 4px;
+}
+
+.dash-user {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.dash-error {
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--warning);
+  margin: 0 0 14px;
+}
+
+.dash-error.hidden {
+  display: none;
+}
+
+/* ---------- lista e card ---------- */
+
+.dash-list {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dash-card {
+  position: relative;
+  min-height: 280px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(201, 164, 67, 0.45);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background-size: cover;
+  background-position: center 18%;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+}
+
+.dash-lvl {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 12px;
+  color: #241d0d;
+  background: linear-gradient(180deg, #e0bb5c, #b8923a);
+  border-radius: var(--radius-xs);
+  padding: 5px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.dash-foot {
+  padding: 46px 18px 18px;
+  background: linear-gradient(180deg, transparent, rgba(10, 8, 6, 0.92) 55%);
+}
+
+.dash-name {
+  font-family: var(--font-title);
+  font-size: 21px;
+  font-weight: 700;
+  color: #e0bb5c;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.dash-line {
+  font-size: 12.5px;
+  color: #cfc7b6;
+  margin-top: 3px;
+}
+
+.dash-enter {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 22px;
+  border: 1px solid var(--accent-gold);
+  border-radius: var(--radius-pill);
+  background: rgba(20, 16, 12, 0.45);
+  color: var(--accent-gold);
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+/* riserva senza ritratto: emblema dorato su fondo sfumato.
+   L'altezza e il padding tengono l'emblema sopra il piede assoluto,
+   senza sovrapposizioni col nome. */
+.dash-card.no-portrait {
+  min-height: 250px;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 26px;
+  background:
+    radial-gradient(ellipse at 50% 32%, rgba(201, 164, 67, 0.18), transparent 60%),
+    linear-gradient(160deg, #2b261d, #1c1915);
+}
+
+.dash-card.no-portrait .dash-foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  background: rgba(10, 8, 6, 0.55);
+}
+
+.dash-emblem {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 1px solid var(--border-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-title);
+  font-size: 38px;
+  color: var(--accent-gold);
+  box-shadow: 0 0 22px rgba(201, 164, 67, 0.22);
+}
+
+/* ---------- segnaposto "nuovo personaggio" ---------- */
+
+.dash-slot {
+  min-height: 100px;
+  border: 1px dashed rgba(201, 164, 67, 0.3);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 18px;
+  font-style: italic;
+  font-size: 13px;
+  color: #6f675a;
+}

@@ -4,7 +4,8 @@
  * - Senza FIREBASE_CONFIG l'app resta in solo-locale: questo modulo esce subito.
  * - localStorage rimane la fonte immediata; il cloud è un mirror con
  *   last-write-wins basato su state.lastModifiedMs.
- * - Documento: users/{uid}/characters/tharion-velnar (pronto per il multi-PG).
+ * - Documento: users/{uid}/characters/{id} — un documento per personaggio
+ *   (Fase 2: dashboard multi-personaggio, id attivo in 'app-active-char').
  */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
@@ -13,13 +14,17 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   initializeFirestore, persistentLocalCache, persistentSingleTabManager,
-  doc, getDoc, setDoc, onSnapshot, serverTimestamp, writeBatch
+  doc, getDoc, getDocs, collection, setDoc, onSnapshot, serverTimestamp, writeBatch
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 (function () {
   var config = window.FIREBASE_CONFIG;
-  var CHAR_ID = 'tharion-velnar';
+  var DEFAULT_CHAR_ID = 'tharion-velnar';
   var PUSH_DEBOUNCE_MS = 1500;
+
+  function charId() {
+    return localStorage.getItem('app-active-char') || DEFAULT_CHAR_ID;
+  }
 
   var accountBtn = document.getElementById('opt-account');
 
@@ -52,7 +57,7 @@ import {
   /* ---------- helpers ---------- */
 
   function charRef() {
-    return doc(db, 'users', user.uid, 'characters', CHAR_ID);
+    return doc(db, 'users', user.uid, 'characters', charId());
   }
 
   function setSyncStatus(label) {
@@ -222,6 +227,83 @@ import {
     });
   }
 
+  /* ---------- dashboard multi-personaggio (Fase 2) ---------- */
+
+  function characterClassName(classId) {
+    var manual = window.MANUAL_55;
+    if (manual && manual.classes && manual.classes[classId]) {
+      return manual.classes[classId].name;
+    }
+
+    return classId || '';
+  }
+
+  function dashboardItemFromCharacter(ch, id) {
+    ch = ch || {};
+
+    return {
+      id: id,
+      name: ch.name || 'Senza nome',
+      className: characterClassName(ch.classId),
+      subclassName: ch.subclassName || '',
+      level: ch.level || 1,
+      speciesLabel: ch.speciesLabel || '',
+      portrait: ch.portrait || '',
+      avatar: ch.avatar || '✦'
+    };
+  }
+
+  function localDashboardItem() {
+    var state = window.AppStorage.getState();
+
+    return dashboardItemFromCharacter(state.character, charId());
+  }
+
+  function loadDashboard() {
+    if (!window.AppDashboard) {
+      return;
+    }
+    getDocs(collection(db, 'users', user.uid, 'characters')).then(function (snap) {
+      var items = [];
+      snap.forEach(function (d) {
+        var data = d.data();
+        if (data && data.state) {
+          items.push(dashboardItemFromCharacter(data.state.character, d.id));
+        }
+      });
+      if (items.length === 0) {
+        items = [localDashboardItem()];
+      }
+      window.AppDashboard.render(items, onSelectCharacter);
+    }).catch(function () {
+      window.AppDashboard.render([localDashboardItem()], onSelectCharacter);
+      window.AppDashboard.showError('Impossibile aggiornare la lista dal cloud');
+    });
+  }
+
+  function onSelectCharacter(id) {
+    localStorage.setItem('app-active-char', id);
+    sessionStorage.setItem('app-skip-dashboard', '1');
+    location.reload(); // stato pulito: scelta deliberata
+  }
+
+  /* Dopo l'autenticazione (ed eventuale sblocco Face ID) si atterra sempre
+     sulla dashboard, TRANNE quando arriva da lì una scelta già fatta
+     (sessionStorage 'app-skip-dashboard', impostato da onSelectCharacter
+     e dal reload di ritorno dal lucchetto). */
+  function enterApp() {
+    if (sessionStorage.getItem('app-skip-dashboard') === '1') {
+      sessionStorage.removeItem('app-skip-dashboard');
+      document.body.classList.remove('in-dashboard');
+      setAuthPhase('auth-in');
+
+      return;
+    }
+    setAuthPhase('auth-in');
+    document.body.classList.add('in-dashboard');
+    loadDashboard();
+  }
+
   /* ---------- UI account ---------- */
 
   function show(el, visible) {
@@ -243,6 +325,10 @@ import {
     var emailEl = document.getElementById('acc-user-email');
     if (emailEl && user) {
       emailEl.textContent = user.email;
+    }
+    var dashUserEl = document.getElementById('dash-user');
+    if (dashUserEl && user) {
+      dashUserEl.textContent = user.email;
     }
     var gear = document.getElementById('header-options');
     if (gear) {
@@ -325,7 +411,7 @@ import {
         setLoginError('');
         window.AppFaceId.unlock().then(function (ok) {
           if (ok) {
-            setAuthPhase('auth-in');
+            enterApp();
           } else {
             setLoginError('Sblocco non riuscito: riprova.');
           }
@@ -352,6 +438,18 @@ import {
         closeModal();
       }
     });
+
+    var dashGear = document.getElementById('dash-gear');
+    if (dashGear) {
+      dashGear.addEventListener('click', openModal);
+    }
+    var optDashboard = document.getElementById('opt-dashboard');
+    if (optDashboard) {
+      show(optDashboard, true);
+      optDashboard.addEventListener('click', function () {
+        location.reload(); // niente skip flag: si riatterra sulla dashboard
+      });
+    }
 
     document.getElementById('acc-login').addEventListener('click', function () {
       setError('');
@@ -425,12 +523,12 @@ import {
             // Nessun messaggio d'errore qui: se iOS rifiuta la get() senza
             // gesto utente resta la riserva del medaglione #lg-faceid.
             if (ok) {
-              setAuthPhase('auth-in');
+              enterApp();
             }
           });
         }
       } else {
-        setAuthPhase('auth-in');
+        enterApp();
       }
       setLoginError('');
       var passEl = document.getElementById('lg-pass');
@@ -442,6 +540,7 @@ import {
       syncManual();
     } else {
       setAuthPhase('auth-out');
+      document.body.classList.remove('in-dashboard'); // logout: fuori anche dalla dashboard
       if (unsubscribeDoc) {
         unsubscribeDoc();
         unsubscribeDoc = null;

@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<title>Tharion Velnar — Paladino Lv.7</title>
+<title>Schede &amp; Imprese</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=53">
+<link rel="stylesheet" href="css/styles.css?v=54">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Tharion">
+<meta name="apple-mobile-web-app-title" content="Schede &amp; Imprese">
 <meta name="theme-color" content="#1a1816">
 </head>
 <body class="auth-checking">
@@ -58,10 +58,22 @@
   </div>
 </section>
 
+<!-- ========== DASHBOARD (Fase 2: lista personaggi) ========== -->
+<section id="view-dashboard" class="dashboard-view" aria-label="I tuoi personaggi">
+  <button type="button" class="dash-gear" id="dash-gear" aria-label="Account">⚙</button>
+  <div class="dash-head">
+    <div class="dash-app">Schede &amp; Imprese</div>
+    <h1 class="dash-title">I tuoi personaggi</h1>
+    <p class="dash-user" id="dash-user"></p>
+  </div>
+  <p class="dash-error hidden" id="dash-error"></p>
+  <div class="dash-list" id="dash-list"></div>
+</section>
+
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=53" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=54" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -76,6 +88,7 @@
 </header>
 
 <div id="options-panel" class="options-panel hidden">
+  <button type="button" id="opt-dashboard" class="hidden">I tuoi personaggi</button>
   <button type="button" id="opt-account" class="hidden">Account e sincronizzazione</button>
   <button type="button" id="opt-manual">Manuale 5.5</button>
   <button type="button" id="opt-reset">Ripristina dati</button>
@@ -889,31 +902,35 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=53" alt="Ritratto di Tharion Velnar">
+      <img id="avatar-full-img" src="avatar-full.jpg?v=54" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
       <span class="afc-sub">Paladino · Livello 7 · Dragonide d'Oro</span>
+      <button type="button" class="account-btn avatar-change-btn" id="avatar-change">Cambia ritratto</button>
+      <input type="file" id="avatar-file" accept="image/*" class="hidden">
     </figcaption>
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=53"></script>
-<script src="js/manual-55.js?v=53"></script>
-<script src="js/config.js?v=53"></script>
-<script src="js/storage.js?v=53"></script>
-<script src="js/engine.js?v=53"></script>
-<script src="js/hp-bar.js?v=53"></script>
-<script src="js/header.js?v=53"></script>
-<script src="js/stats.js?v=53"></script>
-<script src="js/sheet.js?v=53"></script>
-<script src="js/grimorio.js?v=53"></script>
-<script src="js/treasury.js?v=53"></script>
-<script src="js/diary.js?v=53"></script>
-<script src="js/inspiration.js?v=53"></script>
-<script src="js/bottom-sheet.js?v=53"></script>
-<script src="js/app.js?v=53"></script>
-<script src="js/faceid.js?v=53"></script>
-<script type="module" src="js/cloud.js?v=53"></script>
+<script src="js/firebase-config.js?v=54"></script>
+<script src="js/manual-55.js?v=54"></script>
+<script src="js/config.js?v=54"></script>
+<script src="js/storage.js?v=54"></script>
+<script src="js/engine.js?v=54"></script>
+<script src="js/hp-bar.js?v=54"></script>
+<script src="js/header.js?v=54"></script>
+<script src="js/stats.js?v=54"></script>
+<script src="js/sheet.js?v=54"></script>
+<script src="js/grimorio.js?v=54"></script>
+<script src="js/treasury.js?v=54"></script>
+<script src="js/diary.js?v=54"></script>
+<script src="js/inspiration.js?v=54"></script>
+<script src="js/bottom-sheet.js?v=54"></script>
+<script src="js/app.js?v=54"></script>
+<script src="js/faceid.js?v=54"></script>
+<script src="js/dashboard.js?v=54"></script>
+<script src="js/portrait.js?v=54"></script>
+<script type="module" src="js/cloud.js?v=54"></script>
 </body>
 </html>
