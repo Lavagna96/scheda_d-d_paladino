@@ -890,7 +890,23 @@
     document.documentElement.style.setProperty('--dbg-sab', 'env(safe-area-inset-bottom)');
   }
 
+  /* Paracadute del cancello di login: se cloud.js (modulo Firebase da CDN)
+     non parte — rete assente al primo avvio — non lasciare lo schermo vuoto. */
+  function bindAuthFallback() {
+    setTimeout(function () {
+      if (document.body.classList.contains('auth-checking')) {
+        document.body.classList.remove('auth-checking');
+        document.body.classList.add('auth-out');
+        var err = document.getElementById('lg-error');
+        if (err) {
+          err.textContent = 'Impossibile contattare il server: controlla la connessione e riapri l\'app.';
+        }
+      }
+    }, 8000);
+  }
+
   function init() {
+    bindAuthFallback();
     bindViewportGuard();
     bindViewportDebug();
     bindNav();

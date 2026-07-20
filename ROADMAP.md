@@ -9,13 +9,13 @@
 
 ## Dove siamo
 
-- **Ultimo aggiornamento:** 2026-07-19
-- **Stato:** **Fase 0 COMPLETATA e committata.** Motore di formule attivo,
-  stato v3 con i fatti base, renderer dinamici, scheda verificata identica.
-- **Prossimo passo:** **Fase 1** (login page + Face ID), step 1.1: discutere
-  l'architettura di navigazione (SPA a viste vs pagine separate), l'approccio
-  Face ID (A/B/C nelle Decisioni aperte) e la modalità ospite; poi 3 proposte
-  grafiche di login page con preview.
+- **Ultimo aggiornamento:** 2026-07-20
+- **Stato:** Fase 0 committata. **Fase 1: step 1.2 (login page, design A)
+  implementato e testato in locale**, in attesa di commit.
+- **Prossimo passo:** far provare ad Andrea il login con le sue credenziali
+  in locale, commit dello step 1.2, poi step **1.3 Face ID** (sblocco
+  biometrico WebAuthn) e **1.4 test su iPhone**. Decidere il nome definitivo
+  dell'app (oggi segnaposto "Schede & Imprese").
 
 ---
 
@@ -87,13 +87,23 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
 ### Fase 1 — Login page e Face ID
 *Il punto 1 della visione.*
 
-- [ ] 1.1 Discutere e scegliere l'architettura di navigazione (vedi Decisioni aperte: SPA a viste vs pagine separate).
-- [ ] 1.2 Login page di atterraggio: se non autenticato si vede solo login/registrazione
-      (riuso della logica già in `cloud.js`); se autenticato si passa oltre.
-      3 proposte grafiche con preview prima di implementare.
-- [ ] 1.3 Face ID — scegliere l'approccio (vedi Decisioni aperte) e implementarlo.
-- [ ] 1.4 Gestione "ospite/solo locale": decidere se l'app resta usabile senza account come oggi.
-- [ ] 1.5 Test su iPhone standalone (PWA): viewport, tastiera, safe-area. Commit.
+- [x] 1.1 Architettura decisa (2026-07-19): **SPA a viste** (login/dashboard/scheda
+      nello stesso index.html), **Face ID = blocco biometrico locale** (approccio A,
+      WebAuthn come lucchetto, sessione Firebase persistente sotto),
+      **login obbligatorio** (niente modalità ospite).
+- [x] 1.2 Login page di atterraggio implementata (design **A — Stemma araldico**,
+      scelto tra 3 proposte con preview): vista `#view-login` in index.html +
+      `css/components/login.css`; macchina a stati sul body
+      (`auth-checking` → `auth-out`/`auth-in`) pilotata da `cloud.js`
+      (che ora fa da cancello: login/registrazione/recupero nella vista,
+      modal account solo per la gestione da loggati); paracadute di timeout
+      in `app.js` se Firebase non carica. Cache busting `?v=51`.
+      Verificato in locale: gate attivo, errori mostrati, stato autenticato
+      simulato via classi CSS OK. **Da testare con credenziali vere e su
+      iPhone (step 1.4). Titolo "Schede & Imprese" ancora segnaposto.**
+- [ ] 1.3 Face ID: sblocco biometrico all'apertura via WebAuthn (platform
+      authenticator), attivabile/disattivabile dalle impostazioni account.
+- [ ] 1.4 Test su iPhone standalone (PWA): viewport, tastiera, safe-area. Commit.
 
 ### Fase 2 — Dashboard profilo e multi-personaggio
 *Il punto 2 della visione.*
@@ -157,25 +167,11 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
 
 ## Decisioni aperte (da discutere prima delle rispettive fasi)
 
-1. **Face ID — tre approcci possibili** (da approfondire in Fase 1):
-   - **A. Sessione persistente + sblocco biometrico locale.** Firebase mantiene la
-     sessione; Face ID (WebAuthn platform authenticator) fa solo da "lucchetto"
-     all'apertura dell'app. Semplice, nessun backend. Non è vera autenticazione lato server.
-   - **B. Passkey vere come login Firebase.** Richiede un backend (Cloud Functions →
-     piano Blaze a consumo) che verifichi la passkey e coni un custom token. Più solido, più complesso.
-   - **C. Portachiavi iCloud.** Campi password standard: iOS propone da solo il
-     riempimento con Face ID. Zero codice, ma UX dipendente da Safari.
-   - Nota da verificare in Fase 1: comportamento WebAuthn in PWA standalone su iOS recenti.
-
-2. **Navigazione: SPA a viste o pagine separate?** `index.html` unico con viste
-   (login/dashboard/scheda) mostrate/nascoste, oppure `login.html` + `dashboard.html`
-   + scheda. Su GitHub Pages senza build, la SPA a viste evita redirect e doppi
-   caricamenti Firebase; le pagine separate sono più semplici da ragionare.
-
-3. **Modalità ospite:** senza account l'app oggi funziona in solo-locale.
-   Con la login page obbligatoria questa possibilità resta o sparisce?
-
-4. **PF al level up:** regola del tiro del dado, della media fissa, o scelta dell'utente?
+1. **PF al level up:** regola del tiro del dado, della media fissa, o scelta dell'utente?
+   (Nota: i PF attuali di Tharion seguono la media fissa.)
+2. **Design della login page:** 3 proposte grafiche con preview da presentare (step 1.2).
+3. Nota tecnica da confermare durante la 1.3: comportamento WebAuthn in PWA
+   standalone su iOS recenti (atteso OK da iOS 16+).
 
 ## Decisioni prese
 
@@ -183,6 +179,15 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
   3 alternative con preview e approvazione prima di ogni implementazione (da CLAUDE.md).
 - 2026-07-19 — Andrea ha scelto di partire dalla **Fase 0** (modello dati + motore
   di formule); l'ordine è 0 → 1 → 2 → 3 → 4.
+- 2026-07-20 — Fase 1, step 1.2: tra le 3 proposte grafiche di login page
+  (A stemma araldico, B tomo epico, C minimale — artifact con i mockup:
+  https://claude.ai/code/artifact/74ae7912-b574-4d1d-9898-59af27ba27fa)
+  Andrea ha scelto la **A — Stemma araldico**. Il titolo "Schede & Imprese"
+  è un segnaposto da confermare.
+- 2026-07-19 — Fase 1, step 1.1: scelte **SPA a viste**, **Face ID approccio A**
+  (blocco biometrico locale via WebAuthn, sessione Firebase persistente) e
+  **login obbligatorio** senza modalità ospite.
+- 2026-07-19 — Fase 0 committata (`bf75403`), non ancora deployata.
 - 2026-07-19 — Step 0.1: scelto il modello **B "fatti base + modificatori"**
   (vs A motore semplice e C formule dichiarative). Formule verificate sul PHB:
   Imposizione = 5×liv, Aura = mod CAR (min +1) ai TS, CD = 8+mod+comp,

@@ -23,8 +23,17 @@ import {
 
   var accountBtn = document.getElementById('opt-account');
 
+  /* Cancello d'ingresso (Fase 1): stati sul body — vedi css/components/login.css */
+  function setAuthPhase(phase) {
+    var b = document.body;
+    b.classList.remove('auth-checking', 'auth-out', 'auth-in');
+    b.classList.add(phase);
+  }
+
   if (!config) {
-    return; // cloud non configurato: app in solo-locale
+    setAuthPhase('auth-in'); // cloud non configurato: app in solo-locale, niente gate
+
+    return;
   }
 
   var app = initializeApp(config);
@@ -252,6 +261,53 @@ import {
     show(document.getElementById('account-modal'), false);
   }
 
+  /* ---------- vista di login ---------- */
+
+  function setLoginError(msg) {
+    var el = document.getElementById('lg-error');
+    if (el) {
+      el.textContent = msg || '';
+    }
+  }
+
+  function bindLoginUi() {
+    var email = document.getElementById('lg-email');
+    var pass = document.getElementById('lg-pass');
+    if (!email || !pass) {
+      return;
+    }
+
+    document.getElementById('lg-login').addEventListener('click', function () {
+      setLoginError('');
+      signInWithEmailAndPassword(auth, email.value.trim(), pass.value)
+        .catch(function (err) { setLoginError(errorMessage(err)); });
+    });
+
+    document.getElementById('lg-register').addEventListener('click', function () {
+      setLoginError('');
+      createUserWithEmailAndPassword(auth, email.value.trim(), pass.value)
+        .catch(function (err) { setLoginError(errorMessage(err)); });
+    });
+
+    document.getElementById('lg-forgot').addEventListener('click', function () {
+      setLoginError('');
+      if (!email.value.trim()) {
+        setLoginError('Scrivi la tua email qui sopra, poi ripremi.');
+
+        return;
+      }
+      sendPasswordResetEmail(auth, email.value.trim()).then(function () {
+        setLoginError('Email di recupero inviata ✓');
+      }).catch(function (err) { setLoginError(errorMessage(err)); });
+    });
+
+    pass.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        document.getElementById('lg-login').click();
+      }
+    });
+  }
+
   function bindUi() {
     show(accountBtn, true);
     accountBtn.addEventListener('click', openModal);
@@ -302,10 +358,17 @@ import {
   onAuthStateChanged(auth, function (u) {
     user = u;
     if (user) {
+      setAuthPhase('auth-in');
+      setLoginError('');
+      var passEl = document.getElementById('lg-pass');
+      if (passEl) {
+        passEl.value = '';
+      }
       setSyncStatus('Connessione…');
       watchDoc();
       syncManual();
     } else {
+      setAuthPhase('auth-out');
       if (unsubscribeDoc) {
         unsubscribeDoc();
         unsubscribeDoc = null;
@@ -316,6 +379,7 @@ import {
   });
 
   bindUi();
+  bindLoginUi();
 
   window.AppCloud = {
     enabled: true,

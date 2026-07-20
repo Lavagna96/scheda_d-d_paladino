@@ -1,0 +1,185 @@
+/*
+ * Vista di login (Fase 1 — design A "Stemma araldico").
+ *
+ * Macchina a stati sul <body>:
+ *   .auth-checking  → avvio, sessione in verifica: né app né login visibili
+ *   .auth-out       → nessun utente: si vede SOLO la vista di login
+ *   .auth-in        → autenticato: app normale, login nascosto
+ * Le classi sono gestite da js/cloud.js (fallback di timeout in js/app.js).
+ */
+
+.login-view {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 24px);
+  background: var(--bg-principal)
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 164, 67, 0.10), transparent);
+}
+
+body.auth-out .login-view {
+  display: flex;
+}
+
+/* Con il cancello attivo l'app resta fuori scena */
+body.auth-checking #app-header,
+body.auth-checking #main-content,
+body.auth-checking #bottom-nav,
+body.auth-checking #global-fab,
+body.auth-out #app-header,
+body.auth-out #main-content,
+body.auth-out #bottom-nav,
+body.auth-out #global-fab {
+  display: none;
+}
+
+.login-crest {
+  width: 92px;
+  height: 92px;
+  margin-bottom: 14px;
+  flex: none;
+}
+
+.login-title {
+  font-family: var(--font-title);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  letter-spacing: 0.06em;
+  text-align: center;
+  margin: 0;
+}
+
+.login-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 6px 0 26px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  background: #221e1a;
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-md);
+  padding: 22px 20px 20px;
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.login-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 6px 2px;
+}
+
+.login-in {
+  width: 100%;
+  box-sizing: border-box;
+  background: #17140f;
+  border: 1px solid #3a332a;
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px; /* evita lo zoom automatico di iOS sul focus */
+  padding: 13px 14px;
+  margin-bottom: 16px;
+  outline: none;
+}
+
+.login-in:focus {
+  border-color: var(--accent-gold);
+}
+
+.login-btn {
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  min-height: var(--touch-min);
+}
+
+.login-btn-gold {
+  background: linear-gradient(180deg, #e0bb5c, #b8923a);
+  color: #241d0d;
+  box-shadow: 0 4px 14px rgba(201, 164, 67, 0.25);
+}
+
+.login-btn-ghost {
+  background: none;
+  color: var(--accent-gold);
+  border: 1px solid var(--border-gold);
+  margin-top: 10px;
+}
+
+.login-link {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: center;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  margin-top: 14px;
+  cursor: pointer;
+}
+
+.login-error {
+  text-align: center;
+  color: var(--ruby-bright);
+  font-size: 13px;
+  min-height: 1.2em;
+  margin: 12px 0 0;
+}
+
+.login-faceid {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-faceid.hidden {
+  display: none;
+}
+
+.login-faceid span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.login-faceid-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #221e1a;
+  cursor: pointer;
+  border: 1px solid var(--border-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+}
+
+/* Tastiera iOS: con poco spazio verticale la vista scorre invece di schiacciarsi */
+@media (max-height: 640px) {
+  .login-view {
+    justify-content: flex-start;
+  }
+}

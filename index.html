@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=50">
+<link rel="stylesheet" href="css/styles.css?v=51">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,12 +15,48 @@
 <meta name="apple-mobile-web-app-title" content="Tharion">
 <meta name="theme-color" content="#1a1816">
 </head>
-<body>
+<body class="auth-checking">
+
+<!-- ========== LOGIN (cancello d'ingresso, Fase 1) ========== -->
+<section id="view-login" class="login-view" aria-label="Accesso">
+  <svg class="login-crest" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+    <path d="M50 6 L86 18 v30 c0 22-16 36-36 42 C30 84 14 70 14 48 V18 Z"
+          fill="#221e1a" stroke="#c9a443" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M50 14 L78 23 v24 c0 17-12 28-28 33 C34 75 22 64 22 47 V23 Z"
+          fill="none" stroke="rgba(201,164,67,.35)" stroke-width="1"/>
+    <path d="M50 26 l6 12 13 2-9.5 9 2 13L50 56l-11.5 6 2-13L31 40l13-2z" fill="#c9a443"/>
+  </svg>
+  <h1 class="login-title">Schede &amp; Imprese</h1>
+  <p class="login-sub">Il tuo compendio di D&amp;D</p>
+  <div class="login-card">
+    <label class="login-label" for="lg-email">Email</label>
+    <input type="email" id="lg-email" class="login-in" placeholder="nome@esempio.it"
+           autocomplete="email" inputmode="email">
+    <label class="login-label" for="lg-pass">Password</label>
+    <input type="password" id="lg-pass" class="login-in" placeholder="••••••••"
+           autocomplete="current-password">
+    <button type="button" id="lg-login" class="login-btn login-btn-gold">Entra</button>
+    <button type="button" id="lg-register" class="login-btn login-btn-ghost">Crea un account</button>
+    <button type="button" id="lg-forgot" class="login-link">Password dimenticata?</button>
+    <p class="login-error" id="lg-error" aria-live="polite"></p>
+  </div>
+  <!-- Sblocco biometrico: si attiva nello step 1.3 (Face ID) -->
+  <div class="login-faceid hidden" id="lg-faceid-wrap">
+    <button type="button" class="login-faceid-btn" id="lg-faceid" aria-label="Sblocca con Face ID">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#c9a443"
+           stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/>
+        <path d="M9 10v1M15 10v1M12 10v3.5a.8.8 0 0 1-.8.8M9.2 16a4.4 4.4 0 0 0 5.6 0"/>
+      </svg>
+    </button>
+    <span>Sblocca con Face ID</span>
+  </div>
+</section>
 
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=50" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=51" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -847,7 +883,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=50" alt="Ritratto di Tharion Velnar">
+      <img src="avatar-full.jpg?v=51" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -856,21 +892,21 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=50"></script>
-<script src="js/manual-55.js?v=50"></script>
-<script src="js/config.js?v=50"></script>
-<script src="js/storage.js?v=50"></script>
-<script src="js/engine.js?v=50"></script>
-<script src="js/hp-bar.js?v=50"></script>
-<script src="js/header.js?v=50"></script>
-<script src="js/stats.js?v=50"></script>
-<script src="js/sheet.js?v=50"></script>
-<script src="js/grimorio.js?v=50"></script>
-<script src="js/treasury.js?v=50"></script>
-<script src="js/diary.js?v=50"></script>
-<script src="js/inspiration.js?v=50"></script>
-<script src="js/bottom-sheet.js?v=50"></script>
-<script src="js/app.js?v=50"></script>
-<script type="module" src="js/cloud.js?v=50"></script>
+<script src="js/firebase-config.js?v=51"></script>
+<script src="js/manual-55.js?v=51"></script>
+<script src="js/config.js?v=51"></script>
+<script src="js/storage.js?v=51"></script>
+<script src="js/engine.js?v=51"></script>
+<script src="js/hp-bar.js?v=51"></script>
+<script src="js/header.js?v=51"></script>
+<script src="js/stats.js?v=51"></script>
+<script src="js/sheet.js?v=51"></script>
+<script src="js/grimorio.js?v=51"></script>
+<script src="js/treasury.js?v=51"></script>
+<script src="js/diary.js?v=51"></script>
+<script src="js/inspiration.js?v=51"></script>
+<script src="js/bottom-sheet.js?v=51"></script>
+<script src="js/app.js?v=51"></script>
+<script type="module" src="js/cloud.js?v=51"></script>
 </body>
 </html>
