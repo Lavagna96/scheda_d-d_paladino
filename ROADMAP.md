@@ -10,12 +10,14 @@
 ## Dove siamo
 
 - **Ultimo aggiornamento:** 2026-07-20
-- **Stato:** Fase 0 committata. **Fase 1: step 1.2 (login page, design A)
-  implementato e testato in locale**, in attesa di commit.
-- **Prossimo passo:** far provare ad Andrea il login con le sue credenziali
-  in locale, commit dello step 1.2, poi step **1.3 Face ID** (sblocco
-  biometrico WebAuthn) e **1.4 test su iPhone**. Decidere il nome definitivo
-  dell'app (oggi segnaposto "Schede & Imprese").
+- **Stato:** Fase 0 e step 1.2 committati (`bf75403`, `5c6f2a5`). Login
+  verificato da Andrea con credenziali vere. **Step 1.3 (Face ID)
+  implementato e verificato in locale, in attesa di commit.**
+- **Prossimo passo:** commit dello step 1.3; prova Touch ID su Mac
+  (`localhost:5599`, attivazione dal modal Account); poi step 1.4 (test
+  iPhone standalone — il Face ID vero richiede il deploy su GitHub Pages,
+  vedi nota in 1.3). Decidere il nome definitivo dell'app (oggi segnaposto
+  "Schede & Imprese"). Poi Fase 2 (dashboard multi-personaggio).
 
 ---
 
@@ -101,8 +103,18 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
       Verificato in locale: gate attivo, errori mostrati, stato autenticato
       simulato via classi CSS OK. **Da testare con credenziali vere e su
       iPhone (step 1.4). Titolo "Schede & Imprese" ancora segnaposto.**
-- [ ] 1.3 Face ID: sblocco biometrico all'apertura via WebAuthn (platform
-      authenticator), attivabile/disattivabile dalle impostazioni account.
+- [x] 1.3 Face ID implementato (2026-07-20, via subagente Sonnet): nuovo
+      `js/faceid.js` (WebAuthn platform authenticator, credenziale per
+      dispositivo+origine in localStorage `app-faceid*`); quarta fase
+      `auth-locked` nella macchina a stati; schermata lucchetto nella vista
+      login ("Bentornato! Sblocca per entrare" + medaglione Face ID + "Non
+      sei tu? Esci"); toggle Attiva/Disattiva nel modal Account (visibile
+      solo se il dispositivo ha l'autenticatore). Cache busting `?v=52`.
+      Verificato in locale (stato simulato, console pulita). **ATTENZIONE
+      per il test reale: WebAuthn richiede un contesto sicuro — funziona su
+      `localhost` (Mac → Touch ID) e su GitHub Pages (HTTPS → Face ID su
+      iPhone), NON da iPhone via LAN `http://IP:5599`. Quindi il vero test
+      Face ID su iPhone si fa dopo il deploy.**
 - [ ] 1.4 Test su iPhone standalone (PWA): viewport, tastiera, safe-area. Commit.
 
 ### Fase 2 — Dashboard profilo e multi-personaggio

@@ -5,6 +5,8 @@
  *   .auth-checking  → avvio, sessione in verifica: né app né login visibili
  *   .auth-out       → nessun utente: si vede SOLO la vista di login
  *   .auth-in        → autenticato: app normale, login nascosto
+ *   .auth-locked    → sessione Firebase valida ma lucchetto Face ID attivo:
+ *                     si vede SOLO il blocco di sblocco (Step 1.3)
  * Le classi sono gestite da js/cloud.js (fallback di timeout in js/app.js).
  */
 
@@ -22,7 +24,8 @@
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 164, 67, 0.10), transparent);
 }
 
-body.auth-out .login-view {
+body.auth-out .login-view,
+body.auth-locked .login-view {
   display: flex;
 }
 
@@ -34,7 +37,11 @@ body.auth-checking #global-fab,
 body.auth-out #app-header,
 body.auth-out #main-content,
 body.auth-out #bottom-nav,
-body.auth-out #global-fab {
+body.auth-out #global-fab,
+body.auth-locked #app-header,
+body.auth-locked #main-content,
+body.auth-locked #bottom-nav,
+body.auth-locked #global-fab {
   display: none;
 }
 
@@ -157,6 +164,36 @@ body.auth-out #global-fab {
 
 .login-faceid.hidden {
   display: none;
+}
+
+/* ---------- Modalità lucchetto (Step 1.3) ---------- */
+
+#lg-locked-info {
+  display: none;
+}
+
+body.auth-locked .login-card,
+body.auth-locked .login-sub {
+  display: none;
+}
+
+body.auth-locked #lg-locked-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.login-locked-msg {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* In modalità lucchetto il pulsante Face ID va mostrato anche se ha .hidden
+   (nascosto di default finché il supporto non è stato verificato) */
+body.auth-locked #lg-faceid-wrap {
+  display: flex !important;
 }
 
 .login-faceid span {

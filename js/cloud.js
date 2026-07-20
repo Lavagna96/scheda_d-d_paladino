@@ -23,10 +23,11 @@ import {
 
   var accountBtn = document.getElementById('opt-account');
 
-  /* Cancello d'ingresso (Fase 1): stati sul body — vedi css/components/login.css */
+  /* Cancello d'ingresso (Fase 1) + lucchetto Face ID (Step 1.3): stati sul
+     body — vedi css/components/login.css */
   function setAuthPhase(phase) {
     var b = document.body;
-    b.classList.remove('auth-checking', 'auth-out', 'auth-in');
+    b.classList.remove('auth-checking', 'auth-out', 'auth-in', 'auth-locked');
     b.classList.add(phase);
   }
 
@@ -248,6 +249,17 @@ import {
       gear.classList.toggle('cloud-on', !!user);
     }
     setSyncStatus(lastSyncLabel);
+    updateFaceIdBtnLabel();
+  }
+
+  function updateFaceIdBtnLabel() {
+    var btn = document.getElementById('acc-faceid');
+    if (!btn || btn.classList.contains('hidden')) {
+      return;
+    }
+    btn.textContent = window.AppFaceId && AppFaceId.isEnabled()
+      ? 'Disattiva sblocco con Face ID'
+      : 'Attiva sblocco con Face ID';
   }
 
   function openModal() {
@@ -306,6 +318,28 @@ import {
         document.getElementById('lg-login').click();
       }
     });
+
+    var faceidBtn = document.getElementById('lg-faceid');
+    if (faceidBtn) {
+      faceidBtn.addEventListener('click', function () {
+        setLoginError('');
+        window.AppFaceId.unlock().then(function (ok) {
+          if (ok) {
+            setAuthPhase('auth-in');
+          } else {
+            setLoginError('Sblocco non riuscito: riprova.');
+          }
+        });
+      });
+    }
+
+    var lockLogoutBtn = document.getElementById('lg-lock-logout');
+    if (lockLogoutBtn) {
+      lockLogoutBtn.addEventListener('click', function () {
+        // Solo logout: il Face ID resta attivo, serve al prossimo accesso.
+        signOut(auth);
+      });
+    }
   }
 
   function bindUi() {
@@ -351,6 +385,29 @@ import {
     document.getElementById('acc-logout').addEventListener('click', function () {
       signOut(auth);
     });
+
+    var faceidBtn = document.getElementById('acc-faceid');
+    if (faceidBtn && window.AppFaceId && AppFaceId.isSupported()) {
+      AppFaceId.checkPlatformAuthenticator().then(function (hasAuthenticator) {
+        if (hasAuthenticator) {
+          show(faceidBtn, true);
+          updateFaceIdBtnLabel();
+        }
+      });
+      faceidBtn.addEventListener('click', function () {
+        setError('');
+        if (AppFaceId.isEnabled()) {
+          AppFaceId.disable();
+          updateFaceIdBtnLabel();
+        } else {
+          AppFaceId.enable(user.uid, user.email).then(function () {
+            updateFaceIdBtnLabel();
+          }).catch(function (err) {
+            setError('Face ID non attivato: ' + ((err && err.message) || 'errore sconosciuto'));
+          });
+        }
+      });
+    }
   }
 
   /* ---------- avvio ---------- */
@@ -358,7 +415,11 @@ import {
   onAuthStateChanged(auth, function (u) {
     user = u;
     if (user) {
-      setAuthPhase('auth-in');
+      if (window.AppFaceId && AppFaceId.shouldLock()) {
+        setAuthPhase('auth-locked');
+      } else {
+        setAuthPhase('auth-in');
+      }
       setLoginError('');
       var passEl = document.getElementById('lg-pass');
       if (passEl) {

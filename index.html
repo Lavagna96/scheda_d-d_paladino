@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=51">
+<link rel="stylesheet" href="css/styles.css?v=52">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -40,6 +40,11 @@
     <button type="button" id="lg-forgot" class="login-link">Password dimenticata?</button>
     <p class="login-error" id="lg-error" aria-live="polite"></p>
   </div>
+  <!-- Modalità lucchetto (Step 1.3): sessione Firebase già attiva, in attesa dello sblocco biometrico -->
+  <div class="login-locked-info" id="lg-locked-info">
+    <p class="login-locked-msg">Bentornato! Sblocca per entrare.</p>
+    <button type="button" class="login-link" id="lg-lock-logout">Non sei tu? Esci</button>
+  </div>
   <!-- Sblocco biometrico: si attiva nello step 1.3 (Face ID) -->
   <div class="login-faceid hidden" id="lg-faceid-wrap">
     <button type="button" class="login-faceid-btn" id="lg-faceid" aria-label="Sblocca con Face ID">
@@ -56,7 +61,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=51" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=52" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -871,6 +876,7 @@
       <p class="account-user">Connesso come <b id="acc-user-email"></b></p>
       <p class="account-sync" id="acc-sync-status">—</p>
       <div class="account-actions">
+        <button type="button" id="acc-faceid" class="account-btn hidden">Attiva sblocco con Face ID</button>
         <button type="button" id="acc-logout" class="account-btn danger">Esci</button>
       </div>
     </div>
@@ -883,7 +889,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img src="avatar-full.jpg?v=51" alt="Ritratto di Tharion Velnar">
+      <img src="avatar-full.jpg?v=52" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -892,21 +898,22 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=51"></script>
-<script src="js/manual-55.js?v=51"></script>
-<script src="js/config.js?v=51"></script>
-<script src="js/storage.js?v=51"></script>
-<script src="js/engine.js?v=51"></script>
-<script src="js/hp-bar.js?v=51"></script>
-<script src="js/header.js?v=51"></script>
-<script src="js/stats.js?v=51"></script>
-<script src="js/sheet.js?v=51"></script>
-<script src="js/grimorio.js?v=51"></script>
-<script src="js/treasury.js?v=51"></script>
-<script src="js/diary.js?v=51"></script>
-<script src="js/inspiration.js?v=51"></script>
-<script src="js/bottom-sheet.js?v=51"></script>
-<script src="js/app.js?v=51"></script>
-<script type="module" src="js/cloud.js?v=51"></script>
+<script src="js/firebase-config.js?v=52"></script>
+<script src="js/manual-55.js?v=52"></script>
+<script src="js/config.js?v=52"></script>
+<script src="js/storage.js?v=52"></script>
+<script src="js/engine.js?v=52"></script>
+<script src="js/hp-bar.js?v=52"></script>
+<script src="js/header.js?v=52"></script>
+<script src="js/stats.js?v=52"></script>
+<script src="js/sheet.js?v=52"></script>
+<script src="js/grimorio.js?v=52"></script>
+<script src="js/treasury.js?v=52"></script>
+<script src="js/diary.js?v=52"></script>
+<script src="js/inspiration.js?v=52"></script>
+<script src="js/bottom-sheet.js?v=52"></script>
+<script src="js/app.js?v=52"></script>
+<script src="js/faceid.js?v=52"></script>
+<script type="module" src="js/cloud.js?v=52"></script>
 </body>
 </html>
