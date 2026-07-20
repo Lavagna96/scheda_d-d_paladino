@@ -416,7 +416,19 @@ import {
     user = u;
     if (user) {
       if (window.AppFaceId && AppFaceId.shouldLock()) {
+        // Se onAuthStateChanged si ripete (es. refresh del token) e siamo
+        // già in lucchetto, non ripartire con un altro auto-scan.
+        var giaBloccato = document.body.classList.contains('auth-locked');
         setAuthPhase('auth-locked');
+        if (!giaBloccato) {
+          AppFaceId.unlock().then(function (ok) {
+            // Nessun messaggio d'errore qui: se iOS rifiuta la get() senza
+            // gesto utente resta la riserva del medaglione #lg-faceid.
+            if (ok) {
+              setAuthPhase('auth-in');
+            }
+          });
+        }
       } else {
         setAuthPhase('auth-in');
       }

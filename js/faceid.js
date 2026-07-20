@@ -12,6 +12,8 @@
 
   var LS_ENABLED = 'app-faceid';
   var LS_CRED = 'app-faceid-cred';
+  var LS_LAST_ACTIVE = 'app-faceid-last-active';
+  var GRACE_MS = 5 * 60 * 1000; // tolleranza: sotto i 5 minuti di inattività niente lucchetto
 
   var _unlocked = false; // già sbloccato in questa sessione di pagina?
 
@@ -43,6 +45,37 @@
     return bytes.buffer;
   }
 
+  /* ---------- tolleranza inattività (5 minuti) ---------- */
+
+  // Ogni chiamata registra "l'app era viva in questo istante"; shouldLock()
+  // confronta questo timestamp con l'ora attuale per decidere se il
+  // lucchetto deve scattare oppure no (breve pausa = niente Face ID).
+  function touchActivity() {
+    localStorage.setItem(LS_LAST_ACTIVE, String(Date.now()));
+  }
+
+  function lastActiveMs() {
+    var raw = parseInt(localStorage.getItem(LS_LAST_ACTIVE), 10);
+
+    return isNaN(raw) ? 0 : raw; // assente/non numerico → 0: blocca per prudenza
+  }
+
+  function bindActivityTracking() {
+    window.addEventListener('pagehide', touchActivity);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        touchActivity();
+      }
+    });
+    // In primo piano e app sbloccata: aggiorna il timestamp ogni 30s così la
+    // finestra di tolleranza riparte da quando l'utente ha smesso di usarla.
+    setInterval(function () {
+      if (document.body.classList.contains('auth-in')) {
+        touchActivity();
+      }
+    }, 30000);
+  }
+
   /* ---------- stato ---------- */
 
   function isSupported() {
@@ -64,7 +97,7 @@
   }
 
   function shouldLock() {
-    return isEnabled() && !_unlocked;
+    return isEnabled() && !_unlocked && (Date.now() - lastActiveMs() > GRACE_MS);
   }
 
   /* ---------- attivazione / disattivazione ---------- */
@@ -96,6 +129,7 @@
       localStorage.setItem(LS_CRED, bufToBase64Url(credential.rawId));
       localStorage.setItem(LS_ENABLED, '1');
       _unlocked = true;
+      touchActivity();
     });
   }
 
@@ -122,12 +156,15 @@
       }
     }).then(function () {
       _unlocked = true;
+      touchActivity();
 
       return true;
     }).catch(function () {
       return false; // annullato o fallito: niente eccezione, solo esito negativo
     });
   }
+
+  bindActivityTracking();
 
   window.AppFaceId = {
     isSupported: isSupported,

@@ -10,14 +10,15 @@
 ## Dove siamo
 
 - **Ultimo aggiornamento:** 2026-07-20
-- **Stato:** Fase 0 e step 1.2 committati (`bf75403`, `5c6f2a5`). Login
-  verificato da Andrea con credenziali vere. **Step 1.3 (Face ID)
-  implementato e verificato in locale, in attesa di commit.**
-- **Prossimo passo:** commit dello step 1.3; prova Touch ID su Mac
-  (`localhost:5599`, attivazione dal modal Account); poi step 1.4 (test
-  iPhone standalone — il Face ID vero richiede il deploy su GitHub Pages,
-  vedi nota in 1.3). Decidere il nome definitivo dell'app (oggi segnaposto
-  "Schede & Imprese"). Poi Fase 2 (dashboard multi-personaggio).
+- **Stato:** Fase 0 + Fase 1 (login page e Face ID) **committate e
+  DEPLOYATE** su GitHub Pages (`bf75403`, `5c6f2a5`, `95da6f6`; run Pages
+  verde, live verificato con curl: `?v=52` servito). Login già provato da
+  Andrea con credenziali vere in locale.
+- **Prossimo passo:** step 1.4 — collaudo di Andrea su iPhone in PWA
+  (https://lavagna96.github.io/scheda_d-d_paladino/): login, attivazione
+  Face ID dal modal Account, chiusura e riapertura → lucchetto. Poi:
+  decidere il nome definitivo dell'app (oggi segnaposto "Schede & Imprese")
+  e partire con la **Fase 2** (dashboard multi-personaggio, step 2.1).
 
 ---
 
@@ -115,6 +116,12 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
       `localhost` (Mac → Touch ID) e su GitHub Pages (HTTPS → Face ID su
       iPhone), NON da iPhone via LAN `http://IP:5599`. Quindi il vero test
       Face ID su iPhone si fa dopo il deploy.**
+      → Collaudato da Andrea su iPhone il 2026-07-20: funziona. Rifinitura
+      richiesta e implementata (`?v=53`): **auto-scan** all'ingresso nel
+      lucchetto (il medaglione resta come riserva) e **tolleranza 5 minuti**
+      (`app-faceid-last-active` aggiornato su pagehide/visibilitychange e
+      ogni 30 s in auth-in; lucchetto solo se inattivi > 5 min). Il foglio
+      "Continua" di iOS non è eliminabile (UX di sistema WebAuthn).
 - [ ] 1.4 Test su iPhone standalone (PWA): viewport, tastiera, safe-area. Commit.
 
 ### Fase 2 — Dashboard profilo e multi-personaggio
