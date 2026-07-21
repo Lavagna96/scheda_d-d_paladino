@@ -926,6 +926,7 @@
 
     window.AppHeader.init();
     window.AppStats.init(); // prima di AppSheet: imposta i data-max delle res-card
+    window.AppTraits.init();
     window.AppSheet.init();
     window.AppGrimorio.init();
     initLevelTabs();

@@ -115,6 +115,9 @@
     if (window.AppStats && window.AppStats.render) {
       window.AppStats.render();
     }
+    if (window.AppTraits && window.AppTraits.render) {
+      window.AppTraits.render(); // Aura di Protezione/Arma Sacra dipendono da CAR/armatura/stile
+    }
     if (window.AppSheet && window.AppSheet.render) {
       window.AppSheet.render();
     }

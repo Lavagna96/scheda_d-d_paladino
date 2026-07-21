@@ -96,32 +96,6 @@
       ') e danni Radiosi.');
   }
 
-  function renderFeatures(view) {
-    var auraTxt = view.aura.text + ' (CAR) a tutti i TS per te e alleati entro ' +
-                  view.aura.rangeM + ' m.';
-    var prot = document.getElementById('feat-aura-prot');
-    if (prot) {
-      prot.setAttribute('data-detail-body',
-        'Tu e gli alleati nell\'aura (' + view.aura.rangeM + ' m) ' +
-        view.aura.text + ' (CAR) a tutti i TS.');
-      var fd = prot.querySelector('.fd');
-      if (fd) {
-        fd.textContent = auraTxt;
-      }
-    }
-    var sacred = document.getElementById('feat-arma-sacra');
-    if (sacred) {
-      sacred.setAttribute('data-detail-body',
-        'Per 10 min ' + view.sacredWeaponText + ' (CAR) al colpire con arma ' +
-        'da mischia, danni Radiosi a scelta, luce intensa 6 m.');
-      var fd2 = sacred.querySelector('.fd');
-      if (fd2) {
-        fd2.textContent = view.sacredWeaponText +
-          ' colpire, danni Radiosi, luce 6 m per 10 min.';
-      }
-    }
-  }
-
   function render() {
     var view = window.AppEngine.getView();
     renderAbilities(view);
@@ -129,7 +103,6 @@
     renderSkills(view);
     renderResources(view);
     renderAttacks(view);
-    renderFeatures(view);
     setText('loh-max', view.poolMax.loh);
   }
 

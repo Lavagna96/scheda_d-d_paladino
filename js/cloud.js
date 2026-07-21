@@ -70,7 +70,7 @@ import {
   }
 
   function rerenderAll() {
-    ['AppHeader', 'AppStats', 'AppSheet', 'AppItems', 'AppGrimorio', 'AppTreasury', 'AppDiary', 'AppInspiration']
+    ['AppHeader', 'AppStats', 'AppTraits', 'AppSheet', 'AppItems', 'AppGrimorio', 'AppTreasury', 'AppDiary', 'AppInspiration']
       .forEach(function (name) {
         if (window[name] && window[name].render) {
           try { window[name].render(); } catch (e) { /* ignore */ }

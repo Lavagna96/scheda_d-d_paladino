@@ -155,6 +155,7 @@ window.APP_CONFIG = {
     character: {
       name: 'Tharion Velnar',
       classId: 'paladino',
+      subclassId: 'devozione', // aggancia i dati della sottoclasse dal manuale (Step 4.5 / 4.6)
       subclassName: 'Devozione',
       level: 7,
       speciesId: 'dragonide',

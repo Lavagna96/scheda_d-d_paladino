@@ -270,14 +270,31 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
 
 **Blocco B — Fondamenta nella scheda**
 
-- [ ] 4.5 **Tratti derivati dal manuale** (refactor-ponte, gemello-prosa della Fase 0).
-      La lista dei privilegi mostrata nella scheda oggi è statica in `config.js`
-      (`FEATURES`, specifica di Tharion): farla nascere da manuale + personaggio
-      = privilegi di classe fino al livello + privilegi di sottoclasse fino al livello
-      + tratti di specie (gating per livello, es. Volo Draconico dal 5° del Dragonide)
-      + talenti presi + oggetti custom (Fase 3.5). **Verifica di non-regressione
-      obbligatoria**: i Tratti di Tharion devono rendere IDENTICI a prima (confronto
-      screenshot), come fu per i numeri nella Fase 0.4.
+- [x] 4.5 **Tratti derivati dal manuale** — FATTO (2026-07-21). Le due card statiche
+      dei Tratti sono ora generate da `js/traits.js` a partire da
+      `classes[classId].levelFeatures` + `subclasses[subclassId].features` +
+      `species[speciesId].traits`, filtrati per livello e per un flag di curatela
+      `trait: false` aggiunto nel manuale (esclude ciò che ha già una card altrove:
+      Imposizione Mani, Incantesimi, Stile di Combattimento, Punizione del Paladino,
+      Incanalare Divinità, Sottoclasse del Paladino, ASI, Attacco Extra, Privilegio di
+      Sottoclasse generico, Dono Epico, Ascendenza Draconica). `species.dragonide`
+      ha anche `minLevel: 5` su Volo Draconico. Aggiunto `character.subclassId:
+      'devozione'` (piccolo assaggio anticipato dello step 4.6, necessario qui).
+      Le due card storicamente dinamiche (Aura di Protezione, Arma Sacra) restano
+      calcolate col valore reale (stessa formula di prima, spostata da `stats.js`
+      — rimossa `renderFeatures` — a `traits.js`); le altre usano il riassunto del
+      manuale così com'è. **Uniche due deviazioni dal testo precedente, dichiarate
+      e approvate**: "Maestria nelle Armi" perde il dettaglio "Vex/Rallentare"
+      (non c'è nello stato un dato per una seconda arma) e le altre card hanno
+      testo più lungo/generico del manuale invece delle frasi ad hoc scritte a
+      mano. Verificato **due volte** (subagente + controprova indipendente in
+      sessione): diff di `manual-55.js` conferma SOLO flag aggiunti, zero testo
+      alterato; le 6 card di classe e le 4 di specie attese sono esattamente
+      quelle previste, in più le due card dinamiche mostrano il testo letteralmente
+      identico a prima; test live CAR 16→18 aggiorna "Aura di Protezione" a "+4
+      (CAR)..." SENZA reload, poi ripristinato; Lama Vincolante e Reliquie intatte
+      e funzionanti; console pulita. Cache busting `?v=62`. **In attesa di commit
+      + deploy.**
 - [ ] 4.6 **Scelte di livello nello stato del personaggio**. Nuovi campi in
       `state.character` per registrare, e rendere riproducibili, le scelte: `subclassId`,
       `feats[]`, distribuzione degli ASI, PF guadagnati per livello (o la regola PF
