@@ -46,10 +46,15 @@
     { id: 'storia', label: 'Storia', abil: 'INT' }
   ];
 
-  /* CA base per armatura indossata (PHB 2024, cap. 6). Per ora solo quelle
-     usate; si estende qui quando servono altre armature. */
+  /* CA base per armatura indossata (PHB 2024, cap. 6). dexCap: Infinity =
+     bonus DES pieno (armatura leggera), un numero = tetto al bonus DES
+     positivo (armatura media, es. +2), 0 = il mod DES non si applica affatto
+     (armatura pesante — vedi nota nel calcolo di ac più sotto). */
   var ARMORS = {
-    piastre: { label: 'Piastre', baseAc: 18, dexBonus: 'none' }
+    'cuoio-borchiato': { label: 'Cuoio Borchiato', baseAc: 12, dexCap: Infinity },
+    'mezza-piastra': { label: 'Mezza Piastra', baseAc: 15, dexCap: 2 },
+    'cotta-maglia': { label: 'Cotta di Maglia', baseAc: 16, dexCap: 0 },
+    piastre: { label: 'Piastre', baseAc: 18, dexCap: 0 }
   };
 
   function abilityMod(score) {
@@ -122,8 +127,26 @@
     var passivePerception = 10 + skills.percezione.total;
 
     var armor = ARMORS[(ch.armor || {}).id];
-    var ac = (armor ? armor.baseAc : 10 + mods.DES) +
-             (ch.armor && ch.armor.shield ? 2 : 0) + modSum(ch, 'ca');
+    var hasArmor = !!(ch.armor && ch.armor.id && ch.armor.id !== 'nessuna');
+    var ac;
+    if (armor) {
+      /* dexCap 0 = armatura pesante: il PHB dice che il mod DES "non si
+         applica", non che è limitato a 0 — quindi qui non va usato
+         Math.min(mods.DES, 0), che sottrarrebbe un mod DES negativo. */
+      var armorDexBonus;
+      if (armor.dexCap === Infinity) {
+        armorDexBonus = mods.DES;
+      } else if (armor.dexCap === 0) {
+        armorDexBonus = 0;
+      } else {
+        armorDexBonus = Math.min(mods.DES, armor.dexCap);
+      }
+      ac = armor.baseAc + armorDexBonus;
+    } else {
+      ac = 10 + mods.DES;
+    }
+    var defenseBonus = (ch.fightingStyle === 'difesa' && hasArmor) ? 1 : 0;
+    ac += (ch.armor && ch.armor.shield ? 2 : 0) + defenseBonus + modSum(ch, 'ca');
     var acNote = (armor ? armor.label : 'Senza armatura') +
                  (ch.armor && ch.armor.shield ? ' + Scudo' : '');
 

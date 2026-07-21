@@ -1,4 +1,5 @@
-#bottom-sheet-overlay {
+#bottom-sheet-overlay,
+#edit-sheet-overlay {
   position: fixed;
   inset: 0;
   z-index: 80;
@@ -8,7 +9,8 @@
   justify-content: center;
 }
 
-#bottom-sheet-overlay.hidden {
+#bottom-sheet-overlay.hidden,
+#edit-sheet-overlay.hidden {
   display: none !important;
 }
 

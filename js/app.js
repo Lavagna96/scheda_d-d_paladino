@@ -927,6 +927,7 @@
     window.AppDiary.init();
     window.AppInspiration.init();
     window.AppBottomSheet.init();
+    window.AppEditSheet.init();
 
     moveNavIndicator(navLinkFor(currentView), false);
 

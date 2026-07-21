@@ -14,10 +14,12 @@
   DEPLOYATE** su GitHub Pages (`bf75403`, `5c6f2a5`, `95da6f6`; run Pages
   verde, live verificato con curl: `?v=52` servito). Login già provato da
   Andrea con credenziali vere in locale.
-- **Prossimo passo:** commit + deploy della Fase 2 (con permesso), poi
-  collaudo di Andrea (step 2.5). A seguire: **Fase 3** (modifica valori
-  della scheda con persistenza), step 3.1: discutere l'UX di editing con
-  3 proposte.
+- **Prossimo passo:** commit + deploy della Fase 3 (con permesso), poi
+  collaudo di Andrea su iPhone (editing reale + sync multi-device) e
+  collaudo residuo della Fase 2 (step 2.5, mai confermato esplicitamente).
+  A seguire: step **3.5** (oggetti magici della campagna creabili da
+  interfaccia, già specificato in dettaglio più sotto) oppure direttamente
+  **Fase 4** (Level Up Paladino) — da concordare con Andrea quale fare prima.
 
 ---
 
@@ -154,13 +156,32 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
 ### Fase 3 — Modifica valori della scheda con persistenza
 *Il punto 3 della visione. Dipende dalla Fase 0.*
 
-- [ ] 3.1 Decidere l'UX di editing (es. modalità "modifica" globale vs edit inline
-      per campo vs bottom sheet per sezione) — 3 proposte con preview.
-- [ ] 3.2 Editing dei fatti base (caratteristiche, competenze, equip, PF max override…)
-      con ricalcolo immediato di tutti i derivati via motore.
-- [ ] 3.3 Persistenza su Firestore (già gratis via `AppStorage`→`AppCloud` una volta
-      che i fatti base sono nello stato).
-- [ ] 3.4 Test: modifico CAR 16→18 e verifico che TS, CD, Aura, Arma Sacra si aggiornino. Commit.
+- [x] 3.1 UX decisa (vedi Decisioni prese, 2026-07-21): bottom sheet per sezione,
+      steppers a card per i numeri, chip per le competenze.
+- [x] 3.2 Editing implementato (subagente Sonnet): nuovo `js/edit-sheet.js` +
+      `css/components/edit-sheet.css`, 3 bottom sheet — Caratteristiche
+      (6 punteggi con stepper + competenze TS), Abilità (18 competenze da
+      `AppEngine.SKILLS`), Equipaggiamento (armatura/scudo/arma/stile).
+      Icone matita sulle intestazioni delle sezioni corrispondenti. Bozza
+      locale allo sheet: "Salva" applica, chiusura con ✕/tap-fuori scarta.
+      **Esteso il motore** (`js/engine.js`): `ARMORS` ora ha 4 armature vere
+      (Cuoio Borchiato, Mezza Piastra, Cotta di Maglia, Piastre) con le CA
+      dal PHB 2024 (verificate: tabella Armor, pag. armi/armature), + stile
+      di combattimento **Difesa** (+1 CA con armatura) accanto al Duello
+      già esistente. Grande Arma/Protezione restano fuori scope (bonus non
+      fissi, richiedono logica reroll/reazione). Livello e classe NON sono
+      editabili (arriveranno con la Fase 4 Level Up). Cache busting `?v=55`.
+- [x] 3.3 Persistenza già gratis via `AppStorage`→`AppCloud` (nessun codice nuovo
+      necessario, come previsto).
+- [x] 3.4 Verificato **due volte** (subagente + controprova indipendente in
+      sessione): CA Tharion resta 20 con Piastre/Scudo/Duello dopo le modifiche
+      al motore (no regressione); cambio armatura dall'interfaccia reale
+      (select→Salva) ricalcola la CA per ogni opzione (Mezza Piastra → 16,
+      confermato −1 DES applicato correttamente sotto il tetto +2, coerente
+      col PHB); CAR 16→18 dallo sheet propaga a TS/CD/Aura/attacco
+      incantesimi esattamente come nella Fase 0; chiusura senza Salva scarta
+      la modifica. Stato di test ripulito, Tharion ripristinato ai valori
+      reali. **In attesa di commit + deploy.**
 - [ ] 3.5 **Oggetti speciali/magici della campagna creabili da interfaccia**
       (richiesto da Andrea il 2026-07-19): durante la campagna arriveranno nuovi
       oggetti unici (stile Lama Vincolante) e deve essere possibile aggiungerli
@@ -208,6 +229,17 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
    standalone su iOS recenti (atteso OK da iOS 16+).
 
 ## Decisioni prese
+
+- 2026-07-21 — Fase 3, step 3.1: UX = **bottom sheet per sezione** con
+  **steppers a card** (proposta A tra 3 con preview) per punteggi/numeri,
+  chip per competenze. Ambito di questa prima passata: **punteggi +
+  competenze (TS/abilità) + equipaggiamento** (armatura, scudo, arma, stile
+  di combattimento). Livello e classe restano bloccati, si cambiano con la
+  futura Fase 4 (Level Up). Verificato sul PHB 2024 (PDF locale): tabella
+  armature complete, Stile di Combattimento Difesa (+1 CA) e Duello
+  (+2 danni, già presente) hanno bonus fissi modellabili nel motore; Grande
+  Arma e Protezione NO (richiedono logica di reroll/reazione, fuori scope
+  per un editor di "fatti base" — restano da fare in futuro se richiesti).
 
 - 2026-07-20 — Fase 2, architettura: dopo login/sblocco si atterra **sempre
   sulla dashboard**; in Fase 2 **solo lista e selezione** dei personaggi

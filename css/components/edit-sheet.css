@@ -1,0 +1,172 @@
+/*
+ * Editing dei fatti base (Fase 3): icona matita sulle intestazioni
+ * modificabili + contenuto dei bottom sheet di editing (#edit-sheet-overlay,
+ * markup gemello di #bottom-sheet-overlay in css/bottom-sheet.css — stessa
+ * struttura .bottom-sheet/.sheet-handle/.sheet-header/.sheet-title/
+ * .sheet-close/.sheet-body, stile ereditato da lì).
+ */
+
+.edit-pencil {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  border: none;
+  background: transparent;
+  color: var(--accent-gold);
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ---------- stepper a card (caratteristiche) ---------- */
+
+.edit-stat-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.edit-stat-row:last-child {
+  border-bottom: none;
+}
+
+.edit-stat-label {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.edit-stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.stepper-btn {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-gold-soft);
+  background: var(--bg-principal);
+  color: var(--accent-gold);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-stat-vals {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 42px;
+}
+
+.edit-stat-score {
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.edit-stat-mod {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.edit-section-label {
+  font-family: var(--font-title);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-gold);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+/* ---------- chip di competenza ---------- */
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  min-height: 36px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.chip.on {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.12);
+}
+
+/* ---------- campi equipaggiamento ---------- */
+
+.edit-field {
+  margin-bottom: var(--space-3);
+}
+
+.edit-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 6px 2px;
+}
+
+.edit-select,
+.edit-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-principal);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px; /* evita lo zoom automatico di iOS sul focus */
+}
+
+/* ---------- bottone Salva ---------- */
+
+.save-btn {
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-top: var(--space-4);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: var(--touch-min);
+  background: linear-gradient(180deg, #e0bb5c, #b8923a);
+  color: #241d0d;
+  box-shadow: 0 4px 14px rgba(201, 164, 67, 0.25);
+}
