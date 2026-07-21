@@ -77,6 +77,16 @@
         total += m.value;
       }
     });
+    /* Reliquie/oggetti magici creati dall'utente (Step 3.5): stessa somma
+       additiva dei modifiers "di sistema", ma da un array separato — vedi
+       character.items in js/items.js. character.modifiers resta intatto. */
+    (ch.items || []).forEach(function (item) {
+      (item.effects || []).forEach(function (eff) {
+        if (eff.target === target) {
+          total += eff.value;
+        }
+      });
+    });
 
     return total;
   }
@@ -198,6 +208,11 @@
     });
     (ch.extraResources || []).forEach(function (r) {
       resources.push(r);
+    });
+    (ch.items || []).forEach(function (item) {
+      if (item.usesMax > 0) {
+        resources.push({ key: 'item-' + item.id, max: item.usesMax, name: item.name, ctx: 'usi limitati' });
+      }
     });
 
     var w = ch.weapon || {};

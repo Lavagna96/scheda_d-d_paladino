@@ -183,7 +183,19 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
       la modifica. Stato di test ripulito, Tharion ripristinato ai valori
       reali. Committato e deployato (`0f902fe`, run Pages verde, live
       verificato con curl: `edit-sheet.js?v=55` servito).
-- [ ] 3.5 **Oggetti speciali/magici della campagna creabili da interfaccia**
+- [x] 3.5 **Oggetti speciali/magici della campagna creabili da interfaccia** — FATTO
+      (2026-07-21, via subagente Sonnet, verificato due volte). Nuovo array
+      `state.character.items` (nome, descrizione, icona SVG da un pool di 8,
+      elenco di effetti per esteso con stepper, usi limitati opzionali).
+      Compaiono tra i Tratti in "Reliquie & Oggetti Magici"; con usi limitati
+      diventano una vera res-card in Risorse → "Oggetti", stessa meccanica di
+      "Scudo magico". `character.modifiers`/Lama Vincolante intatti, fuori
+      scope. Verificato in browser: non-regressione (items:[] → CA/TS/CD
+      invariati), creazione con 2 effetti (CA 20→21, TS CAR/FOR +1 ciascuno),
+      res-card con usi limitati funzionante al tocco, modifica ed eliminazione
+      (tornano esattamente al valore base). Cache busting `?v=57`.
+      **In attesa di commit + deploy.**
+      Sotto, il testo originale della specifica per riferimento:
       (richiesto da Andrea il 2026-07-19): durante la campagna arriveranno nuovi
       oggetti unici (stile Lama Vincolante) e deve essere possibile aggiungerli
       direttamente dall'app, senza toccare il codice. Per ogni oggetto si sceglie:
@@ -229,6 +241,22 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
 3. Nota tecnica da confermare durante la 1.3: comportamento WebAuthn in PWA
    standalone su iOS recenti (atteso OK da iOS 16+).
 
+## Decisioni prese (step 3.5)
+
+- 2026-07-21 — UX del modulo "Nuova Reliquia": tra 6 proposte con preview
+  (A-C poi D-F dopo che Andrea ha segnalato le sigle poco chiare nella prima
+  tornata), scelta la **B pura**: elenco di righe ripetibili (parte vuoto,
+  "+ Aggiungi effetto" per ognuna), ogni riga = menu a tendina con
+  l'effetto **per esteso** (non sigle) + stepper −/+ per il valore +
+  rimozione riga. Gli 8 effetti possibili (unici che il motore sa gestire,
+  dalla Fase 0): Colpire con le armi, Danni con le armi, Difficoltà degli
+  incantesimi, Colpire con gli incantesimi, Classe Armatura, Tiri Salvezza,
+  Iniziativa, Punti Ferita massimi. Icone: pool di 8 SVG in stile coerente
+  con quelle già in `sheet.js` (spada, scudo, anello, amuleto, mantello,
+  bastone, pozione, tomo). Usi limitati opzionali → diventano una res-card
+  vera nella tab Risorse, esattamente come l'attuale "Scudo magico".
+  La Lama Vincolante esistente resta com'è (fuori scope, nessuna migrazione).
+
 ## Bug risolti
 
 - 2026-07-21 — **Schermata nera all'apertura su rete lenta.** Segnalato da
@@ -249,6 +277,7 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
   gstatic.com per velocizzare il caricamento. Verificato in locale
   simulando la rete lenta: stato disattivato reso correttamente, sblocco
   regolare a bind avvenuto, console pulita. Cache busting `?v=56`.
+  Committato e deployato (`ae3ef6e`, run Pages verde, live verificato).
 
 ## Decisioni prese
 

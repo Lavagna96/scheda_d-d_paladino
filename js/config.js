@@ -176,7 +176,8 @@ window.APP_CONFIG = {
       ],
       extraResources: [
         { key: 'shield', max: 1 }
-      ]
+      ],
+      items: [] // reliquie/oggetti magici creati dall'utente (Step 3.5) — js/items.js
     },
     pools: { loh: 35, hp: 60, steedhp: 25, tempHp: 0 },
     spent: {},
