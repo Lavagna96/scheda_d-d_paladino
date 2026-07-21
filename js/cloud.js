@@ -38,6 +38,7 @@ import {
 
   if (!config) {
     setAuthPhase('auth-in'); // cloud non configurato: app in solo-locale, niente gate
+    document.body.classList.remove('login-not-ready');
 
     return;
   }
@@ -552,6 +553,10 @@ import {
 
   bindUi();
   bindLoginUi();
+  // Da qui in poi i bottoni del login hanno davvero un gestore agganciato:
+  // qualunque messaggio di attesa mostrato nel frattempo va tolto (vedi
+  // body.login-not-ready in login.css e il paracadute in app.js).
+  document.body.classList.remove('login-not-ready');
 
   window.AppCloud = {
     enabled: true,

@@ -891,15 +891,21 @@
   }
 
   /* Paracadute del cancello di login: se cloud.js (modulo Firebase da CDN)
-     non parte — rete assente al primo avvio — non lasciare lo schermo vuoto. */
+     impiega troppo — rete lenta al primo avvio — mostra comunque il login
+     invece di uno schermo vuoto. I bottoni restano disattivati (vedi
+     body.login-not-ready in login.css) finché cloud.js non li aggancia
+     davvero: bindLoginUi() toglie la classe a fine caricamento, qualunque
+     sia il momento in cui il modulo finisce di arrivare dal CDN. */
   function bindAuthFallback() {
     setTimeout(function () {
       if (document.body.classList.contains('auth-checking')) {
         document.body.classList.remove('auth-checking');
         document.body.classList.add('auth-out');
-        var err = document.getElementById('lg-error');
-        if (err) {
-          err.textContent = 'Impossibile contattare il server: controlla la connessione e riapri l\'app.';
+      }
+      if (document.body.classList.contains('login-not-ready')) {
+        var status = document.getElementById('lg-status');
+        if (status) {
+          status.textContent = 'Connessione lenta: il pulsante si attiva appena pronto…';
         }
       }
     }, 8000);

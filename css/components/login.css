@@ -154,6 +154,28 @@ body.auth-locked #global-fab {
   margin: 12px 0 0;
 }
 
+/* Il modulo Firebase arriva da un CDN esterno: finché non ha finito di
+   caricarsi (rete lenta/instabile) i bottoni non hanno ancora un gestore
+   agganciato. Meglio mostrarli disattivati che farli sembrare rotti. */
+.login-status {
+  display: none;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 12px 0 0;
+}
+
+body.login-not-ready .login-status {
+  display: block;
+}
+
+body.login-not-ready .login-btn,
+body.login-not-ready .login-link,
+body.login-not-ready .login-faceid-btn {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .login-faceid {
   margin-top: 26px;
   display: flex;

@@ -14,12 +14,12 @@
   DEPLOYATE** su GitHub Pages (`bf75403`, `5c6f2a5`, `95da6f6`; run Pages
   verde, live verificato con curl: `?v=52` servito). Login già provato da
   Andrea con credenziali vere in locale.
-- **Prossimo passo:** commit + deploy della Fase 3 (con permesso), poi
-  collaudo di Andrea su iPhone (editing reale + sync multi-device) e
-  collaudo residuo della Fase 2 (step 2.5, mai confermato esplicitamente).
-  A seguire: step **3.5** (oggetti magici della campagna creabili da
-  interfaccia, già specificato in dettaglio più sotto) oppure direttamente
-  **Fase 4** (Level Up Paladino) — da concordare con Andrea quale fare prima.
+- **Prossimo passo:** collaudo di Andrea su iPhone (editing reale delle 3
+  sezioni + sync multi-device) e collaudo residuo della Fase 2 (step 2.5,
+  mai confermato esplicitamente). A seguire: step **3.5** (oggetti magici
+  della campagna creabili da interfaccia, già specificato in dettaglio più
+  sotto) oppure direttamente **Fase 4** (Level Up Paladino) — da concordare
+  con Andrea quale fare prima.
 
 ---
 
@@ -181,7 +181,8 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
       col PHB); CAR 16→18 dallo sheet propaga a TS/CD/Aura/attacco
       incantesimi esattamente come nella Fase 0; chiusura senza Salva scarta
       la modifica. Stato di test ripulito, Tharion ripristinato ai valori
-      reali. **In attesa di commit + deploy.**
+      reali. Committato e deployato (`0f902fe`, run Pages verde, live
+      verificato con curl: `edit-sheet.js?v=55` servito).
 - [ ] 3.5 **Oggetti speciali/magici della campagna creabili da interfaccia**
       (richiesto da Andrea il 2026-07-19): durante la campagna arriveranno nuovi
       oggetti unici (stile Lama Vincolante) e deve essere possibile aggiungerli
@@ -227,6 +228,27 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
 2. **Design della login page:** 3 proposte grafiche con preview da presentare (step 1.2).
 3. Nota tecnica da confermare durante la 1.3: comportamento WebAuthn in PWA
    standalone su iOS recenti (atteso OK da iOS 16+).
+
+## Bug risolti
+
+- 2026-07-21 — **Schermata nera all'apertura su rete lenta.** Segnalato da
+  Andrea: a volte l'app resta nera, poi dopo un po' appare "Impossibile
+  contattare il server", e toccare "Entra" non fa nulla — finché non
+  funziona da solo dopo un'attesa. Causa: `js/cloud.js` è un modulo che
+  importa Firebase da un CDN esterno (gstatic.com); finché quell'import non
+  finisce di scaricarsi, i bottoni del login sono visibili ma SENZA alcun
+  gestore agganciato (`bindLoginUi()` non è ancora girato) — su rete lenta
+  restano cliccabili nel vuoto per diversi secondi. Il vecchio paracadute
+  di 8s in `app.js` mostrava un messaggio fuorviante ("riapri l'app") che
+  non risolveva nulla, dato che bastava aspettare.
+  **Fix**: nuova classe `body.login-not-ready` (tolta da `cloud.js` solo
+  quando i bottoni sono davvero agganciati) che li mostra visibilmente
+  disattivati con un messaggio onesto ("Connessione al server…", poi
+  "Connessione lenta: il pulsante si attiva appena pronto…" dopo 8s) invece
+  di farli sembrare rotti; aggiunto `<link rel="preconnect">` verso
+  gstatic.com per velocizzare il caricamento. Verificato in locale
+  simulando la rete lenta: stato disattivato reso correttamente, sblocco
+  regolare a bind avvenuto, console pulita. Cache busting `?v=56`.
 
 ## Decisioni prese
 
