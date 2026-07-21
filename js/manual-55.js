@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 12,
+  version: 13,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -95,7 +95,85 @@ window.MANUAL_55 = {
       casterType: 'half', spellAbility: 'CAR',
       channelDivinity: [0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
       preparedByLevel: [0, 2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15],
-      slotLevelByLevel: [0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
+      slotLevelByLevel: [0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5],
+      /* Privilegi per livello (Step 4.1, per il futuro wizard di Level Up —
+         Step 4.5): riassunti originali in italiano, verificati sul PHB 2024.
+         Non ancora consumati da nessuna vista della scheda. */
+      levelFeatures: {
+        1: [
+          { name: 'Imposizione delle Mani', desc: 'Riserva di cura pari a 5 × il tuo livello da paladino, che si ricarica al riposo lungo. Azione bonus: tocchi una creatura (anche te stesso) e le ridai PF attinti dalla riserva. Puoi spendere 5 PF della riserva per rimuovere la condizione Avvelenato.' },
+          { name: 'Incantesimi', desc: 'Lanci incantesimi da paladino usando il Carisma. Prepari una lista di incantesimi il cui numero cresce col livello (colonna Incantesimi preparati). Sei un incantatore a metà.' },
+          { name: 'Maestria nelle Armi', desc: 'Puoi usare la proprietà di maestria di due tipi di arma con cui sei competente. Al riposo lungo puoi cambiare le armi scelte.' }
+        ],
+        2: [
+          { name: 'Stile di Combattimento', desc: 'Ottieni un talento di Stile di Combattimento a tua scelta (in alternativa, Guerriero Benedetto: impari due trucchetti da chierico, con Carisma come caratteristica).' },
+          { name: 'Punizione del Paladino', desc: 'Hai sempre preparato l\'incantesimo Punizione Divina. Inoltre puoi lanciarlo una volta senza spendere uno slot; recuperi quest\'uso al riposo lungo.' }
+        ],
+        3: [
+          { name: 'Incanalare Divinità', desc: 'Incanali energia divina per alimentare effetti magici. Parti con l\'effetto Percezione Divina; altri privilegi ne aggiungono altri. Hai 2 usi (3 dall\'11° livello), ne recuperi uno al riposo breve e tutti al riposo lungo.' },
+          { name: 'Percezione Divina', desc: 'Effetto di Incanalare Divinità. Azione bonus: per 10 minuti percepisci Celestiali, Immondi e Non Morti entro 18 m (posizione e tipo), e i luoghi o oggetti consacrati o profanati nello stesso raggio.' },
+          { name: 'Sottoclasse del Paladino', desc: 'Scegli un Giuramento (Devozione, Gloria, Antichi o Vendetta). Ottieni i suoi privilegi al tuo livello da paladino o inferiore.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1 ciascuno, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        5: [
+          { name: 'Attacco Extra', desc: 'Puoi attaccare due volte, invece di una, ogni volta che compi l\'azione di Attacco nel tuo turno.' },
+          { name: 'Destriero Fedele', desc: 'Hai sempre preparato l\'incantesimo Trova Destriero. Puoi lanciarlo anche una volta senza spendere uno slot; recuperi quest\'uso al riposo lungo.' }
+        ],
+        6: [
+          { name: 'Aura di Protezione', desc: 'Emani un\'aura protettiva entro 3 m. Tu e i tuoi alleati nell\'aura ricevete a tutti i tiri salvezza un bonus pari al tuo modificatore di Carisma (minimo +1). L\'aura è inattiva se hai la condizione Incapacitato.' }
+        ],
+        7: [
+          { name: 'Privilegio di Sottoclasse', desc: 'Ottieni un privilegio del tuo Giuramento (dipende dalla sottoclasse scelta).' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        9: [
+          { name: 'Scacciare i Nemici', desc: 'Azione Magica, spendendo un uso di Incanalare Divinità: bersagli un numero di creature pari al tuo modificatore di Carisma (minimo 1) che vedi entro 18 m. Ognuna fa un TS Saggezza o è Spaventata per 1 minuto (o finché non subisce danni). Mentre è Spaventata così, nel suo turno può fare solo una cosa tra muoversi, compiere un\'azione o un\'azione bonus.' }
+        ],
+        10: [
+          { name: 'Aura di Coraggio', desc: 'Tu e i tuoi alleati siete immuni alla condizione Spaventato mentre siete nella tua Aura di Protezione. Se un alleato Spaventato entra nell\'aura, la condizione non ha effetto su di lui finché resta.' }
+        ],
+        11: [
+          { name: 'Colpi Radiosi', desc: 'Quando colpisci un bersaglio con un tiro per colpire usando un\'arma da mischia o un colpo senz\'armi, infliggi 1d8 danni Radiosi aggiuntivi.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        13: [],
+        14: [
+          { name: 'Tocco Ristoratore', desc: 'Quando usi Imposizione delle Mani su una creatura, puoi anche rimuovere una o più di queste condizioni: Accecato, Affascinato, Assordato, Spaventato, Paralizzato, Stordito. Spendi 5 PF della riserva per ciascuna condizione rimossa (questi PF non curano anche i PF della creatura).' }
+        ],
+        15: [
+          { name: 'Privilegio di Sottoclasse', desc: 'Ottieni un altro privilegio del tuo Giuramento.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        17: [],
+        18: [
+          { name: 'Espansione dell\'Aura', desc: 'La tua Aura di Protezione diventa un\'emanazione di 9 m.' }
+        ],
+        19: [
+          { name: 'Dono Epico', desc: 'Ottieni un talento Dono Epico a scelta (o un altro talento per cui sei idoneo). È consigliato il Dono della Vista Autentica.' }
+        ],
+        20: [
+          { name: 'Privilegio di Sottoclasse', desc: 'Ottieni il privilegio finale del tuo Giuramento.' }
+        ]
+      },
+      /* Livelli che richiedono una scelta dell'utente: per il futuro wizard
+         di Level Up (Step 4.5). Niente array annidati dentro array (limite
+         Firestore): solo array di numeri dentro la mappa. */
+      choicePoints: {
+        fightingStyle: 2,
+        subclass: 3,
+        subclassFeatureLevels: [3, 7, 15, 20],
+        asi: [4, 8, 12, 16],
+        epicBoon: 19,
+        extraAttack: 5
+      }
     },
     ranger: {
       name: 'Ranger', hitDie: 'd10', primaryAbility: 'DES e SAG', saves: ['FOR', 'DES'],

@@ -9,17 +9,20 @@
 
 ## Dove siamo
 
-- **Ultimo aggiornamento:** 2026-07-20
-- **Stato:** Fase 0 + Fase 1 (login page e Face ID) **committate e
-  DEPLOYATE** su GitHub Pages (`bf75403`, `5c6f2a5`, `95da6f6`; run Pages
-  verde, live verificato con curl: `?v=52` servito). Login già provato da
-  Andrea con credenziali vere in locale.
-- **Prossimo passo:** collaudo di Andrea su iPhone (editing reale delle 3
-  sezioni + sync multi-device) e collaudo residuo della Fase 2 (step 2.5,
-  mai confermato esplicitamente). A seguire: step **3.5** (oggetti magici
-  della campagna creabili da interfaccia, già specificato in dettaglio più
-  sotto) oppure direttamente **Fase 4** (Level Up Paladino) — da concordare
-  con Andrea quale fare prima.
+- **Ultimo aggiornamento:** 2026-07-21
+- **Stato:** Fasi 0, 1, 2, 3 (editing + step 3.5 oggetti magici) tutte
+  **committate e DEPLOYATE** su GitHub Pages, ultimo commit `f91dc85`.
+  Login e Face ID già collaudati da Andrea su iPhone reale (con relativo
+  fix del cancello di login su rete lenta, commit `ae3ef6e`).
+- **Prossimo passo:** **Fase 4 — Level Up Paladino**, ora espansa in 9 step
+  su 3 blocchi (dati del manuale + sync DB → fondamenta nella scheda →
+  flusso di level-up). Da aprire risolvendo le 3 Decisioni aperte qui sotto
+  (PF al level up, livello impostabile o solo incrementabile, ambito
+  sottoclassi), poi step 4.1 (privilegi per livello 1→20 dal PHB).
+  Nota: le nuove sezioni del manuale (privilegi per livello, sottoclassi,
+  talenti) vanno salvate anche su Firestore come già razze/classi/incantesimi
+  (step 4.4). Collaudo residuo mai confermato: sync multi-device tra due
+  dispositivi con lo stesso account.
 
 ---
 
@@ -194,7 +197,7 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
       invariati), creazione con 2 effetti (CA 20→21, TS CAR/FOR +1 ciascuno),
       res-card con usi limitati funzionante al tocco, modifica ed eliminazione
       (tornano esattamente al valore base). Cache busting `?v=57`.
-      **In attesa di commit + deploy.**
+      Committato e deployato (`f91dc85`, run Pages verde, live verificato).
       Sotto, il testo originale della specifica per riferimento:
       (richiesto da Andrea il 2026-07-19): durante la campagna arriveranno nuovi
       oggetti unici (stile Lama Vincolante) e deve essere possibile aggiungerli
@@ -211,19 +214,71 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
       Firestore) e compare tra i Tratti con la sua icona e descrizione.
 
 ### Fase 4 — Level up Paladino
-*Il punto 4 della visione. Dipende dalle Fasi 0 e 3.*
+*Il punto 4 della visione, la fase più grande. Dipende dalle Fasi 0 e 3.*
+*Per ora SOLO Paladino, ma dati e UX vanno pensati generici (altre classi in Fase 5).*
 
-- [ ] 4.1 Estendere `manual-55.js` con i privilegi per livello del Paladino 1→20
-      (dal PHB 2024 PDF, riassunti in italiano): cosa si guadagna a ogni livello,
-      quali scelte comporta (ASI o talento ai liv. 4/8/12/16/19, sottoclasse al 3,
-      nuovi slot, Aura 9 m al 18…).
-- [ ] 4.2 Talenti: aggiungere al manuale almeno i talenti generali del PHB idonei
-      al Paladino (prerequisito liv. 4+) in forma riassunta.
-- [ ] 4.3 UX level-up: bottom sheet/wizard che al passaggio di livello mostra i
-      guadagni automatici e guida le scelte (distribuzione +2/+1+1, o talento;
-      tiro/media PF) — 3 proposte con preview.
-- [ ] 4.4 Applicazione atomica del level-up allo stato + ricalcolo derivati + sync cloud.
-- [ ] 4.5 Test del percorso 7→8 reale di Tharion e simulazione fino al 20. Commit.
+Struttura in 3 blocchi: prima i **dati del manuale** (+ sync a DB), poi le
+**fondamenta nella scheda**, infine il **flusso di level-up** vero e proprio.
+Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il resto.
+
+**Blocco A — Dati del manuale (nuove sezioni, tutte da salvare anche su Firestore)**
+
+- [x] 4.1 **Privilegi per livello del Paladino 1→20** in `manual-55.js` — FATTO
+      (2026-07-21, dati estratti dal PDF dal coordinatore, integrati dal subagente).
+      Aggiunte `classes.paladino.levelFeatures` (mappa 1→20 di privilegi in prosa,
+      italiano originale) e `choicePoints` (fightingStyle:2, subclass:3,
+      subclassFeatureLevels:[3,7,15,20], asi:[4,8,12,16], epicBoon:19, extraAttack:5).
+      `manual.version` 12→13. Tabelle numeriche esistenti intatte. Verificato due
+      volte (struttura 1→20 con 13/17 vuoti + non-regressione: Tharion identico,
+      console pulita). Cache busting `?v=58`. **In attesa di commit + deploy.**
+      Nota per 4.5: il sync a Firestore di questi dati scatta da solo (version 13 >
+      remota) perché `syncManual` serializza l'intero documento classe.
+- [ ] 4.2 **Sottoclassi / Giuramenti** del Paladino (nuova sezione dati). Modellare
+      per prima **Devozione** (quella di Tharion) coi suoi privilegi ai liv. 3/7/15/20;
+      le altre man mano. Oggi `character.subclassName` è solo testo → diventerà un id
+      collegato a questi dati.
+- [ ] 4.3 **Catalogo talenti** nel manuale (nuova sezione): talenti generali (prereq.
+      liv. 4+), talenti di Stile di Combattimento (Difesa/Duello già nel motore dalla
+      Fase 3 — qui diventano dati completi), Doni Epici (liv. 19). Ogni talento: nome,
+      prerequisito, riassunto. Dove un talento dà un bonus fisso (es. +1 a una
+      caratteristica, Maestro d'Armi), va modellato per agganciarsi ai `modifiers`/al
+      motore già esistenti; gli altri restano descrittivi (mostrati come tratto).
+- [ ] 4.4 **Sync Firestore delle nuove sezioni** (privilegi per livello, sottoclassi,
+      talenti) — estendere `syncManual()` in `cloud.js` come già fa per
+      spells/classes/species. Confermare che la regola Firestore `/manuals/{**}` sia
+      DAVVERO deployata (oggi il sync fallisce in silenzio se manca — vedi
+      [[manuale-55-architettura]]): con più dati conviene verificarlo esplicitamente.
+
+**Blocco B — Fondamenta nella scheda**
+
+- [ ] 4.5 **Tratti derivati dal manuale** (refactor-ponte, gemello-prosa della Fase 0).
+      La lista dei privilegi mostrata nella scheda oggi è statica in `config.js`
+      (`FEATURES`, specifica di Tharion): farla nascere da manuale + personaggio
+      = privilegi di classe fino al livello + privilegi di sottoclasse fino al livello
+      + tratti di specie (gating per livello, es. Volo Draconico dal 5° del Dragonide)
+      + talenti presi + oggetti custom (Fase 3.5). **Verifica di non-regressione
+      obbligatoria**: i Tratti di Tharion devono rendere IDENTICI a prima (confronto
+      screenshot), come fu per i numeri nella Fase 0.4.
+- [ ] 4.6 **Scelte di livello nello stato del personaggio**. Nuovi campi in
+      `state.character` per registrare, e rendere riproducibili, le scelte: `subclassId`,
+      `feats[]`, distribuzione degli ASI, PF guadagnati per livello (o la regola PF
+      scelta). Migrazione dello stato attuale di Tharion (già liv. 7, Devozione, Duello,
+      Lama Vincolante come modifier) senza perdere nulla. Decidere la forma esatta prima
+      di scrivere.
+
+**Blocco C — Il level-up**
+
+- [ ] 4.7 **UX del level-up** — bottom sheet/wizard che al passaggio di livello mostra
+      i guadagni automatici e guida le scelte (subclasse al 3; ASI +2 / +1+1 vs talento;
+      PF secondo la regola scelta; nuovo Stile al 2; conteggi incantesimi/trucchetti).
+      3 proposte con preview prima di implementare.
+- [ ] 4.8 **Applicazione atomica** del level-up: applica il passaggio N→N+1 allo stato in
+      un colpo solo, il motore ricalcola tutti i derivati, sync cloud. Gestire anche il
+      caso "correzione" se si decide che il livello è impostabile e non solo incrementabile
+      (vedi Decisioni aperte).
+- [ ] 4.9 **Test**: percorso reale 7→8 di Tharion (verifica che PF, competenza,
+      Imposizione, slot, nuovi privilegi si aggiornino coerentemente) + simulazione 1→20
+      a tavolino. Commit + deploy finale della fase.
 
 ### Fase 5 — Estensioni future (backlog, non pianificate in dettaglio)
 
@@ -233,13 +288,21 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
 
 ---
 
-## Decisioni aperte (da discutere prima delle rispettive fasi)
+## Decisioni aperte
 
-1. **PF al level up:** regola del tiro del dado, della media fissa, o scelta dell'utente?
-   (Nota: i PF attuali di Tharion seguono la media fissa.)
-2. **Design della login page:** 3 proposte grafiche con preview da presentare (step 1.2).
-3. Nota tecnica da confermare durante la 1.3: comportamento WebAuthn in PWA
-   standalone su iOS recenti (atteso OK da iOS 16+).
+Nessuna al momento: le tre della Fase 4 sono state risolte (vedi "Decisioni
+prese (Fase 4)").
+
+## Decisioni prese (Fase 4)
+
+- 2026-07-21 — Fase 4 espansa in 9 step su 3 blocchi. Scelte di Andrea prima
+  di iniziare:
+  - **PF al level up: media fissa** (+6 + mod COS a livello; coerente con come
+    è compilato Tharion oggi, nessuna casualità).
+  - **Livello: solo incrementabile di +1** col wizard guidato (niente campo di
+    impostazione diretta per ora; si potrà aggiungere in seguito).
+  - **Sottoclassi: solo Devozione** modellata in questa fase; gli altri
+    Giuramenti si aggiungono in seguito come puri dati.
 
 ## Decisioni prese (step 3.5)
 
