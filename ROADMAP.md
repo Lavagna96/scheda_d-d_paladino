@@ -233,10 +233,13 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       console pulita). Cache busting `?v=58`. **In attesa di commit + deploy.**
       Nota per 4.5: il sync a Firestore di questi dati scatta da solo (version 13 >
       remota) perché `syncManual` serializza l'intero documento classe.
-- [ ] 4.2 **Sottoclassi / Giuramenti** del Paladino (nuova sezione dati). Modellare
-      per prima **Devozione** (quella di Tharion) coi suoi privilegi ai liv. 3/7/15/20;
-      le altre man mano. Oggi `character.subclassName` è solo testo → diventerà un id
-      collegato a questi dati.
+- [x] 4.2 **Giuramento di Devozione** modellato (2026-07-21). Aggiunto
+      `classes.paladino.subclasses.devozione` (annidato → si sincronizza col
+      documento classe): `name`, `tenets`, `spellsByLevel` (incantesimi sempre
+      preparati a 3/5/9/13/17) e `features` (Arma Sacra 3, Aura di Devozione 7,
+      Punizione di Protezione 15, Nimbo Sacro 20). `manual.version` 13→14. Altre
+      sottoclassi in seguito come puri dati. Verificato (struttura + Tharion
+      identico, console pulita). Cache busting `?v=59`. Committato e deployato.
 - [ ] 4.3 **Catalogo talenti** nel manuale (nuova sezione): talenti generali (prereq.
       liv. 4+), talenti di Stile di Combattimento (Difesa/Duello già nel motore dalla
       Fase 3 — qui diventano dati completi), Doni Epici (liv. 19). Ogni talento: nome,

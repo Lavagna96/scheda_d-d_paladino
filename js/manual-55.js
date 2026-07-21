@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 13,
+  version: 14,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -173,6 +173,40 @@ window.MANUAL_55 = {
         asi: [4, 8, 12, 16],
         epicBoon: 19,
         extraAttack: 5
+      },
+      /* Sottoclassi (Giuramenti) — Step 4.2: per ora solo Devozione (scelta
+         dell'utente), le altre si aggiungono in seguito. Riassunti originali
+         in italiano, verificati sul PHB 2024. Non ancora consumati da
+         nessuna vista della scheda. */
+      subclasses: {
+        devozione: {
+          name: 'Giuramento di Devozione',
+          tenets: 'Che la tua parola sia una promessa. · Proteggi i deboli e non temere mai di agire. · Che le tue gesta onorevoli siano d\'esempio.',
+          // Incantesimi sempre preparati garantiti dal giuramento (nomi in
+          // italiano; il collegamento al grimorio è un passo successivo,
+          // qui sono solo dati).
+          spellsByLevel: {
+            3: ['Protezione dal Male e dal Bene', 'Scudo della Fede'],
+            5: ['Aiuto', 'Zona di Verità'],
+            9: ['Faro di Speranza', 'Dissolvi Magie'],
+            13: ['Libertà di Movimento', 'Guardiano della Fede'],
+            17: ['Comunione', 'Colpo Infuocato']
+          },
+          features: {
+            3: [
+              { name: 'Arma Sacra', desc: 'Quando compi l\'azione di Attacco, puoi spendere un uso di Incanalare Divinità per infondere energia positiva in un\'arma da mischia che impugni. Per 10 minuti (o finché non riusi questo privilegio), aggiungi il tuo modificatore di Carisma ai tiri per colpire con quell\'arma (minimo +1) e a ogni colpo scegli se infliggere il tipo di danno normale o danni Radiosi. L\'arma emette luce intensa entro 6 m e luce fioca per altri 6 m. Puoi terminare l\'effetto in anticipo (nessuna azione); termina anche se smetti di impugnare l\'arma.' }
+            ],
+            7: [
+              { name: 'Aura di Devozione', desc: 'Tu e i tuoi alleati siete immuni alla condizione Affascinato mentre siete nella tua Aura di Protezione. Se un alleato Affascinato entra nell\'aura, la condizione non ha effetto su di lui finché vi resta.' }
+            ],
+            15: [
+              { name: 'Punizione di Protezione', desc: 'Quando lanci Punizione Divina, tu e i tuoi alleati avete Copertura Parziale mentre siete nella tua Aura di Protezione. L\'aura conferisce questo beneficio fino all\'inizio del tuo prossimo turno.' }
+            ],
+            20: [
+              { name: 'Nimbo Sacro', desc: 'Azione bonus: infondi la tua Aura di Protezione di potere sacro per 10 minuti o finché non la termini (nessuna azione). Una volta usato, devi finire un riposo lungo prima di riusarlo, oppure puoi ripristinarne l\'uso spendendo uno slot di 5° livello. Benefici: Salvaguardia Sacra (vantaggio ai tiri salvezza imposti da Immondi o Non Morti); Danni Radiosi (un nemico che inizia il turno nell\'aura subisce danni Radiosi pari al tuo modificatore di Carisma più il tuo bonus di competenza); Luce Solare (l\'aura è piena di luce intensa considerata luce solare).' }
+            ]
+          }
+        }
       }
     },
     ranger: {
