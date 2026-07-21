@@ -251,11 +251,22 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       identico, console pulita). Cache busting `?v=60`. **In attesa di commit + deploy.**
       Il subagente ha esaurito il limite di sessione a fine lavoro: dati completati e
       verificati direttamente in sessione (bump versione + cache).
-- [ ] 4.4 **Sync Firestore delle nuove sezioni** (privilegi per livello, sottoclassi,
-      talenti) — estendere `syncManual()` in `cloud.js` come già fa per
-      spells/classes/species. Confermare che la regola Firestore `/manuals/{**}` sia
-      DAVVERO deployata (oggi il sync fallisce in silenzio se manca — vedi
-      [[manuale-55-architettura]]): con più dati conviene verificarlo esplicitamente.
+- [x] 4.4 **Sync Firestore delle nuove sezioni** — FATTO nel codice (2026-07-21, in
+      sessione diretta perché il subagente aveva esaurito il limite). `syncManual()`
+      in `cloud.js`: i talenti diventano la sottocollezione `manuals/5.5/feats/{id}`
+      (privilegi per livello e sottoclassi viaggiano già dentro i documenti classe,
+      annidati → sincronizzati con quelli). **Refactor importante colto al volo**: il
+      manuale ha ~393 incantesimi, quindi un singolo batch (ora 432 scritture)
+      sfiorava il limite Firestore di 500 → riscritto in blocchi da 400 committati in
+      sequenza, con la versione radice scritta per ultima a parte (avanza solo a sync
+      completato; un blocco fallito viene ritentato). Verificato: modulo si inizializza
+      senza errori, AppCloud attivo, login OK, console pulita. Cache busting `?v=61`.
+      **VERIFICA REALE ANCORA DA FARE (serve Andrea):** dopo il deploy, login sul sito
+      live → il sync parte (versione locale 15 > remota); poi confermare nella console
+      Firebase che esista `manuals/5.5/feats` con le 17 voci. Se NON compaiono, la
+      **regola Firestore** per i manuali non è attiva: aggiungere in Console → Firestore
+      → Regole `match /manuals/{document=**} { allow read, write: if request.auth != null; }`.
+      Il sync fallisce in silenzio (catch), quindi l'app funziona comunque dal file locale.
 
 **Blocco B — Fondamenta nella scheda**
 

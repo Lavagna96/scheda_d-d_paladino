@@ -138,14 +138,40 @@ import {
 
   /*
    * Manuale 5.5: mantiene su Firestore una copia del manuale
-   * (manuals/5.5 + sottocollezioni spells/classes/species). Il file locale
-   * js/manual-55.js è la fonte di verità: se la sua versione è più nuova
-   * di quella nel documento radice, tutto viene (ri)caricato in un batch.
+   * (manuals/5.5 + sottocollezioni spells/classes/species/feats). Il file
+   * locale js/manual-55.js è la fonte di verità: se la sua versione è più
+   * nuova di quella nel documento radice, tutto viene (ri)caricato.
+   * I privilegi per livello e le sottoclassi viaggiano dentro i documenti
+   * classe (annidati), quindi si sincronizzano con quelli; i talenti sono
+   * una sottocollezione a sé (feats), come classes/species.
    * Richiede nelle regole Firestore: match /manuals/{document=**}
    * { allow read, write: if request.auth != null; }
    */
   function plain(obj) {
     return JSON.parse(JSON.stringify(obj));
+  }
+
+  /* Il manuale ha ~400 incantesimi: un singolo batch sfiorerebbe il limite
+     Firestore di 500 scritture. Suddividiamo in blocchi (margine a 400) e li
+     committiamo in sequenza. La versione radice va scritta DOPO, a parte:
+     così avanza solo a sync completato e, se un blocco fallisce, resta
+     indietro e il prossimo accesso ritenta l'intero caricamento. */
+  var SYNC_CHUNK = 400;
+
+  function commitInChunks(writes) {
+    var chunks = [];
+    for (var i = 0; i < writes.length; i += SYNC_CHUNK) {
+      chunks.push(writes.slice(i, i + SYNC_CHUNK));
+    }
+
+    return chunks.reduce(function (prev, chunk) {
+      return prev.then(function () {
+        var batch = writeBatch(db);
+        chunk.forEach(function (w) { batch.set(w.ref, w.data); });
+
+        return batch.commit();
+      });
+    }, Promise.resolve());
   }
 
   /* Firestore non accetta array annidati: le tabelle slot (array di array)
@@ -172,29 +198,37 @@ import {
       if (manual.version <= remoteVersion) {
         return;
       }
-      var batch = writeBatch(db);
+      var writes = [];
       manual.spells.forEach(function (spell) {
-        batch.set(doc(db, 'manuals', '5.5', 'spells', spell.id), plain(spell));
+        writes.push({ ref: doc(db, 'manuals', '5.5', 'spells', spell.id), data: plain(spell) });
       });
       Object.keys(manual.classes).forEach(function (id) {
-        batch.set(doc(db, 'manuals', '5.5', 'classes', id), plain(manual.classes[id]));
+        writes.push({ ref: doc(db, 'manuals', '5.5', 'classes', id), data: plain(manual.classes[id]) });
       });
       Object.keys(manual.species).forEach(function (id) {
-        batch.set(doc(db, 'manuals', '5.5', 'species', id), plain(manual.species[id]));
+        writes.push({ ref: doc(db, 'manuals', '5.5', 'species', id), data: plain(manual.species[id]) });
       });
-      batch.set(rootRef, {
-        version: manual.version,
-        name: 'Player\'s Handbook 2024 (5.5)',
-        slotTables: {
-          full: slotTableAsMap(manual.slotTables.full),
-          half: slotTableAsMap(manual.slotTables.half),
-          pactSlots: plain(manual.slotTables.pactSlots),
-          pactSlotLevel: plain(manual.slotTables.pactSlotLevel)
-        },
-        updatedAt: serverTimestamp()
+      Object.keys(manual.feats || {}).forEach(function (id) {
+        writes.push({ ref: doc(db, 'manuals', '5.5', 'feats', id), data: plain(manual.feats[id]) });
       });
 
-      return batch.commit();
+      // Prima tutti i dati (in blocchi), poi la versione radice a parte.
+      return commitInChunks(writes).then(function () {
+        var rootBatch = writeBatch(db);
+        rootBatch.set(rootRef, {
+          version: manual.version,
+          name: 'Player\'s Handbook 2024 (5.5)',
+          slotTables: {
+            full: slotTableAsMap(manual.slotTables.full),
+            half: slotTableAsMap(manual.slotTables.half),
+            pactSlots: plain(manual.slotTables.pactSlots),
+            pactSlotLevel: plain(manual.slotTables.pactSlotLevel)
+          },
+          updatedAt: serverTimestamp()
+        });
+
+        return rootBatch.commit();
+      });
     }).catch(function () { /* regole non aggiornate o offline: ignora */ });
   }
 
