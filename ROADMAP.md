@@ -230,7 +230,7 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       subclassFeatureLevels:[3,7,15,20], asi:[4,8,12,16], epicBoon:19, extraAttack:5).
       `manual.version` 12→13. Tabelle numeriche esistenti intatte. Verificato due
       volte (struttura 1→20 con 13/17 vuoti + non-regressione: Tharion identico,
-      console pulita). Cache busting `?v=58`. **In attesa di commit + deploy.**
+      console pulita). Cache busting `?v=58`. Committato e deployato (`929a40e`).
       Nota per 4.5: il sync a Firestore di questi dati scatta da solo (version 13 >
       remota) perché `syncManual` serializza l'intero documento classe.
 - [x] 4.2 **Giuramento di Devozione** modellato (2026-07-21). Aggiunto
@@ -248,9 +248,9 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       (Vista Autentica). Catalogo iniziale estendibile. `manual.version` 14→15. Nota:
       "Robusto"/"Attaccante Selvaggio" scartati (talenti di Origine, non selezionabili
       agli ASI). Ogni voce: name/category/prereq/desc. Verificato (17 voci, Tharion
-      identico, console pulita). Cache busting `?v=60`. **In attesa di commit + deploy.**
-      Il subagente ha esaurito il limite di sessione a fine lavoro: dati completati e
-      verificati direttamente in sessione (bump versione + cache).
+      identico, console pulita). Cache busting `?v=60`. Committato e deployato
+      (`6a969be`). Il subagente ha esaurito il limite di sessione a fine lavoro:
+      dati completati e verificati direttamente in sessione (bump versione + cache).
 - [x] 4.4 **Sync Firestore delle nuove sezioni** — FATTO nel codice (2026-07-21, in
       sessione diretta perché il subagente aveva esaurito il limite). `syncManual()`
       in `cloud.js`: i talenti diventano la sottocollezione `manuals/5.5/feats/{id}`
@@ -261,6 +261,7 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       sequenza, con la versione radice scritta per ultima a parte (avanza solo a sync
       completato; un blocco fallito viene ritentato). Verificato: modulo si inizializza
       senza errori, AppCloud attivo, login OK, console pulita. Cache busting `?v=61`.
+      Committato e deployato (`57a4534`).
       **VERIFICA REALE ANCORA DA FARE (serve Andrea):** dopo il deploy, login sul sito
       live → il sync parte (versione locale 15 > remota); poi confermare nella console
       Firebase che esista `manuals/5.5/feats` con le 17 voci. Se NON compaiono, la
@@ -293,14 +294,22 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       quelle previste, in più le due card dinamiche mostrano il testo letteralmente
       identico a prima; test live CAR 16→18 aggiorna "Aura di Protezione" a "+4
       (CAR)..." SENZA reload, poi ripristinato; Lama Vincolante e Reliquie intatte
-      e funzionanti; console pulita. Cache busting `?v=62`. **In attesa di commit
-      + deploy.**
-- [ ] 4.6 **Scelte di livello nello stato del personaggio**. Nuovi campi in
-      `state.character` per registrare, e rendere riproducibili, le scelte: `subclassId`,
-      `feats[]`, distribuzione degli ASI, PF guadagnati per livello (o la regola PF
-      scelta). Migrazione dello stato attuale di Tharion (già liv. 7, Devozione, Duello,
-      Lama Vincolante come modifier) senza perdere nulla. Decidere la forma esatta prima
-      di scrivere.
+      e funzionanti; console pulita. Cache busting `?v=62`. Committato e deployato
+      (`6412d97`, run Pages verde, live verificato).
+- [x] 4.6 **Scelte di livello nello stato del personaggio** — FATTO (2026-07-21,
+      fatto direttamente, micro-ritocco). `subclassId` era già stato aggiunto in 4.5.
+      Aggiunti a `DEFAULT_STATE.character`: `feats: []` (talenti presi, `{id, level}`,
+      id da `manual.feats`) e `levelChoices: {}` (mappa livello → scelta fatta:
+      `{type:'asi', abilityDeltas:{...}}` oppure `{type:'feat', featId:'...'}`).
+      **Niente migrazione storica per Tharion**: i suoi punteggi attuali sono già il
+      risultato finale di scelte mai tracciate finora — non c'è nulla da ricostruire
+      a ritroso, i campi partono vuoti e si popolano dal prossimo level-up in poi
+      (la migrazione automatica esistente in `storage.js` li aggiunge già di default
+      via merge, nessun codice di migrazione nuovo necessario). PF non richiedono
+      alcun campo: restano una formula pura nel motore (media fissa), nessuno storico
+      da salvare. Verificato: campi presenti, non-regressione confermata (CA 20,
+      PF 60, TS CAR +9), console pulita. Cache busting `?v=63`. **In attesa di
+      commit + deploy.**
 
 **Blocco C — Il level-up**
 

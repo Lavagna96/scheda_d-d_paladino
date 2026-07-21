@@ -178,7 +178,14 @@ window.APP_CONFIG = {
       extraResources: [
         { key: 'shield', max: 1 }
       ],
-      items: [] // reliquie/oggetti magici creati dall'utente (Step 3.5) — js/items.js
+      items: [], // reliquie/oggetti magici creati dall'utente (Step 3.5) — js/items.js
+
+      /* Scelte di livello (Step 4.6). Non serve migrare uno storico per
+         Tharion: i suoi punteggi attuali sono già il risultato finale delle
+         scelte fatte finora (mai tracciate), non c'è nulla da ricostruire —
+         questi campi partono vuoti e si popolano dal prossimo level-up in poi. */
+      feats: [], // talenti presi: [{ id: 'sentinella', level: 4 }, ...] — id da manual.feats
+      levelChoices: {} // livello -> scelta fatta lì: { type: 'asi', abilityDeltas: {CAR:2} } oppure { type: 'feat', featId: 'sentinella' }
     },
     pools: { loh: 35, hp: 60, steedhp: 25, tempHp: 0 },
     spent: {},
