@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 14,
+  version: 15,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -1976,5 +1976,80 @@ window.MANUAL_55 = {
       classes: ['mago'],
       meta: 'Azione · Illimitata · 24 ore · V, S, M (un paio di anelli d\'argento collegati)',
       desc: 'Crei un legame telepatico tra te e una creatura volontaria che conosci, ovunque si trovi sullo stesso piano di esistenza (finisce se non siete più sullo stesso piano). Finché dura, potete scambiarvi istantaneamente parole, immagini, suoni e altri messaggi sensoriali attraverso il legame, e il bersaglio ti riconosce come l\'entità con cui comunica; l\'incantesimo gli permette di comprendere il significato di ciò che invii.' }
-  ]
+  ],
+
+  /* Catalogo talenti (Step 4.3) — mappa per id, come classes/species.
+     Selezione curata ed estendibile, riassunti originali in italiano,
+     verificati sul PHB 2024. Non ancora consumati da nessuna vista/motore
+     (il sync verso Firestore è lo Step 4.4, separato). */
+  feats: {
+    'stile-difesa': {
+      name: 'Difesa', category: 'stile', prereq: 'Talento di Stile di Combattimento',
+      desc: 'Mentre indossi un\'armatura (leggera, media o pesante), ottieni +1 alla Classe Armatura.'
+    },
+    'stile-duello': {
+      name: 'Duello', category: 'stile', prereq: 'Talento di Stile di Combattimento',
+      desc: 'Quando impugni un\'arma da mischia in una mano e nessun\'altra arma, ottieni +2 ai tiri per i danni con quell\'arma.'
+    },
+    'stile-arma-grande': {
+      name: 'Combattere con Arma Grande', category: 'stile', prereq: 'Talento di Stile di Combattimento',
+      desc: 'Quando tiri i danni di un attacco con un\'arma da mischia impugnata a due mani, puoi trattare come 3 ogni 1 o 2 ottenuto sui dadi del danno. L\'arma deve avere la proprietà A Due Mani o Versatile.'
+    },
+    'stile-protezione': {
+      name: 'Protezione', category: 'stile', prereq: 'Talento di Stile di Combattimento',
+      desc: 'Quando una creatura che vedi attacca un bersaglio diverso da te entro 1,5 m, puoi usare una reazione per interporre lo scudo (se lo impugni) e imporre svantaggio al tiro per colpire.'
+    },
+    'stile-tiro': {
+      name: 'Tiro', category: 'stile', prereq: 'Talento di Stile di Combattimento',
+      desc: 'Ottieni +2 ai tiri per colpire con le armi a distanza.'
+    },
+    'stile-cieca': {
+      name: 'Combattere alla Cieca', category: 'stile', prereq: 'Talento di Stile di Combattimento',
+      desc: 'Hai Vista Cieca con una portata di 3 m.'
+    },
+    'stile-intercettazione': {
+      name: 'Intercettazione', category: 'stile', prereq: 'Talento di Stile di Combattimento',
+      desc: 'Quando una creatura che vedi colpisce con un attacco un\'altra creatura entro 1,5 m da te, puoi usare una reazione per ridurre quel danno di 1d10 + il tuo bonus di competenza (devi impugnare uno scudo o un\'arma semplice o da guerra).'
+    },
+    'stile-arma-lancio': {
+      name: 'Combattere con Arma da Lancio', category: 'stile', prereq: 'Talento di Stile di Combattimento',
+      desc: 'Quando colpisci con un attacco a distanza usando un\'arma con la proprietà Da Lancio, ottieni +2 al tiro per i danni.'
+    },
+    'stile-due-armi': {
+      name: 'Combattere con Due Armi', category: 'stile', prereq: 'Talento di Stile di Combattimento',
+      desc: 'Quando fai un attacco extra grazie a un\'arma con la proprietà Leggera, puoi aggiungere il tuo modificatore di caratteristica al danno di quell\'attacco.'
+    },
+    'stile-senzarmi': {
+      name: 'Combattere Senz\'Armi', category: 'stile', prereq: 'Talento di Stile di Combattimento',
+      desc: 'Con un colpo senz\'armi puoi infliggere 1d6 danni contundenti (1d8 se non impugni armi né scudo). All\'inizio di ogni tuo turno puoi infliggere 1d4 contundenti a una creatura che tieni in presa.'
+    },
+    'aumento-caratteristica': {
+      name: 'Aumento di Caratteristica', category: 'generale', prereq: 'Livello 4+', asi: true,
+      desc: 'Aumenti un punteggio di caratteristica a scelta di 2, oppure due punteggi a scelta di 1 ciascuno. Non puoi superare 20 con questo talento.'
+    },
+    'maestro-armi-pesanti': {
+      name: 'Maestro d\'Armi Pesanti', category: 'generale', prereq: 'Livello 4+, Forza 13+',
+      desc: 'Aumenti Forza di 1 (max 20). Quando colpisci con un\'arma con la proprietà Pesante durante l\'azione di Attacco, infliggi danni extra pari al tuo bonus di competenza. Inoltre, subito dopo un colpo critico o dopo aver ridotto una creatura a 0 PF con un\'arma da mischia, puoi fare un attacco in mischia come azione bonus.'
+    },
+    'maestro-aste': {
+      name: 'Maestro d\'Aste', category: 'generale', prereq: 'Livello 4+, Forza o Destrezza 13+',
+      desc: 'Aumenti Forza o Destrezza di 1 (max 20). Subito dopo l\'azione di Attacco con un bastone ferrato, una lancia o un\'arma con proprietà Pesante e Portata, puoi usare un\'azione bonus per un attacco in mischia con l\'estremità opposta dell\'arma (danno d4). Inoltre una creatura che entra nella tua portata provoca un attacco di opportunità.'
+    },
+    sentinella: {
+      name: 'Sentinella', category: 'generale', prereq: 'Livello 4+, Forza o Destrezza 13+',
+      desc: 'Aumenti Forza o Destrezza di 1 (max 20). Quando una creatura entro 1,5 m compie l\'azione Disimpegno o colpisce un bersaglio diverso da te, puoi fare un attacco di opportunità contro di essa; quando la colpisci con un attacco di opportunità, la sua velocità diventa 0 per il resto del turno.'
+    },
+    'incantatore-guerra': {
+      name: 'Incantatore di Guerra', category: 'generale', prereq: 'Livello 4+, tratto da incantatore',
+      desc: 'Aumenti Intelligenza, Saggezza o Carisma di 1 (max 20). Hai vantaggio ai tiri salvezza su Costituzione per mantenere la concentrazione, puoi eseguire le componenti somatiche anche con armi o uno scudo nelle mani, e puoi lanciare un incantesimo come reazione al posto di un attacco di opportunità.'
+    },
+    'condottiero-ispiratore': {
+      name: 'Condottiero Ispiratore', category: 'generale', prereq: 'Livello 4+, Saggezza o Carisma 13+',
+      desc: 'Aumenti Saggezza o Carisma di 1 (max 20). Al termine di un riposo breve o lungo puoi tenere un discorso, un canto o una danza ispiratori: fino a sei creature che ti sentono e vedono ottengono punti ferita temporanei.'
+    },
+    'dono-vista-autentica': {
+      name: 'Dono della Vista Autentica', category: 'dono-epico', prereq: 'Livello 19+',
+      desc: 'Aumenti un punteggio di caratteristica a scelta di 1 (fino a un massimo di 30). Ottieni Vista Autentica con una portata di 18 m.'
+    }
+  }
 };

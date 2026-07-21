@@ -240,12 +240,17 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       Punizione di Protezione 15, Nimbo Sacro 20). `manual.version` 13→14. Altre
       sottoclassi in seguito come puri dati. Verificato (struttura + Tharion
       identico, console pulita). Cache busting `?v=59`. Committato e deployato.
-- [ ] 4.3 **Catalogo talenti** nel manuale (nuova sezione): talenti generali (prereq.
-      liv. 4+), talenti di Stile di Combattimento (Difesa/Duello già nel motore dalla
-      Fase 3 — qui diventano dati completi), Doni Epici (liv. 19). Ogni talento: nome,
-      prerequisito, riassunto. Dove un talento dà un bonus fisso (es. +1 a una
-      caratteristica, Maestro d'Armi), va modellato per agganciarsi ai `modifiers`/al
-      motore già esistenti; gli altri restano descrittivi (mostrati come tratto).
+- [x] 4.3 **Catalogo talenti** — FATTO (2026-07-21). Nuova sezione top-level `feats`
+      in `manual-55.js` (mappa per id come classes/species): 17 voci curate e
+      verificate sul PHB — 10 Stili di Combattimento, 6 Talenti generali (liv. 4+:
+      Aumento di Caratteristica con flag `asi:true`, Maestro d'Armi Pesanti, Maestro
+      d'Aste, Sentinella, Incantatore di Guerra, Condottiero Ispiratore), 1 Dono Epico
+      (Vista Autentica). Catalogo iniziale estendibile. `manual.version` 14→15. Nota:
+      "Robusto"/"Attaccante Selvaggio" scartati (talenti di Origine, non selezionabili
+      agli ASI). Ogni voce: name/category/prereq/desc. Verificato (17 voci, Tharion
+      identico, console pulita). Cache busting `?v=60`. **In attesa di commit + deploy.**
+      Il subagente ha esaurito il limite di sessione a fine lavoro: dati completati e
+      verificati direttamente in sessione (bump versione + cache).
 - [ ] 4.4 **Sync Firestore delle nuove sezioni** (privilegi per livello, sottoclassi,
       talenti) — estendere `syncManual()` in `cloud.js` come già fa per
       spells/classes/species. Confermare che la regola Firestore `/manuals/{**}` sia
