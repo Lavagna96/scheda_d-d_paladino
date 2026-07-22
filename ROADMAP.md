@@ -308,22 +308,60 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       via merge, nessun codice di migrazione nuovo necessario). PF non richiedono
       alcun campo: restano una formula pura nel motore (media fissa), nessuno storico
       da salvare. Verificato: campi presenti, non-regressione confermata (CA 20,
-      PF 60, TS CAR +9), console pulita. Cache busting `?v=63`. **In attesa di
-      commit + deploy.**
+      PF 60, TS CAR +9), console pulita. Cache busting `?v=63`. Committato e
+      deployato (`de7aea7`, run Pages verde).
 
 **Blocco C — Il level-up**
 
-- [ ] 4.7 **UX del level-up** — bottom sheet/wizard che al passaggio di livello mostra
-      i guadagni automatici e guida le scelte (subclasse al 3; ASI +2 / +1+1 vs talento;
-      PF secondo la regola scelta; nuovo Stile al 2; conteggi incantesimi/trucchetti).
-      3 proposte con preview prima di implementare.
-- [ ] 4.8 **Applicazione atomica** del level-up: applica il passaggio N→N+1 allo stato in
-      un colpo solo, il motore ricalcola tutti i derivati, sync cloud. Gestire anche il
-      caso "correzione" se si decide che il livello è impostabile e non solo incrementabile
-      (vedi Decisioni aperte).
-- [ ] 4.9 **Test**: percorso reale 7→8 di Tharion (verifica che PF, competenza,
-      Imposizione, slot, nuovi privilegi si aggiornino coerentemente) + simulazione 1→20
-      a tavolino. Commit + deploy finale della fase.
+- [x] 4.7 **UX del level-up decisa** (2026-07-21): tra 3 proposte con preview
+      (artifact: https://claude.ai/code/artifact/daceb757-d26b-4079-ac3f-97c893491779),
+      scelta la **A — Sheet unico a sezioni** (stesso pattern dei bottom sheet già
+      usati per editing/reliquie: guadagni automatici in alto, poi la scelta con
+      un interruttore, poi stepper/catalogo sotto).
+      **Da conservare per il futuro** (Fase 5, altre classi): il modello **C —
+      Checklist con progresso** (righe "✓ fatto" per i guadagni automatici + righe
+      toccabili per ogni scelta ancora aperta, barra "N di M completati") non è
+      stato scartato per demerito: è pensato apposta per i livelli con **più
+      scelte simultanee** (es. una classe che al livello X ha contemporaneamente
+      sottoclasse + incantesimi + ASI). Il Paladino non ha mai più di una scelta
+      per livello, quindi oggi non serve — ma quando si adatteranno altre classi
+      con livelli "affollati", riconsiderare C invece di forzare A a fare troppo
+      in una sola sezione lunga.
+- [x] 4.8 **Applicazione atomica** — FATTO (2026-07-21), implementato insieme al 4.7
+      (un wizard senza applicazione reale non si sarebbe potuto testare). Nuovo
+      `js/levelup.js`: bottone "Sali di Livello" nell'header, bottom sheet con
+      guadagni automatici ricalcolati DAL VIVO (`AppEngine.derive` su una bozza
+      di personaggio, mai sullo stato reale), sezione ASI-o-Talento con budget
+      vincolato (max 2 punti, max +2 su una sola caratteristica, tetto 20),
+      catalogo talenti (17 voci) selezionabile, righe di sola lettura per
+      sottoclasse/dono epico quando c'è una sola opzione disponibile (nota nel
+      codice su dove inserire un picker se in futuro le opzioni diventano più
+      di una). Conferma: livello + eventuali abilità/talento applicati,
+      `levelChoices`/`feats` registrati, **PF correnti aumentati della stessa
+      quantità del tetto** (non solo il tetto — regola vera del PHB, include il
+      bonus retroattivo di Costituzione se scelta come ASI), Imposizione delle
+      Mani lascia i PF correnti invariati (solo il tetto sale). Livello
+      impostabile SOLO tramite wizard, incrementale di +1 (nessun campo diretto,
+      come deciso).
+      **Verificato DUE volte** (subagente + controprova indipendente approfondita
+      in sessione, incluso un giro di debug che ha isolato un falso allarme:
+      un mio click via coordinate non era arrivato a segno, non un bug
+      dell'app — confermato ripetendo il test con click diretti sugli elementi
+      reali). Percorso 7→8 reale di Tharion: guadagni esatti "PF 60→68",
+      "Imposizione 35→40", "Dadi Ferita 7d10→8d10", nessun'altra riga; bonus
+      retroattivo di Costituzione confermato a parte (COS+2 con Tharion→ PF
+      60→76, verificato sia con `AppEngine.derive` diretto sia dentro il
+      wizard reale); conferma con CAR+2 → level 8, CAR 18, PF correnti 68,
+      Imposizione max 40/correnti 35, header e Aura di Protezione ("+4 CAR")
+      aggiornati senza reload; annulla scarta tutto; percorso Talento (livello
+      11→12 simulato) → Sentinella scelto, `feats`/`levelChoices` corretti;
+      riga Dono Epico auto-selezionata al 18→19, non bloccante; console pulita
+      in tutta la sessione; stato di Tharion ripristinato esattamente ai valori
+      reali (livello 7, CAR 16, feats/levelChoices vuoti) a fine test.
+      Cache busting `?v=64`. **In attesa di commit + deploy.**
+- [ ] 4.9 **Test**: simulazione 1→20 a tavolino (percorso 7→8 reale già fatto nel 4.8).
+      Commit + deploy finale della fase — sarà lo stesso commit del 4.7/4.8, dato che
+      sono stati implementati e verificati insieme.
 
 ### Fase 5 — Estensioni future (backlog, non pianificate in dettaglio)
 
