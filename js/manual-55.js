@@ -96,6 +96,17 @@ window.MANUAL_55 = {
       channelDivinity: [0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
       preparedByLevel: [0, 2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15],
       slotLevelByLevel: [0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5],
+      /* Risorse di classe dati-driven (Blocco 5.A, schema C): i valori che
+         dipendono SOLO dal livello vivono qui come dati (serializzabili →
+         Firestore); i bonus che scalano con una caratteristica stanno nel
+         registry CLASS_BONUSES di js/engine.js. 'pool' = riserva spendibile
+         (come i PF), 'uses' = res-card a ricarica. */
+      classResources: {
+        loh: { name: 'Imposizione delle Mani', kind: 'pool',
+               byLevel: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100] },
+        smitefree: { name: 'Punizione Divina (gratis)', kind: 'uses', from: 2, max: 1 },
+        steedfree: { name: 'Evoca Destriero (gratis)', kind: 'uses', from: 5, max: 1 }
+      },
       /* Privilegi per livello (Step 4.1, per il futuro wizard di Level Up —
          Step 4.5): riassunti originali in italiano, verificati sul PHB 2024.
          Non ancora consumati da nessuna vista della scheda. */

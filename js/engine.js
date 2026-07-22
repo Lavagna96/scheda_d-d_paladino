@@ -57,6 +57,17 @@
     piastre: { label: 'Piastre', baseAc: 18, dexCap: 0 }
   };
 
+  /* Bonus/valori di classe che scalano con una caratteristica o hanno logica:
+     vivono nel motore (Fase 0: le formule del PHB stanno qui), NON nei dati.
+     Le tabelle puramente per-livello stanno invece in klass.classResources
+     (js/manual-55.js). ability = punteggio da cui scala; min = pavimento. */
+  var CLASS_BONUSES = {
+    paladino: {
+      aura: { from: 6, target: 'ts', ability: 'CAR', min: 1 },  // Aura di Protezione
+      sacredWeapon: { ability: 'CAR', min: 1 }                  // Arma Sacra (Devozione)
+    }
+  };
+
   function abilityMod(score) {
     return Math.floor((score - 10) / 2);
   }
@@ -99,6 +110,18 @@
     return '1d10';
   }
 
+  /* Max di una risorsa di classe dai dati (klass.classResources): tabella
+     byLevel oppure { from, max } costante. Ritorna 0 se non attiva al livello. */
+  function resMax(def, level) {
+    if (!def) { return 0; }
+    if (def.byLevel) { return def.byLevel[level] || 0; }
+    if (typeof def.max === 'number') {
+      return (def.from && level < def.from) ? 0 : def.max;
+    }
+
+    return 0;
+  }
+
   function derive(ch) {
     var manual = window.MANUAL_55 || { classes: {}, slotTables: {} };
     var klass = manual.classes[ch.classId] || {};
@@ -109,8 +132,11 @@
       mods[k] = abilityMod(ch.abilities[k]);
     });
 
-    var isPaladin = ch.classId === 'paladino';
-    var auraBonus = (isPaladin && ch.level >= 6) ? Math.max(1, mods.CAR) : 0;
+    var classRes = klass.classResources || {};
+    var bonuses = CLASS_BONUSES[ch.classId] || {};
+    var auraDef = bonuses.aura;
+    var auraBonus = (auraDef && ch.level >= auraDef.from)
+      ? Math.max(auraDef.min || 0, mods[auraDef.ability]) : 0;
     var auraRangeM = ch.level >= 18 ? 9 : 3;
 
     var abilities = ABILITY_ORDER.map(function (k) {
@@ -173,7 +199,7 @@
 
     var poolMax = {
       hp: hpMax,
-      loh: isPaladin ? 5 * ch.level : 0,
+      loh: resMax(classRes.loh, ch.level),
       steedhp: 5 + 10 * (ch.steedSlotLevel || 2),
       tempHp: 0
     };
@@ -197,12 +223,17 @@
         resources.push({ key: 'flight', max: 1 });
       }
     }
-    if (isPaladin && ch.level >= 2) {
-      resources.push({ key: 'smitefree', max: 1 });
-    }
-    if (isPaladin && ch.level >= 5) {
-      resources.push({ key: 'steedfree', max: 1 });
-    }
+    /* Risorse di classe a "usi" (res-card) dai dati, nell'ordine dichiarato;
+       i 'pool' (es. Imposizione delle Mani) non sono res-card: vanno in poolMax. */
+    Object.keys(classRes).forEach(function (key) {
+      var def = classRes[key];
+      if (def.kind === 'uses') {
+        var max = resMax(def, ch.level);
+        if (max > 0) {
+          resources.push({ key: key, max: max });
+        }
+      }
+    });
     slots.forEach(function (n, i) {
       resources.push({ key: 'sl' + (i + 1), max: n });
     });
@@ -219,7 +250,8 @@
     var weaponHit = mods.FOR + pb + modSum(ch, 'attacco');
     var weaponDmgBonus = mods.FOR + modSum(ch, 'danni') +
                          (ch.fightingStyle === 'duello' ? 2 : 0);
-    var sacredWeaponBonus = Math.max(1, mods.CAR);
+    var swDef = bonuses.sacredWeapon;
+    var sacredWeaponBonus = swDef ? Math.max(swDef.min || 0, mods[swDef.ability]) : 0;
 
     return {
       name: ch.name,

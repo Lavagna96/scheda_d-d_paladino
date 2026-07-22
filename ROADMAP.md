@@ -392,10 +392,16 @@ invariato e fa da test di non-regressione a ogni passo.
 **Blocco 5.A — Generalizzazione motore + wizard**
 *(una volta sola, guidata dalla 1ª classe nuova; Paladino invariato e verificato a ogni step)*
 
-- [ ] 5.A.1 Motore **dati-driven** per risorse/bonus di classe: spostare nel
-      manuale (es. `classResources`/`classBonuses` per livello) ciò che oggi
-      `isPaladin` cabla (Aura, Imposizione Mani, Smite/Destriero gratis, Arma
-      Sacra), portandoci dentro il Paladino così com'è.
+- [x] 5.A.1 Motore **dati-driven** per risorse/bonus di classe — FATTO
+      (2026-07-22). `paladino.classResources` nel manuale (Imposizione Mani come
+      `pool` con tabella 1→20; Punizione/Destriero gratis come `uses` con
+      `from`/`max`) + registry `CLASS_BONUSES` in `engine.js` per i bonus che
+      scalano con una caratteristica (Aura di Protezione, Arma Sacra). `isPaladin`
+      eliminato del tutto; nuovo helper `resMax()`. Verificato: Tharion
+      byte-identico (CA 20, TS CAR +9/SAG +6, CD 15, att.inc +7, PF 60,
+      Imposizione 35, Aura +3/3m, +8/1d8+7, Arma Sacra +3, ordine risorse
+      invariato), console pulita, sintassi OK. Cache busting `?v=65`. Committato
+      in locale (deploy rimandato).
 - [ ] 5.A.2 CA senza armatura **alternativa** come dato di classe (Barbaro
       10+DES+COS; poi Monaco 10+DES+SAG), non formula fissa.
 - [ ] 5.A.3 Abilità d'attacco arma (FOR vs DES) scelta dall'arma/agile, non FOR fisso.
@@ -484,6 +490,16 @@ Della **Fase 5** (da sciogliere al blocco giusto; raccomandazione già annotata)
     prima, poi half, poi full, poi pact).
   - **Multiclasse** spostata a una **Fase 6** dedicata dopo la Fase 5 (resta
     fuori scope per ora, non più elencata dentro la Fase 5).
+
+- 2026-07-22 — Blocco 5.A, schema risorse/bonus di classe: scelto lo **schema C
+  (ibrido)** tra 3 proposte — i numeri che dipendono solo dal livello vivono come
+  dati nel manuale (`classResources`), lo scaling da caratteristiche/logica nel
+  motore (`CLASS_BONUSES`). Coerente con la Fase 0 (formule in `engine.js`) e
+  interamente serializzabile su Firestore.
+
+- 2026-07-22 — Workflow commit: **un commit per ogni step** (in locale), per uno
+  storico granulare e più facile da analizzare (git bisect/blame). Il deploy
+  (push) resta da chiedere a parte, come da CLAUDE.md.
 
 ## Decisioni prese (Fase 4)
 
