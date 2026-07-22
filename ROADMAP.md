@@ -9,22 +9,21 @@
 
 ## Dove siamo
 
-- **Ultimo aggiornamento:** 2026-07-21
+- **Ultimo aggiornamento:** 2026-07-22
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
   GitHub Pages, ultimo commit `ace8167` (wizard di level-up, che chiude la
   Fase 4). L'intera visione originale (login, dashboard multi-personaggio,
   editing, oggetti magici, level-up guidato per il Paladino) è realizzata e
   funzionante. Login e Face ID collaudati da Andrea su iPhone reale.
-- **Prossimo passo:** nessuna fase obbligata in coda — restano solo la
-  **Fase 5** (backlog: level-up per le altre 11 classi, creazione guidata di
-  un personaggio da zero, multiclasse — tutte esplicitamente non pianificate
-  in dettaglio) e due collaudi mai confermati esplicitamente: sync
-  multi-device tra due dispositivi con lo stesso account, e la verifica nella
-  console Firebase che `manuals/5.5/feats` sia arrivato davvero su Firestore
-  (step 4.4 — il sync fallisce in silenzio se la regola non è deployata, vedi
-  quello step per la riga di regola da aggiungere). Da qui in poi: aspettare
-  input di Andrea su cosa affrontare (rifiniture estetiche già rimandate di
-  proposito — icone reliquie, Maestria nelle Armi generica — oppure la Fase 5).
+  **La Fase 5 è ora pianificata in dettaglio (2026-07-22):** vedi la sua
+  sezione qui sotto e "Decisioni prese (Fase 5)".
+- **Prossimo passo:** iniziare il **Blocco 5.A** (generalizzazione di motore e
+  wizard) insieme alla **1ª classe nuova, il Barbaro**, tenendo il Paladino
+  come test di non-regressione. Restano in coda due collaudi mai confermati
+  esplicitamente: sync multi-device tra due dispositivi con lo stesso account,
+  e la verifica nella console Firebase che `manuals/5.5/feats` sia arrivato
+  davvero su Firestore (step 4.4 — il sync fallisce in silenzio se la regola
+  non è deployata, vedi quello step per la riga di regola da aggiungere).
 
 ---
 
@@ -366,18 +365,125 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       Commit + deploy finale della fase — sarà lo stesso commit del 4.7/4.8, dato che
       sono stati implementati e verificati insieme.
 
-### Fase 5 — Estensioni future (backlog, non pianificate in dettaglio)
+### Fase 5 — Tutte le classi + creazione di un personaggio da zero
 
-- [ ] Level up per le altre 11 classi (il motore e la UX di Fase 4 devono già nascere generici).
-- [ ] Creazione guidata di un personaggio nuovo da zero (qualsiasi classe/specie del manuale).
-- [ ] Multiclasse (esplicitamente fuori scope per ora).
+*Il punto 1 (level-up altre classi) e il punto 2 (creazione da zero) della
+visione. Il multiclasse (punto 3) è trattato a parte nella Fase 6, dopo questa.*
+
+**Approccio deciso (2026-07-22):** verticale, una classe alla volta **dalla
+più semplice ma tutte**, ognuna portata end-to-end come è oggi il Paladino
+(dati manuale → motore → tratti → level-up → creabile), con verifica e commit
+**per classe**. Il **Paladino è il modello di riferimento** già completo: resta
+invariato e fa da test di non-regressione a ogni passo.
+
+**Stato di genericità del codice (verificato il 2026-07-22):**
+
+| Pezzo | Generico? | Nota |
+|---|---|---|
+| `manual-55.js` dati base 12 classi | ✅ | hitDie/saves/casterType/spellAbility per tutte; slotTables full/half/pact condivise |
+| `manual-55.js` progressione 1→20 | ❌ | Solo Paladino ha levelFeatures/choicePoints/subclasses; le altre 11 solo dati base |
+| `engine.js` numeri base | ✅ | mod, PB, TS, abilità, CA, slot, PF, CD/att. incantesimi derivati da `klass.*` |
+| `engine.js` privilegi | ❌ | `isPaladin` cabla Aura/Imposizione/Smite/Destriero; Arma Sacra fissa; attacco arma su FOR fisso |
+| `traits.js` | ✅ | card dal manuale via template `{{...}}` + 2 formule speciali Paladino |
+| `levelup.js` | ⚠️ | choicePoints/ASI generici; stili hardcoded, niente scelte multiple/incantesimi/competenze |
+| `config.js` DEFAULT_STATE + STEED/SWORD_TIERS/FEATURES/SPELLS | ❌ | ancora interamente Tharion |
+| Creazione nuovo PG | ❌ | segnaposto "presto" nella dashboard |
+
+**Blocco 5.A — Generalizzazione motore + wizard**
+*(una volta sola, guidata dalla 1ª classe nuova; Paladino invariato e verificato a ogni step)*
+
+- [ ] 5.A.1 Motore **dati-driven** per risorse/bonus di classe: spostare nel
+      manuale (es. `classResources`/`classBonuses` per livello) ciò che oggi
+      `isPaladin` cabla (Aura, Imposizione Mani, Smite/Destriero gratis, Arma
+      Sacra), portandoci dentro il Paladino così com'è.
+- [ ] 5.A.2 CA senza armatura **alternativa** come dato di classe (Barbaro
+      10+DES+COS; poi Monaco 10+DES+SAG), non formula fissa.
+- [ ] 5.A.3 Abilità d'attacco arma (FOR vs DES) scelta dall'arma/agile, non FOR fisso.
+- [ ] 5.A.4 Wizard: stili di combattimento dal manuale, guadagni automatici
+      generici (via il `classId==='paladino'`), label risorse generiche.
+- [ ] 5.A.5 Render (`stats`/`sheet`): label risorse e card 100% dal manuale,
+      zero stringhe Paladino residue.
+
+**Blocco 5.B — Creazione di un personaggio da zero**
+*(il punto 2; parte quando esistono ≥2 classi generiche, così il selettore ha senso)*
+
+- [ ] 5.B.1 UX del flusso a passi (3 proposte + preview): specie → classe →
+      punteggi → competenze → equipaggiamento → sottoclasse/incantesimi se dovuti.
+- [ ] 5.B.2 Genera un `character` valido e **vuoto** (nessun residuo Tharion) →
+      nuovo documento Firestore → compare in dashboard.
+- [ ] 5.B.3 Ripulire `config.js`: STEED/SWORD_TIERS/FEATURES/SPELLS da globali
+      di Tharion a dati del personaggio.
+
+**Blocco 5.C — Le classi, una alla volta**
+*(stesso pacchetto ripetibile, dati dal PDF PHB 2024 locale, riassunti IT originali — mai testo integrale)*
+
+Pacchetto di 5 step per **ogni** classe:
+- **n.1** Privilegi 1→20 dal PDF → `levelFeatures`, `choicePoints`, flag `trait`.
+- **n.2** Meccaniche uniche nel motore (risorse/bonus specifici).
+- **n.3** Almeno 1 sottoclasse come dati (le altre dopo).
+- **n.4** Incantesimi se caster (noti/preparati/cantrip) + scelta nel wizard/creazione.
+- **n.5** Verifica (creazione liv 1 + level-up 1→20 a tavolino + Paladino non
+  regredito) → sync Firestore → commit/deploy.
+
+Ordine (dalla più semplice; le meccaniche sono i "titoli" per dimensionare il
+lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
+
+1. [ ] **Barbaro** (no caster) — Furia, Difesa Senz'Armatura. Porta con sé il Blocco 5.A.
+2. [ ] **Guerriero** (no caster) — stili extra, ASI a 6/14, attacchi extra multipli, Azione Impetuosa, Recuperare Energie.
+3. [ ] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
+4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
+5. [ ] **Ranger** (half-caster) — riusa gli slot half del Paladino; incantesimi noti, Nemico Prescelto.
+6. [ ] **Chierico** (full) — Incanalare Divinità (campo già esiste), Dominio.
+7. [ ] **Druido** (full) — Forma Selvatica, Circolo.
+8. [ ] **Bardo** (full) — Ispirazione Bardica, Collegio.
+9. [ ] **Stregone** (full) — Punti Stregoneria, Metamagia.
+10. [ ] **Mago** (full) — libro incantesimi, Recupero Arcano, Tradizione.
+11. [ ] **Warlock** (pact) — slot pact (già in tabella), Invocazioni, Suppliche, Patto.
+
+**Sequenza dei blocchi:** 5.A + Barbaro insieme → 5.B creazione → poi 5.C dalla 2 alla 11.
+
+### Fase 6 — Multiclasse (backlog, dopo la Fase 5)
+
+*Esplicitamente fuori scope per ora: si affronta solo a Fase 5 completata.*
+Moltiplica la complessità di motore e wizard (slot da incantatore combinati,
+requisiti di punteggio minimo per entrare/uscire, privilegi presi da più classi,
+un solo bonus di competenza condiviso) e va pianificata in dettaglio a suo tempo,
+come è stato fatto per la Fase 5.
+
+- [ ] Multiclasse secondo le regole del PHB 2024 (da dettagliare quando si arriva).
 
 ---
 
 ## Decisioni aperte
 
-Nessuna al momento: le tre della Fase 4 sono state risolte (vedi "Decisioni
-prese (Fase 4)").
+Della **Fase 5** (da sciogliere al blocco giusto; raccomandazione già annotata):
+
+1. **Creazione, livello di partenza** — livello 1 fisso (poi si sale col wizard)
+   vs livello arbitrario. → *Racc: livello 1*, riusa tutto il level-up.
+2. **Metodo punteggi** — point-buy / standard array / manuale. → *Racc: offrirli
+   tutti e 3, default point-buy.*
+3. **Meccaniche uniche: quanto dati-driven** vs codice per classe. → *Racc:
+   dati-driven per risorse/bonus numerici; codice minimo solo per le formule
+   davvero peculiari (es. Forma Selvatica).*
+4. **Wizard su livelli "affollati"** — adottare il modello **C "checklist con
+   progresso"** (previsto e messo da parte in 4.7) quando una classe ha più
+   scelte nello stesso livello, invece di forzare lo sheet unico.
+
+## Decisioni prese (Fase 5)
+
+- 2026-07-22 — Pianificazione Fase 5 (analisi del codice + scelte di Andrea):
+  - **Approccio verticale**: una classe alla volta, portata end-to-end come il
+    Paladino, con verifica e commit per classe (scartati "orizzontale — prima
+    tutta l'infrastruttura" e "solo dati manuale").
+  - **Ampiezza**: tutte le 11 classi mancanti, ma **una alla volta dalle più
+    semplici**, in step ben divisi.
+  - **Paladino = riferimento** già completo, non una pilota da rifare: fa da
+    modello e da test di non-regressione a ogni passo.
+  - **Ordine per complessità crescente**: Barbaro → Guerriero → Ladro → Monaco
+    → Ranger → Chierico → Druido → Bardo → Stregone → Mago → Warlock (no-caster
+    prima, poi half, poi full, poi pact).
+  - **Multiclasse** spostata a una **Fase 6** dedicata dopo la Fase 5 (resta
+    fuori scope per ora, non più elencata dentro la Fase 5).
 
 ## Decisioni prese (Fase 4)
 
