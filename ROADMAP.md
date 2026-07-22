@@ -10,19 +10,21 @@
 ## Dove siamo
 
 - **Ultimo aggiornamento:** 2026-07-21
-- **Stato:** Fasi 0, 1, 2, 3 (editing + step 3.5 oggetti magici) tutte
-  **committate e DEPLOYATE** su GitHub Pages, ultimo commit `f91dc85`.
-  Login e Face ID già collaudati da Andrea su iPhone reale (con relativo
-  fix del cancello di login su rete lenta, commit `ae3ef6e`).
-- **Prossimo passo:** **Fase 4 — Level Up Paladino**, ora espansa in 9 step
-  su 3 blocchi (dati del manuale + sync DB → fondamenta nella scheda →
-  flusso di level-up). Da aprire risolvendo le 3 Decisioni aperte qui sotto
-  (PF al level up, livello impostabile o solo incrementabile, ambito
-  sottoclassi), poi step 4.1 (privilegi per livello 1→20 dal PHB).
-  Nota: le nuove sezioni del manuale (privilegi per livello, sottoclassi,
-  talenti) vanno salvate anche su Firestore come già razze/classi/incantesimi
-  (step 4.4). Collaudo residuo mai confermato: sync multi-device tra due
-  dispositivi con lo stesso account.
+- **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
+  GitHub Pages, ultimo commit `ace8167` (wizard di level-up, che chiude la
+  Fase 4). L'intera visione originale (login, dashboard multi-personaggio,
+  editing, oggetti magici, level-up guidato per il Paladino) è realizzata e
+  funzionante. Login e Face ID collaudati da Andrea su iPhone reale.
+- **Prossimo passo:** nessuna fase obbligata in coda — restano solo la
+  **Fase 5** (backlog: level-up per le altre 11 classi, creazione guidata di
+  un personaggio da zero, multiclasse — tutte esplicitamente non pianificate
+  in dettaglio) e due collaudi mai confermati esplicitamente: sync
+  multi-device tra due dispositivi con lo stesso account, e la verifica nella
+  console Firebase che `manuals/5.5/feats` sia arrivato davvero su Firestore
+  (step 4.4 — il sync fallisce in silenzio se la regola non è deployata, vedi
+  quello step per la riga di regola da aggiungere). Da qui in poi: aspettare
+  input di Andrea su cosa affrontare (rifiniture estetiche già rimandate di
+  proposito — icone reliquie, Maestria nelle Armi generica — oppure la Fase 5).
 
 ---
 
@@ -358,7 +360,8 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       riga Dono Epico auto-selezionata al 18→19, non bloccante; console pulita
       in tutta la sessione; stato di Tharion ripristinato esattamente ai valori
       reali (livello 7, CAR 16, feats/levelChoices vuoti) a fine test.
-      Cache busting `?v=64`. **In attesa di commit + deploy.**
+      Cache busting `?v=64`. Committato e deployato (`ace8167`, run Pages
+      verde, live verificato).
 - [ ] 4.9 **Test**: simulazione 1→20 a tavolino (percorso 7→8 reale già fatto nel 4.8).
       Commit + deploy finale della fase — sarà lo stesso commit del 4.7/4.8, dato che
       sono stati implementati e verificati insieme.
