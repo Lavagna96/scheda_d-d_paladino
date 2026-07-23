@@ -112,9 +112,12 @@
 
   /* Max di una risorsa di classe dai dati (klass.classResources): tabella
      byLevel oppure { from, max } costante. Ritorna 0 se non attiva al livello. */
-  function resMax(def, level) {
+  function resMax(def, level, klass) {
     if (!def) { return 0; }
-    if (def.byLevel) { return def.byLevel[level] || 0; }
+    /* byLevel = tabella propria; byLevelRef = nome di una tabella già presente
+       sulla classe (es. 'rages' del Barbaro), per non duplicare i numeri. */
+    var table = def.byLevel || (def.byLevelRef && klass && klass[def.byLevelRef]);
+    if (table) { return table[level] || 0; }
     if (typeof def.max === 'number') {
       return (def.from && level < def.from) ? 0 : def.max;
     }
@@ -202,7 +205,7 @@
 
     var poolMax = {
       hp: hpMax,
-      loh: resMax(classRes.loh, ch.level),
+      loh: resMax(classRes.loh, ch.level, klass),
       steedhp: 5 + 10 * (ch.steedSlotLevel || 2),
       tempHp: 0
     };
@@ -231,7 +234,7 @@
     Object.keys(classRes).forEach(function (key) {
       var def = classRes[key];
       if (def.kind === 'uses') {
-        var max = resMax(def, ch.level);
+        var max = resMax(def, ch.level, klass);
         if (max > 0) {
           resources.push({ key: key, max: max });
         }

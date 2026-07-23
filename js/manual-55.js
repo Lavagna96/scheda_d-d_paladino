@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 16,
+  version: 17,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -39,7 +39,86 @@ window.MANUAL_55 = {
       casterType: 'none',
       rages: [0, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6],
       rageDamage: [0, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4],
-      weaponMastery: [0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+      weaponMastery: [0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      unarmoredDefense: 'COS', // CA senza armatura = 10 + DES + COS (Blocco 5.A.2)
+      classResources: {
+        furia: { name: 'Furia', kind: 'uses', byLevelRef: 'rages' }
+      },
+      choicePoints: {
+        subclass: 3, subclassFeatureLevels: [3, 6, 10, 14],
+        asi: [4, 8, 12, 16], epicBoon: 19, extraAttack: 5
+      },
+      /* Privilegi per livello 1→20 (Fase 5, step Barbaro): riassunti originali in
+         italiano, verificati sul PHB 2024 (PDF locale, p.50-52). trait:false =
+         già mostrato altrove (risorsa Furia a parte, o scelta gestita dal wizard). */
+      levelFeatures: {
+        1: [
+          { name: 'Furia', desc: 'Come azione bonus (se non indossi armatura pesante) entri in Furia, per un numero di usi pari alla colonna Furie; ne recuperi uno col riposo breve e tutti col riposo lungo. Mentre è attiva: resistenza ai danni contundenti, perforanti e taglienti; bonus ai danni quando attacchi con la Forza; vantaggio a prove e TS di Forza; non puoi concentrarti né lanciare incantesimi. Dura fino alla fine del tuo prossimo turno e la prolunghi (fino a 10 minuti) attaccando, forzando un TS o con un\'azione bonus.' },
+          { name: 'Difesa senza Armatura', desc: 'Quando non indossi alcuna armatura, la tua CA base è 10 + modificatore di Destrezza + modificatore di Costituzione. Puoi comunque impugnare uno scudo.' },
+          { name: 'Maestria nelle Armi', desc: 'Puoi usare la proprietà di maestria di due tipi di arma da mischia Semplici o da Guerra a tua scelta; col crescere del livello aumentano i tipi utilizzabili. Al riposo lungo puoi cambiare le armi scelte.' }
+        ],
+        2: [
+          { name: 'Percezione del Pericolo', desc: 'Hai vantaggio ai tiri salvezza di Destrezza, a meno che tu non sia Incapacitato.' },
+          { name: 'Attacco Sconsiderato', desc: 'Al primo attacco del tuo turno puoi decidere di attaccare in modo sconsiderato: ottieni vantaggio ai tiri per colpire basati sulla Forza fino all\'inizio del tuo prossimo turno, ma nel frattempo gli attacchi contro di te hanno vantaggio.' }
+        ],
+        3: [
+          { name: 'Sottoclasse del Barbaro', trait: false, desc: 'Scegli un Cammino (Berserker, Cuore Selvaggio, Albero del Mondo o Zelota). Ottieni i suoi privilegi al tuo livello da barbaro o inferiore.' },
+          { name: 'Conoscenza Primordiale', desc: 'Ottieni competenza in un\'altra abilità dalla lista del barbaro. Inoltre, mentre sei in Furia, puoi effettuare come prove di Forza le prove di Acrobazia, Intimidire, Percezione, Furtività o Sopravvivenza.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        5: [
+          { name: 'Attacco Extra', trait: false, desc: 'Puoi attaccare due volte, invece di una, ogni volta che compi l\'azione di Attacco nel tuo turno.' },
+          { name: 'Movimento Veloce', desc: 'La tua velocità aumenta di 3 metri quando non indossi armatura pesante.' }
+        ],
+        6: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio del tuo Cammino (dipende dalla sottoclasse scelta).' }
+        ],
+        7: [
+          { name: 'Istinto Ferino', desc: 'Hai vantaggio ai tiri di iniziativa.' },
+          { name: 'Balzo Istintivo', desc: 'Come parte dell\'azione bonus con cui entri in Furia, puoi muoverti fino a metà della tua velocità.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        9: [
+          { name: 'Colpo Brutale', desc: 'Se usi Attacco Sconsiderato, puoi rinunciare al vantaggio su un tiro per colpire basato sulla Forza: se colpisci, infliggi 1d10 danni extra dello stesso tipo e applichi un effetto di Colpo Brutale (Colpo Forzato: spingi il bersaglio di 4,5 m; Colpo Menomante: ne riduci la velocità di 4,5 m).' }
+        ],
+        10: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio del tuo Cammino.' }
+        ],
+        11: [
+          { name: 'Furia Implacabile', desc: 'Se scendi a 0 PF mentre sei in Furia e non muori sul colpo, puoi fare un TS di Costituzione CD 10: se lo superi, i tuoi PF diventano pari al doppio del tuo livello da barbaro. La CD sale di 5 a ogni uso successivo e si azzera dopo un riposo breve o lungo.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        13: [
+          { name: 'Colpo Brutale Migliorato', desc: 'Nuovi effetti di Colpo Brutale: Colpo Stordente (il bersaglio ha svantaggio al prossimo TS e non può fare attacchi di opportunità) e Colpo Devastante (il prossimo attacco di un\'altra creatura contro il bersaglio ha +5).' }
+        ],
+        14: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio del tuo Cammino.' }
+        ],
+        15: [
+          { name: 'Furia Persistente', desc: 'Quando tiri l\'iniziativa puoi recuperare tutti gli usi di Furia (una volta per riposo lungo). Inoltre la Furia dura 10 minuti senza bisogno di mantenerla e termina solo se sei Privo di Sensi o indossi armatura pesante.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        17: [
+          { name: 'Colpo Brutale Migliorato', desc: 'I danni extra del Colpo Brutale salgono a 2d10 e puoi applicare due effetti di Colpo Brutale diversi con lo stesso colpo.' }
+        ],
+        18: [
+          { name: 'Potenza Indomabile', desc: 'Se il totale di una prova o TS di Forza è inferiore al tuo punteggio di Forza, puoi usare il punteggio al posto del totale.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono dell\'Offesa Irresistibile) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Campione Primordiale', desc: 'Incarni la potenza primordiale: i tuoi punteggi di Forza e Costituzione aumentano di 4, fino a un massimo di 25.' }
+        ]
+      }
     },
     bardo: {
       name: 'Bardo', hitDie: 'd8', primaryAbility: 'CAR', saves: ['DES', 'CAR'],

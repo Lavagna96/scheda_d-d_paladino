@@ -441,6 +441,12 @@ Ordine (dalla più semplice; le meccaniche sono i "titoli" per dimensionare il
 lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
 
 1. [ ] **Barbaro** (no caster) — Furia, Difesa Senz'Armatura. Porta con sé il Blocco 5.A.
+   → *step b FATTO (2026-07-22):* privilegi 1→20 dal PDF (p.50-52, riassunti IT),
+   `classResources.furia` (via `byLevelRef:'rages'`, nessuna duplicazione),
+   `unarmoredDefense:'COS'`, `choicePoints`. Verificato con `derive` (Furia
+   2/3/5/6 ai liv 1/5/12/20, CA 15 senz'armatura, Tharion invariato), manuale
+   `version` 16→17. *Restano:* meccaniche runtime, 1 sottoclasse (Berserker) e
+   generalizzazione wizard/label (step c), poi creazione (5.B).
 2. [ ] **Guerriero** (no caster) — stili extra, ASI a 6/14, attacchi extra multipli, Azione Impetuosa, Recuperare Energie.
 3. [ ] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
 4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
