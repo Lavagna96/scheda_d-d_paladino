@@ -179,7 +179,10 @@
       }
       ac = armor.baseAc + armorDexBonus;
     } else {
-      ac = 10 + mods.DES;
+      /* CA senza armatura alternativa (Blocco 5.A.2): alcune classi sostituiscono
+         la formula base con 10 + DES + una loro caratteristica (Barbaro: COS,
+         Monaco: SAG). Il dato vive in klass.unarmoredDefense (js/manual-55.js). */
+      ac = 10 + mods.DES + (klass.unarmoredDefense ? mods[klass.unarmoredDefense] : 0);
     }
     var defenseBonus = (ch.fightingStyle === 'difesa' && hasArmor) ? 1 : 0;
     ac += (ch.armor && ch.armor.shield ? 2 : 0) + defenseBonus + modSum(ch, 'ca');
@@ -247,8 +250,14 @@
     });
 
     var w = ch.weapon || {};
-    var weaponHit = mods.FOR + pb + modSum(ch, 'attacco');
-    var weaponDmgBonus = mods.FOR + modSum(ch, 'danni') +
+    /* Abilità d'attacco dell'arma (Blocco 5.A.3): a distanza → DES; agile
+       (finesse) → la migliore tra FOR e DES; altrimenti FOR. I flag
+       w.ranged / w.finesse vivono nei dati dell'arma del personaggio. */
+    var wAbil = w.ranged ? 'DES'
+      : (w.finesse && mods.DES > mods.FOR) ? 'DES'
+      : 'FOR';
+    var weaponHit = mods[wAbil] + pb + modSum(ch, 'attacco');
+    var weaponDmgBonus = mods[wAbil] + modSum(ch, 'danni') +
                          (ch.fightingStyle === 'duello' ? 2 : 0);
     var swDef = bonuses.sacredWeapon;
     var sacredWeaponBonus = swDef ? Math.max(swDef.min || 0, mods[swDef.ability]) : 0;

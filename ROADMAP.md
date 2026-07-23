@@ -402,9 +402,15 @@ invariato e fa da test di non-regressione a ogni passo.
       Imposizione 35, Aura +3/3m, +8/1d8+7, Arma Sacra +3, ordine risorse
       invariato), console pulita, sintassi OK. Cache busting `?v=65`. Committato
       in locale (deploy rimandato).
-- [ ] 5.A.2 CA senza armatura **alternativa** come dato di classe (Barbaro
-      10+DES+COS; poi Monaco 10+DES+SAG), non formula fissa.
-- [ ] 5.A.3 Abilità d'attacco arma (FOR vs DES) scelta dall'arma/agile, non FOR fisso.
+- [x] 5.A.2 CA senza armatura **alternativa** come dato di classe — MECCANICA
+      FATTA (2026-07-22) in `engine.js` (ramo senza armatura: `10 + DES +
+      mod[klass.unarmoredDefense]`). Il dato `unarmoredDefense:'COS'` del Barbaro
+      (e `'SAG'` del Monaco) entra con verifica sul PDF nel rispettivo step di
+      classe. Testato in memoria: Barbaro COS → CA 15 (17 con scudo).
+- [x] 5.A.3 Abilità d'attacco arma (FOR vs DES) — FATTO (2026-07-22). In
+      `engine.js`: a distanza (`w.ranged`) → DES; agile (`w.finesse`) → la
+      migliore tra FOR e DES; altrimenti FOR. Tharion (spada, FOR) invariato
+      (+8); testato agile DES>FOR → DES, agile FOR>DES → FOR, distanza → DES.
 - [ ] 5.A.4 Wizard: stili di combattimento dal manuale, guadagni automatici
       generici (via il `classId==='paladino'`), label risorse generiche.
 - [ ] 5.A.5 Render (`stats`/`sheet`): label risorse e card 100% dal manuale,
