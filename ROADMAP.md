@@ -9,7 +9,7 @@
 
 ## Dove siamo
 
-- **Ultimo aggiornamento:** 2026-07-22
+- **Ultimo aggiornamento:** 2026-07-23
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
   GitHub Pages, ultimo commit `ace8167` (wizard di level-up, che chiude la
   Fase 4). L'intera visione originale (login, dashboard multi-personaggio,
@@ -19,10 +19,13 @@
   sezione qui sotto e "Decisioni prese (Fase 5)".
 - **Prossimo passo:** **Blocco 5.A COMPLETO** e **Barbaro completo a livello
   scheda + level-up** (motore dati-driven, dati 1→20, Berserker, tab
-  Risorse/attacchi generiche, wizard con guadagni Furia) — 8 commit locali da
-  `dedff1d`, Tharion sempre verificato invariato. Tutto testato finora solo con
-  **stato iniettato** (nessun Barbaro reso in UI vera). Prossimo: **Blocco 5.B
-  — creazione di un personaggio da zero**, per creare e usare davvero un Barbaro.
+  Risorse/attacchi generiche, wizard con guadagni Furia) — 8 commit **deployati
+  il 2026-07-23** (`3c46d64`→`536ae74`, run "pages build and deployment" verde,
+  live verificato con curl: `?v=66`, manuale `version 19`, motore/rendering
+  generici serviti), Tharion sempre verificato invariato. Tutto testato finora
+  solo con **stato iniettato** (nessun Barbaro reso in UI vera). In corso:
+  **Blocco 5.B — creazione di un personaggio da zero**, per creare e usare
+  davvero un Barbaro.
   Restano anche in coda due collaudi cloud mai confermati: sync multi-device tra
   due dispositivi con lo stesso account, e la verifica nella console Firebase che
   `manuals/5.5/feats` sia arrivato su Firestore (step 4.4, dopo un deploy — il
