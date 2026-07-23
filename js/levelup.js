@@ -205,6 +205,22 @@
         rows++;
       }
 
+      /* Risorse di classe "a usi" dai dati (es. Furia del Barbaro): mostra i
+         cambi di massimo, con il nome preso dal manuale (niente hardcoding). */
+      var classRes = klass.classResources || {};
+      Object.keys(classRes).forEach(function (key) {
+        var def = classRes[key];
+        if (def.kind !== 'uses') {
+          return;
+        }
+        var rb = findResourceMax(viewBefore.resources, key);
+        var ra = findResourceMax(viewAfter.resources, key);
+        if (rb !== ra) {
+          gainsContainer.appendChild(buildGainRow(def.name || key, rb, ra));
+          rows++;
+        }
+      });
+
       var slotsBefore = (viewBefore.slots || []).join('/');
       var slotsAfter = (viewAfter.slots || []).join('/');
       if (slotsBefore !== slotsAfter) {

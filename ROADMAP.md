@@ -17,13 +17,16 @@
   funzionante. Login e Face ID collaudati da Andrea su iPhone reale.
   **La Fase 5 è ora pianificata in dettaglio (2026-07-22):** vedi la sua
   sezione qui sotto e "Decisioni prese (Fase 5)".
-- **Prossimo passo:** iniziare il **Blocco 5.A** (generalizzazione di motore e
-  wizard) insieme alla **1ª classe nuova, il Barbaro**, tenendo il Paladino
-  come test di non-regressione. Restano in coda due collaudi mai confermati
-  esplicitamente: sync multi-device tra due dispositivi con lo stesso account,
-  e la verifica nella console Firebase che `manuals/5.5/feats` sia arrivato
-  davvero su Firestore (step 4.4 — il sync fallisce in silenzio se la regola
-  non è deployata, vedi quello step per la riga di regola da aggiungere).
+- **Prossimo passo:** **Blocco 5.A COMPLETO** e **Barbaro completo a livello
+  scheda + level-up** (motore dati-driven, dati 1→20, Berserker, tab
+  Risorse/attacchi generiche, wizard con guadagni Furia) — 8 commit locali da
+  `dedff1d`, Tharion sempre verificato invariato. Tutto testato finora solo con
+  **stato iniettato** (nessun Barbaro reso in UI vera). Prossimo: **Blocco 5.B
+  — creazione di un personaggio da zero**, per creare e usare davvero un Barbaro.
+  Restano anche in coda due collaudi cloud mai confermati: sync multi-device tra
+  due dispositivi con lo stesso account, e la verifica nella console Firebase che
+  `manuals/5.5/feats` sia arrivato su Firestore (step 4.4, dopo un deploy — il
+  sync fallisce in silenzio se la regola non è deployata).
 
 ---
 
@@ -456,8 +459,11 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
    (`stats.js`) — riga Soffio solo per Dragonidi, "Attacco Extra" dai
    `choicePoints`, nota costruita dai dati reali (bonus arma/stile/Arma Sacra);
    unica deviazione dichiarata su Tharion: la 1ª frase della nota ("spada +1" →
-   "bonus magici dell'arma (+1)"). *Restano:* wizard di level-up generico
-   (guadagni Furia), poi creazione (5.B).
+   "bonus magici dell'arma (+1)"). *step c4 FATTO (2026-07-22):* wizard di level-up generico
+   (`levelup.js`) — i guadagni delle risorse di classe (Furia 2→3…) compaiono
+   dai dati (`classResources`); Tharion 7→8 invariato (PF/Imposizione/Dadi/ASI).
+   Cache bump `?v=65→66`. **Barbaro completo a livello scheda e level-up**; per
+   crearne uno serve solo il blocco condiviso **5.B (creazione da zero)**.
 2. [ ] **Guerriero** (no caster) — stili extra, ASI a 6/14, attacchi extra multipli, Azione Impetuosa, Recuperare Energie.
 3. [ ] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
 4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
