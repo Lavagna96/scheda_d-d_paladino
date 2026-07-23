@@ -452,8 +452,12 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
    generata dinamicamente nella sezione giusta, sezioni vuote e `loh-card`
    (Imposizione) condizionali; il motore passa `name`/`resetOn` con la risorsa.
    Paladino invariato (verificato con Barbaro iniettato + ripristino identico),
-   `version` 18→19. *Restano:* sezione attacchi (Soffio/nota) generica, wizard
-   di level-up generico, poi creazione (5.B).
+   `version` 18→19. *step c3 FATTO (2026-07-22):* sezione attacchi generica
+   (`stats.js`) — riga Soffio solo per Dragonidi, "Attacco Extra" dai
+   `choicePoints`, nota costruita dai dati reali (bonus arma/stile/Arma Sacra);
+   unica deviazione dichiarata su Tharion: la 1ª frase della nota ("spada +1" →
+   "bonus magici dell'arma (+1)"). *Restano:* wizard di level-up generico
+   (guadagni Furia), poi creazione (5.B).
 2. [ ] **Guerriero** (no caster) — stili extra, ASI a 6/14, attacchi extra multipli, Azione Impetuosa, Recuperare Energie.
 3. [ ] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
 4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).

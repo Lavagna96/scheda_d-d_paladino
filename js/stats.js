@@ -160,17 +160,53 @@
     });
   }
 
+  /* Nota attacchi costruita dai dati reali del personaggio (niente più testo
+     fisso di Tharion): bonus magici all'arma, stile di combattimento, Arma Sacra
+     dove applicabile. Stringa vuota → la nota viene nascosta. */
+  function buildAttackNote(view, ch) {
+    var parts = [];
+    var atkBonus = 0;
+    (ch.modifiers || []).forEach(function (m) { if (m.target === 'attacco') { atkBonus += m.value; } });
+    (ch.items || []).forEach(function (it) {
+      (it.effects || []).forEach(function (e) { if (e.target === 'attacco') { atkBonus += e.value; } });
+    });
+    if (atkBonus > 0) { parts.push('Colpire e danni includono i bonus magici dell\'arma (+' + atkBonus + ').'); }
+    if (ch.fightingStyle === 'duello') { parts.push('Stile Duellante +2 ai danni.'); }
+    if (ch.fightingStyle === 'difesa') { parts.push('Stile Difesa +1 alla CA.'); }
+    if (view.sacredWeaponBonus > 0) {
+      parts.push('Con Arma Sacra: ' + view.sacredWeaponText + ' al colpire (→ ' +
+        window.AppEngine.formatMod(view.weapon.hit + view.sacredWeaponBonus) + ') e danni Radiosi.');
+    }
+
+    return parts.join(' ');
+  }
+
   function renderAttacks(view) {
+    var ch = window.AppStorage.getState().character;
     setText('atk-weapon-name', view.weapon.name);
     setText('atk-weapon-hit', view.weapon.hitText);
     setText('atk-weapon-dmg', view.weapon.dmgText);
-    setText('atk-breath-hit', 'TS DES ' + view.breath.dc);
-    setText('atk-breath-dmg', view.breath.dice + ' fuoco');
-    setText('atk-note',
-      'Colpire/danni includono spada +1. Stile Duellante +2 ai danni. ' +
-      'Con Arma Sacra: ' + view.sacredWeaponText + ' al colpire (→ ' +
-      window.AppEngine.formatMod(view.weapon.hit + view.sacredWeaponBonus) +
-      ') e danni Radiosi.');
+
+    // Riga Soffio: solo per chi ha quell'attacco (Dragonide → risorsa 'breath').
+    var hasBreath = view.resources.some(function (r) { return r.key === 'breath'; });
+    var breathHit = document.getElementById('atk-breath-hit');
+    var breathRow = breathHit ? breathHit.closest('tr') : null;
+    if (breathRow) { breathRow.classList.toggle('hidden', !hasBreath); }
+    if (hasBreath) {
+      setText('atk-breath-hit', 'TS DES ' + view.breath.dc);
+      setText('atk-breath-dmg', view.breath.dice + ' fuoco');
+    }
+
+    // "Attacco Extra: N colpi": solo se la classe lo concede a questo livello.
+    var manual = window.MANUAL_55 || { classes: {} };
+    var cp = (manual.classes[view.classId] || {}).choicePoints || {};
+    var extraEl = document.getElementById('atk-extra');
+    if (extraEl) { extraEl.classList.toggle('hidden', !(cp.extraAttack && view.level >= cp.extraAttack)); }
+
+    var note = buildAttackNote(view, ch);
+    setText('atk-note', note);
+    var noteEl = document.getElementById('atk-note');
+    if (noteEl) { noteEl.classList.toggle('hidden', !note); }
   }
 
   function render() {
