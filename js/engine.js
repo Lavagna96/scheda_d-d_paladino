@@ -236,7 +236,7 @@
       if (def.kind === 'uses') {
         var max = resMax(def, ch.level, klass);
         if (max > 0) {
-          resources.push({ key: key, max: max });
+          resources.push({ key: key, max: max, name: def.name, resetOn: def.resetOn });
         }
       }
     });

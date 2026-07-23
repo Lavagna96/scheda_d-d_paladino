@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 18,
+  version: 19,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -42,7 +42,7 @@ window.MANUAL_55 = {
       weaponMastery: [0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       unarmoredDefense: 'COS', // CA senza armatura = 10 + DES + COS (Blocco 5.A.2)
       classResources: {
-        furia: { name: 'Furia', kind: 'uses', byLevelRef: 'rages' }
+        furia: { name: 'Furia', kind: 'uses', byLevelRef: 'rages', resetOn: 'long' }
       },
       choicePoints: {
         subclass: 3, subclassFeatureLevels: [3, 6, 10, 14],

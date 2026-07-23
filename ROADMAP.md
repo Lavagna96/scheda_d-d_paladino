@@ -447,8 +447,13 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
    2/3/5/6 ai liv 1/5/12/20, CA 15 senz'armatura, Tharion invariato), manuale
    `version` 16→17. *step c1 FATTO (2026-07-22):* sottoclasse **Cammino del
    Berserker** come dati (p.53; Frenesia/Furia Cieca/Ritorsione/Presenza
-   Intimidatoria a 3/6/10/14; `version` 17→18). *Restano:* rendering res-card
-   dinamiche + wizard generico (guadagni/label), poi creazione (5.B).
+   Intimidatoria a 3/6/10/14; `version` 17→18). *step c2 FATTO (2026-07-22):*
+   tab Risorse generica (`stats.js`) — res-card non pertinenti nascoste, Furia
+   generata dinamicamente nella sezione giusta, sezioni vuote e `loh-card`
+   (Imposizione) condizionali; il motore passa `name`/`resetOn` con la risorsa.
+   Paladino invariato (verificato con Barbaro iniettato + ripristino identico),
+   `version` 18→19. *Restano:* sezione attacchi (Soffio/nota) generica, wizard
+   di level-up generico, poi creazione (5.B).
 2. [ ] **Guerriero** (no caster) — stili extra, ASI a 6/14, attacchi extra multipli, Azione Impetuosa, Recuperare Energie.
 3. [ ] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
 4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
