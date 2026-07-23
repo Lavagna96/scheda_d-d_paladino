@@ -445,8 +445,10 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
    `classResources.furia` (via `byLevelRef:'rages'`, nessuna duplicazione),
    `unarmoredDefense:'COS'`, `choicePoints`. Verificato con `derive` (Furia
    2/3/5/6 ai liv 1/5/12/20, CA 15 senz'armatura, Tharion invariato), manuale
-   `version` 16→17. *Restano:* meccaniche runtime, 1 sottoclasse (Berserker) e
-   generalizzazione wizard/label (step c), poi creazione (5.B).
+   `version` 16→17. *step c1 FATTO (2026-07-22):* sottoclasse **Cammino del
+   Berserker** come dati (p.53; Frenesia/Furia Cieca/Ritorsione/Presenza
+   Intimidatoria a 3/6/10/14; `version` 17→18). *Restano:* rendering res-card
+   dinamiche + wizard generico (guadagni/label), poi creazione (5.B).
 2. [ ] **Guerriero** (no caster) — stili extra, ASI a 6/14, attacchi extra multipli, Azione Impetuosa, Recuperare Energie.
 3. [ ] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
 4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).

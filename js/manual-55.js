@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 17,
+  version: 18,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -118,6 +118,28 @@ window.MANUAL_55 = {
         20: [
           { name: 'Campione Primordiale', desc: 'Incarni la potenza primordiale: i tuoi punteggi di Forza e Costituzione aumentano di 4, fino a un massimo di 25.' }
         ]
+      },
+      /* Sottoclassi del Barbaro (Fase 5, step Barbaro): per ora il Cammino del
+         Berserker come dati (PHB 2024, p.53); gli altri Cammini in seguito.
+         Il Barbaro non è incantatore, quindi niente incantesimi di sottoclasse. */
+      subclasses: {
+        berserker: {
+          name: 'Cammino del Berserker',
+          features: {
+            3: [
+              { name: 'Frenesia', desc: 'Se usi Attacco Sconsiderato mentre sei in Furia, infliggi danni extra al primo bersaglio che colpisci nel turno con un attacco basato sulla Forza: tira un numero di d6 pari al tuo bonus ai danni da Furia e sommali. Il tipo di danno è quello dell\'arma o del colpo senz\'armi usato.' }
+            ],
+            6: [
+              { name: 'Furia Cieca', desc: 'Mentre sei in Furia sei immune alle condizioni Affascinato e Spaventato. Se sei già Affascinato o Spaventato quando entri in Furia, quella condizione termina su di te.' }
+            ],
+            10: [
+              { name: 'Ritorsione', desc: 'Quando subisci danni da una creatura entro 1,5 metri da te, puoi usare una reazione per fare un attacco in mischia contro di essa (con un\'arma o un colpo senz\'armi).' }
+            ],
+            14: [
+              { name: 'Presenza Intimidatoria', desc: 'Azione bonus: ogni creatura a tua scelta entro un\'Emanazione di 9 metri da te deve superare un TS di Saggezza (CD 8 + modificatore di Forza + bonus di competenza) o è Spaventata per 1 minuto, ripetendo il TS alla fine di ogni suo turno. Dopo l\'uso devi finire un riposo lungo per riusarla, oppure puoi spendere un uso di Furia (nessuna azione) per ripristinarla.' }
+            ]
+          }
+        }
       }
     },
     bardo: {
