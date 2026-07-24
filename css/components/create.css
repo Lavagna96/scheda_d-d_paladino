@@ -3,7 +3,7 @@
  * passi con corpi segnaposto. b2.1: contenuto reale dei passi Specie e
  * Classe (vedi ".has-fields" più sotto). b2.2: contenuto del passo
  * Punteggi — selettore di metodo (.create-method-row) e sezioni Point-buy/
- * Array standard/Manuale, che riusano gli stepper .edit-stat-*/.edit-stepper
+ * Array standard/Manuale, che riusano gli stepper .edit-stat-* e .edit-stepper
  * di css/components/edit-sheet.css. b2.3 (qui): contenuto del passo
  * Competenze — riga di sola lettura Tiri Salvezza (.create-saves-line) e
  * chip competenze (.chip/.chip-row di edit-sheet.css, con stato disabilitato
