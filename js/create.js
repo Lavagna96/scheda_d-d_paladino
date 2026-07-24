@@ -9,12 +9,17 @@
    * - b2.3 (fatto): contenuto reale del passo Competenze — Tiri Salvezza
    *   fissi della classe (di sola lettura) + scelta delle competenze di
    *   abilità (CLASS_SKILLS, PHB 2024).
-   * - b2.4 (qui): contenuto reale del passo Equipaggiamento — armatura,
+   * - b2.4 (fatto): contenuto reale del passo Equipaggiamento — armatura,
    *   scudo e arma, con default sensati per classe (equip. iniziale del PHB
    *   2024, opzione A) tutti modificabili; NIENTE stile di combattimento
    *   (per il Paladino è una scelta di livello 2, il Barbaro non lo prende
-   *   mai → arriva col level-up). Resta segnaposto solo Sottoclasse/
-   *   Incantesimi, in arrivo nei prossimi sotto-step.
+   *   mai → arriva col level-up).
+   * - b2.5 (qui): contenuto reale del passo finale Sottoclasse/Incantesimi —
+   *   a livello 1 nessuna classe sceglie la sottoclasse (tutte al livello 3:
+   *   solo una nota informativa); per i caster, selettore incantesimi dal
+   *   catalogo del manuale filtrato per classe e livello (Paladino: 2 di
+   *   livello 1, nessun cantrip). Generico via casterType / cantripsByLevel /
+   *   preparedByLevel; i non-caster (Barbaro) non hanno nulla da scegliere.
    * - b3   (in arrivo): generazione vera del personaggio.
    * Pattern "Mago a schermo intero" (5.B.1): una vista a schermo intero, un
    * passo per volta.
@@ -47,7 +52,10 @@
     // quando si entra nel passo (ensureEquipDraft); equipForClass ricorda per
     // quale classe è stato riempito, così cambiando classe si riparte dal kit
     // giusto.
-    equip: null, equipForClass: null
+    equip: null, equipForClass: null,
+    // Incantesimi scelti nel passo finale (b2.5): id dal catalogo del manuale.
+    // Vuoti per i non-caster; per il Paladino solo preparedSpells (2 di liv. 1).
+    cantrips: [], preparedSpells: []
   };
 
   var progressFillEl, stepNumEl, stepTitleEl, stepBodyEl, backBtn, nextBtn, footerNoteEl;
@@ -161,6 +169,23 @@
     return { armorId: '', shield: false, weaponName: '', weaponDie: '1d8', weaponType: '', weaponMastery: '' };
   }
 
+  // Livello di partenza fisso in creazione (decisione 5.B): 1. Gli indici
+  // cantripsByLevel/preparedByLevel nel manuale sono per livello (0 inutilizzato).
+  var CREATE_LEVEL = 1;
+
+  // Incantesimi di una classe a un dato livello di incantesimo, dal catalogo
+  // del manuale (window.MANUAL_55.spells, con tag `classes` e `level`),
+  // ordinati per nome. Usato dal passo finale (b2.5) per i caster.
+  function classSpellsAt(classId, spellLevel) {
+    var all = (window.MANUAL_55 && window.MANUAL_55.spells) || [];
+
+    return all.filter(function (s) {
+      return s.classes && s.classes.indexOf(classId) !== -1 && s.level === spellLevel;
+    }).sort(function (a, b) {
+      return a.name.localeCompare(b.name, 'it');
+    });
+  }
+
   /* ---------- helper DOM ---------- */
 
   function el(tag, cls, text) {
@@ -204,10 +229,37 @@
     if (step.id === 'competenze') {
       return draft.profSkills.length === classSkillsFor(draft.classId).count;
     }
+    if (step.id === 'finale') {
+      return finaleValid();
+    }
 
     // Equipaggiamento: nessun vincolo (i default di classe riempiono già i
-    // campi e tutto è modificabile). Passo finale ancora segnaposto.
+    // campi e tutto è modificabile).
     return true;
+  }
+
+  // Validità del passo finale (b2.5): i non-caster non hanno nulla da
+  // scegliere (sempre valido); i caster devono aver scelto il numero esatto
+  // di cantrip e di incantesimi preparati previsti al livello 1 (stesso
+  // vincolo "esattamente N" delle competenze). La sottoclasse non entra: a
+  // livello 1 nessuna classe la sceglie. Il Math.min protegge il caso (oggi
+  // teorico) in cui il catalogo avesse meno incantesimi del dovuto.
+  function finaleValid() {
+    var klass = (window.MANUAL_55 && window.MANUAL_55.classes[draft.classId]) || {};
+    if (!klass.casterType || klass.casterType === 'none') {
+      return true;
+    }
+    var needCantrips = Math.min(
+      (klass.cantripsByLevel && klass.cantripsByLevel[CREATE_LEVEL]) || 0,
+      classSpellsAt(draft.classId, 0).length
+    );
+    var needPrepared = Math.min(
+      (klass.preparedByLevel && klass.preparedByLevel[CREATE_LEVEL]) || 0,
+      classSpellsAt(draft.classId, 1).length
+    );
+
+    return (draft.cantrips || []).length === needCantrips &&
+           (draft.preparedSpells || []).length === needPrepared;
   }
 
   // Validità del passo Punteggi: dipende dal metodo in draft.scoreMethod.
@@ -794,6 +846,100 @@
       equipTextInput(eq.weaponMastery, function (v) { eq.weaponMastery = v; })));
   }
 
+  /* ---------- passo finale: Sottoclasse e Incantesimi (b2.5) ---------- */
+
+  // Selettore a chip di `count` incantesimi tra `spells` (voci del catalogo del
+  // manuale), che scrive gli id scelti in draft[draftKey]. Stessa meccanica dei
+  // chip competenza (cap a count, contatore, stato disabilitato al tetto);
+  // scarta le selezioni non più valide se la lista cambia (cambio classe).
+  function buildSpellPicker(container, title, spells, count, draftKey) {
+    var validIds = spells.map(function (s) { return s.id; });
+    draft[draftKey] = (draft[draftKey] || []).filter(function (id) {
+      return validIds.indexOf(id) !== -1;
+    });
+
+    container.appendChild(el('div', 'edit-section-label', title));
+    var counterEl = el('div', 'create-points-counter');
+    container.appendChild(counterEl);
+    var chipRow = el('div', 'chip-row');
+    container.appendChild(chipRow);
+
+    var chipEls = {};
+
+    function refresh() {
+      var n = draft[draftKey].length;
+      var atCap = n >= count;
+      counterEl.textContent = n + ' / ' + count;
+      spells.forEach(function (s) {
+        var chip = chipEls[s.id];
+        var isOn = draft[draftKey].indexOf(s.id) !== -1;
+        chip.classList.toggle('on', isOn);
+        var disable = atCap && !isOn;
+        chip.disabled = disable;
+        chip.classList.toggle('is-disabled', disable);
+      });
+      updateNav();
+    }
+
+    spells.forEach(function (s) {
+      var chip = el('button', 'chip', s.name);
+      chip.type = 'button';
+      chip.addEventListener('click', function () {
+        var idx = draft[draftKey].indexOf(s.id);
+        if (idx !== -1) {
+          draft[draftKey].splice(idx, 1);
+        } else if (draft[draftKey].length < count) {
+          draft[draftKey].push(s.id);
+        }
+        refresh();
+      });
+      chipEls[s.id] = chip;
+      chipRow.appendChild(chip);
+    });
+
+    refresh();
+  }
+
+  function renderFinale(container) {
+    var klass = window.MANUAL_55.classes[draft.classId] || {};
+
+    // Nota sottoclasse: a livello 1 nessuna classe la sceglie (tutte al 3).
+    container.appendChild(el('div', 'create-saves-line',
+      'La sottoclasse si sceglie al livello 3, non alla creazione.'));
+
+    var isCaster = klass.casterType && klass.casterType !== 'none';
+    if (!isCaster) {
+      // Non-caster (es. Barbaro): niente incantesimi al livello 1. Ripulisco
+      // eventuali scelte rimaste da una classe caster selezionata prima.
+      draft.cantrips = [];
+      draft.preparedSpells = [];
+      container.appendChild(el('div', 'create-saves-line',
+        'Questa classe non lancia incantesimi al livello 1: non c’è altro da scegliere qui.'));
+      updateNav();
+
+      return;
+    }
+
+    var needCantrips = (klass.cantripsByLevel && klass.cantripsByLevel[CREATE_LEVEL]) || 0;
+    var needPrepared = (klass.preparedByLevel && klass.preparedByLevel[CREATE_LEVEL]) || 0;
+
+    if (needCantrips > 0) {
+      buildSpellPicker(container, 'Trucchetti (scegline ' + needCantrips + ')',
+        classSpellsAt(draft.classId, 0), needCantrips, 'cantrips');
+    } else {
+      draft.cantrips = [];
+    }
+
+    if (needPrepared > 0) {
+      buildSpellPicker(container, 'Incantesimi preparati di 1° livello (scegline ' + needPrepared + ')',
+        classSpellsAt(draft.classId, 1), needPrepared, 'preparedSpells');
+    } else {
+      draft.preparedSpells = [];
+    }
+
+    updateNav();
+  }
+
   /* ---------- render ---------- */
 
   function render() {
@@ -825,11 +971,14 @@
       } else if (step.id === 'equipaggiamento') {
         stepBodyEl.classList.add('has-fields');
         renderEquipaggiamento(stepBodyEl);
+      } else if (step.id === 'finale') {
+        stepBodyEl.classList.add('has-fields');
+        renderFinale(stepBodyEl);
       } else {
-        // Segnaposto: resta solo il passo finale (Sottoclasse/Incantesimi);
-        // la generazione vera del personaggio è il b3.
+        // Difensivo: tutti i 6 passi hanno ora un contenuto reale, questo ramo
+        // non dovrebbe mai scattare.
         stepBodyEl.classList.remove('has-fields');
-        stepBodyEl.textContent = 'Contenuto del passo "' + step.title + '" — in arrivo.';
+        stepBodyEl.textContent = '';
       }
     }
     updateNav();
@@ -885,7 +1034,8 @@
       scoreMethod: 'pointbuy',
       abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 },
       profSkills: [],
-      equip: null, equipForClass: null
+      equip: null, equipForClass: null,
+      cantrips: [], preparedSpells: []
     };
     document.body.classList.remove('in-dashboard');
     document.body.classList.add('in-create');

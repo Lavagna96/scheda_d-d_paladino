@@ -493,8 +493,28 @@ invariato e fa da test di non-regressione a ogni passo.
 > applica `flex-direction: column`. Verificato nel browser: default per
 > Paladino/Barbaro/Mago, persistenza a classe invariata, reset al cambio classe,
 > layout a schermo pieno, console pulita, Tharion invariato (CA 20, CD 15,
-> stato reale non toccato dal wizard). `?v=67`. *Prossimo:* **b2.5** — passo
-> finale Sottoclasse/Incantesimi (per le classi che li scelgono al livello 1).
+> stato reale non toccato dal wizard). `?v=67`.
+>
+> **b2.5 FATTO (2026-07-24):** passo finale **Sottoclasse e Incantesimi**. A
+> livello 1 **nessuna classe sceglie la sottoclasse** (tutte al livello 3, dato
+> `choicePoints.subclass:3`) → solo nota informativa, niente selettore. Per i
+> **caster**, selettore incantesimi a chip (stesso pattern delle competenze:
+> cap al numero dovuto, contatore, auto-scarto al cambio classe) alimentato dal
+> **catalogo del manuale** (`MANUAL_55.spells`, filtrato per `classes` e
+> `level`, ordinato per nome): il **Paladino** sceglie **2 incantesimi di 1°
+> livello** tra i 16 della sua lista, **senza cantrip** (coerente col 2024). I
+> **non-caster** (Barbaro) vedono la nota "nessun incantesimo al livello 1".
+> Generico via `casterType` + `cantripsByLevel`/`preparedByLevel` (pronto per i
+> full caster futuri, che avranno anche i cantrip). Le scelte vivono in
+> `draft.cantrips`/`draft.preparedSpells` (le userà il b3); `finaleValid()`
+> (esattamente N, come le competenze) è pronta a sbloccare "Crea personaggio"
+> nel b3. Solo `create.js`, nessun nuovo CSS (riusa i chip), nessun tocco al
+> manuale, `?v=67`. Verificato nel browser (Paladino 2/16 con cap e contatore,
+> Barbaro senza selettore, azzeramento al cambio classe, layout a schermo pieno,
+> console pulita, Tharion invariato CA 20/CD 15 e grimorio intatto).
+> **Con b2.5 tutto il contenuto dei 6 passi del wizard è completo.**
+> *Prossimo:* **b3** (5.B.2) — generazione vera del `character` dai dati del
+> `draft` → nuovo documento Firestore → compare in dashboard.
 
 **Blocco 5.C — Le classi, una alla volta**
 *(stesso pacchetto ripetibile, dati dal PDF PHB 2024 locale, riassunti IT originali — mai testo integrale)*
