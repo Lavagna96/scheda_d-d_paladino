@@ -9,7 +9,7 @@
 
 ## Dove siamo
 
-- **Ultimo aggiornamento:** 2026-07-23
+- **Ultimo aggiornamento:** 2026-07-24
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
   GitHub Pages, ultimo commit `ace8167` (wizard di level-up, che chiude la
   Fase 4). L'intera visione originale (login, dashboard multi-personaggio,
@@ -471,7 +471,30 @@ invariato e fa da test di non-regressione a ogni passo.
 > PHB verificati p.50/p.108; fallback "2 tra 18" per le altre classi), cap a N,
 > validazione di "Avanti", auto-correzione al cambio classe. Costante
 > `CLASS_SKILLS` in `create.js`, nessun tocco al manuale, `?v=67`. Verificato nel
-> browser. *Prossimo:* **b2.4** — Equipaggiamento (armatura/scudo/arma).
+> browser.
+>
+> **b2.4 FATTO (2026-07-24):** passo **Equipaggiamento** — armatura (5 opzioni),
+> scudo (toggle) e arma (nome/dado/tipo/maestria), con **default sensati per
+> classe** dall'equip. iniziale del PHB 2024 opzione A (Barbaro p.49 → Ascia
+> bipenne 1d12, nessuna armatura perché usa la Difesa senza armatura; Paladino
+> p.107 → Cotta di Maglia + Scudo + Spada lunga 1d8), tutti modificabili; kit
+> neutro per le classi non ancora modellate. **Niente stile di combattimento**
+> (non è una scelta di livello 1: il Paladino l'ha al livello 2, il Barbaro mai
+> → arriva col level-up), quindi in creazione `fightingStyle` resta 'nessuno'.
+> Auto-reset ai default al cambio classe, ma conservazione delle modifiche
+> manuali a classe invariata. `CLASS_EQUIP`/`defaultEquipFor` in `create.js`,
+> `.create-field` in `create.css`, nessun tocco al manuale.
+> **Bug preesistente trovato e corretto** (introdotto nel commento del b2.2): la
+> stringa `.edit-stat-*` seguita da `/.edit-stepper` conteneva un `*/` che
+> chiudeva in anticipo il commento in testa a `create.css`, facendo scartare al
+> parser CSS l'intera regola `.create-view` → il wizard rendeva come riga
+> orizzontale invece che a schermo intero (mai deployato: il create è tutto
+> locale). Corretto il commento (bilancio `/* */` ora 12/12), `.create-view` ora
+> applica `flex-direction: column`. Verificato nel browser: default per
+> Paladino/Barbaro/Mago, persistenza a classe invariata, reset al cambio classe,
+> layout a schermo pieno, console pulita, Tharion invariato (CA 20, CD 15,
+> stato reale non toccato dal wizard). `?v=67`. *Prossimo:* **b2.5** — passo
+> finale Sottoclasse/Incantesimi (per le classi che li scelgono al livello 1).
 
 **Blocco 5.C — Le classi, una alla volta**
 *(stesso pacchetto ripetibile, dati dal PDF PHB 2024 locale, riassunti IT originali — mai testo integrale)*

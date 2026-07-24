@@ -6,11 +6,15 @@
    *   bozza condiviso `draft`.
    * - b2.2 (fatto): contenuto reale del passo Punteggi — point-buy, array
    *   standard e manuale (dati PHB 2024 p.37).
-   * - b2.3 (qui): contenuto reale del passo Competenze — Tiri Salvezza
+   * - b2.3 (fatto): contenuto reale del passo Competenze — Tiri Salvezza
    *   fissi della classe (di sola lettura) + scelta delle competenze di
-   *   abilità (CLASS_SKILLS, PHB 2024); gli altri passi (Equipaggiamento,
-   *   Sottoclasse/Incantesimi) restano segnaposto, in arrivo nei prossimi
-   *   sotto-step (b2.4+).
+   *   abilità (CLASS_SKILLS, PHB 2024).
+   * - b2.4 (qui): contenuto reale del passo Equipaggiamento — armatura,
+   *   scudo e arma, con default sensati per classe (equip. iniziale del PHB
+   *   2024, opzione A) tutti modificabili; NIENTE stile di combattimento
+   *   (per il Paladino è una scelta di livello 2, il Barbaro non lo prende
+   *   mai → arriva col level-up). Resta segnaposto solo Sottoclasse/
+   *   Incantesimi, in arrivo nei prossimi sotto-step.
    * - b3   (in arrivo): generazione vera del personaggio.
    * Pattern "Mago a schermo intero" (5.B.1): una vista a schermo intero, un
    * passo per volta.
@@ -38,7 +42,12 @@
     name: '', speciesId: null, classId: null,
     scoreMethod: 'pointbuy',
     abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 },
-    profSkills: []
+    profSkills: [],
+    // Equipaggiamento (b2.4): impostato in modo pigro dai default di classe
+    // quando si entra nel passo (ensureEquipDraft); equipForClass ricorda per
+    // quale classe è stato riempito, così cambiando classe si riparte dal kit
+    // giusto.
+    equip: null, equipForClass: null
   };
 
   var progressFillEl, stepNumEl, stepTitleEl, stepBodyEl, backBtn, nextBtn, footerNoteEl;
@@ -113,6 +122,45 @@
     return { count: 2, from: allIds };
   }
 
+  // Armature selezionabili (stesse di js/edit-sheet.js): id vuoto = nessuna
+  // armatura → nel motore diventa la Difesa senza armatura se la classe ne ha
+  // una (es. Barbaro/COS). WEAPON_DICE = stessi dadi danno dell'editor scheda.
+  var ARMOR_OPTIONS = [
+    { id: '', label: 'Nessuna armatura' },
+    { id: 'cuoio-borchiato', label: 'Cuoio Borchiato' },
+    { id: 'mezza-piastra', label: 'Mezza Piastra' },
+    { id: 'cotta-maglia', label: 'Cotta di Maglia' },
+    { id: 'piastre', label: 'Piastre' }
+  ];
+  var WEAPON_DICE = ['1d4', '1d6', '1d8', '1d10', '1d12', '2d6'];
+
+  // Equipaggiamento iniziale sensato per classe: opzione A della lista
+  // "Starting Equipment" del PHB 2024 (Barbaro p.49 → Ascia bipenne, nessuna
+  // armatura perché usa la Difesa senza armatura; Paladino p.107 → Cotta di
+  // Maglia + Scudo + Spada lunga a una mano, 1d8). Tutti i campi restano
+  // modificabili nel passo; la maestria resta vuota (facoltativa). Le classi
+  // non ancora giocabili usano il kit neutro di defaultEquipFor().
+  var CLASS_EQUIP = {
+    barbaro:  { armorId: '', shield: false, weaponName: 'Ascia bipenne', weaponDie: '1d12', weaponType: 'tagl.', weaponMastery: '' },
+    paladino: { armorId: 'cotta-maglia', shield: true, weaponName: 'Spada lunga', weaponDie: '1d8', weaponType: 'tagl.', weaponMastery: '' }
+  };
+
+  // Copia FRESCA dei default per una classe (mai un riferimento a CLASS_EQUIP,
+  // che verrebbe poi mutato dagli input del passo). Fallback neutro per le
+  // classi senza preset dedicato.
+  function defaultEquipFor(classId) {
+    var p = CLASS_EQUIP[classId];
+    if (p) {
+      return {
+        armorId: p.armorId, shield: p.shield,
+        weaponName: p.weaponName, weaponDie: p.weaponDie,
+        weaponType: p.weaponType, weaponMastery: p.weaponMastery
+      };
+    }
+
+    return { armorId: '', shield: false, weaponName: '', weaponDie: '1d8', weaponType: '', weaponMastery: '' };
+  }
+
   /* ---------- helper DOM ---------- */
 
   function el(tag, cls, text) {
@@ -157,7 +205,9 @@
       return draft.profSkills.length === classSkillsFor(draft.classId).count;
     }
 
-    return true; // passi ancora segnaposto: nessun vincolo (b2.4+)
+    // Equipaggiamento: nessun vincolo (i default di classe riempiono già i
+    // campi e tutto è modificabile). Passo finale ancora segnaposto.
+    return true;
   }
 
   // Validità del passo Punteggi: dipende dal metodo in draft.scoreMethod.
@@ -660,6 +710,90 @@
     refresh();
   }
 
+  /* ---------- passo: Equipaggiamento (b2.4) ---------- */
+
+  // Imposta l'equipaggiamento in bozza ai default della classe la prima volta
+  // che si entra nel passo e ogni volta che la classe è cambiata da quando
+  // erano stati impostati (stesso spirito dell'auto-correzione delle
+  // competenze al cambio classe: cambiare classe rimette il kit di quella
+  // classe). Se la classe non è cambiata, conserva le modifiche manuali.
+  function ensureEquipDraft() {
+    if (!draft.equip || draft.equipForClass !== draft.classId) {
+      draft.equip = defaultEquipFor(draft.classId);
+      draft.equipForClass = draft.classId;
+    }
+  }
+
+  // Campo "etichetta + controllo" con la spaziatura uniforme del passo
+  // (.create-field): usato sia per i <select> (armatura, dado) sia per gli
+  // input di testo (nome arma, tipo, maestria).
+  function equipField(labelText, controlEl) {
+    var field = el('div', 'create-field');
+    field.appendChild(el('label', 'create-label', labelText));
+    field.appendChild(controlEl);
+
+    return field;
+  }
+
+  function equipSelect(options, selectedValue, ariaLabel, onChange) {
+    var select = document.createElement('select');
+    select.className = 'edit-select';
+    select.setAttribute('aria-label', ariaLabel);
+    options.forEach(function (opt) {
+      var o = document.createElement('option');
+      o.value = opt.id;
+      o.textContent = opt.label;
+      if (opt.id === selectedValue) {
+        o.selected = true;
+      }
+      select.appendChild(o);
+    });
+    select.addEventListener('change', function () { onChange(select.value); });
+
+    return select;
+  }
+
+  function equipTextInput(value, onInput) {
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'create-in';
+    input.value = value || '';
+    input.addEventListener('input', function () { onInput(input.value); });
+
+    return input;
+  }
+
+  function renderEquipaggiamento(container) {
+    ensureEquipDraft();
+    var eq = draft.equip;
+
+    // Armatura.
+    container.appendChild(equipField('Armatura',
+      equipSelect(ARMOR_OPTIONS, eq.armorId, 'Armatura', function (v) { eq.armorId = v; })));
+
+    // Scudo: chip on/off, indipendente dall'armatura (come nel motore: la
+    // Difesa senza armatura ammette comunque lo scudo).
+    var shieldChip = el('button', 'chip' + (eq.shield ? ' on' : ''), 'Scudo equipaggiato');
+    shieldChip.type = 'button';
+    shieldChip.addEventListener('click', function () {
+      eq.shield = !eq.shield;
+      shieldChip.classList.toggle('on', eq.shield);
+    });
+    container.appendChild(equipField('Scudo', shieldChip));
+
+    // Arma.
+    container.appendChild(el('div', 'edit-section-label', 'Arma'));
+    container.appendChild(equipField('Nome',
+      equipTextInput(eq.weaponName, function (v) { eq.weaponName = v; })));
+    container.appendChild(equipField('Dado danni',
+      equipSelect(WEAPON_DICE.map(function (d) { return { id: d, label: d }; }),
+        eq.weaponDie, 'Dado danni', function (v) { eq.weaponDie = v; })));
+    container.appendChild(equipField('Tipo di danno',
+      equipTextInput(eq.weaponType, function (v) { eq.weaponType = v; })));
+    container.appendChild(equipField('Maestria (facoltativa)',
+      equipTextInput(eq.weaponMastery, function (v) { eq.weaponMastery = v; })));
+  }
+
   /* ---------- render ---------- */
 
   function render() {
@@ -688,11 +822,14 @@
       } else if (step.id === 'competenze') {
         stepBodyEl.classList.add('has-fields');
         renderCompetenze(stepBodyEl);
+      } else if (step.id === 'equipaggiamento') {
+        stepBodyEl.classList.add('has-fields');
+        renderEquipaggiamento(stepBodyEl);
       } else {
-        // Segnaposto: il contenuto reale degli altri passi arriva nei
-        // prossimi sotto-step (b2.4+).
+        // Segnaposto: resta solo il passo finale (Sottoclasse/Incantesimi);
+        // la generazione vera del personaggio è il b3.
         stepBodyEl.classList.remove('has-fields');
-        stepBodyEl.textContent = 'Contenuto del passo "' + step.title + '" — in arrivo (step b2).';
+        stepBodyEl.textContent = 'Contenuto del passo "' + step.title + '" — in arrivo.';
       }
     }
     updateNav();
@@ -747,7 +884,8 @@
       name: '', speciesId: null, classId: null,
       scoreMethod: 'pointbuy',
       abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 },
-      profSkills: []
+      profSkills: [],
+      equip: null, equipForClass: null
     };
     document.body.classList.remove('in-dashboard');
     document.body.classList.add('in-create');

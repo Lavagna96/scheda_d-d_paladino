@@ -355,3 +355,19 @@ body.in-create .dashboard-view {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ---------- passo Equipaggiamento (sotto-step b2.4) ----------
+   Campi "etichetta + controllo" con spaziatura uniforme: i <select>
+   (armatura, dado danni) riusano .edit-select (edit-sheet.css), gli input di
+   testo riusano .create-in (annullando qui il suo margine, gestito dal
+   wrapper) e lo scudo riusa .chip. Nessun campo per lo stile di combattimento:
+   non è una scelta di livello 1 (Paladino: livello 2; Barbaro: mai). */
+
+.create-field {
+  margin-bottom: var(--space-4);
+}
+
+.create-field .create-in,
+.create-field .edit-select {
+  margin-bottom: 0;
+}
