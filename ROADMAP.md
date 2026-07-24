@@ -456,7 +456,15 @@ invariato e fa da test di non-regressione a ogni passo.
 > `js/create.js` + `css/components/create.css`; nessun cache bump (resta `?v=67`).
 > Implementato dal subagente (sola verifica statica); controprova nel browser
 > fatta in sessione (flusso, validazione, persistenza, console pulita, Tharion
-> invariato). *Prossimo:* **b2.2** — passo Punteggi (point-buy / array / manuale).
+> invariato).
+>
+> **b2.2 FATTO (2026-07-23):** passo **Punteggi** coi 3 metodi — Point-buy (27
+> punti, costi PHB 2024 p.37), Array standard (assegnazione dei 6 valori senza
+> doppioni), Manuale (libero 3–20) — con pulsante "Consigliati per la classe"
+> (array consigliati p.37), modificatori live e validazione di "Avanti" per
+> metodo. Riusa stepper/select di `edit-sheet`. Verificato nel browser (costi e
+> tetto 15, de-dup array, switch metodo, Tharion invariato, console pulita);
+> nessun cache bump (`?v=67`). *Prossimo:* **b2.3** — Competenze + Equipaggiamento.
 
 **Blocco 5.C — Le classi, una alla volta**
 *(stesso pacchetto ripetibile, dati dal PDF PHB 2024 locale, riassunti IT originali — mai testo integrale)*

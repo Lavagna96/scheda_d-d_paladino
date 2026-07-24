@@ -2,10 +2,12 @@
   /*
    * Wizard di creazione personaggio (Fase 5, Blocco 5.B):
    * - b1   (fatto): scaffold — macchina a stati dei passi e navigazione.
-   * - b2.1 (qui): contenuto reale dei passi Specie e Classe, con stato in
-   *   bozza condiviso `draft`; gli altri passi (Punteggi, Competenze,
+   * - b2.1 (fatto): contenuto reale dei passi Specie e Classe, con stato in
+   *   bozza condiviso `draft`.
+   * - b2.2 (qui): contenuto reale del passo Punteggi — point-buy, array
+   *   standard e manuale (dati PHB 2024 p.37); gli altri passi (Competenze,
    *   Equipaggiamento, Sottoclasse/Incantesimi) restano segnaposto, in
-   *   arrivo nel prossimo sotto-step (b2.2+).
+   *   arrivo nei prossimi sotto-step (b2.3+).
    * - b3   (in arrivo): generazione vera del personaggio.
    * Pattern "Mago a schermo intero" (5.B.1): una vista a schermo intero, un
    * passo per volta.
@@ -28,10 +30,62 @@
 
   // Stato in bozza del personaggio in creazione: vive solo mentre il wizard
   // è aperto e viene azzerato a ogni open() (vedi sotto). I passi non ancora
-  // implementati (b2.2+) non hanno ancora un campo dedicato qui.
-  var draft = { name: '', speciesId: null, classId: null };
+  // implementati (b2.3+) non hanno ancora un campo dedicato qui.
+  var draft = {
+    name: '', speciesId: null, classId: null,
+    scoreMethod: 'pointbuy',
+    abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 }
+  };
 
   var progressFillEl, stepNumEl, stepTitleEl, stepBodyEl, backBtn, nextBtn, footerNoteEl;
+
+  // Ordine e etichette delle 6 caratteristiche: stessa convenzione di
+  // js/levelup.js e js/edit-sheet.js.
+  var ABILITY_ORDER = ['FOR', 'DES', 'COS', 'INT', 'SAG', 'CAR'];
+  var ABILITY_LABELS = {
+    FOR: 'Forza', DES: 'Destrezza', COS: 'Costituzione',
+    INT: 'Intelligenza', SAG: 'Saggezza', CAR: 'Carisma'
+  };
+
+  // Point-buy (PHB 2024 p.37): 27 punti totali; costo per punteggio 8-15.
+  var POINT_BUY_BUDGET = 27;
+  var POINT_BUY_COST = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 };
+
+  // Array standard (PHB 2024 p.37): 6 valori fissi da assegnare uno a testa.
+  var STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
+
+  // Array consigliato per classe (PHB 2024 p.37), ordine FOR,DES,COS,INT,SAG,CAR:
+  // è sempre una permutazione di STANDARD_ARRAY (costo 27 in point-buy "per
+  // costruzione").
+  var RECOMMENDED_ARRAYS = {
+    barbaro:   { FOR: 15, DES: 13, COS: 14, INT: 10, SAG: 12, CAR: 8 },
+    bardo:     { FOR: 8,  DES: 14, COS: 12, INT: 13, SAG: 10, CAR: 15 },
+    chierico:  { FOR: 14, DES: 8,  COS: 13, INT: 10, SAG: 15, CAR: 12 },
+    druido:    { FOR: 8,  DES: 12, COS: 14, INT: 13, SAG: 15, CAR: 10 },
+    guerriero: { FOR: 15, DES: 14, COS: 13, INT: 8,  SAG: 10, CAR: 12 },
+    monaco:    { FOR: 12, DES: 15, COS: 13, INT: 10, SAG: 14, CAR: 8 },
+    paladino:  { FOR: 15, DES: 10, COS: 13, INT: 8,  SAG: 12, CAR: 14 },
+    ranger:    { FOR: 12, DES: 15, COS: 13, INT: 8,  SAG: 14, CAR: 10 },
+    ladro:     { FOR: 12, DES: 15, COS: 13, INT: 14, SAG: 10, CAR: 8 },
+    stregone:  { FOR: 10, DES: 13, COS: 14, INT: 8,  SAG: 12, CAR: 15 },
+    warlock:   { FOR: 8,  DES: 14, COS: 13, INT: 12, SAG: 10, CAR: 15 },
+    mago:      { FOR: 8,  DES: 12, COS: 13, INT: 15, SAG: 14, CAR: 10 }
+  };
+
+  // Costo cumulativo point-buy di un punteggio e totale punti già spesi
+  // secondo draft.abilities (helper condivisi da validazione e render).
+  function pointBuyCost(score) {
+    return POINT_BUY_COST[score] || 0;
+  }
+
+  function pointBuyUsed() {
+    var total = 0;
+    ABILITY_ORDER.forEach(function (k) {
+      total += pointBuyCost(draft.abilities[k]);
+    });
+
+    return total;
+  }
 
   /* ---------- helper DOM ---------- */
 
@@ -70,8 +124,33 @@
     if (step.id === 'classe') {
       return !!draft.classId;
     }
+    if (step.id === 'punteggi') {
+      return scoresValid();
+    }
 
-    return true; // passi ancora segnaposto: nessun vincolo (b2.2+)
+    return true; // passi ancora segnaposto: nessun vincolo (b2.3+)
+  }
+
+  // Validità del passo Punteggi: dipende dal metodo in draft.scoreMethod.
+  function scoresValid() {
+    if (draft.scoreMethod === 'array') {
+      // Valido solo quando tutti e 6 i valori dell'array sono assegnati.
+      return ABILITY_ORDER.every(function (k) {
+        return !!draft.abilities[k];
+      });
+    }
+    if (draft.scoreMethod === 'pointbuy') {
+      // Di fatto sempre vero se gli stepper rispettano i vincoli (8-15,
+      // costo entro budget), ma la verifica resta esplicita.
+      var inRange = ABILITY_ORDER.every(function (k) {
+        var v = draft.abilities[k];
+        return v >= 8 && v <= 15;
+      });
+
+      return inRange && pointBuyUsed() <= POINT_BUY_BUDGET;
+    }
+
+    return true; // manuale: ha sempre un valore, nessun budget da rispettare
   }
 
   /* ---------- passi: Specie e Classe (b2.1) ---------- */
@@ -141,6 +220,348 @@
     });
   }
 
+  /* ---------- passo: Punteggi (b2.2) ---------- */
+
+  // Reimposta draft.abilities in modo coerente quando cambia il metodo di
+  // generazione, così i valori restano sempre nel dominio del metodo attivo:
+  // - pointbuy: riparte sempre da tutti 8 (base del point-buy, 0 punti spesi);
+  // - array: tutti "non assegnati" (null) finché il giocatore non sceglie;
+  // - manuale: mantiene i valori correnti se già numeri validi (3-20),
+  //   altrimenti (es. arrivando da "array" con caselle ancora vuote) parte
+  //   da 10.
+  function resetAbilitiesForMethod(method) {
+    if (method === 'pointbuy') {
+      ABILITY_ORDER.forEach(function (k) { draft.abilities[k] = 8; });
+    } else if (method === 'array') {
+      ABILITY_ORDER.forEach(function (k) { draft.abilities[k] = null; });
+    } else {
+      ABILITY_ORDER.forEach(function (k) {
+        var v = draft.abilities[k];
+        if (typeof v !== 'number' || v < 3 || v > 20) {
+          draft.abilities[k] = 10;
+        }
+      });
+    }
+  }
+
+  // Testo del modificatore per un punteggio, da mostrare come aiuto accanto
+  // al valore. Usa window.AppEngine se disponibile (coerente col resto
+  // dell'app), altrimenti calcola inline la stessa formula del PHB.
+  function abilityModText(score) {
+    if (score == null) {
+      return ''; // caratteristica non ancora assegnata (Array standard)
+    }
+    var mod = (window.AppEngine && window.AppEngine.abilityMod)
+      ? window.AppEngine.abilityMod(score)
+      : Math.floor((score - 10) / 2);
+
+    return (window.AppEngine && window.AppEngine.formatMod)
+      ? window.AppEngine.formatMod(mod)
+      : (mod >= 0 ? '+' : '−') + Math.abs(mod);
+  }
+
+  // Sezione Point-buy: stepper −/+ per caratteristica (8-15), contatore
+  // punti live e pulsante "Consigliati per la classe".
+  function buildPointBuySection() {
+    var wrap = el('div');
+    var counterEl = el('div', 'create-points-counter');
+    wrap.appendChild(counterEl);
+
+    var list = el('div', 'edit-stat-list');
+    var scoreEls = {}, modEls = {}, plusBtns = {}, minusBtns = {};
+
+    function refresh() {
+      var used = pointBuyUsed();
+      ABILITY_ORDER.forEach(function (k) {
+        var v = draft.abilities[k];
+        scoreEls[k].textContent = String(v);
+        modEls[k].textContent = abilityModText(v);
+
+        var costUp = pointBuyCost(v + 1) - pointBuyCost(v);
+        var disablePlus = v >= 15 || (used + costUp) > POINT_BUY_BUDGET;
+        plusBtns[k].disabled = disablePlus;
+        plusBtns[k].classList.toggle('is-disabled', disablePlus);
+
+        var disableMinus = v <= 8;
+        minusBtns[k].disabled = disableMinus;
+        minusBtns[k].classList.toggle('is-disabled', disableMinus);
+      });
+      counterEl.textContent = 'Punti: ' + used + ' / ' + POINT_BUY_BUDGET;
+      updateNav();
+    }
+
+    ABILITY_ORDER.forEach(function (k) {
+      var row = el('div', 'edit-stat-row');
+      row.appendChild(el('span', 'edit-stat-label', ABILITY_LABELS[k]));
+
+      var stepper = el('div', 'edit-stepper');
+      var minus = el('button', 'stepper-btn minus', '−');
+      minus.type = 'button';
+      minus.setAttribute('aria-label', 'Diminuisci ' + ABILITY_LABELS[k]);
+      var vals = el('div', 'edit-stat-vals');
+      var scoreEl = el('span', 'edit-stat-score', String(draft.abilities[k]));
+      var modEl = el('span', 'edit-stat-mod', abilityModText(draft.abilities[k]));
+      vals.appendChild(scoreEl);
+      vals.appendChild(modEl);
+      var plus = el('button', 'stepper-btn plus', '+');
+      plus.type = 'button';
+      plus.setAttribute('aria-label', 'Aumenta ' + ABILITY_LABELS[k]);
+
+      minus.addEventListener('click', function () {
+        if (draft.abilities[k] > 8) {
+          draft.abilities[k]--;
+          refresh();
+        }
+      });
+      plus.addEventListener('click', function () {
+        var used = pointBuyUsed();
+        var costUp = pointBuyCost(draft.abilities[k] + 1) - pointBuyCost(draft.abilities[k]);
+        if (draft.abilities[k] < 15 && (used + costUp) <= POINT_BUY_BUDGET) {
+          draft.abilities[k]++;
+          refresh();
+        }
+      });
+
+      stepper.appendChild(minus);
+      stepper.appendChild(vals);
+      stepper.appendChild(plus);
+      row.appendChild(stepper);
+      list.appendChild(row);
+
+      scoreEls[k] = scoreEl;
+      modEls[k] = modEl;
+      plusBtns[k] = plus;
+      minusBtns[k] = minus;
+    });
+    wrap.appendChild(list);
+
+    var recBtn = el('button', 'create-suggest-btn', 'Consigliati per la classe');
+    recBtn.type = 'button';
+    recBtn.addEventListener('click', function () {
+      var rec = RECOMMENDED_ARRAYS[draft.classId];
+      if (!rec) {
+        return; // difensivo: il passo Classe garantisce già un classId valido
+      }
+      ABILITY_ORDER.forEach(function (k) { draft.abilities[k] = rec[k]; });
+      refresh();
+    });
+    wrap.appendChild(recBtn);
+
+    refresh();
+
+    return wrap;
+  }
+
+  // Sezione Array standard: un <select> per caratteristica con i valori
+  // [15,14,13,12,10,8]; ogni valore è utilizzabile una sola volta, quindi le
+  // opzioni si ricalcolano su tutte le select a ogni scelta.
+  function buildArraySection() {
+    var wrap = el('div');
+    var list = el('div', 'edit-stat-list');
+    var selects = {}, modEls = {};
+
+    function usedValues() {
+      var used = [];
+      ABILITY_ORDER.forEach(function (k) {
+        if (draft.abilities[k] != null) {
+          used.push(draft.abilities[k]);
+        }
+      });
+
+      return used;
+    }
+
+    function rebuildOptions() {
+      var used = usedValues();
+      ABILITY_ORDER.forEach(function (k) {
+        var select = selects[k];
+        var current = draft.abilities[k];
+        select.textContent = ''; // svuota (nessun dato: solo reset opzioni)
+
+        var emptyOpt = document.createElement('option');
+        emptyOpt.value = '';
+        emptyOpt.textContent = '—';
+        select.appendChild(emptyOpt);
+
+        STANDARD_ARRAY.forEach(function (val) {
+          // Un valore già scelto per un'ALTRA caratteristica sparisce dalle
+          // altre select; resta disponibile nella propria (altrimenti la
+          // selezione corrente sparirebbe dalla sua stessa lista).
+          if (used.indexOf(val) !== -1 && val !== current) {
+            return;
+          }
+          var opt = document.createElement('option');
+          opt.value = String(val);
+          opt.textContent = String(val);
+          select.appendChild(opt);
+        });
+
+        select.value = current != null ? String(current) : '';
+        modEls[k].textContent = abilityModText(current);
+      });
+      updateNav();
+    }
+
+    ABILITY_ORDER.forEach(function (k) {
+      var row = el('div', 'edit-stat-row');
+      row.appendChild(el('span', 'edit-stat-label', ABILITY_LABELS[k]));
+
+      var vals = el('div', 'create-array-vals');
+      var select = document.createElement('select');
+      select.className = 'edit-select';
+      select.setAttribute('aria-label', ABILITY_LABELS[k]);
+      select.addEventListener('change', function () {
+        draft.abilities[k] = select.value ? parseInt(select.value, 10) : null;
+        rebuildOptions();
+      });
+      var modEl = el('span', 'edit-stat-mod', '');
+
+      vals.appendChild(select);
+      vals.appendChild(modEl);
+      row.appendChild(vals);
+      list.appendChild(row);
+
+      selects[k] = select;
+      modEls[k] = modEl;
+    });
+    wrap.appendChild(list);
+
+    var recBtn = el('button', 'create-suggest-btn', 'Consigliati per la classe');
+    recBtn.type = 'button';
+    recBtn.addEventListener('click', function () {
+      var rec = RECOMMENDED_ARRAYS[draft.classId];
+      if (!rec) {
+        return;
+      }
+      ABILITY_ORDER.forEach(function (k) { draft.abilities[k] = rec[k]; });
+      rebuildOptions();
+    });
+    wrap.appendChild(recBtn);
+
+    rebuildOptions();
+
+    return wrap;
+  }
+
+  // Sezione Manuale: stepper −/+ liberi, range 3-20, nessun budget.
+  function buildManualSection() {
+    var wrap = el('div');
+    var list = el('div', 'edit-stat-list');
+    var scoreEls = {}, modEls = {}, plusBtns = {}, minusBtns = {};
+
+    function refresh() {
+      ABILITY_ORDER.forEach(function (k) {
+        var v = draft.abilities[k];
+        scoreEls[k].textContent = String(v);
+        modEls[k].textContent = abilityModText(v);
+
+        var disableMinus = v <= 3;
+        minusBtns[k].disabled = disableMinus;
+        minusBtns[k].classList.toggle('is-disabled', disableMinus);
+
+        var disablePlus = v >= 20;
+        plusBtns[k].disabled = disablePlus;
+        plusBtns[k].classList.toggle('is-disabled', disablePlus);
+      });
+      updateNav();
+    }
+
+    ABILITY_ORDER.forEach(function (k) {
+      var row = el('div', 'edit-stat-row');
+      row.appendChild(el('span', 'edit-stat-label', ABILITY_LABELS[k]));
+
+      var stepper = el('div', 'edit-stepper');
+      var minus = el('button', 'stepper-btn minus', '−');
+      minus.type = 'button';
+      minus.setAttribute('aria-label', 'Diminuisci ' + ABILITY_LABELS[k]);
+      var vals = el('div', 'edit-stat-vals');
+      var scoreEl = el('span', 'edit-stat-score', String(draft.abilities[k]));
+      var modEl = el('span', 'edit-stat-mod', abilityModText(draft.abilities[k]));
+      vals.appendChild(scoreEl);
+      vals.appendChild(modEl);
+      var plus = el('button', 'stepper-btn plus', '+');
+      plus.type = 'button';
+      plus.setAttribute('aria-label', 'Aumenta ' + ABILITY_LABELS[k]);
+
+      minus.addEventListener('click', function () {
+        if (draft.abilities[k] > 3) {
+          draft.abilities[k]--;
+          refresh();
+        }
+      });
+      plus.addEventListener('click', function () {
+        if (draft.abilities[k] < 20) {
+          draft.abilities[k]++;
+          refresh();
+        }
+      });
+
+      stepper.appendChild(minus);
+      stepper.appendChild(vals);
+      stepper.appendChild(plus);
+      row.appendChild(stepper);
+      list.appendChild(row);
+
+      scoreEls[k] = scoreEl;
+      modEls[k] = modEl;
+      plusBtns[k] = plus;
+      minusBtns[k] = minus;
+    });
+    wrap.appendChild(list);
+
+    refresh();
+
+    return wrap;
+  }
+
+  function renderPunteggi(container) {
+    // Selettore di metodo: 3 chip (riuso .chip/.chip-row di edit-sheet.css).
+    // Il click cambia draft.scoreMethod, reimposta draft.abilities in modo
+    // coerente (resetAbilitiesForMethod) e ridisegna solo la sezione sotto.
+    var METHODS = [
+      { id: 'pointbuy', label: 'Point-buy' },
+      { id: 'array', label: 'Array standard' },
+      { id: 'manual', label: 'Manuale' }
+    ];
+
+    var methodRow = el('div', 'chip-row create-method-row');
+    var sectionWrap = el('div');
+
+    function renderSection() {
+      sectionWrap.textContent = ''; // svuota: si ricostruisce con createElement
+      if (draft.scoreMethod === 'pointbuy') {
+        sectionWrap.appendChild(buildPointBuySection());
+      } else if (draft.scoreMethod === 'array') {
+        sectionWrap.appendChild(buildArraySection());
+      } else {
+        sectionWrap.appendChild(buildManualSection());
+      }
+    }
+
+    function renderChips() {
+      methodRow.textContent = '';
+      METHODS.forEach(function (m) {
+        var chip = el('button', 'chip' + (draft.scoreMethod === m.id ? ' on' : ''), m.label);
+        chip.type = 'button';
+        chip.addEventListener('click', function () {
+          if (draft.scoreMethod === m.id) {
+            return;
+          }
+          draft.scoreMethod = m.id;
+          resetAbilitiesForMethod(m.id);
+          renderChips();
+          renderSection();
+        });
+        methodRow.appendChild(chip);
+      });
+    }
+
+    renderChips();
+    container.appendChild(methodRow);
+    container.appendChild(sectionWrap);
+    renderSection();
+  }
+
   /* ---------- render ---------- */
 
   function render() {
@@ -163,9 +584,12 @@
       } else if (step.id === 'classe') {
         stepBodyEl.classList.add('has-fields');
         renderClasse(stepBodyEl);
+      } else if (step.id === 'punteggi') {
+        stepBodyEl.classList.add('has-fields');
+        renderPunteggi(stepBodyEl);
       } else {
-        // Segnaposto: il contenuto reale degli altri passi arriva nel
-        // prossimo sotto-step (b2.2+).
+        // Segnaposto: il contenuto reale degli altri passi arriva nei
+        // prossimi sotto-step (b2.3+).
         stepBodyEl.classList.remove('has-fields');
         stepBodyEl.textContent = 'Contenuto del passo "' + step.title + '" — in arrivo (step b2).';
       }
@@ -218,7 +642,11 @@
 
   function open() {
     stepIndex = 0;
-    draft = { name: '', speciesId: null, classId: null };
+    draft = {
+      name: '', speciesId: null, classId: null,
+      scoreMethod: 'pointbuy',
+      abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 }
+    };
     document.body.classList.remove('in-dashboard');
     document.body.classList.add('in-create');
     render();

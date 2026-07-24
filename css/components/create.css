@@ -1,8 +1,11 @@
 /*
  * Creazione personaggio (Fase 5, Blocco 5.B). b1: scaffold — navigazione a
- * passi con corpi segnaposto. b2.1 (qui): contenuto reale dei passi Specie e
- * Classe (vedi ".has-fields" più sotto); gli altri passi restano segnaposto
- * fino al b2.2+. La generazione vera arriva nel b3. Pattern deciso: "Mago a
+ * passi con corpi segnaposto. b2.1: contenuto reale dei passi Specie e
+ * Classe (vedi ".has-fields" più sotto). b2.2 (qui): contenuto del passo
+ * Punteggi — selettore di metodo (.create-method-row) e sezioni Point-buy/
+ * Array standard/Manuale, che riusano gli stepper .edit-stat-*/.edit-stepper
+ * di css/components/edit-sheet.css. Gli altri passi restano segnaposto fino
+ * al b2.3+. La generazione vera arriva nel b3. Pattern deciso: "Mago a
  * schermo intero".
  *
  * body.in-create mostra #view-create e nasconde l'app normale, esattamente
@@ -279,4 +282,55 @@ body.in-create .dashboard-view {
   font-family: var(--font-body);
   font-size: 12px;
   color: var(--text-secondary);
+}
+
+/* ---------- passo Punteggi (sotto-step b2.2) ----------
+   Le righe caratteristica riusano .edit-stat-list/.edit-stat-row/
+   .edit-stat-label/.edit-stepper/.stepper-btn/.edit-stat-vals/
+   .edit-stat-score/.edit-stat-mod già definite in
+   css/components/edit-sheet.css (stessa "card" a righe di Point-buy,
+   Manuale e delle Caratteristiche in modifica scheda); qui restano solo le
+   classi che servono in più: il selettore di metodo, il contatore punti
+   del point-buy, la riga con <select> dell'Array standard e il pulsante
+   "Consigliati per la classe". */
+
+.create-method-row {
+  margin: 0 0 var(--space-4);
+}
+
+.create-points-counter {
+  margin: 0 0 var(--space-3);
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.create-array-vals {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Il <select> dell'Array standard riusa .edit-select (edit-sheet.css) ma
+   non deve occupare tutta la riga come nei campi equipaggiamento: qui sta
+   accanto al modificatore, dentro .create-array-vals. */
+.create-array-vals .edit-select {
+  width: auto;
+  min-width: 84px;
+}
+
+.create-suggest-btn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: var(--space-3) 0 var(--space-2);
+  padding: 10px 14px;
+  border: 1px solid var(--border-gold-soft);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--accent-gold);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
 }
