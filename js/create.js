@@ -4,10 +4,13 @@
    * - b1   (fatto): scaffold — macchina a stati dei passi e navigazione.
    * - b2.1 (fatto): contenuto reale dei passi Specie e Classe, con stato in
    *   bozza condiviso `draft`.
-   * - b2.2 (qui): contenuto reale del passo Punteggi — point-buy, array
-   *   standard e manuale (dati PHB 2024 p.37); gli altri passi (Competenze,
-   *   Equipaggiamento, Sottoclasse/Incantesimi) restano segnaposto, in
-   *   arrivo nei prossimi sotto-step (b2.3+).
+   * - b2.2 (fatto): contenuto reale del passo Punteggi — point-buy, array
+   *   standard e manuale (dati PHB 2024 p.37).
+   * - b2.3 (qui): contenuto reale del passo Competenze — Tiri Salvezza
+   *   fissi della classe (di sola lettura) + scelta delle competenze di
+   *   abilità (CLASS_SKILLS, PHB 2024); gli altri passi (Equipaggiamento,
+   *   Sottoclasse/Incantesimi) restano segnaposto, in arrivo nei prossimi
+   *   sotto-step (b2.4+).
    * - b3   (in arrivo): generazione vera del personaggio.
    * Pattern "Mago a schermo intero" (5.B.1): una vista a schermo intero, un
    * passo per volta.
@@ -30,11 +33,12 @@
 
   // Stato in bozza del personaggio in creazione: vive solo mentre il wizard
   // è aperto e viene azzerato a ogni open() (vedi sotto). I passi non ancora
-  // implementati (b2.3+) non hanno ancora un campo dedicato qui.
+  // implementati (b2.4+) non hanno ancora un campo dedicato qui.
   var draft = {
     name: '', speciesId: null, classId: null,
     scoreMethod: 'pointbuy',
-    abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 }
+    abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 },
+    profSkills: []
   };
 
   var progressFillEl, stepNumEl, stepTitleEl, stepBodyEl, backBtn, nextBtn, footerNoteEl;
@@ -87,6 +91,28 @@
     return total;
   }
 
+  // Competenze di abilità della classe, PHB 2024 (Barbaro p.50, Paladino
+  // p.108). Le altre classi useranno un fallback finché non saranno modellate.
+  var CLASS_SKILLS = {
+    barbaro: { count: 2, from: ['addestrare-animali', 'atletica', 'intimidire', 'natura', 'percezione', 'sopravvivenza'] },
+    paladino: { count: 2, from: ['atletica', 'intuizione', 'intimidire', 'medicina', 'persuasione', 'religione'] }
+  };
+
+  // Competenze disponibili per una classe: usa CLASS_SKILLS se già
+  // modellata; altrimenti fallback "scegli 2 fra tutte le 18 abilità" (id
+  // presi da window.AppEngine.SKILLS) finché la classe non avrà una voce
+  // dedicata.
+  function classSkillsFor(classId) {
+    if (CLASS_SKILLS[classId]) {
+      return CLASS_SKILLS[classId];
+    }
+    var allIds = (window.AppEngine && window.AppEngine.SKILLS)
+      ? window.AppEngine.SKILLS.map(function (s) { return s.id; })
+      : [];
+
+    return { count: 2, from: allIds };
+  }
+
   /* ---------- helper DOM ---------- */
 
   function el(tag, cls, text) {
@@ -127,8 +153,11 @@
     if (step.id === 'punteggi') {
       return scoresValid();
     }
+    if (step.id === 'competenze') {
+      return draft.profSkills.length === classSkillsFor(draft.classId).count;
+    }
 
-    return true; // passi ancora segnaposto: nessun vincolo (b2.3+)
+    return true; // passi ancora segnaposto: nessun vincolo (b2.4+)
   }
 
   // Validità del passo Punteggi: dipende dal metodo in draft.scoreMethod.
@@ -562,6 +591,75 @@
     renderSection();
   }
 
+  /* ---------- passo: Competenze (b2.3) ---------- */
+
+  function renderCompetenze(container) {
+    var klass = window.MANUAL_55.classes[draft.classId] || {};
+
+    // Riga di sola lettura: Tiri Salvezza fissi della classe (non si
+    // scelgono in questo passo, sono mostrati solo per riferimento).
+    var savesLabels = (klass.saves || []).map(function (k) { return ABILITY_LABELS[k]; });
+    container.appendChild(el('div', 'create-saves-line',
+      'Tiri Salvezza (dalla classe): ' + savesLabels.join(', ')));
+
+    var skillsDef = classSkillsFor(draft.classId);
+    var allSkills = (window.AppEngine && window.AppEngine.SKILLS) || [];
+
+    // Se si torna qui dopo essere tornati indietro e aver cambiato classe,
+    // scarta eventuali competenze scelte per la classe precedente che non
+    // sono più tra quelle disponibili per la classe attuale.
+    draft.profSkills = draft.profSkills.filter(function (id) {
+      return skillsDef.from.indexOf(id) !== -1;
+    });
+
+    container.appendChild(el('div', 'edit-section-label', 'Scegli ' + skillsDef.count + ' competenze'));
+
+    var counterEl = el('div', 'create-points-counter');
+    container.appendChild(counterEl);
+
+    var chipRow = el('div', 'chip-row');
+    container.appendChild(chipRow);
+
+    var chipEls = {};
+
+    function refresh() {
+      var n = draft.profSkills.length;
+      var atCap = n >= skillsDef.count;
+      counterEl.textContent = n + ' / ' + skillsDef.count;
+
+      skillsDef.from.forEach(function (id) {
+        var chip = chipEls[id];
+        var isOn = draft.profSkills.indexOf(id) !== -1;
+        chip.classList.toggle('on', isOn);
+        var disable = atCap && !isOn;
+        chip.disabled = disable;
+        chip.classList.toggle('is-disabled', disable);
+      });
+      updateNav();
+    }
+
+    skillsDef.from.forEach(function (id) {
+      var match = allSkills.filter(function (s) { return s.id === id; })[0];
+      var chip = el('button', 'chip', match ? match.label : id);
+      chip.type = 'button';
+
+      chip.addEventListener('click', function () {
+        var idx = draft.profSkills.indexOf(id);
+        if (idx !== -1) {
+          draft.profSkills.splice(idx, 1);
+        } else if (draft.profSkills.length < skillsDef.count) {
+          draft.profSkills.push(id);
+        }
+        refresh();
+      });
+
+      chipEls[id] = chip;
+      chipRow.appendChild(chip);
+    });
+
+    refresh();
+  }
+
   /* ---------- render ---------- */
 
   function render() {
@@ -587,9 +685,12 @@
       } else if (step.id === 'punteggi') {
         stepBodyEl.classList.add('has-fields');
         renderPunteggi(stepBodyEl);
+      } else if (step.id === 'competenze') {
+        stepBodyEl.classList.add('has-fields');
+        renderCompetenze(stepBodyEl);
       } else {
         // Segnaposto: il contenuto reale degli altri passi arriva nei
-        // prossimi sotto-step (b2.3+).
+        // prossimi sotto-step (b2.4+).
         stepBodyEl.classList.remove('has-fields');
         stepBodyEl.textContent = 'Contenuto del passo "' + step.title + '" — in arrivo (step b2).';
       }
@@ -645,7 +746,8 @@
     draft = {
       name: '', speciesId: null, classId: null,
       scoreMethod: 'pointbuy',
-      abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 }
+      abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 },
+      profSkills: []
     };
     document.body.classList.remove('in-dashboard');
     document.body.classList.add('in-create');

@@ -1,12 +1,14 @@
 /*
  * Creazione personaggio (Fase 5, Blocco 5.B). b1: scaffold — navigazione a
  * passi con corpi segnaposto. b2.1: contenuto reale dei passi Specie e
- * Classe (vedi ".has-fields" più sotto). b2.2 (qui): contenuto del passo
+ * Classe (vedi ".has-fields" più sotto). b2.2: contenuto del passo
  * Punteggi — selettore di metodo (.create-method-row) e sezioni Point-buy/
  * Array standard/Manuale, che riusano gli stepper .edit-stat-*/.edit-stepper
- * di css/components/edit-sheet.css. Gli altri passi restano segnaposto fino
- * al b2.3+. La generazione vera arriva nel b3. Pattern deciso: "Mago a
- * schermo intero".
+ * di css/components/edit-sheet.css. b2.3 (qui): contenuto del passo
+ * Competenze — riga di sola lettura Tiri Salvezza (.create-saves-line) e
+ * chip competenze (.chip/.chip-row di edit-sheet.css, con stato disabilitato
+ * al tetto). Gli altri passi restano segnaposto fino al b2.4+. La
+ * generazione vera arriva nel b3. Pattern deciso: "Mago a schermo intero".
  *
  * body.in-create mostra #view-create e nasconde l'app normale, esattamente
  * come body.in-dashboard fa per la dashboard (vedi css/components/dashboard.css)
@@ -333,4 +335,23 @@ body.in-create .dashboard-view {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+}
+
+/* ---------- passo Competenze (sotto-step b2.3) ----------
+   Titolo "Scegli N competenze" e contatore riusano .edit-section-label e
+   .create-points-counter già definite sopra; le chip competenza riusano
+   .chip/.chip-row (css/components/edit-sheet.css). Restano da aggiungere
+   solo la riga di sola lettura dei Tiri Salvezza e lo stato disabilitato
+   dei chip quando si raggiunge il numero di competenze da scegliere. */
+
+.create-saves-line {
+  margin: 0 0 var(--space-3);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.chip:disabled,
+.chip.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

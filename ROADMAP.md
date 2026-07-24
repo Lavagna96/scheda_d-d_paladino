@@ -464,7 +464,14 @@ invariato e fa da test di non-regressione a ogni passo.
 > (array consigliati p.37), modificatori live e validazione di "Avanti" per
 > metodo. Riusa stepper/select di `edit-sheet`. Verificato nel browser (costi e
 > tetto 15, de-dup array, switch metodo, Tharion invariato, console pulita);
-> nessun cache bump (`?v=67`). *Prossimo:* **b2.3** — Competenze + Equipaggiamento.
+> nessun cache bump (`?v=67`).
+>
+> **b2.3 FATTO (2026-07-23):** passo **Competenze** — TS fissi della classe in
+> sola lettura + scelta di N competenze di abilità (Barbaro/Paladino coi dati
+> PHB verificati p.50/p.108; fallback "2 tra 18" per le altre classi), cap a N,
+> validazione di "Avanti", auto-correzione al cambio classe. Costante
+> `CLASS_SKILLS` in `create.js`, nessun tocco al manuale, `?v=67`. Verificato nel
+> browser. *Prossimo:* **b2.4** — Equipaggiamento (armatura/scudo/arma).
 
 **Blocco 5.C — Le classi, una alla volta**
 *(stesso pacchetto ripetibile, dati dal PDF PHB 2024 locale, riassunti IT originali — mai testo integrale)*
