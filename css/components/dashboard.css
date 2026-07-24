@@ -223,3 +223,10 @@ body.in-dashboard #global-fab {
   font-size: 13px;
   color: #6f675a;
 }
+
+/* Cliccabile: apre il wizard di creazione (js/create.js, Fase 5 Blocco 5.B) */
+.dash-slot-clickable {
+  cursor: pointer;
+  color: var(--accent-gold-dim);
+  font-style: normal;
+}

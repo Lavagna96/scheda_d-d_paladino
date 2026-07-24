@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=66">
+<link rel="stylesheet" href="css/styles.css?v=67">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -72,10 +72,33 @@
   <div class="dash-list" id="dash-list"></div>
 </section>
 
+<!-- ========== CREAZIONE PERSONAGGIO (Fase 5, Blocco 5.B — scaffold) ========== -->
+<section id="view-create" class="create-view" aria-label="Creazione personaggio">
+  <div class="create-header">
+    <span class="create-header-title">Nuovo Personaggio</span>
+    <button type="button" class="create-cancel-btn" id="create-cancel" aria-label="Annulla">✕</button>
+  </div>
+  <div class="create-progress">
+    <div class="create-progress-track">
+      <div class="create-progress-fill" id="create-progress-fill"></div>
+    </div>
+    <span class="create-step-num" id="create-step-num"></span>
+  </div>
+  <div class="create-content">
+    <h2 class="create-step-title" id="create-step-title"></h2>
+    <div class="create-step-body" id="create-step-body"></div>
+  </div>
+  <div class="create-footer">
+    <button type="button" class="create-btn create-btn-ghost" id="create-back">← Indietro</button>
+    <button type="button" class="create-btn create-btn-gold" id="create-next">Avanti →</button>
+  </div>
+  <p class="create-footer-note hidden" id="create-footer-note"></p>
+</section>
+
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=66" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=67" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -913,7 +936,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img id="avatar-full-img" src="avatar-full.jpg?v=66" alt="Ritratto di Tharion Velnar">
+      <img id="avatar-full-img" src="avatar-full.jpg?v=67" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -924,28 +947,29 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=66"></script>
-<script src="js/manual-55.js?v=66"></script>
-<script src="js/config.js?v=66"></script>
-<script src="js/storage.js?v=66"></script>
-<script src="js/engine.js?v=66"></script>
-<script src="js/hp-bar.js?v=66"></script>
-<script src="js/header.js?v=66"></script>
-<script src="js/stats.js?v=66"></script>
-<script src="js/traits.js?v=66"></script>
-<script src="js/sheet.js?v=66"></script>
-<script src="js/grimorio.js?v=66"></script>
-<script src="js/treasury.js?v=66"></script>
-<script src="js/diary.js?v=66"></script>
-<script src="js/inspiration.js?v=66"></script>
-<script src="js/bottom-sheet.js?v=66"></script>
-<script src="js/edit-sheet.js?v=66"></script>
-<script src="js/items.js?v=66"></script>
-<script src="js/levelup.js?v=66"></script>
-<script src="js/app.js?v=66"></script>
-<script src="js/faceid.js?v=66"></script>
-<script src="js/dashboard.js?v=66"></script>
-<script src="js/portrait.js?v=66"></script>
-<script type="module" src="js/cloud.js?v=66"></script>
+<script src="js/firebase-config.js?v=67"></script>
+<script src="js/manual-55.js?v=67"></script>
+<script src="js/config.js?v=67"></script>
+<script src="js/storage.js?v=67"></script>
+<script src="js/engine.js?v=67"></script>
+<script src="js/hp-bar.js?v=67"></script>
+<script src="js/header.js?v=67"></script>
+<script src="js/stats.js?v=67"></script>
+<script src="js/traits.js?v=67"></script>
+<script src="js/sheet.js?v=67"></script>
+<script src="js/grimorio.js?v=67"></script>
+<script src="js/treasury.js?v=67"></script>
+<script src="js/diary.js?v=67"></script>
+<script src="js/inspiration.js?v=67"></script>
+<script src="js/bottom-sheet.js?v=67"></script>
+<script src="js/edit-sheet.js?v=67"></script>
+<script src="js/items.js?v=67"></script>
+<script src="js/levelup.js?v=67"></script>
+<script src="js/app.js?v=67"></script>
+<script src="js/faceid.js?v=67"></script>
+<script src="js/dashboard.js?v=67"></script>
+<script src="js/create.js?v=67"></script>
+<script src="js/portrait.js?v=67"></script>
+<script type="module" src="js/cloud.js?v=67"></script>
 </body>
 </html>

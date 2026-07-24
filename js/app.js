@@ -937,6 +937,9 @@
     window.AppEditSheet.init();
     window.AppItems.init();
     window.AppLevelUp.init();
+    if (window.AppCreate) {
+      window.AppCreate.init();
+    }
 
     moveNavIndicator(navLinkFor(currentView), false);
 

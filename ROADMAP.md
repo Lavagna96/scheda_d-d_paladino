@@ -425,12 +425,29 @@ invariato e fa da test di non-regressione a ogni passo.
 **Blocco 5.B — Creazione di un personaggio da zero**
 *(il punto 2; parte quando esistono ≥2 classi generiche, così il selettore ha senso)*
 
-- [ ] 5.B.1 UX del flusso a passi (3 proposte + preview): specie → classe →
-      punteggi → competenze → equipaggiamento → sottoclasse/incantesimi se dovuti.
+- [x] 5.B.1 UX del flusso a passi — DECISA (2026-07-23): tra 3 proposte con
+      preview (artifact:
+      https://claude.ai/code/artifact/2fb67a1c-9854-4156-a085-db93ed537e49),
+      scelta la **A — Mago a schermo intero** (un passo per schermata, barra di
+      avanzamento, Avanti/Indietro). Livello di partenza **1 fisso**; punteggi
+      con **tutti e tre i metodi** (point-buy default, array standard, manuale).
+      Flusso: specie → classe → punteggi → competenze → equipaggiamento →
+      sottoclasse/incantesimi se dovuti.
 - [ ] 5.B.2 Genera un `character` valido e **vuoto** (nessun residuo Tharion) →
       nuovo documento Firestore → compare in dashboard.
 - [ ] 5.B.3 Ripulire `config.js`: STEED/SWORD_TIERS/FEATURES/SPELLS da globali
       di Tharion a dati del personaggio.
+
+> *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
+> `js/create.js` (`window.AppCreate`, macchina a stati dei 6 passi, corpi
+> segnaposto) e `css/components/create.css` (vista `#view-create` pilotata da
+> `body.in-create`, come la dashboard); slot "Nuovo personaggio" della dashboard
+> ora cliccabile; `init` agganciato in `app.js`. Cache `?v=66→67`. Implementato
+> dal subagente `implementatore` (bloccatosi in fase di verifica per un timeout
+> del browser); revisione + controprova completate in sessione: navigazione/
+> barra/Indietro/Annulla OK, ultimo passo "Crea personaggio" disabilitato
+> (generazione = b3), console pulita, Tharion e viste esistenti invariati.
+> *Prossimo:* **b2** — contenuto reale dei passi.
 
 **Blocco 5.C — Le classi, una alla volta**
 *(stesso pacchetto ripetibile, dati dal PDF PHB 2024 locale, riassunti IT originali — mai testo integrale)*
@@ -532,6 +549,14 @@ Della **Fase 5** (da sciogliere al blocco giusto; raccomandazione già annotata)
 - 2026-07-22 — Workflow commit: **un commit per ogni step** (in locale), per uno
   storico granulare e più facile da analizzare (git bisect/blame). Il deploy
   (push) resta da chiedere a parte, come da CLAUDE.md.
+
+- 2026-07-23 — Blocco 5.B (creazione), decisioni prima dell'implementazione:
+  **livello di partenza 1 fisso** (poi si sale col wizard), **punteggi con tutti
+  e tre i metodi** (point-buy default / array standard / manuale), **UX A —
+  Mago a schermo intero** (tra 3 proposte con preview). Implementazione a
+  sotto-step: b1 shell vista + navigazione, b2 contenuto dei passi, b3
+  generazione + salvataggio del personaggio (nuovo doc Firestore), b4 pulizia
+  dei residui di Tharion in `config.js` (STEED/SWORD_TIERS/FEATURES/SPELLS).
 
 ## Decisioni prese (Fase 4)
 

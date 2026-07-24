@@ -2,8 +2,9 @@
   /*
    * Dashboard multi-personaggio (Fase 2): lista dei personaggi dell'utente,
    * una card per ciascuno (ritratto o emblema di riserva), tap per entrare
-   * nella scheda. Nessuna creazione qui: solo un segnaposto "presto
-   * disponibile". Popolata da js/cloud.js via render(items, onSelect).
+   * nella scheda. Lo slot "Nuovo personaggio" apre il wizard di creazione
+   * (js/create.js, Fase 5 Blocco 5.B). Popolata da js/cloud.js via
+   * render(items, onSelect).
    */
 
   function classLine(item) {
@@ -72,8 +73,13 @@
     });
 
     var slot = document.createElement('div');
-    slot.className = 'dash-slot';
-    slot.textContent = '✦ Nuovo personaggio — presto disponibile';
+    slot.className = 'dash-slot dash-slot-clickable';
+    slot.textContent = '✦ Nuovo personaggio';
+    slot.addEventListener('click', function () {
+      if (window.AppCreate) {
+        window.AppCreate.open();
+      }
+    });
     list.appendChild(slot);
   }
 

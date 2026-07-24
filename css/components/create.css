@@ -1,0 +1,200 @@
+/*
+ * Creazione personaggio (Fase 5, Blocco 5.B, sotto-step b1 — solo scaffold:
+ * navigazione a passi con corpi segnaposto; il contenuto vero arriva nel b2,
+ * la generazione nel b3). Pattern deciso: "Mago a schermo intero".
+ *
+ * body.in-create mostra #view-create e nasconde l'app normale, esattamente
+ * come body.in-dashboard fa per la dashboard (vedi css/components/dashboard.css)
+ * e body.auth-out/auth-locked per il login (vedi css/components/login.css).
+ * js/create.js scambia in-dashboard con in-create in open()/close().
+ */
+
+.create-view {
+  position: fixed;
+  inset: 0;
+  z-index: 260; /* sopra la dashboard (250), sotto il login (300) */
+  display: none;
+  flex-direction: column;
+  padding: calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px);
+  background: var(--bg-principal)
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 164, 67, 0.10), transparent);
+}
+
+body.in-create .create-view {
+  display: flex;
+}
+
+body.in-create #app-header,
+body.in-create #main-content,
+body.in-create #bottom-nav,
+body.in-create #global-fab,
+body.in-create .dashboard-view {
+  display: none;
+}
+
+/* ---------- intestazione ---------- */
+
+.create-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto 20px;
+  flex: none;
+}
+
+.create-header-title {
+  font-family: var(--font-title);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.create-cancel-btn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- barra di avanzamento ---------- */
+
+.create-progress {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto 24px;
+  flex: none;
+}
+
+.create-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: var(--radius-bar);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  overflow: hidden;
+}
+
+.create-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: var(--radius-bar);
+  background: linear-gradient(90deg, var(--accent-gold-dim), var(--accent-gold));
+  transition: width 0.3s ease;
+}
+
+.create-step-num {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ---------- corpo del passo ---------- */
+
+.create-content {
+  flex: 1;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.create-step-title {
+  font-family: var(--font-title);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  margin: 0 0 18px;
+}
+
+.create-step-body {
+  background: var(--bg-card);
+  border: 1px solid var(--border-gold-soft);
+  border-radius: var(--radius-lg);
+  padding: 28px 20px;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- footer / navigazione ---------- */
+
+.create-footer {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 440px;
+  margin: 20px auto 0;
+  flex: none;
+}
+
+.create-footer-note {
+  width: 100%;
+  max-width: 440px;
+  margin: 10px auto 0;
+  text-align: center;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-secondary);
+  flex: none;
+}
+
+.create-footer-note.hidden {
+  display: none;
+}
+
+.create-btn {
+  flex: 1;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  min-height: var(--touch-min);
+  border: none;
+}
+
+.create-btn-gold {
+  background: linear-gradient(180deg, #e0bb5c, #b8923a);
+  color: #241d0d;
+  box-shadow: 0 4px 14px rgba(201, 164, 67, 0.25);
+}
+
+.create-btn-ghost {
+  background: none;
+  color: var(--accent-gold);
+  border: 1px solid var(--border-gold);
+}
+
+.create-btn:disabled,
+.create-btn.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
