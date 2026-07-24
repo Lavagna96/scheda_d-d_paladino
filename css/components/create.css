@@ -1,7 +1,9 @@
 /*
- * Creazione personaggio (Fase 5, Blocco 5.B, sotto-step b1 — solo scaffold:
- * navigazione a passi con corpi segnaposto; il contenuto vero arriva nel b2,
- * la generazione nel b3). Pattern deciso: "Mago a schermo intero".
+ * Creazione personaggio (Fase 5, Blocco 5.B). b1: scaffold — navigazione a
+ * passi con corpi segnaposto. b2.1 (qui): contenuto reale dei passi Specie e
+ * Classe (vedi ".has-fields" più sotto); gli altri passi restano segnaposto
+ * fino al b2.2+. La generazione vera arriva nel b3. Pattern deciso: "Mago a
+ * schermo intero".
  *
  * body.in-create mostra #view-create e nasconde l'app normale, esattamente
  * come body.in-dashboard fa per la dashboard (vedi css/components/dashboard.css)
@@ -197,4 +199,84 @@ body.in-create .dashboard-view {
   opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+/* ---------- passi con campi reali (Specie, Classe — sotto-step b2.1) ----------
+   .create-step-body di base è pensato per il segnaposto centrato in corsivo
+   (vedi sopra): quando il passo ha campi veri, .has-fields lo riporta a un
+   blocco normale allineato in alto, senza toccare bordo/sfondo/ombra della
+   "card" già definiti sopra. */
+
+.create-step-body.has-fields {
+  display: block;
+  text-align: left;
+  font-style: normal;
+  color: var(--text-primary);
+}
+
+.create-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 6px 2px;
+}
+
+.create-in {
+  width: 100%;
+  box-sizing: border-box;
+  background: #17140f;
+  border: 1px solid #3a332a;
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px; /* evita lo zoom automatico di iOS sul focus */
+  padding: 13px 14px;
+  margin-bottom: 20px;
+  outline: none;
+}
+
+.create-in:focus {
+  border-color: var(--accent-gold);
+}
+
+.create-tile-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.create-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-1);
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-gold-soft);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  padding: var(--space-3) var(--space-4);
+  min-height: var(--touch-min);
+  text-align: left;
+  cursor: pointer;
+}
+
+.create-tile.on {
+  border-color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.08);
+}
+
+.create-tile-name {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.create-tile-meta {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
 }

@@ -447,7 +447,16 @@ invariato e fa da test di non-regressione a ogni passo.
 > del browser); revisione + controprova completate in sessione: navigazione/
 > barra/Indietro/Annulla OK, ultimo passo "Crea personaggio" disabilitato
 > (generazione = b3), console pulita, Tharion e viste esistenti invariati.
-> *Prossimo:* **b2** — contenuto reale dei passi.
+>
+> **b2.1 FATTO (2026-07-23):** passi **Specie** (campo nome + 10 specie del
+> manuale) e **Classe** (12 classi) con stato `draft` condiviso e validazione di
+> "Avanti" (Specie richiede nome + specie; Classe richiede la classe). Tile
+> selezionabili (`<button>`), selezione e nome persistono tornando indietro; i
+> passi ancora segnaposto restano tali (`.has-fields` tolta, nessun artefatto).
+> `js/create.js` + `css/components/create.css`; nessun cache bump (resta `?v=67`).
+> Implementato dal subagente (sola verifica statica); controprova nel browser
+> fatta in sessione (flusso, validazione, persistenza, console pulita, Tharion
+> invariato). *Prossimo:* **b2.2** — passo Punteggi (point-buy / array / manuale).
 
 **Blocco 5.C — Le classi, una alla volta**
 *(stesso pacchetto ripetibile, dati dal PDF PHB 2024 locale, riassunti IT originali — mai testo integrale)*
