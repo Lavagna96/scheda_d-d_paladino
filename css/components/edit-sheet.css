@@ -138,6 +138,20 @@
   margin: 0 0 6px 2px;
 }
 
+/* Riga di sola lettura sotto l'arma scelta dal catalogo: dado, tipo di danno,
+   maestria e proprietà. Con "Personalizzata…" al suo posto compaiono i campi
+   liberi, dentro lo stesso contenitore (5.B.5). */
+.edit-custom-weapon {
+  margin-bottom: var(--space-3);
+}
+
+.edit-hint {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: -2px 0 0 2px;
+}
+
 .edit-select,
 .edit-input {
   display: block;

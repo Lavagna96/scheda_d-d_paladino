@@ -470,7 +470,7 @@ invariato e fa da test di non-regressione a ogni passo.
       strumenti ed equipaggiamento (PHB pag. 176 del PDF). Oggi il wizard lo
       salta del tutto: i punteggi restano i grezzi del point-buy e mancano
       talento e competenze. È il buco più grosso rispetto al manuale.
-- [ ] 5.B.5 Equipaggiamento dai **pacchetti del manuale** + catalogo armi
+- [x] 5.B.5 Equipaggiamento dai **pacchetti del manuale** + catalogo armi
       (decisione 2026-07-27, alternativa B di 3 con preview). Oggi arma, dado,
       tipo e maestria sono campi di testo liberi e le armature solo nomi: si
       passa alla scelta A/B del PHB (Paladino: cotta di maglia, scudo, spada
@@ -513,8 +513,21 @@ invariato e fa da test di non-regressione a ogni passo.
       9 MO; Barbaro pacchetto B → nessuna arma né armatura, 75 MO, sacca vuota,
       maestrie comunque salvate; cambio di classe che rifà le card e azzera le
       maestrie non più valide; Tharion invariato (CA 20, CD 15, PF 60, "Maestria:
-      Vex"); console pulita. *Resta:* l'editor della scheda (`edit-sheet.js`),
-      ancora a testo libero — vedi Debiti aperti.
+      Vex"); console pulita.
+      → **Editor della scheda FATTO (2026-07-27), `?v=75`.** `edit-sheet.js` non
+      ha più la lista di 4 armature né i campi liberi per l'arma: armatura da un
+      menu con tutte e 12 le voci del manuale e la CA accanto ("Piastre — CA
+      18"), scudo che dice "CA +2", arma dal catalogo (dado, tipo di danno e
+      maestria arrivano da soli, con una riga di riepilogo che mostra anche le
+      proprietà). Resta l'opzione **"Personalizzata…"**, che riapre i campi
+      liberi: è l'unico modo per le armi fuori catalogo — la Spada lunga ✦
+      (magica) di Tharion si riapre proprio così, coi suoi valori intatti.
+      Verificato in locale il giro completo: catalogo → Ascia bipenne salva
+      1d12 tagl. Cleave e la scheda mostra "Maestria: Cleave"; cambio armatura →
+      CA ricalcolata (Cuoio Borchiato + Scudo = 13 con DES −1); riaprendo
+      l'editor l'arma è già selezionata; ritorno a "Personalizzata…" → Tharion
+      di nuovo CA 20 / CD 15 con la sua spada magica. Console pulita.
+      **Con questo 5.B.5 è chiuso.**
 
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
 > `js/create.js` (`window.AppCreate`, macchina a stati dei 6 passi, corpi
@@ -832,10 +845,6 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
       salva (le armi di cui sai usare la maestria), ma la scheda mostra solo la
       maestria dell'arma impugnata. Serve una riga nei Tratti o nelle
       Caratteristiche.
-- [ ] **Editor della scheda ancora a testo libero** — `edit-sheet.js` ha ancora
-      nome/dado/tipo/maestria dell'arma come campi liberi e la vecchia lista di
-      4 armature: va portato sul catalogo del manuale come il wizard (è la
-      seconda metà di 5.B.5).
 
 ## Bug risolti
 

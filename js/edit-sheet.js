@@ -22,13 +22,54 @@
     INT: 'Intelligenza', SAG: 'Saggezza', CAR: 'Carisma'
   };
   var WEAPON_DICE = ['1d4', '1d6', '1d8', '1d10', '1d12', '2d6'];
-  var ARMOR_OPTIONS = [
-    { id: '', label: 'Nessuna armatura' },
-    { id: 'cuoio-borchiato', label: 'Cuoio Borchiato' },
-    { id: 'mezza-piastra', label: 'Mezza Piastra' },
-    { id: 'cotta-maglia', label: 'Cotta di Maglia' },
-    { id: 'piastre', label: 'Piastre' }
-  ];
+
+  /* Armature e armi vengono dal manuale (5.B.5): prima erano quattro nomi
+     scritti qui e tre campi di testo liberi per l'arma. Qui è dove si
+     personalizza — il master che ti fa partire con qualcosa in più, o la spada
+     magica trovata in giro — quindi resta l'opzione "Personalizzata", che è
+     l'unico modo per avere un'arma fuori catalogo (es. la Spada lunga ✦ di
+     Tharion, che è magica e ha un nome suo). */
+  var CUSTOM_WEAPON = '__custom__';
+
+  function armorOptions() {
+    var opts = [{ id: '', label: 'Nessuna armatura' }];
+    (window.MANUAL_55.armors || []).forEach(function (a) {
+      opts.push({ id: a.id, label: window.AppEngine.armorLabel(a.id) });
+    });
+
+    return opts;
+  }
+
+  function weaponOptions() {
+    var opts = (window.MANUAL_55.weapons || []).map(function (w) {
+      return { id: w.id, label: w.name + ' — ' + w.die + ' ' + w.dmg + ' · ' + w.mastery };
+    });
+    opts.push({ id: CUSTOM_WEAPON, label: 'Personalizzata…' });
+
+    return opts;
+  }
+
+  function weaponById(id) {
+    var found = null;
+    (window.MANUAL_55.weapons || []).forEach(function (w) {
+      if (w.id === id) {
+        found = w;
+      }
+    });
+
+    return found;
+  }
+
+  function weaponByName(name) {
+    var found = null;
+    (window.MANUAL_55.weapons || []).forEach(function (w) {
+      if (w.name === name) {
+        found = w;
+      }
+    });
+
+    return found;
+  }
   var FIGHTING_STYLES = [
     { id: 'nessuno', label: 'Nessuno' },
     { id: 'duello', label: 'Duello (+2 danni, arma a una mano)' },
@@ -249,9 +290,14 @@
 
   function buildEquipSheet() {
     var ch = window.AppStorage.getState().character;
+    // Se l'arma attuale ha lo stesso nome di una del catalogo si riapre già
+    // selezionata; altrimenti (arma magica, nome personale) resta su
+    // "Personalizzata…" coi suoi valori.
+    var known = weaponByName((ch.weapon && ch.weapon.name) || '');
     var draft = {
       armorId: (ch.armor && ch.armor.id) || '',
       shield: !!(ch.armor && ch.armor.shield),
+      weaponId: known ? known.id : CUSTOM_WEAPON,
       weaponName: (ch.weapon && ch.weapon.name) || '',
       weaponDie: (ch.weapon && ch.weapon.die) || '1d8',
       weaponType: (ch.weapon && ch.weapon.type) || '',
@@ -261,7 +307,7 @@
 
     openSheet('Modifica · Equipaggiamento');
 
-    var armorSelect = buildSelect(ARMOR_OPTIONS, draft.armorId, 'edit-armor-select');
+    var armorSelect = buildSelect(armorOptions(), draft.armorId, 'edit-armor-select');
     armorSelect.addEventListener('change', function () {
       draft.armorId = armorSelect.value;
     });
@@ -269,7 +315,8 @@
 
     var shieldField = el('div', 'edit-field');
     shieldField.appendChild(el('span', 'edit-label', 'Scudo'));
-    var shieldChip = el('button', 'chip', 'Scudo equipaggiato');
+    var shieldAc = ((window.MANUAL_55 && window.MANUAL_55.shield) || {}).ac || 2;
+    var shieldChip = el('button', 'chip', 'Scudo equipaggiato · CA +' + shieldAc);
     shieldChip.type = 'button';
     if (draft.shield) {
       shieldChip.classList.add('on');
@@ -281,39 +328,68 @@
     shieldField.appendChild(shieldChip);
     bodyEl.appendChild(shieldField);
 
-    var nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.className = 'edit-input';
-    nameInput.value = draft.weaponName;
-    nameInput.addEventListener('input', function () {
-      draft.weaponName = nameInput.value;
-    });
-    bodyEl.appendChild(buildField('Nome arma', nameInput, 'edit-weapon-name'));
+    /* Arma: dal catalogo del manuale (dado, tipo di danno e maestria arrivano
+       da soli) oppure "Personalizzata…", che riapre i campi liberi per le armi
+       magiche o inventate al tavolo. */
+    var weaponSelect = buildSelect(weaponOptions(), draft.weaponId, 'edit-weapon-select');
+    bodyEl.appendChild(buildField('Arma', weaponSelect, 'edit-weapon-select'));
 
-    var dieOptions = WEAPON_DICE.map(function (d) { return { id: d, label: d }; });
-    var dieSelect = buildSelect(dieOptions, draft.weaponDie, 'edit-weapon-die');
-    dieSelect.addEventListener('change', function () {
-      draft.weaponDie = dieSelect.value;
-    });
-    bodyEl.appendChild(buildField('Dado danni', dieSelect, 'edit-weapon-die'));
+    var customBox = el('div', 'edit-custom-weapon');
+    bodyEl.appendChild(customBox);
 
-    var typeInput = document.createElement('input');
-    typeInput.type = 'text';
-    typeInput.className = 'edit-input';
-    typeInput.value = draft.weaponType;
-    typeInput.addEventListener('input', function () {
-      draft.weaponType = typeInput.value;
-    });
-    bodyEl.appendChild(buildField('Tipo di danno', typeInput, 'edit-weapon-type'));
+    function renderWeaponFields() {
+      customBox.textContent = '';
+      if (draft.weaponId !== CUSTOM_WEAPON) {
+        var w = weaponById(draft.weaponId);
+        if (w) {
+          customBox.appendChild(el('div', 'edit-hint',
+            w.die + ' ' + w.dmg + ' · maestria ' + w.mastery +
+            (w.props.length ? ' · ' + w.props.join(', ') : '')));
+        }
 
-    var masteryInput = document.createElement('input');
-    masteryInput.type = 'text';
-    masteryInput.className = 'edit-input';
-    masteryInput.value = draft.weaponMastery;
-    masteryInput.addEventListener('input', function () {
-      draft.weaponMastery = masteryInput.value;
+        return;
+      }
+
+      var nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.className = 'edit-input';
+      nameInput.value = draft.weaponName;
+      nameInput.addEventListener('input', function () {
+        draft.weaponName = nameInput.value;
+      });
+      customBox.appendChild(buildField('Nome arma', nameInput, 'edit-weapon-name'));
+
+      var dieOptions = WEAPON_DICE.map(function (d) { return { id: d, label: d }; });
+      var dieSelect = buildSelect(dieOptions, draft.weaponDie, 'edit-weapon-die');
+      dieSelect.addEventListener('change', function () {
+        draft.weaponDie = dieSelect.value;
+      });
+      customBox.appendChild(buildField('Dado danni', dieSelect, 'edit-weapon-die'));
+
+      var typeInput = document.createElement('input');
+      typeInput.type = 'text';
+      typeInput.className = 'edit-input';
+      typeInput.value = draft.weaponType;
+      typeInput.addEventListener('input', function () {
+        draft.weaponType = typeInput.value;
+      });
+      customBox.appendChild(buildField('Tipo di danno', typeInput, 'edit-weapon-type'));
+
+      var masteryInput = document.createElement('input');
+      masteryInput.type = 'text';
+      masteryInput.className = 'edit-input';
+      masteryInput.value = draft.weaponMastery;
+      masteryInput.addEventListener('input', function () {
+        draft.weaponMastery = masteryInput.value;
+      });
+      customBox.appendChild(buildField('Maestria', masteryInput, 'edit-weapon-mastery'));
+    }
+
+    weaponSelect.addEventListener('change', function () {
+      draft.weaponId = weaponSelect.value;
+      renderWeaponFields();
     });
-    bodyEl.appendChild(buildField('Maestria', masteryInput, 'edit-weapon-mastery'));
+    renderWeaponFields();
 
     var styleSelect = buildSelect(FIGHTING_STYLES, draft.fightingStyle, 'edit-fighting-style');
     styleSelect.addEventListener('change', function () {
@@ -331,10 +407,18 @@
         }
         character.armor.shield = draft.shield;
         character.weapon = character.weapon || {};
-        character.weapon.name = draft.weaponName;
-        character.weapon.die = draft.weaponDie;
-        character.weapon.type = draft.weaponType;
-        character.weapon.mastery = draft.weaponMastery;
+        var picked = draft.weaponId !== CUSTOM_WEAPON ? weaponById(draft.weaponId) : null;
+        if (picked) {
+          character.weapon.name = picked.name;
+          character.weapon.die = picked.die;
+          character.weapon.type = picked.dmg;
+          character.weapon.mastery = picked.mastery;
+        } else {
+          character.weapon.name = draft.weaponName;
+          character.weapon.die = draft.weaponDie;
+          character.weapon.type = draft.weaponType;
+          character.weapon.mastery = draft.weaponMastery;
+        }
         character.fightingStyle = draft.fightingStyle;
       });
     });
