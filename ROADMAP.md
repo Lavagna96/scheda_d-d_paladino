@@ -433,8 +433,10 @@ invariato e fa da test di non-regressione a ogni passo.
       con **tutti e tre i metodi** (point-buy default, array standard, manuale).
       Flusso: specie → classe → punteggi → competenze → equipaggiamento →
       sottoclasse/incantesimi se dovuti.
-- [ ] 5.B.2 Genera un `character` valido e **vuoto** (nessun residuo Tharion) →
-      nuovo documento Firestore → compare in dashboard.
+- [x] 5.B.2 Genera un `character` valido e **vuoto** (nessun residuo Tharion) →
+      nuovo documento Firestore → compare in dashboard. FATTO nel codice
+      (2026-07-24, vedi *Avanzamento 5.B → b3*); scrittura Firestore reale +
+      comparsa card da collaudare da loggati.
 - [ ] 5.B.3 Ripulire `config.js`: STEED/SWORD_TIERS/FEATURES/SPELLS da globali
       di Tharion a dati del personaggio.
 
@@ -513,8 +515,32 @@ invariato e fa da test di non-regressione a ogni passo.
 > Barbaro senza selettore, azzeramento al cambio classe, layout a schermo pieno,
 > console pulita, Tharion invariato CA 20/CD 15 e grimorio intatto).
 > **Con b2.5 tutto il contenuto dei 6 passi del wizard è completo.**
-> *Prossimo:* **b3** (5.B.2) — generazione vera del `character` dai dati del
-> `draft` → nuovo documento Firestore → compare in dashboard.
+>
+> **b3 FATTO (2026-07-24):** generazione vera del personaggio (5.B.2). "Crea
+> personaggio" (ultimo passo, ora abilitato quando gli incantesimi sono completi
+> via `finaleValid()`) costruisce uno stato pulito dal draft
+> (`buildStateFromDraft` in `create.js`): `character` coi fatti base (nome,
+> classe, livello 1, specie, punteggi, TS fissi di classe, competenze,
+> armatura/scudo/arma, sottoclasse assente, stile 'nessuno'), pool correnti al
+> massimo di livello 1 dal motore (PF pieni, Imposizione piena per il Paladino,
+> nessun destriero), 0 monete e inventario/diario vuoti (partenza minimale,
+> decisione 5.B), grimorio con gli incantesimi scelti. **Nessun residuo di
+> Tharion.** Id = slug del nome (accenti/simboli normalizzati) + suffisso casuale
+> anti-collisione (es. `auriel-di-citta-9ien`). Nuovo metodo
+> `AppCloud.createCharacter(id, state)` (`cloud.js`): salva in locale
+> (`char-<id>-state`), scrive il doc `users/{uid}/characters/{id}` e ricarica la
+> dashboard; **non cambia il personaggio attivo** (nel nuovo si entra dalla
+> dashboard, come per gli altri). Verificato in locale (con mock del metodo
+> cloud): stato completo e corretto per Paladino (2 incantesimi, PF 11 /
+> Imposizione 5) e Barbaro (senz'armatura, PF 14, grimorio vuoto, Crea abilitato
+> subito), card dashboard resa ("Classe · Specie", Lv. 1, emblema), gating del
+> bottone, console pulita, Tharion invariato (CA 20 / CD 15, stato non toccato).
+> **Da collaudare da loggati** (non testabile in locale senza login): la
+> scrittura Firestore reale e la comparsa della card dopo "Crea" — il codice
+> ricalca il sync esistente (`pushNow`/`loadDashboard`). *Prossimo:* **b4
+> (5.B.3)** — pulizia dei residui globali di Tharion in `config.js`
+> (SPELLS/STEED/…) così la scheda del nuovo personaggio si apre e si rende
+> perfettamente (soprattutto il grimorio, che oggi legge `cfg.SPELLS`).
 
 **Blocco 5.C — Le classi, una alla volta**
 *(stesso pacchetto ripetibile, dati dal PDF PHB 2024 locale, riassunti IT originali — mai testo integrale)*

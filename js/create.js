@@ -14,13 +14,19 @@
    *   2024, opzione A) tutti modificabili; NIENTE stile di combattimento
    *   (per il Paladino è una scelta di livello 2, il Barbaro non lo prende
    *   mai → arriva col level-up).
-   * - b2.5 (qui): contenuto reale del passo finale Sottoclasse/Incantesimi —
+   * - b2.5 (fatto): contenuto reale del passo finale Sottoclasse/Incantesimi —
    *   a livello 1 nessuna classe sceglie la sottoclasse (tutte al livello 3:
    *   solo una nota informativa); per i caster, selettore incantesimi dal
    *   catalogo del manuale filtrato per classe e livello (Paladino: 2 di
    *   livello 1, nessun cantrip). Generico via casterType / cantripsByLevel /
    *   preparedByLevel; i non-caster (Barbaro) non hanno nulla da scegliere.
-   * - b3   (in arrivo): generazione vera del personaggio.
+   * - b3   (qui): generazione vera del personaggio. "Crea personaggio"
+   *   costruisce uno stato pulito dal draft (buildStateFromDraft, nessun
+   *   residuo di Tharion, pool al massimo di livello 1), lo salva via
+   *   AppCloud.createCharacter (localStorage + nuovo doc Firestore) e torna
+   *   in dashboard dove compare la nuova card. La resa pulita della scheda
+   *   del nuovo personaggio (togliere i globali di Tharion, es. cfg.SPELLS)
+   *   resta il passo 5.B.3.
    * Pattern "Mago a schermo intero" (5.B.1): una vista a schermo intero, un
    * passo per volta.
    *
@@ -940,6 +946,101 @@
     updateNav();
   }
 
+  /* ---------- generazione del personaggio (b3) ---------- */
+
+  // Id del nuovo personaggio: slug dal nome (senza accenti/simboli) + suffisso
+  // casuale breve, per non collidere con documenti esistenti (es.
+  // tharion-velnar) né tra personaggi con lo stesso nome.
+  function makeCharId(name) {
+    var slug = (name || '').toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32);
+    if (!slug) { slug = 'eroe'; }
+
+    return slug + '-' + Math.random().toString(36).slice(2, 6);
+  }
+
+  // Oggetto `character` (fatti base) dal draft + dati di classe/specie del
+  // manuale. Parte da zero: nessun residuo di Tharion. Sottoclasse assente
+  // (si sceglie al livello 3) e stile di combattimento 'nessuno' (arriva col
+  // level-up); i TS competenti sono quelli fissi della classe.
+  function buildCharacter() {
+    var manual = window.MANUAL_55;
+    var klass = manual.classes[draft.classId] || {};
+    var species = manual.species[draft.speciesId] || {};
+    var eq = draft.equip || defaultEquipFor(draft.classId);
+
+    var armor = { shield: !!eq.shield };
+    if (eq.armorId) { armor.id = eq.armorId; }
+
+    return {
+      name: (draft.name || '').trim(),
+      classId: draft.classId,
+      subclassId: null,
+      subclassName: '',
+      level: CREATE_LEVEL,
+      speciesId: draft.speciesId,
+      speciesLabel: species.name || '',
+      avatar: '✦',
+      abilities: Object.assign({}, draft.abilities),
+      profSaves: (klass.saves || []).slice(),
+      profSkills: (draft.profSkills || []).slice(),
+      fightingStyle: 'nessuno',
+      armor: armor,
+      weapon: {
+        name: eq.weaponName || '', die: eq.weaponDie || '1d8',
+        type: eq.weaponType || '', mastery: eq.weaponMastery || ''
+      },
+      modifiers: [], extraResources: [], items: [], feats: [], levelChoices: {}
+    };
+  }
+
+  // Stato completo e pulito del nuovo personaggio. I pool correnti partono al
+  // massimo del livello 1 (ricavati dal motore: PF pieni, Imposizione piena
+  // per il Paladino, nessun destriero); monete/inventario/diario vuoti
+  // (partenza minimale, decisione 5.B). Gli incantesimi scelti finiscono nel
+  // grimorio.
+  function buildStateFromDraft() {
+    var character = buildCharacter();
+    var poolMax = (window.AppEngine.derive(character).poolMax) || {};
+
+    return {
+      version: 3,
+      character: character,
+      pools: { hp: poolMax.hp || 0, loh: poolMax.loh || 0, steedhp: 0, tempHp: 0 },
+      spent: {},
+      coins: { mp: 0, mo: 0, ma: 0, mr: 0 },
+      steed: { name: '' },
+      treasury: {
+        carryMax: (character.abilities.FOR || 10) * 15, // capacità PHB = FOR × 15
+        partyItems: [], personalItems: []
+      },
+      diary: { sessions: [], png: [], quests: { active: [], completed: [] } },
+      inspiration: false,
+      deathSaves: { success: 0, fail: 0 },
+      grimoire: {
+        prepared: (draft.preparedSpells || []).slice(),
+        cantrips: (draft.cantrips || []).slice()
+      }
+    };
+  }
+
+  // "Crea personaggio" (ultimo passo): genera lo stato dal draft, torna alla
+  // dashboard e delega a AppCloud la persistenza (localStorage + Firestore) e
+  // il refresh della lista. Non cambia il personaggio attivo: nel nuovo si
+  // entra dalla dashboard, come per gli altri.
+  function finishCreation() {
+    if (!finaleValid()) {
+      return;
+    }
+    var id = makeCharId(draft.name);
+    var state = buildStateFromDraft();
+    close();
+    if (window.AppCloud && window.AppCloud.createCharacter) {
+      window.AppCloud.createCharacter(id, state);
+    }
+  }
+
   /* ---------- render ---------- */
 
   function render() {
@@ -992,14 +1093,14 @@
 
     if (nextBtn) {
       nextBtn.textContent = isLast ? 'Crea personaggio' : 'Avanti →';
-      // La generazione vera arriva nel b3: all'ultimo passo il bottone resta
-      // disabilitato; negli altri dipende dalla validità del passo corrente.
-      nextBtn.disabled = isLast ? true : !stepValid();
+      // Il bottone dipende sempre dalla validità del passo corrente; all'ultimo
+      // passo stepValid() = finaleValid() e il click genera il personaggio (b3).
+      nextBtn.disabled = !stepValid();
       nextBtn.classList.toggle('is-disabled', nextBtn.disabled);
     }
     if (footerNoteEl) {
-      footerNoteEl.textContent = isLast ? 'generazione in arrivo (b3)' : '';
-      footerNoteEl.classList.toggle('hidden', !isLast);
+      footerNoteEl.textContent = '';
+      footerNoteEl.classList.add('hidden');
     }
   }
 
@@ -1007,10 +1108,11 @@
 
   function next() {
     if (nextBtn && nextBtn.disabled) {
-      return; // passo non valido, oppure ultimo passo (bottone disabilitato)
+      return; // passo non valido
     }
     if (stepIndex >= STEPS.length - 1) {
-      return; // ultimo passo: "Crea personaggio" è disabilitato, nessuna azione
+      finishCreation(); // ultimo passo: "Crea personaggio" genera il personaggio
+      return;
     }
     stepIndex = Math.min(STEPS.length - 1, stepIndex + 1);
     render();

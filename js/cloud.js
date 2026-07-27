@@ -322,6 +322,33 @@ import {
     location.reload(); // stato pulito: scelta deliberata
   }
 
+  /* Crea un nuovo personaggio (dal wizard di creazione, js/create.js): salva
+     subito lo stato in locale sotto la sua chiave, scrive il documento
+     Firestore e — a scrittura conclusa — ricarica la lista della dashboard così
+     la nuova card compare. NON cambia il personaggio attivo: nel nuovo si entra
+     dalla dashboard, come per gli altri. Offline lo stato resta in locale
+     (comparirà al prossimo sync). */
+  function createCharacter(id, state) {
+    try {
+      localStorage.setItem('char-' + id + '-state', JSON.stringify(state));
+    } catch (e) { /* ignore */ }
+
+    if (!user) {
+      // Caso difensivo: il wizard si raggiunge solo da loggati. Lo stato è già
+      // in locale; loadDashboard richiederebbe user.uid, quindi non la chiamo.
+      return Promise.resolve();
+    }
+
+    return setDoc(doc(db, 'users', user.uid, 'characters', id), {
+      state: JSON.parse(JSON.stringify(state)),
+      updatedAt: serverTimestamp()
+    }).then(function () {
+      loadDashboard();
+    }).catch(function () {
+      loadDashboard();
+    });
+  }
+
   /* Dopo l'autenticazione (ed eventuale sblocco Face ID) si atterra sempre
      sulla dashboard, TRANNE quando arriva da lì una scelta già fatta
      (sessionStorage 'app-skip-dashboard', impostato da onSelectCharacter
@@ -595,6 +622,7 @@ import {
   window.AppCloud = {
     enabled: true,
     schedulePush: schedulePush,
+    createCharacter: createCharacter,
     getUser: function () { return user; }
   };
 })();
