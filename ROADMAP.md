@@ -813,19 +813,21 @@ Della **Fase 5** (da sciogliere al blocco giusto; raccomandazione già annotata)
 completo di tutto**. Qui finisce ogni cosa incompleta che incontro mentre
 lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
 
-- [ ] **4 incantesimi del giuramento non sono nel catalogo** — Faro di Speranza,
-      Libertà di Movimento, Guardiano della Fede, Colpo Infuocato. Nella
-      tabella `devozione.spellsByLevel` (livelli 9/13/17) stanno con `id: null`:
-      si elencano ma non si aprono. Non tocca nessuno finché Tharion è al 7°,
-      ma va chiuso prima che qualcuno arrivi al 9°. Fonte: PHB pag. 110 del PDF.
+- [x] ~~**4 incantesimi del giuramento non sono nel catalogo**~~ — FATTO
+      (2026-07-27, manuale `version: 22`): Faro di Speranza, Libertà di
+      Movimento, Guardiano della Fede e Colpo Infuocato sono entrati nel
+      catalogo con riassunti originali in italiano dal PDF. `classes` resta
+      quella vera (Chierico e compagnia): non sono sulla lista del Paladino, gli
+      arrivano solo dal giuramento, quindi non deve poterli *scegliere*.
+      Verificato: tutte e 10 le voci di `devozione.spellsByLevel` (3→17) ora si
+      aprono.
 - [ ] **Statblock del destriero scritto fisso nell'HTML** — CA 12, velocità,
       caratteristiche e le tre forme (Celestiale/Folletto/Immondo) sono markup
       statico in `index.html`: è il destriero di Tharion, uguale per chiunque.
       Va ai dati come il resto (stesso trattamento di 5.B.3).
-- [ ] **Nome del file di export sempre `tharion-velnar-backup.json`** —
-      hardcoded in `js/app.js` (`opt-export`): esportando un altro personaggio
-      il file porta comunque il nome di Tharion. Va costruito dal nome del
-      personaggio attivo.
+- [x] ~~**Nome del file di export sempre `tharion-velnar-backup.json`**~~ —
+      FATTO (2026-07-27): il nome segue il personaggio attivo
+      (`prova-backup.json`), slug con accenti e simboli normalizzati.
 - [ ] **Trucchetti scelti in creazione** — `grimoire.cantrips` ora viene letto
       dal grimorio (5.B.3), ma nessuna classe già implementata ne ha: il
       percorso resta da collaudare davvero con la prima classe che li prende
@@ -841,10 +843,12 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
 - [ ] **Peso dei kit non pesato** — Kit del sacerdote e Kit dell'esploratore
       entrano nella sacca con `weight: 0`: il PHB ne dà contenuto e costo ma
       non il peso complessivo, andrebbe sommato dai singoli oggetti.
-- [ ] **`weaponMasteries` del personaggio non è ancora mostrato** — il wizard lo
-      salva (le armi di cui sai usare la maestria), ma la scheda mostra solo la
-      maestria dell'arma impugnata. Serve una riga nei Tratti o nelle
-      Caratteristiche.
+- [x] ~~**`weaponMasteries` del personaggio non è ancora mostrato**~~ — FATTO
+      (2026-07-27): riga sotto la tabella Attacchi, "Maestrie nelle armi: Spada
+      lunga (Sap), Giavellotto (Slow)", nascosta per chi non ne ha.
+      **Tharion resta senza**: le sue due maestrie da paladino di 7° non sono
+      mai state registrate e il manuale non dice quali abbia scelto — vanno
+      scelte da lui (serve un modo per farlo dall'editor).
 
 ## Bug risolti
 

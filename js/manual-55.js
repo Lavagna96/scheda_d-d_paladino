@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 21,
+  version: 22,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -356,16 +356,16 @@ window.MANUAL_55 = {
               { id: 'zona-di-verita', name: 'Zona di Verità' }
             ],
             9: [
-              { id: null, name: 'Faro di Speranza' },
+              { id: 'faro-speranza', name: 'Faro di Speranza' },
               { id: 'dissolvi-magie', name: 'Dissolvi Magie' }
             ],
             13: [
-              { id: null, name: 'Libertà di Movimento' },
-              { id: null, name: 'Guardiano della Fede' }
+              { id: 'liberta-movimento', name: 'Libertà di Movimento' },
+              { id: 'guardiano-fede', name: 'Guardiano della Fede' }
             ],
             17: [
               { id: 'comunione', name: 'Comunione' },
-              { id: null, name: 'Colpo Infuocato' }
+              { id: 'colpo-infuocato', name: 'Colpo Infuocato' }
             ]
           },
           features: {
@@ -631,6 +631,13 @@ window.MANUAL_55 = {
       classes: ['paladino', 'chierico'],
       meta: 'Azione · 9 m · Istantaneo · V, S',
       desc: 'Crei cibo (insipido ma nutriente) e acqua sufficienti a sfamare 15 umanoidi o 5 destrieri per 24 ore.' },
+    /* Concessi sempre preparati dal Giuramento di Devozione (9°/13°/17°): non
+       sono sulla lista del Paladino, quindi `classes` resta quella vera — un
+       paladino non può sceglierli, se li ritrova dal giuramento. */
+    { id: 'faro-speranza', name: 'Faro di Speranza', level: 3, school: 'Abiurazione',
+      classes: ['chierico'],
+      meta: 'Azione · 9 m · 1 min CONC · V, S',
+      desc: 'Quante creature vuoi entro gittata ottengono vantaggio ai TS Saggezza e ai tiri salvezza contro morte, e recuperano il massimo dei PF possibili da ogni cura.' },
     { id: 'dissolvi-magie', name: 'Dissolvi Magie', level: 3, school: 'Abiurazione',
       classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'stregone', 'warlock', 'mago'],
       meta: 'Azione · 36 m · Istantaneo · V, S',
@@ -653,6 +660,15 @@ window.MANUAL_55 = {
       desc: 'Una creatura morta da non più di 1 minuto torna in vita con 1 PF. Non funziona su chi è morto di vecchiaia e non rigenera parti del corpo mancanti.' },
 
     /* ===== 4° livello ===== */
+    // Dal Giuramento di Devozione al 13° (vedi nota al 3° livello).
+    { id: 'liberta-movimento', name: 'Libertà di Movimento', level: 4, school: 'Abiurazione',
+      classes: ['bardo', 'chierico', 'druido', 'ranger'],
+      meta: 'Azione · Tocco · 1 ora · V, S, M (una cinghia di cuoio)',
+      desc: 'Una creatura volontaria ignora il terreno difficile; nessun effetto magico può ridurne la velocità né renderla Paralizzata o Trattenuta. Può inoltre spendere 1,5 m di movimento per liberarsi da prese non magiche.' },
+    { id: 'guardiano-fede', name: 'Guardiano della Fede', level: 4, school: 'Evocazione',
+      classes: ['chierico'],
+      meta: 'Azione · 9 m · 8 ore · V',
+      desc: 'Un guardiano spettrale Grande e invulnerabile occupa uno spazio libero a vista. Il nemico che gli arriva entro 3 m per la prima volta nel turno, o vi comincia il turno, fa un TS Destrezza: 20 danni radiosi se fallisce, metà se riesce. Svanisce dopo aver inflitto 60 danni.' },
     { id: 'aura-purezza', name: 'Aura di Purezza', level: 4, school: 'Abiurazione',
       classes: ['paladino', 'chierico'],
       meta: 'Azione · Sé (aura 9 m) · 10 min CONC · V',
@@ -679,6 +695,11 @@ window.MANUAL_55 = {
       desc: '+4d6 psichici al colpo. Il bersaglio fa TS Saggezza: se fallisce è Stordito fino alla fine del tuo prossimo turno. +1d6 per ogni slot oltre il 4°.' },
 
     /* ===== 5° livello ===== */
+    // Dal Giuramento di Devozione al 17° (vedi nota al 3° livello).
+    { id: 'colpo-infuocato', name: 'Colpo Infuocato', level: 5, school: 'Invocazione',
+      classes: ['chierico'],
+      meta: 'Azione · 18 m · Istantaneo · V, S, M (un pizzico di zolfo)',
+      desc: 'Una colonna di fuoco alta 12 m e con raggio 3 m piomba dall\'alto: chi è dentro fa un TS Destrezza e subisce 5d6 danni da fuoco più 5d6 radiosi, metà se riesce. +1d6 per tipo di danno per ogni slot oltre il 5°.' },
     { id: 'cerchio-potere', name: 'Cerchio di Potere', level: 5, school: 'Abiurazione',
       classes: ['paladino', 'chierico', 'mago'],
       meta: 'Azione · Sé (aura 9 m) · 10 min CONC · V',

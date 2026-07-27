@@ -804,11 +804,17 @@
     });
 
     document.getElementById('opt-export').addEventListener('click', function () {
-      var data = JSON.stringify(window.AppStorage.getState(), null, 2);
+      var state = window.AppStorage.getState();
+      var data = JSON.stringify(state, null, 2);
       var blob = new Blob([data], { type: 'application/json' });
       var a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'tharion-velnar-backup.json';
+      // Il nome del file segue il personaggio esportato: prima era sempre
+      // quello di Tharion, anche esportando qualcun altro.
+      var slug = ((state.character && state.character.name) || 'personaggio')
+        .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'personaggio';
+      a.download = slug + '-backup.json';
       a.click();
       panel.classList.add('hidden');
     });

@@ -197,6 +197,24 @@
       mastEl.classList.toggle('hidden', !mastery);
     }
 
+    // Maestrie possedute (scelte alla creazione): il personaggio le sa usare
+    // anche se in mano ha un'altra arma, quindi vanno dette a parte.
+    var ownedEl = document.getElementById('atk-masteries');
+    if (ownedEl) {
+      var owned = (ch.weaponMasteries || []).map(function (id) {
+        var w = null;
+        (window.MANUAL_55.weapons || []).forEach(function (x) {
+          if (x.id === id) {
+            w = x;
+          }
+        });
+
+        return w ? w.name + ' (' + w.mastery + ')' : id;
+      });
+      ownedEl.textContent = owned.length ? 'Maestrie nelle armi: ' + owned.join(', ') : '';
+      ownedEl.classList.toggle('hidden', !owned.length);
+    }
+
     // Riga Soffio: solo per chi ha quell'attacco (Dragonide → risorsa 'breath').
     var hasBreath = view.resources.some(function (r) { return r.key === 'breath'; });
     var breathHit = document.getElementById('atk-breath-hit');
