@@ -269,6 +269,55 @@ Ogni step si chiude con verifica e (dove tocca file) commit + deploy, come il re
       Punizione di Protezione 15, Nimbo Sacro 20). `manual.version` 13→14. Altre
       sottoclassi in seguito come puri dati. Verificato (struttura + Tharion
       identico, console pulita). Cache busting `?v=59`. Committato e deployato.
+      → **Completato con gli altri 3 giuramenti (2026-07-27), `?v=85`,
+      `manual.version` 27→28.** Il Paladino ne ha 4 nel PHB (Devozione, Gloria,
+      Antichi, Vendetta); mancavano gli altri tre, e il wizard di level-up
+      auto-assegnava la sottoclasse quando ce n'era una sola — con 4 non poteva
+      più farlo da solo. Aggiunti ai dati:
+      - **Giuramento di Gloria** (p.113-114 PDF): tenets, `spellsByLevel` (Dardo
+        di Guida/Eroismo, Potenziare Capacità/Arma Magica, Accelerare/Protezione
+        dall'Energia, Costrizione/Libertà di Movimento, Ricordo
+        Leggendario/Presenza Regale di Yolande), `features` (Punizione
+        Ispiratrice + Atleta Impareggiabile a 3, Aura di Alacrità a 7, Difesa
+        Gloriosa a 15, Leggenda Vivente a 20).
+      - **Giuramento degli Antichi** (p.114-115): Ira della Natura a 3, Aura
+        Arcana a 7 (resistenza Necrotico/Psichico/Radioso), Sentinella
+        Immortale a 15, Campione degli Antichi a 20; incantesimi da natura
+        (Colpo Intrappolante, Passo Fatato, Raggio Lunare, Tempesta di
+        Ghiaccio, Passo dell'Albero…).
+      - **Giuramento di Vendetta** (p.115-116): Voto di Inimicizia a 3,
+        Vendicatore Instancabile a 7, Anima della Vendetta a 15, Angelo
+        Vendicatore a 20; incantesimi da caccia/controllo (Maledizione,
+        Tenere Persone, Bandire, Tenere Mostri…).
+      **10 incantesimi nuovi nel catalogo** per coprire le tre tabelle (Dardo di
+      Guida, Colpo Intrappolante, Potenziare Capacità, Tenere Persone, Passo
+      Fatato, Raggio Lunare, Bandire, Ricordo Leggendario, Tenere Mostri, Passo
+      dell'Albero), riassunti originali dal PDF, con `classes` = la lista reale
+      del PHB (niente 'paladino' aggiunto artificialmente dove il paladino la
+      riceve solo dal giuramento — stesso criterio già usato per Devozione).
+      **Bug trovato e corretto nello stesso giro**: avevo creato un incantesimo
+      duplicato per Libertà di Movimento (`liberta-movimento`, aggiunto da me
+      il 2026-07-27 per Devozione) quando ne esisteva già uno (`liberta-di-movimento`,
+      precedente, usato da Bardo/Chierico/Druido/Ranger) — e quello preesistente
+      aveva pure una clausola di potenziamento ("+1 bersaglio per ogni slot oltre
+      il 4°") che non appartiene affatto a questo incantesimo nel PHB 2024 (l'ho
+      verificata riga per riga: è un artefatto di estrazione a due colonne, il
+      testo apparteneva a un incantesimo diverso). Rimosso il duplicato, tolta
+      la clausola sbagliata, aggiornato il riferimento del giuramento di
+      Devozione sull'id corretto.
+      **Level-up: la sezione Sottoclasse ora sceglie davvero.** `buildSubclassAutoRow`
+      → `buildSubclassSection` in `levelup.js`: con 1 sola sottoclasse resta
+      l'assegnazione automatica di sempre (riga di sola lettura); con più di 1
+      mostra una card per giuramento (nome + precetti, stesso pattern a righe
+      cliccabili di `buildFeatSection`) e blocca "Conferma" finché non se ne
+      sceglie una. Verificato: un paladino di livello 2 che sale a 3 vede le
+      4 card con i precetti, "Conferma" disabilitato finché non clicchi,
+      scegliendo Gloria diventa `subclassId: 'gloria'` e la scheda mostra da
+      subito Punizione Ispiratrice/Atleta Impareggiabile nei Tratti e Dardo di
+      Guida/Eroismo come fissi nel grimorio; Tharion (livello 7, già Devozione)
+      non vede affatto la sezione Sottoclasse salendo a 8 (si chiede solo al
+      3°) ed è rimasto identico in tutto — CA 20, CD 15, PF 60, Imposizione 35,
+      stesso grimorio. Console pulita in ogni prova.
 - [x] 4.3 **Catalogo talenti** — FATTO (2026-07-21). Nuova sezione top-level `feats`
       in `manual-55.js` (mappa per id come classes/species): 17 voci curate e
       verificate sul PHB — 10 Stili di Combattimento, 6 Talenti generali (liv. 4+:
@@ -924,9 +973,11 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
       dal grimorio (5.B.3), ma nessuna classe già implementata ne ha: il
       percorso resta da collaudare davvero con la prima classe che li prende
       (Mago/Stregone/Chierico, Blocco 5.C).
-- [ ] **`spellsByLevel` delle sottoclassi non-Devozione** — le altre sottoclassi
-      del Paladino (e quelle delle classi future) non hanno ancora la tabella:
-      va aggiunta insieme a ciascuna sottoclasse.
+- [x] ~~**`spellsByLevel` delle sottoclassi non-Devozione**~~ — per il Paladino
+      FATTO (2026-07-27): i 4 giuramenti sono tutti modellati (vedi 4.2). Resta
+      da fare **solo per le classi future** — Barbaro ha ancora 1 solo Cammino
+      dei 4 del PHB (Berserker), e ogni nuova classe del Blocco 5.C partirà
+      allo stesso modo (1 sottoclasse, le altre dopo).
 - [ ] **Point-buy: si può passare senza spendere i 27 punti** — `scoresValid()`
       in `create.js` accetta qualsiasi spesa **≤** budget, quindi si arriva in
       fondo con tutti 8 e un personaggio storpio senza un solo avviso. Serve
@@ -957,6 +1008,21 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
       è competente. Serviva perché i personaggi nati prima del wizard — cioè
       Tharion — non ne avevano nessuna registrata. **Quali siano le sue due
       resta una scelta di Andrea**: il manuale ovviamente non lo dice.
+- [ ] **Barbaro: solo 1 Cammino su 4** — nel PHB ne ha Berserker, Cuore
+      Selvaggio, Albero del Mondo e Zelota; modellato solo Berserker. Stesso
+      pattern già risolto per il Paladino (vedi 4.2): quando si riprende, va
+      aggiunto anche il picker vero nel level-up — oggi con 1 sola sottoclasse
+      il Barbaro la assegna da solo, col nuovo `buildSubclassSection` basta che
+      i dati abbiano più di 1 voce e il picker compare da sé, nessun altro
+      codice da toccare.
+- [ ] **`renderGains()` ha un hardcode `classId === 'paladino'`** — in
+      `levelup.js`, la riga dei guadagni di Imposizione delle Mani nel preview
+      del level-up è agganciata al nome della classe invece che a "la classe ha
+      una risorsa di tipo `pool`" (le risorse `kind:'uses'`, es. Furia, sono già
+      generiche in un loop a parte). Non blocca nulla oggi — solo il Paladino
+      ha una risorsa `pool` — ma è esattamente il tipo di hardcode che il
+      Blocco 5.A voleva eliminare; da generalizzare quando una seconda classe
+      avrà una risorsa `pool` propria.
 
 ## Bug risolti
 

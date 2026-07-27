@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 27,
+  version: 28,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -363,7 +363,7 @@ window.MANUAL_55 = {
               { id: 'dissolvi-magie', name: 'Dissolvi Magie' }
             ],
             13: [
-              { id: 'liberta-movimento', name: 'Libertà di Movimento' },
+              { id: 'liberta-di-movimento', name: 'Libertà di Movimento' },
               { id: 'guardiano-fede', name: 'Guardiano della Fede' }
             ],
             17: [
@@ -383,6 +383,133 @@ window.MANUAL_55 = {
             ],
             20: [
               { name: 'Nimbo Sacro', desc: 'Azione bonus: infondi la tua Aura di Protezione di potere sacro per 10 minuti o finché non la termini (nessuna azione). Una volta usato, devi finire un riposo lungo prima di riusarlo, oppure puoi ripristinarne l\'uso spendendo uno slot di 5° livello. Benefici: Salvaguardia Sacra (vantaggio ai tiri salvezza imposti da Immondi o Non Morti); Danni Radiosi (un nemico che inizia il turno nell\'aura subisce danni Radiosi pari al tuo modificatore di Carisma più il tuo bonus di competenza); Luce Solare (l\'aura è piena di luce intensa considerata luce solare).' }
+            ]
+          }
+        },
+        /* Giuramenti di Gloria, degli Antichi e di Vendetta (PHB 2024, p.113-116
+           del PDF): completano le 4 sottoclassi del Paladino — prima c'era solo
+           Devozione. Stessa struttura: `tenets`, `spellsByLevel` (sempre
+           preparati a 3/5/9/13/17, letti dal grimorio) e `features` (privilegi
+           di sottoclasse ai livelli di `choicePoints.subclassFeatureLevels` =
+           [3,7,15,20]). Riassunti originali in italiano. */
+        gloria: {
+          name: 'Giuramento di Gloria',
+          tenets: 'Fatti conoscere per le tue gesta. · Affronta le difficoltà con coraggio. · Ispira gli altri a puntare alla gloria.',
+          spellsByLevel: {
+            3: [
+              { id: 'dardo-di-guida', name: 'Dardo di Guida' },
+              { id: 'eroismo', name: 'Eroismo' }
+            ],
+            5: [
+              { id: 'potenziare-capacita', name: 'Potenziare Capacità' },
+              { id: 'arma-magica', name: 'Arma Magica' }
+            ],
+            9: [
+              { id: 'accelerare', name: 'Accelerare' },
+              { id: 'protezione-dall-energia', name: 'Protezione dall\'Energia' }
+            ],
+            13: [
+              { id: 'costrizione', name: 'Costrizione' },
+              { id: 'liberta-di-movimento', name: 'Libertà di Movimento' }
+            ],
+            17: [
+              { id: 'ricordo-leggendario', name: 'Ricordo Leggendario' },
+              { id: 'presenza-regale-di-yolande', name: 'Presenza Regale di Yolande' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Punizione Ispiratrice', desc: 'Subito dopo aver lanciato Punizione Divina, puoi spendere un uso di Incanalare Divinità per distribuire PF temporanei (2d8 + il tuo livello da paladino, divisi come vuoi) fra le creature a tua scelta entro 9 m, te compreso.' },
+              { name: 'Atleta Impareggiabile', desc: 'Azione bonus: spendi un uso di Incanalare Divinità per un\'ora di vantaggio alle prove di Forza (Atletica) e Destrezza (Acrobazia), con salti in lungo e in alto più lunghi di 3 m (il movimento extra si paga come sempre).' }
+            ],
+            7: [
+              { name: 'Aura di Alacrità', desc: 'La tua velocità aumenta di 3 m. Inoltre, quando un alleato entra per la prima volta nel turno nella tua Aura di Protezione, o vi comincia il turno, la sua velocità aumenta di 3 m fino alla fine del suo turno successivo.' }
+            ],
+            15: [
+              { name: 'Difesa Gloriosa', desc: 'Con una reazione, quando tu o un\'altra creatura a vista entro 3 m siete colpiti da un attacco, dai al bersaglio un bonus alla CA (il tuo modificatore di Carisma, minimo +1) contro quell\'attacco: se lo manca, puoi attaccare l\'attaccante con un\'arma se è a portata. Usi pari al modificatore di Carisma (minimo 1), tutti recuperati al riposo lungo.' }
+            ],
+            20: [
+              { name: 'Leggenda Vivente', desc: 'Azione bonus: per 10 minuti (o finché non termini l\'effetto), ottieni Carismatico (vantaggio a tutte le prove di Carisma), Ririlancio del Tiro Salvezza (con una reazione, ritiri un TS fallito e tieni il nuovo risultato) e Colpo Infallibile (una volta per turno trasformi in un colpo un attacco con arma che ha mancato). Una volta usato, serve un riposo lungo per riusarlo, oppure uno slot di 5° livello per ripristinarlo.' }
+            ]
+          }
+        },
+        antichi: {
+          name: 'Giuramento degli Antichi',
+          tenets: 'Ravviva la luce della speranza. · Proteggi la vita. · Gioisci nell\'arte e nella risata.',
+          spellsByLevel: {
+            3: [
+              { id: 'colpo-intrappolante', name: 'Colpo Intrappolante' },
+              { id: 'parlare-con-gli-animali', name: 'Parlare con gli Animali' }
+            ],
+            5: [
+              { id: 'passo-fatato', name: 'Passo Fatato' },
+              { id: 'raggio-lunare', name: 'Raggio Lunare' }
+            ],
+            9: [
+              { id: 'crescita-delle-piante', name: 'Crescita delle Piante' },
+              { id: 'protezione-dall-energia', name: 'Protezione dall\'Energia' }
+            ],
+            13: [
+              { id: 'tempesta-di-ghiaccio', name: 'Tempesta di Ghiaccio' },
+              { id: 'pelle-di-pietra', name: 'Pelle di Pietra' }
+            ],
+            17: [
+              { id: 'comunione-con-la-natura', name: 'Comunione con la Natura' },
+              { id: 'passo-dellalbero', name: 'Passo dell\'Albero' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Ira della Natura', desc: 'Con un\'azione magica, spendi un uso di Incanalare Divinità per evocare viticci spettrali: le creature a tua scelta entro 4,5 m fanno un TS Forza o restano Trattenute per 1 minuto, ripetendo il TS alla fine di ogni loro turno.' }
+            ],
+            7: [
+              { name: 'Aura Arcana', desc: 'Tu e i tuoi alleati avete resistenza ai danni Necrotici, Psichici e Radiosi mentre siete nella tua Aura di Protezione.' }
+            ],
+            15: [
+              { name: 'Sentinella Immortale', desc: 'Se scendi a 0 PF senza morire sul colpo, puoi restare a 1 PF invece e recuperarne un numero pari al triplo del tuo livello da paladino; una volta per riposo lungo. Inoltre non invecchi più magicamente e smetti di invecchiare a vista.' }
+            ],
+            20: [
+              { name: 'Campione degli Antichi', desc: 'Azione bonus: per 1 minuto (o finché non termini l\'effetto), ottieni Sfida alla Sfida (i nemici nell\'aura hanno svantaggio ai TS contro i tuoi incantesimi e le tue opzioni di Incanalare Divinità), Rigenerazione (recuperi 10 PF a inizio di ogni tuo turno) e Incantesimi Rapidi (puoi lanciare come azione bonus un incantesimo che normalmente richiede un\'azione). Una volta usato, serve un riposo lungo per riusarlo, oppure uno slot di 5° livello per ripristinarlo.' }
+            ]
+          }
+        },
+        vendetta: {
+          name: 'Giuramento di Vendetta',
+          tenets: 'Non mostrare pietà ai malvagi. · Combatti l\'ingiustizia e le sue cause. · Aiuta chi è colpito dall\'ingiustizia.',
+          spellsByLevel: {
+            3: [
+              { id: 'maledizione', name: 'Maledizione' },
+              { id: 'marchio-del-cacciatore', name: 'Marchio del Cacciatore' }
+            ],
+            5: [
+              { id: 'tenere-persone', name: 'Tenere Persone' },
+              { id: 'passo-fatato', name: 'Passo Fatato' }
+            ],
+            9: [
+              { id: 'accelerare', name: 'Accelerare' },
+              { id: 'protezione-dall-energia', name: 'Protezione dall\'Energia' }
+            ],
+            13: [
+              { id: 'bandire', name: 'Bandire' },
+              { id: 'porta-dimensionale', name: 'Porta Dimensionale' }
+            ],
+            17: [
+              { id: 'tenere-mostri', name: 'Tenere Mostri' },
+              { id: 'scrutare', name: 'Scrutare' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Voto di Inimicizia', desc: 'Quando compi l\'azione di Attacco, puoi spendere un uso di Incanalare Divinità per giurare inimicizia a una creatura a vista entro 9 m: per 1 minuto (o finché non riusi questo privilegio) hai vantaggio ai tiri per colpire contro di lei. Se scende a 0 PF prima che il voto finisca, puoi trasferirlo a un\'altra creatura entro 9 m (nessuna azione).' }
+            ],
+            7: [
+              { name: 'Vendicatore Instancabile', desc: 'Quando colpisci con un attacco di opportunità, puoi ridurre a 0 la velocità del bersaglio fino alla fine del turno e poi muoverti fino a metà della tua velocità come parte della stessa reazione, senza provocare attacchi di opportunità.' }
+            ],
+            15: [
+              { name: 'Anima della Vendetta', desc: 'Subito dopo che una creatura sotto il tuo Voto di Inimicizia colpisce o manca con un attacco, puoi usare una reazione per attaccarla in mischia se è a portata.' }
+            ],
+            20: [
+              { name: 'Angelo Vendicatore', desc: 'Azione bonus: per 10 minuti (o finché non termini l\'effetto), ottieni Volo (velocità di volo 18 m, puoi librarti) e Aura Terrificante (un nemico che inizia il turno nella tua Aura di Protezione fa un TS Saggezza o è Spaventato per 1 minuto o finché non subisce danni; gli attacchi contro chi è Spaventato così hanno vantaggio). Una volta usato, serve un riposo lungo per riusarlo, oppure uno slot di 5° livello per ripristinarlo.' }
             ]
           }
         }
@@ -506,6 +633,14 @@ window.MANUAL_55 = {
 
   spells: [
     /* ===== 1° livello ===== */
+    { id: 'dardo-di-guida', name: 'Dardo di Guida', level: 1, school: 'Evocazione',
+      classes: ['chierico'],
+      meta: 'Azione · 36 m · 1 round · V, S',
+      desc: 'Attacco con incantesimo a distanza: 4d6 danni radiosi se colpisci, e il prossimo tiro per colpire contro il bersaglio prima della fine del tuo turno successivo ha vantaggio. +1d6 per ogni slot oltre il 1°.' },
+    { id: 'colpo-intrappolante', name: 'Colpo Intrappolante', level: 1, school: 'Convocazione',
+      classes: ['ranger'],
+      meta: 'Azione bonus (dopo un colpo con un\'arma) · Sé · 1 min CONC · V',
+      desc: 'Sul bersaglio colpito spuntano viticci: TS Forza (vantaggio se Grande o più grande) o resta Trattenuto finché dura. Da Trattenuto subisce 1d6 perforanti a inizio di ogni suo turno; lui o un alleato a portata possono liberarlo con una prova di Forza (Atletica) CD pari alla tua CD incantesimi.' },
     { id: 'benedizione', name: 'Benedizione', level: 1, school: 'Incantamento',
       classes: ['paladino', 'chierico'],
       meta: 'Azione · 9 m · 1 min CONC · V, S, M',
@@ -572,6 +707,22 @@ window.MANUAL_55 = {
       desc: 'Una creatura a scelta entro gittata ottiene +2 alla CA per tutta la durata.' },
 
     /* ===== 2° livello ===== */
+    { id: 'potenziare-capacita', name: 'Potenziare Capacità', level: 2, school: 'Trasmutazione',
+      classes: ['bardo', 'chierico', 'druido', 'ranger', 'stregone', 'mago'],
+      meta: 'Azione · Tocco · 1 ora CONC · V, S, M',
+      desc: 'Tocchi una creatura e scegli una caratteristica: per la durata ha vantaggio alle prove di quella caratteristica. +1 bersaglio per ogni slot oltre il 2°, con caratteristica scelta a parte per ciascuno.' },
+    { id: 'tenere-persone', name: 'Tenere Persone', level: 2, school: 'Incantamento',
+      classes: ['bardo', 'chierico', 'druido', 'stregone', 'warlock', 'mago'],
+      meta: 'Azione · 18 m · 1 min CONC · V, S, M',
+      desc: 'Un Umanoide a vista fa TS Saggezza o resta Paralizzato finché dura; ripete il TS alla fine di ogni suo turno. +1 bersaglio Umanoide per ogni slot oltre il 2°.' },
+    { id: 'passo-fatato', name: 'Passo Fatato', level: 2, school: 'Convocazione',
+      classes: ['stregone', 'warlock', 'mago'],
+      meta: 'Azione bonus · Sé · Istantaneo · V',
+      desc: 'Ti teletrasporti fino a 9 m in uno spazio libero a vista, avvolto in una bruma argentea.' },
+    { id: 'raggio-lunare', name: 'Raggio Lunare', level: 2, school: 'Evocazione',
+      classes: ['druido'],
+      meta: 'Azione · 36 m · 1 min CONC · V, S, M',
+      desc: 'Un cilindro di luce fioca (raggio 1,5 m, altezza 12 m) piomba entro gittata: chi vi si trova fa un TS Costituzione, 2d10 danni radiosi se fallisce o metà se riesce (si ripete a chi entra o comincia lì il turno, una volta a testa). Con un\'azione puoi spostare il cilindro fino a 18 m nei turni successivi.' },
     { id: 'aiuto', name: 'Aiuto', level: 2, school: 'Abiurazione',
       classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger'],
       meta: 'Azione · 9 m · 8 ore · V, S, M',
@@ -663,11 +814,10 @@ window.MANUAL_55 = {
       desc: 'Una creatura morta da non più di 1 minuto torna in vita con 1 PF. Non funziona su chi è morto di vecchiaia e non rigenera parti del corpo mancanti.' },
 
     /* ===== 4° livello ===== */
-    // Dal Giuramento di Devozione al 13° (vedi nota al 3° livello).
-    { id: 'liberta-movimento', name: 'Libertà di Movimento', level: 4, school: 'Abiurazione',
-      classes: ['bardo', 'chierico', 'druido', 'ranger'],
-      meta: 'Azione · Tocco · 1 ora · V, S, M (una cinghia di cuoio)',
-      desc: 'Una creatura volontaria ignora il terreno difficile; nessun effetto magico può ridurne la velocità né renderla Paralizzata o Trattenuta. Può inoltre spendere 1,5 m di movimento per liberarsi da prese non magiche.' },
+    { id: 'bandire', name: 'Bandire', level: 4, school: 'Abiurazione',
+      classes: ['paladino', 'chierico', 'stregone', 'warlock', 'mago'],
+      meta: 'Azione · 9 m · 1 min CONC · V, S, M',
+      desc: 'Una creatura a vista fa TS Carisma o è trasportata per la durata in un demipiano innocuo (Incapacitata lì dentro); alla fine dell\'incantesimo torna nel suo spazio o nel più vicino libero. Se è una creatura extraplanare e l\'incantesimo dura un minuto intero, non torna: resta bandita nel suo piano d\'origine.' },
     { id: 'guardiano-fede', name: 'Guardiano della Fede', level: 4, school: 'Evocazione',
       classes: ['chierico'],
       meta: 'Azione · 9 m · 8 ore · V',
@@ -698,6 +848,18 @@ window.MANUAL_55 = {
       desc: '+4d6 psichici al colpo. Il bersaglio fa TS Saggezza: se fallisce è Stordito fino alla fine del tuo prossimo turno. +1d6 per ogni slot oltre il 4°.' },
 
     /* ===== 5° livello ===== */
+    { id: 'ricordo-leggendario', name: 'Ricordo Leggendario', level: 5, school: 'Divinazione',
+      classes: ['bardo', 'chierico', 'mago'],
+      meta: '10 minuti · Sé · Istantaneo · V, S, M (incenso e strisce d\'avorio, consumati)',
+      desc: 'Nomini o descrivi una persona, un luogo o un oggetto famosi: ricevi un riassunto delle informazioni leggendarie che li riguardano, decise dal master.' },
+    { id: 'tenere-mostri', name: 'Tenere Mostri', level: 5, school: 'Incantamento',
+      classes: ['bardo', 'stregone', 'warlock', 'mago'],
+      meta: 'Azione · 27 m · 1 min CONC · V, S, M',
+      desc: 'Una creatura a vista fa TS Saggezza o resta Paralizzata finché dura; ripete il TS alla fine di ogni suo turno. +1 bersaglio per ogni slot oltre il 5°.' },
+    { id: 'passo-dellalbero', name: 'Passo dell\'Albero', level: 5, school: 'Convocazione',
+      classes: ['druido', 'ranger'],
+      meta: 'Azione · Sé · 1 min CONC · V, S',
+      desc: 'Puoi entrare in un albero vivo e spostarti all\'istante dentro un altro albero della stessa specie entro 150 m, di cui conosci la posizione; entrare in un albero costa 1,5 m di movimento.' },
     // Dal Giuramento di Devozione al 17° (vedi nota al 3° livello).
     { id: 'colpo-infuocato', name: 'Colpo Infuocato', level: 5, school: 'Invocazione',
       classes: ['chierico'],
@@ -899,7 +1061,7 @@ window.MANUAL_55 = {
     { id: 'liberta-di-movimento', name: 'Libertà di Movimento', level: 4, school: 'Abiurazione',
       classes: ['bardo', 'chierico', 'druido', 'ranger'],
       meta: 'Azione · Tocco · 1 ora · V, S, M (una cinghia di cuoio)',
-      desc: 'La creatura toccata ignora il Terreno Difficile, non può subire riduzioni di velocità né Paralisi/Restrizione da magia, e ottiene velocità di nuoto pari alla sua. Può spendere 1,5 m di movimento per liberarsi automaticamente da manette o Afferramento non magici. +1 bersaglio per ogni slot oltre il 4°.' },
+      desc: 'La creatura toccata ignora il Terreno Difficile, non può subire riduzioni di velocità né Paralisi/Restrizione da magia, e ottiene velocità di nuoto pari alla sua. Può spendere 1,5 m di movimento per liberarsi automaticamente da manette o Afferramento non magici.' },
     { id: 'vite-afferrante', name: 'Vite Afferrante', level: 4, school: 'Convocazione',
       classes: ['druido', 'ranger'],
       meta: 'Azione bonus · 18 m · 1 min CONC · V, S',

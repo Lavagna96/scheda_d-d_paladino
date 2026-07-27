@@ -98,6 +98,7 @@
     };
     var autoSubclassId = null;
     var autoEpicBoonId = null;
+    choice.subclassId = null; // scelta vera quando la classe ha >1 sottoclasse
 
     var gainsContainer = null;
     var confirmBtn = null;
@@ -260,6 +261,11 @@
         } else {
           ok = false;
         }
+      }
+      /* Sottoclasse: con una sola opzione è già assegnata (autoSubclassId);
+         con più di una serve una scelta vera prima di poter confermare. */
+      if (needsSubclass && Object.keys(klass.subclasses || {}).length > 1 && !choice.subclassId) {
+        ok = false;
       }
       confirmBtn.disabled = !ok;
       confirmBtn.classList.toggle('is-disabled', !ok);
@@ -426,19 +432,49 @@
 
     /* ---------- righe di sola lettura (1 sola opzione disponibile oggi) ---------- */
 
-    function buildSubclassAutoRow() {
+    /* Con una sola sottoclasse la si assegna da sola (riga di sola lettura);
+       con più di una serve una scelta vera — stesso pattern di
+       buildFeatSection: righe cliccabili, tenets/giuramento come descrizione,
+       stato "on" su quella scelta. */
+    function buildSubclassSection() {
       var wrap = el('div');
       wrap.appendChild(el('div', 'edit-section-label', 'Sottoclasse'));
       var ids = Object.keys(klass.subclasses || {});
-      if (ids.length === 1) {
-        autoSubclassId = ids[0];
-        var sub = klass.subclasses[autoSubclassId];
-        wrap.appendChild(el('div', 'levelup-auto-row', 'Sottoclasse: ' + sub.name));
-      } else {
-        // Nota: se in futuro classes.paladino.subclasses avrà più di 1 voce,
-        // qui va sostituito con un picker (stesso pattern di buildFeatSection).
-        wrap.appendChild(el('div', 'levelup-auto-row', 'Più sottoclassi disponibili: scelta non ancora gestita qui.'));
+
+      if (ids.length <= 1) {
+        autoSubclassId = ids[0] || null;
+        if (autoSubclassId) {
+          var sub = klass.subclasses[autoSubclassId];
+          wrap.appendChild(el('div', 'levelup-auto-row', 'Sottoclasse: ' + sub.name));
+        }
+
+        return wrap;
       }
+
+      var list = el('div', 'levelup-feat-list');
+      var rowEls = {};
+
+      ids.forEach(function (id) {
+        var s = klass.subclasses[id];
+        var row = el('div', 'levelup-feat-row');
+        row.appendChild(el('div', 'levelup-feat-name', s.name));
+        if (s.tenets) {
+          row.appendChild(el('div', 'levelup-feat-desc', s.tenets));
+        }
+
+        row.addEventListener('click', function () {
+          choice.subclassId = id;
+          Object.keys(rowEls).forEach(function (otherId) {
+            rowEls[otherId].classList.toggle('on', otherId === id);
+          });
+          updateConfirmState();
+        });
+
+        rowEls[id] = row;
+        list.appendChild(row);
+      });
+
+      wrap.appendChild(list);
 
       return wrap;
     }
@@ -502,15 +538,18 @@
         ch.levelChoices[key].fightingStyle = choice.styleId;
       }
 
-      if (needsSubclass && autoSubclassId) {
+      // Con più di una sottoclasse vince la scelta fatta nel picker; con una
+      // sola resta l'assegnazione automatica di sempre.
+      var chosenSubclassId = choice.subclassId || autoSubclassId;
+      if (needsSubclass && chosenSubclassId) {
         if (!ch.subclassId) {
-          ch.subclassId = autoSubclassId;
+          ch.subclassId = chosenSubclassId;
         }
         if (!ch.subclassName) {
-          ch.subclassName = klass.subclasses[autoSubclassId].name;
+          ch.subclassName = klass.subclasses[chosenSubclassId].name;
         }
         ch.levelChoices[key] = ch.levelChoices[key] || {};
-        ch.levelChoices[key].subclassId = autoSubclassId;
+        ch.levelChoices[key].subclassId = chosenSubclassId;
       }
 
       if (needsEpicBoon && autoEpicBoonId) {
@@ -572,7 +611,7 @@
     }
 
     if (needsSubclass) {
-      bodyEl.appendChild(buildSubclassAutoRow());
+      bodyEl.appendChild(buildSubclassSection());
     }
 
     if (needsEpicBoon) {
