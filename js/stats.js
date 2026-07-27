@@ -177,6 +177,16 @@
       parts.push('Con Arma Sacra: ' + view.sacredWeaponText + ' al colpire (→ ' +
         window.AppEngine.formatMod(view.weapon.hit + view.sacredWeaponBonus) + ') e danni Radiosi.');
     }
+    /* Danno da Furia (Barbaro): tabella per livello nei dati, mai mostrata da
+       nessuna parte finora — il giocatore doveva ricordarsela a memoria. È un
+       bonus che si applica solo con attacchi basati sulla Forza mentre la
+       Furia è attiva (stato transitorio, non tracciato nello stato salvato),
+       quindi resta una nota informativa e non un numero già sommato sopra. */
+    var klass = (window.MANUAL_55.classes || {})[ch.classId] || {};
+    var rageBonus = (klass.rageDamage || [])[view.level];
+    if (rageBonus) {
+      parts.push('In Furia: +' + rageBonus + ' danni con attacchi basati sulla Forza.');
+    }
 
     return parts.join(' ');
   }

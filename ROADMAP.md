@@ -731,7 +731,7 @@ Pacchetto di 5 step per **ogni** classe:
 Ordine (dalla più semplice; le meccaniche sono i "titoli" per dimensionare il
 lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
 
-1. [ ] **Barbaro** (no caster) — Furia, Difesa Senz'Armatura. Porta con sé il Blocco 5.A.
+1. [x] **Barbaro** (no caster) — Furia, Difesa Senz'Armatura. Porta con sé il Blocco 5.A.
    → *step b FATTO (2026-07-22):* privilegi 1→20 dal PDF (p.50-52, riassunti IT),
    `classResources.furia` (via `byLevelRef:'rages'`, nessuna duplicazione),
    `unarmoredDefense:'COS'`, `choicePoints`. Verificato con `derive` (Furia
@@ -752,6 +752,42 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
    dai dati (`classResources`); Tharion 7→8 invariato (PF/Imposizione/Dadi/ASI).
    Cache bump `?v=65→66`. **Barbaro completo a livello scheda e level-up**; per
    crearne uno serve solo il blocco condiviso **5.B (creazione da zero)**.
+   → **Chiuso davvero (2026-07-27, `?v=84`)**: con 5.B ormai completo (background,
+   equipaggiamento, maestrie), ho riverificato il Barbaro allo stesso standard
+   con cui avevo appena controllato il Paladino:
+   - **Tabelle numeriche esatte contro il PHB** (pag. 51): `rages` (Furie),
+     `rageDamage` e `weaponMastery` per tutti i 20 livelli tornano cifra per
+     cifra con la tabella Barbarian Features.
+   - **Testo dei 20 livelli di privilegi verificato a campione** contro il PDF,
+     compresi i dettagli fini (Furia Persistente termina solo se **Privi di
+     Sensi**, non semplicemente Incapacitati — distinzione che il manuale fa
+     e i dati rispettano; Colpo Brutale Migliorato: dadi e doppio effetto
+     corretti a 13/17).
+   - **Un buco vero trovato e chiuso**: il bonus Danno da Furia (tabella
+     `rageDamage`) non compariva **da nessuna parte** nella scheda — un
+     giocatore doveva ricordarselo a memoria, a differenza del Paladino che ha
+     la nota dell'Arma Sacra sotto gli Attacchi. Aggiunta la stessa nota
+     generica in `buildAttackNote` (`stats.js`): "In Furia: +N danni con
+     attacchi basati sulla Forza", letta da `klass.rageDamage[livello]` — non
+     hardcoded su `classId==='barbaro'`, quindi vale per qualunque classe futura
+     con la stessa tabella. Verificato: +2 al 1° livello, +3 al 9°; Tharion
+     (Paladino, nessun `rageDamage`) non mostra la riga, le altre note (bonus
+     arma, Stile Duellante, Arma Sacra) restano intatte.
+   - **Giro completo del wizard rifatto da zero** con un Barbaro Soldato
+     (Goliath), background con strumento a scelta (Set da gioco): confermato
+     che `bgValid()` blocca davvero "Avanti" finché il campo "Quale Set da
+     gioco?" non è compilato — nessuna correzione necessaria, verifica riuscita.
+     Generato:
+     punteggi con bonus applicati (FOR 15+2=17, COS 13+1=14), 4 competenze senza
+     doppioni, talento Attaccante Selvaggio (corretto per il background
+     Soldato), ascia bipenne con maestria Cleave, seconda maestria (Lancia),
+     pacchetto di classe + pacchetto del background sommati nella sacca (9
+     voci, pesi tutti valorizzati), 29 MO, PF 14. Console pulita.
+   - **Gap noto e volutamente non toccato**: il Barbaro ha nel PHB 4 Cammini
+     (Berserker, Cuore Selvaggio, Albero del Mondo, Zelota) e ne è modellato
+     **solo uno**, Berserker — stesso trattamento delle 4 sottoclassi mancanti
+     al Paladino. Non richiesto in questo giro; stesso pattern, si può
+     riprendere quando servirà.
 2. [ ] **Guerriero** (no caster) — stili extra, ASI a 6/14, attacchi extra multipli, Azione Impetuosa, Recuperare Energie.
 3. [ ] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
 4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
