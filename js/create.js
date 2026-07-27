@@ -1054,7 +1054,8 @@
         name: it.name,
         desc: it.desc || (w ? w.die + ' ' + w.dmg + ' · ' + w.mastery : ''),
         qty: it.qty || 1,
-        weight: w ? w.weight : 0
+        // peso proprio dell'oggetto, oppure quello dell'arma dal catalogo
+        weight: it.weight != null ? it.weight : (w ? w.weight : 0)
       };
     });
   }

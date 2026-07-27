@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 22,
+  version: 23,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -51,7 +51,7 @@ window.MANUAL_55 = {
           armorId: '', shield: false, weaponId: 'ascia-bipenne',
           extra: [
             { name: 'Ascia da lancio', qty: 4, weaponId: 'ascia-da-lancio' },
-            { name: 'Kit dell\'esploratore', qty: 1, desc: 'Zaino, giaciglio, 2 fiaschette d\'olio, razioni per 10 giorni, corda, acciarino, 10 torce, otre.' }
+            { name: 'Kit dell\'esploratore', qty: 1, weight: 55, desc: 'Zaino, giaciglio, 2 fiaschette d\'olio, razioni per 10 giorni, corda, acciarino, 10 torce, otre.' }
           ],
           coins: { mo: 15 }
         },
@@ -234,8 +234,11 @@ window.MANUAL_55 = {
           armorId: 'cotta-maglia', shield: true, weaponId: 'spada-lunga',
           extra: [
             { name: 'Giavellotto', qty: 6, weaponId: 'giavellotto' },
-            { name: 'Simbolo sacro', qty: 1, desc: 'Focus per gli incantesimi da paladino.' },
-            { name: 'Kit del sacerdote', qty: 1, desc: 'Zaino, coperta, acqua santa, lampada, razioni per 7 giorni, veste, acciarino.' }
+            // Il PHB dà il simbolo sacro come "peso variabile" secondo la forma
+            // (amuleto 1 lb, emblema su stoffa/scudo senza peso, reliquiario
+            // 2 lb): qui vale l'amuleto.
+            { name: 'Simbolo sacro', qty: 1, weight: 1, desc: 'Focus per gli incantesimi da paladino.' },
+            { name: 'Kit del sacerdote', qty: 1, weight: 29, desc: 'Zaino, coperta, acqua santa, lampada, razioni per 7 giorni, veste, acciarino.' }
           ],
           coins: { mo: 9 }
         },

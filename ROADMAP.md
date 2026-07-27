@@ -840,15 +840,19 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
       fondo con tutti 8 e un personaggio storpio senza un solo avviso. Serve
       almeno un avvertimento (o bloccare finché i punti non sono spesi):
       è una scelta di UX da fare.
-- [ ] **Peso dei kit non pesato** — Kit del sacerdote e Kit dell'esploratore
-      entrano nella sacca con `weight: 0`: il PHB ne dà contenuto e costo ma
-      non il peso complessivo, andrebbe sommato dai singoli oggetti.
+- [x] ~~**Peso dei kit non pesato**~~ — FATTO (2026-07-27): il peso c'era
+      eccome, nella tabella dell'equipaggiamento (PDF pag. 222) e non nella
+      descrizione dei kit — Kit del sacerdote 29 lb, Kit dell'esploratore
+      55 lb. Il simbolo sacro è "variabile" secondo la forma: vale l'amuleto
+      (1 lb).
 - [x] ~~**`weaponMasteries` del personaggio non è ancora mostrato**~~ — FATTO
       (2026-07-27): riga sotto la tabella Attacchi, "Maestrie nelle armi: Spada
       lunga (Sap), Giavellotto (Slow)", nascosta per chi non ne ha.
-      **Tharion resta senza**: le sue due maestrie da paladino di 7° non sono
-      mai state registrate e il manuale non dice quali abbia scelto — vanno
-      scelte da lui (serve un modo per farlo dall'editor).
+      Le maestrie si assegnano dall'editor (Modifica · Equipaggiamento): tanti
+      selettori quanti ne concede la classe a quel livello, fra le armi in cui
+      è competente. Serviva perché i personaggi nati prima del wizard — cioè
+      Tharion — non ne avevano nessuna registrata. **Quali siano le sue due
+      resta una scelta di Andrea**: il manuale ovviamente non lo dice.
 
 ## Bug risolti
 

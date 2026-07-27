@@ -60,6 +60,25 @@
     return found;
   }
 
+  // Quante maestrie ha il personaggio al suo livello, dai dati di classe
+  // (Paladino 2 fisse, Barbaro e Guerriero crescono). 0 = la classe non ha
+  // Maestria nelle Armi e i selettori non compaiono.
+  function masteryCountFor(ch) {
+    var klass = ((window.MANUAL_55.classes || {})[ch.classId]) || {};
+
+    return (klass.weaponMastery || [])[ch.level] || 0;
+  }
+
+  // Armi fra cui può scegliere: quelle in cui la classe è competente.
+  function masteryChoices(ch) {
+    var klass = ((window.MANUAL_55.classes || {})[ch.classId]) || {};
+    var prof = klass.weaponProf || ['sem', 'gue'];
+
+    return (window.MANUAL_55.weapons || []).filter(function (w) {
+      return prof.indexOf(w.cat.split('-')[0]) !== -1;
+    });
+  }
+
   function weaponByName(name) {
     var found = null;
     (window.MANUAL_55.weapons || []).forEach(function (w) {
@@ -302,6 +321,7 @@
       weaponDie: (ch.weapon && ch.weapon.die) || '1d8',
       weaponType: (ch.weapon && ch.weapon.type) || '',
       weaponMastery: (ch.weapon && ch.weapon.mastery) || '',
+      masteries: (ch.weaponMasteries || []).slice(),
       fightingStyle: ch.fightingStyle || 'nessuno'
     };
 
@@ -391,6 +411,24 @@
     });
     renderWeaponFields();
 
+    /* Maestria nelle armi: quante ne ha il personaggio lo dicono i dati di
+       classe al suo livello. Il wizard le fa scegliere alla creazione, ma i
+       personaggi nati prima (Tharion) non ne hanno nessuna registrata: qui si
+       possono assegnare, e cambiare a ogni riposo lungo come dice il manuale. */
+    var masterySelects = [];
+    var masteryCount = masteryCountFor(ch);
+    if (masteryCount > 0) {
+      var choices = masteryChoices(ch);
+      var opts = [{ id: '', label: '— nessuna —' }].concat(choices.map(function (w) {
+        return { id: w.id, label: w.name + ' · ' + w.mastery };
+      }));
+      for (var i = 0; i < masteryCount; i++) {
+        var sel = buildSelect(opts, draft.masteries[i] || '', 'edit-mastery-' + i);
+        masterySelects.push(sel);
+        bodyEl.appendChild(buildField('Maestria ' + (i + 1), sel, 'edit-mastery-' + i));
+      }
+    }
+
     var styleSelect = buildSelect(FIGHTING_STYLES, draft.fightingStyle, 'edit-fighting-style');
     styleSelect.addEventListener('change', function () {
       draft.fightingStyle = styleSelect.value;
@@ -419,6 +457,14 @@
           character.weapon.type = draft.weaponType;
           character.weapon.mastery = draft.weaponMastery;
         }
+        // Maestrie: gli id scelti nei selettori, senza vuoti né doppioni.
+        var chosen = [];
+        masterySelects.forEach(function (sel) {
+          if (sel.value && chosen.indexOf(sel.value) === -1) {
+            chosen.push(sel.value);
+          }
+        });
+        character.weaponMasteries = chosen;
         character.fightingStyle = draft.fightingStyle;
       });
     });
