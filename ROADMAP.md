@@ -867,10 +867,20 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
       arrivano solo dal giuramento, quindi non deve poterli *scegliere*.
       Verificato: tutte e 10 le voci di `devozione.spellsByLevel` (3→17) ora si
       aprono.
-- [ ] **Statblock del destriero scritto fisso nell'HTML** — CA 12, velocità,
-      caratteristiche e le tre forme (Celestiale/Folletto/Immondo) sono markup
-      statico in `index.html`: è il destriero di Tharion, uguale per chiunque.
-      Va ai dati come il resto (stesso trattamento di 5.B.3).
+- [x] ~~**Statblock del destriero scritto fisso nell'HTML**~~ — FATTO
+      (2026-07-27, manuale `version: 26`, `?v=82`). Il blocco viveva in
+      `index.html` coi numeri di Tharion — CA 12, +7 al colpire, CD 15,
+      competenza +3, 1d8+2 — mostrati identici a chiunque. Ora `findSteed` sta
+      nei dati (statblock del Destriero Ultraterreno, PDF pag. 272) e
+      `sheet.js` lo rende calcolando quel che scala: **CA = 10 + livello dello
+      slot**, PF, danno dello Schianto `1d8 + livello`, cura del Celestiale
+      `2d8 + livello`, CD dello Sguardo Maligno = la **tua** CD incantesimi,
+      bonus al colpire = il **tuo** attacco con incantesimi, bonus di
+      competenza = il tuo, e la nota sul volo che sparisce quando lo slot è di
+      4° o superiore. Verificato: per Tharion i valori restano identici a prima
+      (CA 12, +3, +7, 1d8+2, 2d8+2, CD 15); per un paladino di 9° con slot di
+      4° e CAR 18 diventano CA 14, +4, +9, 1d8+4, CD 17 e volo senza nota.
+      Console pulita.
 - [x] ~~**Nome del file di export sempre `tharion-velnar-backup.json`**~~ —
       FATTO (2026-07-27): il nome segue il personaggio attivo
       (`prova-backup.json`), slug con accenti e simboli normalizzati.

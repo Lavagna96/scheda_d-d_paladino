@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=81">
+<link rel="stylesheet" href="css/styles.css?v=82">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -105,7 +105,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=81" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=82" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -548,46 +548,19 @@
       </div>
     </div>
     <div class="steed-mini-stats">
-      <div class="mini-stat"><div class="big">12</div><div class="lab">Classe Armatura</div></div>
-      <div class="mini-stat"><div class="big">18 m</div><div class="lab">Velocità</div></div>
-      <div class="mini-stat"><div class="big">+3</div><div class="lab">Bonus Comp.</div></div>
+      <div class="mini-stat"><div class="big" id="steed-ac">—</div><div class="lab">Classe Armatura</div></div>
+      <div class="mini-stat"><div class="big" id="steed-speed">—</div><div class="lab">Velocità</div></div>
+      <div class="mini-stat"><div class="big" id="steed-pb">—</div><div class="lab">Bonus Comp.</div></div>
     </div>
     <div class="card page-card">
     <div class="card">
       <h2 class="card-title">Statistiche Base</h2>
-      <div class="steed-abil-grid">
-        <div class="sa"><span class="sa-n">FOR</span><span class="sa-m">+4</span><span class="sa-s">18</span></div>
-        <div class="sa"><span class="sa-n">DES</span><span class="sa-m">+1</span><span class="sa-s">12</span></div>
-        <div class="sa"><span class="sa-n">COS</span><span class="sa-m">+2</span><span class="sa-s">14</span></div>
-        <div class="sa"><span class="sa-n">INT</span><span class="sa-m">−2</span><span class="sa-s">6</span></div>
-        <div class="sa"><span class="sa-n">SAG</span><span class="sa-m">+1</span><span class="sa-s">12</span></div>
-        <div class="sa"><span class="sa-n">CAR</span><span class="sa-m">−1</span><span class="sa-s">8</span></div>
-      </div>
-      <p class="note">PP 11 · Telepatia 1,6 km · Volo 18 m con slot 4°+</p>
+      <div class="steed-abil-grid" id="steed-abil-grid"></div>
+      <p class="note" id="steed-senses"></p>
     </div>
     <h2 class="card-title sec">Azioni della Cavalcatura</h2>
-    <div class="action-card pressable" data-detail-title="Schianto Ultraterreno" data-detail-body="Schianto Ultraterreno (azione): +7 al colpire, portata 1,5 m, 1d8+2 danni (tipo secondo la forma). Con slot più alti: 1d8 + livello slot.">
-      <div class="action-title">Schianto Ultraterreno</div>
-      <p>Attacco da mischia, +7 al tiro per colpire. Danno: 1d8+2 (tipo secondo forma).</p>
-    </div>
-    <div class="action-card pressable" data-detail-title="Legame Vitale" data-detail-body="Quando recuperi PF da un incantesimo (liv. 1+) e il destriero è entro 1,5 m, recupera i tuoi stessi PF. Condivide la tua iniziativa. Scompare a 0 PF o se muori.">
-      <div class="action-title">Legame Vitale</div>
-      <p>Cura condivisa con incantesimi · iniziativa condivisa · cavalcatura controllata.</p>
-    </div>
-    <div class="steed-forms">
-      <div class="steed-form pressable" data-detail-title="Celestiale — Tocco Guaritore" data-detail-body="Tocco Guaritore (az. bonus, ricarica: riposo lungo): una creatura entro 1,5 m recupera 2d8+2 PF.">
-        <div class="sf-head"><span class="sf-name">Celestiale</span><span class="tag g">Radioso</span></div>
-        <p class="fd">Tocco Guaritore: 2d8+2 PF (az. bonus, 1/rip. lungo)</p>
-      </div>
-      <div class="steed-form pressable" data-detail-title="Folletto — Passo Fatato" data-detail-body="Passo Fatato (az. bonus, ricarica: riposo lungo): teletrasporto entro 18 m con te in sella.">
-        <div class="sf-head"><span class="sf-name">Folletto (Fey)</span><span class="tag">Psichico</span></div>
-        <p class="fd">Passo Fatato: teletrasporto 18 m (az. bonus, 1/rip. lungo)</p>
-      </div>
-      <div class="steed-form pressable" data-detail-title="Immondo — Sguardo Maligno" data-detail-body="Sguardo Maligno (az. bonus, ricarica: riposo lungo): TS Saggezza CD 15 o Spaventata fino al tuo prossimo turno.">
-        <div class="sf-head"><span class="sf-name">Immondo (Fiend)</span><span class="tag c">Necrotico</span></div>
-        <p class="fd">Sguardo Maligno: TS Sag CD 15 o Spaventata (az. bonus, 1/rip. lungo)</p>
-      </div>
-    </div>
+    <div id="steed-actions"></div>
+    <div class="steed-forms" id="steed-forms"></div>
     <p class="steed-note">Con slot più alti: CA = 10 + livello · PF max = 5 + 10×livello · Volo da 4°+</p>
     </div>
   </section>
@@ -944,7 +917,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img id="avatar-full-img" src="avatar-full.jpg?v=81" alt="Ritratto di Tharion Velnar">
+      <img id="avatar-full-img" src="avatar-full.jpg?v=82" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -955,29 +928,29 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=81"></script>
-<script src="js/manual-55.js?v=81"></script>
-<script src="js/config.js?v=81"></script>
-<script src="js/storage.js?v=81"></script>
-<script src="js/engine.js?v=81"></script>
-<script src="js/hp-bar.js?v=81"></script>
-<script src="js/header.js?v=81"></script>
-<script src="js/stats.js?v=81"></script>
-<script src="js/traits.js?v=81"></script>
-<script src="js/sheet.js?v=81"></script>
-<script src="js/grimorio.js?v=81"></script>
-<script src="js/treasury.js?v=81"></script>
-<script src="js/diary.js?v=81"></script>
-<script src="js/inspiration.js?v=81"></script>
-<script src="js/bottom-sheet.js?v=81"></script>
-<script src="js/edit-sheet.js?v=81"></script>
-<script src="js/items.js?v=81"></script>
-<script src="js/levelup.js?v=81"></script>
-<script src="js/app.js?v=81"></script>
-<script src="js/faceid.js?v=81"></script>
-<script src="js/dashboard.js?v=81"></script>
-<script src="js/create.js?v=81"></script>
-<script src="js/portrait.js?v=81"></script>
-<script type="module" src="js/cloud.js?v=81"></script>
+<script src="js/firebase-config.js?v=82"></script>
+<script src="js/manual-55.js?v=82"></script>
+<script src="js/config.js?v=82"></script>
+<script src="js/storage.js?v=82"></script>
+<script src="js/engine.js?v=82"></script>
+<script src="js/hp-bar.js?v=82"></script>
+<script src="js/header.js?v=82"></script>
+<script src="js/stats.js?v=82"></script>
+<script src="js/traits.js?v=82"></script>
+<script src="js/sheet.js?v=82"></script>
+<script src="js/grimorio.js?v=82"></script>
+<script src="js/treasury.js?v=82"></script>
+<script src="js/diary.js?v=82"></script>
+<script src="js/inspiration.js?v=82"></script>
+<script src="js/bottom-sheet.js?v=82"></script>
+<script src="js/edit-sheet.js?v=82"></script>
+<script src="js/items.js?v=82"></script>
+<script src="js/levelup.js?v=82"></script>
+<script src="js/app.js?v=82"></script>
+<script src="js/faceid.js?v=82"></script>
+<script src="js/dashboard.js?v=82"></script>
+<script src="js/create.js?v=82"></script>
+<script src="js/portrait.js?v=82"></script>
+<script type="module" src="js/cloud.js?v=82"></script>
 </body>
 </html>

@@ -15,6 +15,26 @@
     return '−' + Math.abs(n);
   }
 
+  /* Helper DOM per i blocchi costruiti da JS (scheda del destriero). */
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) {
+      node.className = cls;
+    }
+    if (text != null) {
+      node.textContent = text;
+    }
+
+    return node;
+  }
+
+  function setText(id, text) {
+    var node = document.getElementById(id);
+    if (node) {
+      node.textContent = text;
+    }
+  }
+
   function ensureDeathSaves(state) {
     if (!state.deathSaves) {
       state.deathSaves = { success: 0, fail: 0 };
@@ -527,6 +547,85 @@
     });
   }
 
+  /* Scheda del destriero dai dati (`MANUAL_55.findSteed`): prima era markup
+     fisso coi numeri di Tharion — CA 12, +7 al colpire, CD 15, competenza +3 —
+     mostrati identici a chiunque. Quasi tutto scala col livello dello slot con
+     cui è stato evocato, e attacco e CD sono quelli di chi lo evoca. */
+  function renderSteedBlock() {
+    var data = (window.MANUAL_55 || {}).findSteed;
+    var grid = document.getElementById('steed-abil-grid');
+    if (!data || !grid) {
+      return;
+    }
+    var view = window.AppEngine.getView();
+    var ch = window.AppStorage.getState().character;
+    var slot = ch.steedSlotLevel || 2;
+    var fmt = window.AppEngine.formatMod;
+
+    setText('steed-ac', String(data.acBase + slot));
+    setText('steed-speed', data.speed);
+    setText('steed-pb', fmt(view.profBonus));
+
+    grid.textContent = '';
+    ['FOR', 'DES', 'COS', 'INT', 'SAG', 'CAR'].forEach(function (k) {
+      var score = data.abilities[k];
+      var cell = document.createElement('div');
+      cell.className = 'sa';
+      cell.appendChild(el('span', 'sa-n', k));
+      cell.appendChild(el('span', 'sa-m', fmt(window.AppEngine.abilityMod(score))));
+      cell.appendChild(el('span', 'sa-s', String(score)));
+      grid.appendChild(cell);
+    });
+
+    var volo = slot >= data.flyFromSlot
+      ? 'Volo ' + data.flySpeed
+      : 'Volo ' + data.flySpeed + ' con slot ' + data.flyFromSlot + '°+';
+    setText('steed-senses', 'PP ' + data.passivePerception +
+      ' · Telepatia ' + data.telepathy + ' · ' + volo);
+
+    var actions = document.getElementById('steed-actions');
+    if (actions) {
+      actions.textContent = '';
+      var slamDesc = 'Attacco da mischia, ' + fmt(view.spellAttack) +
+        ' al tiro per colpire, portata 1,5 m. Danno: 1d8+' + slot + ' (tipo secondo la forma).';
+      actions.appendChild(actionCard(data.slam.name, slamDesc, data.slam.desc));
+      actions.appendChild(actionCard(data.lifeBond.name,
+        'Cura condivisa con incantesimi · iniziativa condivisa · cavalcatura controllata.',
+        data.lifeBond.desc));
+    }
+
+    var forms = document.getElementById('steed-forms');
+    if (forms) {
+      forms.textContent = '';
+      data.forms.forEach(function (f) {
+        var card = el('div', 'steed-form pressable');
+        card.setAttribute('data-detail-title', f.name + ' — ' + f.action);
+        card.setAttribute('data-detail-body', f.desc);
+        var head = el('div', 'sf-head');
+        head.appendChild(el('span', 'sf-name', f.name));
+        head.appendChild(el('span', 'tag' + (f.tagClass ? ' ' + f.tagClass : ''), f.damage));
+        card.appendChild(head);
+        // Numeri concreti al posto delle formule: chi legge la scheda in
+        // partita vuole il valore, non "2d8 + livello dello slot".
+        var riga = f.id === 'celestiale' ? 'Tocco Guaritore: 2d8+' + slot + ' PF (az. bonus, 1/rip. lungo)'
+          : f.id === 'immondo' ? 'Sguardo Maligno: TS Sag CD ' + view.spellDc + ' o Spaventata (az. bonus, 1/rip. lungo)'
+            : 'Passo Fatato: teletrasporto 18 m (az. bonus, 1/rip. lungo)';
+        card.appendChild(el('p', 'fd', riga));
+        forms.appendChild(card);
+      });
+    }
+  }
+
+  function actionCard(title, testo, detail) {
+    var card = el('div', 'action-card pressable');
+    card.setAttribute('data-detail-title', title);
+    card.setAttribute('data-detail-body', detail);
+    card.appendChild(el('div', 'action-title', title));
+    card.appendChild(el('p', null, testo));
+
+    return card;
+  }
+
   function renderResources() {
     renderCombatStats();
     renderDeathSaves();
@@ -534,6 +633,7 @@
     renderHp();
     renderLoh();
     renderSteedHp();
+    renderSteedBlock();
     var state = window.AppStorage.getState();
     var nameInp = document.getElementById('steed-name');
     if (nameInp && document.activeElement !== nameInp) {

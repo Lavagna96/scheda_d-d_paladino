@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 25,
+  version: 26,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -2244,6 +2244,42 @@ window.MANUAL_55 = {
      d'origine, due competenze in abilità, una competenza in strumenti e un
      equipaggiamento A/B. `tool` è una stringa fissa; `toolChoice` indica invece
      una famiglia da cui scegliere. Riassunti e nomi in italiano. */
+  /* Destriero Ultraterreno (incantesimo Trova Destriero, PHB 2024 — statblock
+     a pag. 272 del PDF). Era scritto fisso in index.html coi numeri di
+     Tharion: CA 12, +7 al colpire, CD 15, bonus competenza +3. Quasi tutto
+     scala col livello dello slot usato per evocarlo, e attacco/CD sono quelli
+     di chi lo evoca — quindi vive qui e la scheda lo calcola. */
+  findSteed: {
+    name: 'Destriero Ultraterreno',
+    acBase: 10,        // CA = acBase + livello dello slot
+    hpBase: 5, hpPerLevel: 10,
+    speed: '18 m',
+    flySpeed: '18 m',
+    flyFromSlot: 4,    // il volo richiede uno slot di 4° o superiore
+    passivePerception: 11,
+    telepathy: '1,6 km',
+    abilities: { FOR: 18, DES: 12, COS: 14, INT: 6, SAG: 12, CAR: 8 },
+    slam: {
+      name: 'Schianto Ultraterreno',
+      desc: 'Attacco da mischia, portata 1,5 m. Il bonus al colpire è il tuo bonus di attacco con incantesimi; i danni sono 1d8 + il livello dello slot, del tipo dato dalla forma.'
+    },
+    lifeBond: {
+      name: 'Legame Vitale',
+      desc: 'Quando recuperi PF da un incantesimo di 1° livello o superiore e il destriero è entro 1,5 m, recupera i tuoi stessi PF. In combattimento condivide la tua iniziativa ed è una cavalcatura controllata.'
+    },
+    forms: [
+      { id: 'celestiale', name: 'Celestiale', damage: 'Radioso', tagClass: 'g',
+        action: 'Tocco Guaritore',
+        desc: 'Azione bonus, ricarica al riposo lungo: una creatura entro 1,5 m recupera 2d8 + il livello dello slot PF.' },
+      { id: 'folletto', name: 'Folletto (Fey)', damage: 'Psichico', tagClass: '',
+        action: 'Passo Fatato',
+        desc: 'Azione bonus, ricarica al riposo lungo: il destriero si teletrasporta, con te in sella, in uno spazio libero entro 18 m.' },
+      { id: 'immondo', name: 'Immondo (Fiend)', damage: 'Necrotico', tagClass: 'c',
+        action: 'Sguardo Maligno',
+        desc: 'Azione bonus, ricarica al riposo lungo: una creatura entro 18 m che il destriero vede fa un TS Saggezza contro la tua CD incantesimi, o è Spaventata fino alla fine del tuo prossimo turno.' }
+    ]
+  },
+
   backgrounds: {
     accolito: { name: 'Accolito', abilities: ['INT', 'SAG', 'CAR'], featId: 'iniziato-alla-magia',
       featNote: 'lista del Chierico', featList: 'chierico', skills: ['intuizione', 'religione'],
