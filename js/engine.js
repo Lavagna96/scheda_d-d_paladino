@@ -203,10 +203,17 @@
     var hpMax = die + mods.COS + (ch.level - 1) * (die / 2 + 1 + mods.COS) +
                 modSum(ch, 'pf-max');
 
+    /* Destriero (5.B.3): esiste solo se la classe lo concede a questo livello
+       — per il Paladino è Destriero Fedele, che dà Trova Destriero sempre
+       preparato dal 5° (risorsa `steedfree` nei dati). Prima la card e i PF si
+       calcolavano per chiunque, così un paladino di 1° livello si ritrovava un
+       destriero fantasma da 25 PF. */
+    var steedRes = classRes.steedfree;
+    var hasSteed = !!(steedRes && ch.level >= (steedRes.from || 1));
     var poolMax = {
       hp: hpMax,
       loh: resMax(classRes.loh, ch.level, klass),
-      steedhp: 5 + 10 * (ch.steedSlotLevel || 2),
+      steedhp: hasSteed ? 5 + 10 * (ch.steedSlotLevel || 2) : 0,
       tempHp: 0
     };
 
@@ -285,6 +292,7 @@
       initiative: initiative,
       initiativeText: fmt(initiative),
       initiativeNote: ch.initiativeNote || '',
+      hasSteed: hasSteed,
       spellDc: spellDc,
       spellAttack: spellAttack,
       spellAbilityModText: fmt(mods[spellAbility]),

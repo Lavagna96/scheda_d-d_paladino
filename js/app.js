@@ -345,10 +345,32 @@
     };
   }
 
-  function adjacentView(dir) {
-    var j = NAV_ORDER.indexOf(currentView) + dir;
+  /* Viste effettivamente raggiungibili da questo personaggio: la Cavalcatura
+     esiste solo per chi ha il destriero (5.B.3), quindi va saltata anche dallo
+     swipe, non solo nascosta dalla barra. */
+  function availableViews() {
+    var view = window.AppEngine && window.AppEngine.getView();
+    var hasSteed = !view || view.hasSteed;
 
-    return (j >= 0 && j < NAV_ORDER.length) ? NAV_ORDER[j] : null;
+    return NAV_ORDER.filter(function (v) {
+      return v !== 'cavalcatura' || hasSteed;
+    });
+  }
+
+  // Toglie dalla barra in basso le tab che questo personaggio non ha.
+  function syncNavVisibility() {
+    var order = availableViews();
+    document.querySelectorAll('#bottom-nav .nav-link').forEach(function (link) {
+      var v = link.getAttribute('data-view');
+      link.classList.toggle('hidden', order.indexOf(v) === -1);
+    });
+  }
+
+  function adjacentView(dir) {
+    var order = availableViews();
+    var j = order.indexOf(currentView) + dir;
+
+    return (j >= 0 && j < order.length) ? order[j] : null;
   }
 
   function activeSubtabIndex(view) {
@@ -922,6 +944,7 @@
     initSubTabs('#view-diario');
     bindOptions();
     bindFab();
+    syncNavVisibility();
     showView('scheda');
 
     window.AppHeader.init();

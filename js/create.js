@@ -24,9 +24,10 @@
    *   costruisce uno stato pulito dal draft (buildStateFromDraft, nessun
    *   residuo di Tharion, pool al massimo di livello 1), lo salva via
    *   AppCloud.createCharacter (localStorage + nuovo doc Firestore) e torna
-   *   in dashboard dove compare la nuova card. La resa pulita della scheda
-   *   del nuovo personaggio (togliere i globali di Tharion, es. cfg.SPELLS)
-   *   resta il passo 5.B.3.
+   *   in dashboard dove compare la nuova card.
+   * - b4 (5.B.3): la scheda del nuovo personaggio si apre pulita — merge
+   *   neutro in storage.js, incantesimi fissi dai dati di classe/sottoclasse,
+   *   niente destriero prima del 5° livello.
    * Pattern "Mago a schermo intero" (5.B.1): una vista a schermo intero, un
    * passo per volta.
    *

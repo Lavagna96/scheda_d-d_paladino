@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 19,
+  version: 20,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -202,6 +202,14 @@ window.MANUAL_55 = {
          Firestore); i bonus che scalano con una caratteristica stanno nel
          registry CLASS_BONUSES di js/engine.js. 'pool' = riserva spendibile
          (come i PF), 'uses' = res-card a ricarica. */
+      /* Incantesimi che la CLASSE tiene sempre preparati, dal livello indicato
+         (PHB 2024: Punizione Divina dal 2° con Punizione del Paladino, Trova
+         Destriero dal 5° con Destriero Fedele). Non contano verso il numero di
+         incantesimi preparabili. Stesso formato di subclasses.spellsByLevel. */
+      spellsByLevel: {
+        2: [{ id: 'punizione-divina', name: 'Punizione Divina' }],
+        5: [{ id: 'trova-destriero', name: 'Trova Destriero' }]
+      },
       classResources: {
         loh: { name: 'Imposizione delle Mani', kind: 'pool',
                byLevel: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100] },
@@ -294,15 +302,32 @@ window.MANUAL_55 = {
         devozione: {
           name: 'Giuramento di Devozione',
           tenets: 'Che la tua parola sia una promessa. · Proteggi i deboli e non temere mai di agire. · Che le tue gesta onorevoli siano d\'esempio.',
-          // Incantesimi sempre preparati garantiti dal giuramento (nomi in
-          // italiano; il collegamento al grimorio è un passo successivo,
-          // qui sono solo dati).
+          /* Incantesimi sempre preparati garantiti dal giuramento (PHB 2024,
+             tabella "Oath of Devotion Spells"). Il grimorio li pesca da qui
+             (5.B.3): `id` aggancia il catalogo `spells`, `name` resta per
+             mostrarli comunque; `id: null` = incantesimo non ancora nel
+             catalogo, quindi elencabile ma non apribile. */
           spellsByLevel: {
-            3: ['Protezione dal Male e dal Bene', 'Scudo della Fede'],
-            5: ['Aiuto', 'Zona di Verità'],
-            9: ['Faro di Speranza', 'Dissolvi Magie'],
-            13: ['Libertà di Movimento', 'Guardiano della Fede'],
-            17: ['Comunione', 'Colpo Infuocato']
+            3: [
+              { id: 'protezione-mal-bene', name: 'Protezione dal Male e dal Bene' },
+              { id: 'scudo-della-fede', name: 'Scudo della Fede' }
+            ],
+            5: [
+              { id: 'aiuto', name: 'Aiuto' },
+              { id: 'zona-di-verita', name: 'Zona di Verità' }
+            ],
+            9: [
+              { id: null, name: 'Faro di Speranza' },
+              { id: 'dissolvi-magie', name: 'Dissolvi Magie' }
+            ],
+            13: [
+              { id: null, name: 'Libertà di Movimento' },
+              { id: null, name: 'Guardiano della Fede' }
+            ],
+            17: [
+              { id: 'comunione', name: 'Comunione' },
+              { id: null, name: 'Colpo Infuocato' }
+            ]
           },
           features: {
             3: [

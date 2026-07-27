@@ -35,8 +35,41 @@
     });
   }
 
+  /* Incantesimi sempre preparati (5.B.3). Prima erano la lista globale
+     `cfg.SPELLS`, cioè quelli di Tharion, appiccicati a chiunque aprisse il
+     grimorio. Ora si ricavano dai dati del personaggio: quelli della classe
+     (Punizione Divina dal 2°, Trova Destriero dal 5°), quelli del giuramento/
+     sottoclasse, più i trucchetti suoi (`grimoire.cantrips`, che arrivano dal
+     wizard di creazione o da talenti). Un paladino di 1° livello non ne ha
+     nessuno — ed è giusto così. */
+  function spellsFromTable(table, level) {
+    var out = [];
+    Object.keys(table || {}).forEach(function (lv) {
+      if (level >= parseInt(lv, 10)) {
+        (table[lv] || []).forEach(function (entry) {
+          if (entry && entry.id) {
+            out.push(entry.id);
+          }
+        });
+      }
+    });
+
+    return out;
+  }
+
   function getFixedIds() {
-    return cfg.SPELLS.map(function (s) { return s.id; });
+    var ch = character();
+    var klass = getManualClass();
+    if (!klass) {
+      return [];
+    }
+    var sub = (klass.subclasses || {})[ch.subclassId] || null;
+    var ids = spellsFromTable(klass.spellsByLevel, ch.level)
+      .concat(spellsFromTable(sub && sub.spellsByLevel, ch.level))
+      .concat((window.AppStorage.getState().grimoire || {}).cantrips || []);
+
+    // niente doppioni se un incantesimo arriva da due fonti
+    return ids.filter(function (id, i) { return ids.indexOf(id) === i; });
   }
 
   function getPreparedIds() {
@@ -65,8 +98,12 @@
 
   /* Tutti gli incantesimi da mostrare nel grimorio: fissi + preparati scelti */
   function getBookSpells() {
-    var list = cfg.SPELLS.map(function (s) {
-      return Object.assign({}, s, { fixed: true });
+    var list = [];
+    getFixedIds().forEach(function (id) {
+      var spell = getManualSpell(id);
+      if (spell) {
+        list.push(Object.assign({}, spell, { fixed: true }));
+      }
     });
     getPreparedIds().forEach(function (id) {
       var spell = getManualSpell(id);

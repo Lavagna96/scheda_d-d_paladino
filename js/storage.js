@@ -25,6 +25,59 @@
     return deepClone(cfg.DEFAULT_STATE);
   }
 
+  /* Scheletro NEUTRO di uno stato (5.B.3). `cfg.DEFAULT_STATE` è la scheda di
+     Tharion: usarlo come base del merge per un personaggio qualsiasi gli
+     regalava i campi che non dichiara (è così che a un paladino di 1° livello
+     appena creato sono finiti addosso `initiativeNote: 'vant. iniziativa'` e il
+     destriero). Da qui in poi la scheda storica si fonde sui propri default,
+     tutti gli altri su questo scheletro: nessun dato di Tharion può colare. */
+  var BASE_CHARACTER = {
+    name: '',
+    classId: '',
+    subclassId: null,
+    subclassName: '',
+    level: 1,
+    speciesId: '',
+    speciesLabel: '',
+    avatar: '✦',
+    abilities: { FOR: 10, DES: 10, COS: 10, INT: 10, SAG: 10, CAR: 10 },
+    profSaves: [],
+    profSkills: [],
+    fightingStyle: 'nessuno',
+    armor: { id: '', shield: false },
+    weapon: { name: '', die: '1d8', type: '', mastery: '' },
+    initiativeNote: '',
+    modifiers: [],
+    extraResources: [],
+    items: [],
+    feats: [],
+    levelChoices: {}
+  };
+
+  var BASE_STATE = {
+    version: 3,
+    character: BASE_CHARACTER,
+    pools: { loh: 0, hp: 0, steedhp: 0, tempHp: 0 },
+    spent: {},
+    coins: { mp: 0, mo: 0, ma: 0, mr: 0 },
+    steed: { name: '' },
+    treasury: { carryMax: 150, partyItems: [], personalItems: [] },
+    diary: { sessions: [], png: [], quests: { active: [], completed: [] } },
+    inspiration: false,
+    deathSaves: { success: 0, fail: 0 },
+    grimoire: { prepared: [], cantrips: [] }
+  };
+
+  function getBaseState() {
+    return deepClone(BASE_STATE);
+  }
+
+  // Default su cui fondere uno stato salvato: la scheda storica sui suoi,
+  // chiunque altro sullo scheletro neutro.
+  function defaultsFor(id) {
+    return id === DEFAULT_CHAR_ID ? getDefaultState() : getBaseState();
+  }
+
   function migrateV1(raw) {
     var next = getDefaultState();
     if (raw.pools) {
@@ -93,17 +146,20 @@
   /* Adatta un oggetto salvato in formato v2/v3 allo stato corrente,
      integrando i campi mancanti con i default (stessa logica di sempre,
      estratta per essere riusata sia dalla chiave per-personaggio sia dalla
-     migrazione dalla vecchia chiave legacy). */
-  function fromSavedV2(parsed) {
-    var next = getDefaultState();
+     migrazione dalla vecchia chiave legacy). `def` sono i default su cui
+     fondere: la scheda di Tharion per la sua, lo scheletro neutro per tutti
+     gli altri (vedi defaultsFor). */
+  function fromSavedV2(parsed, def) {
+    var base = def || getDefaultState();
+    var next = deepClone(base);
     next = Object.assign(next, parsed);
     next.version = 3;
-    next.character = mergeCharacter(getDefaultState().character, parsed.character);
-    next.pools = Object.assign(getDefaultState().pools, parsed.pools || {});
-    next.coins = Object.assign(getDefaultState().coins, parsed.coins || {});
-    next.steed = Object.assign(getDefaultState().steed, parsed.steed || {});
-    next.treasury = Object.assign(getDefaultState().treasury, parsed.treasury || {});
-    next.diary = Object.assign(getDefaultState().diary, parsed.diary || {});
+    next.character = mergeCharacter(base.character, parsed.character);
+    next.pools = Object.assign(deepClone(base.pools), parsed.pools || {});
+    next.coins = Object.assign(deepClone(base.coins), parsed.coins || {});
+    next.steed = Object.assign(deepClone(base.steed), parsed.steed || {});
+    next.treasury = Object.assign(deepClone(base.treasury), parsed.treasury || {});
+    next.diary = Object.assign(deepClone(base.diary), parsed.diary || {});
     if (parsed.diary && parsed.diary.quests) {
       next.diary.quests = Object.assign({ active: [], completed: [] }, parsed.diary.quests);
     }
@@ -111,9 +167,9 @@
       next.inspiration = parsed.inspiration;
     }
     if (parsed.deathSaves) {
-      next.deathSaves = Object.assign(getDefaultState().deathSaves, parsed.deathSaves);
+      next.deathSaves = Object.assign(deepClone(base.deathSaves), parsed.deathSaves);
     }
-    next.grimoire = Object.assign(getDefaultState().grimoire, parsed.grimoire || {});
+    next.grimoire = Object.assign(deepClone(base.grimoire), parsed.grimoire || {});
 
     return next;
   }
@@ -127,7 +183,7 @@
       if (own) {
         var parsedOwn = JSON.parse(own);
         if (parsedOwn && (parsedOwn.version === 2 || parsedOwn.version === 3)) {
-          return fromSavedV2(parsedOwn);
+          return fromSavedV2(parsedOwn, defaultsFor(id));
         }
       }
     } catch (e) { /* ignore */ }
@@ -140,7 +196,7 @@
         if (v2) {
           var parsed = JSON.parse(v2);
           if (parsed && (parsed.version === 2 || parsed.version === 3)) {
-            var migrated = fromSavedV2(parsed);
+            var migrated = fromSavedV2(parsed, getDefaultState());
             saveState(migrated, true);
 
             return migrated;
@@ -159,7 +215,10 @@
       } catch (e) { /* ignore */ }
     }
 
-    var next = getDefaultState();
+    // Nessuno stato salvato: la scheda storica parte dai suoi default, un
+    // personaggio qualsiasi (es. doc cloud non ancora sceso in locale) parte
+    // vuoto — mai dalla scheda di Tharion.
+    var next = defaultsFor(id);
     try {
       if (localStorage.getItem(cfg.INSPIRATION_KEY) === '1') {
         next.inspiration = true;

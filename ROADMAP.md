@@ -152,8 +152,9 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
       nessuno verifica l'assertion (Firebase Auth non ha WebAuthn nativo; una
       login vera richiederebbe una Cloud Function che emette un custom token).
       Verificato in locale (gating corretto nei 4 casi, layout del campo,
-      console pulita). **Da collaudare su iPhone dopo il deploy** — il punto
-      incerto è la QuickType in PWA standalone da home screen.
+      console pulita). → **Collaudato da Andrea su iPhone il 2026-07-27
+      (deploy `62c9b46`): funziona.** La Conditional UI regge anche in PWA
+      standalone da home screen, che era il punto incerto.
 - [ ] 1.4 Test su iPhone standalone (PWA): viewport, tastiera, safe-area. Commit.
 
 ### Fase 2 — Dashboard profilo e multi-personaggio
@@ -455,11 +456,33 @@ invariato e fa da test di non-regressione a ogni passo.
       Flusso: specie → classe → punteggi → competenze → equipaggiamento →
       sottoclasse/incantesimi se dovuti.
 - [x] 5.B.2 Genera un `character` valido e **vuoto** (nessun residuo Tharion) →
-      nuovo documento Firestore → compare in dashboard. FATTO nel codice
-      (2026-07-24, vedi *Avanzamento 5.B → b3*); scrittura Firestore reale +
-      comparsa card da collaudare da loggati.
-- [ ] 5.B.3 Ripulire `config.js`: STEED/SWORD_TIERS/FEATURES/SPELLS da globali
-      di Tharion a dati del personaggio.
+      nuovo documento Firestore → compare in dashboard. FATTO (2026-07-24, vedi
+      *Avanzamento 5.B → b3*); **collaudato da Andrea il 2026-07-27**: paladino
+      "Prova" creato da iPhone, documento presente su Firestore, card in
+      dashboard. Stato esportato verificato campo per campo contro il PHB
+      (TS SAG+CAR, 2 abilità dalla lista, PF 11 = D10+COS, Imposizione 5,
+      2 incantesimi di 1° e nessun trucchetto, carico 225 = FOR×15).
+- [x] 5.B.3 Ripulire i globali di Tharion — FATTO (2026-07-27, *b4*). Più ampio
+      di com'era scritto: la causa dei residui non era solo `config.js` ma il
+      **merge conservativo** di `storage.js`.
+- [ ] 5.B.4 Passo **Background** nel wizard: nel 5.5 dà +2/+1 (o +1/+1/+1) su
+      tre punteggi, un **talento d'origine**, 2 competenze in abilità, una in
+      strumenti ed equipaggiamento (PHB pag. 176 del PDF). Oggi il wizard lo
+      salta del tutto: i punteggi restano i grezzi del point-buy e mancano
+      talento e competenze. È il buco più grosso rispetto al manuale.
+- [ ] 5.B.5 Equipaggiamento dai **pacchetti del manuale** + catalogo armi
+      (decisione 2026-07-27, alternativa B di 3 con preview). Oggi arma, dado,
+      tipo e maestria sono campi di testo liberi e le armature solo nomi: si
+      passa alla scelta A/B del PHB (Paladino: cotta di maglia, scudo, spada
+      lunga, 6 giavellotti, simbolo sacro, kit del sacerdote, 9 MO — oppure
+      150 MO; Barbaro: ascia bipenne, 4 asce da lancio, kit dell'esploratore,
+      15 MO — oppure 75 MO), tabella armi del PHB nei dati (nome, dado, tipo,
+      proprietà, **maestria**, peso, costo) e CA mostrata accanto a ogni
+      armatura. La personalizzazione (master che concede di più) si fa dopo,
+      nella scheda, con lo stesso catalogo. **Nomi delle maestrie in inglese**
+      come già oggi (`mastery: 'Vex'`): il PDF è in inglese e non c'è una fonte
+      italiana ufficiale. L'acquisto a budget con l'opzione B (negozio coi
+      prezzi del cap. 6) resta un punto separato, più avanti.
 
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
 > `js/create.js` (`window.AppCreate`, macchina a stati dei 6 passi, corpi
@@ -558,10 +581,50 @@ invariato e fa da test di non-regressione a ogni passo.
 > bottone, console pulita, Tharion invariato (CA 20 / CD 15, stato non toccato).
 > **Da collaudare da loggati** (non testabile in locale senza login): la
 > scrittura Firestore reale e la comparsa della card dopo "Crea" — il codice
-> ricalca il sync esistente (`pushNow`/`loadDashboard`). *Prossimo:* **b4
-> (5.B.3)** — pulizia dei residui globali di Tharion in `config.js`
-> (SPELLS/STEED/…) così la scheda del nuovo personaggio si apre e si rende
-> perfettamente (soprattutto il grimorio, che oggi legge `cfg.SPELLS`).
+> ricalca il sync esistente (`pushNow`/`loadDashboard`). **Collaudato da Andrea
+> il 2026-07-27: documento presente su Firestore e card in dashboard.**
+>
+> **b4 FATTO (2026-07-27):** la scheda di un personaggio nuovo si apre pulita
+> (5.B.3). Il JSON del paladino "Prova" ha mostrato che i residui non venivano
+> dal wizard ma da **due punti di render/merge** che davano per scontato
+> Tharion:
+> - **`storage.js`** — `mergeCharacter` fondeva ogni stato salvato su
+>   `cfg.DEFAULT_STATE.character`, cioè la scheda di Tharion: ogni chiave non
+>   dichiarata veniva ereditata (a "Prova" erano arrivati `steedSlotLevel: 2` e
+>   `initiativeNote: 'vant. iniziativa'`). Ora c'è uno **scheletro neutro**
+>   (`BASE_CHARACTER`/`BASE_STATE`): la scheda storica si fonde sui suoi
+>   default, chiunque altro sul neutro (`defaultsFor(id)`). Corretto anche il
+>   fallback di `loadState` quando manca lo stato locale, che restituiva
+>   Tharion in blocco.
+> - **destriero fantasma** — `engine.js` calcolava `steedhp = 5 + 10 × (…|| 2)`
+>   per chiunque e `sheet.js` disegnava la card senza condizioni: un paladino di
+>   1° livello aveva una barra "Destriero 0/25". Ora il motore espone
+>   `hasSteed` (dalla risorsa `steedfree`, cioè Destriero Fedele dal 5°), i PF
+>   sono 0 senza destriero e `app.js` toglie la tab Cavalcatura dalla barra e
+>   dallo swipe (`availableViews`).
+> - **grimorio** — `cfg.SPELLS` (gli 8 incantesimi fissi di Tharion, mostrati a
+>   chiunque) sostituito dai dati: nuove tabelle `spellsByLevel` sulla classe
+>   (Punizione Divina dal 2°, Trova Destriero dal 5°) e sulla sottoclasse
+>   (giuramento di Devozione: 3°/5°/9°/13°/17°, formato `{id, name}` con
+>   `id: null` per gli incantesimi non ancora nel catalogo), più i trucchetti
+>   del personaggio in `grimoire.cantrips` — che finalmente vengono letti.
+>   Manuale a `version: 20`.
+> - **maestria e ritratto** — `Maestria: Vex` era scritta fissa nell'HTML e
+>   `avatar.jpg` era hardcoded: ogni personaggio nuovo si apriva con l'arma e
+>   la faccia di Tharion. Ora la maestria viene da `weapon.mastery` (e sparisce
+>   se vuota) e i ritratti stanno in `character.portrait`/`portraitFull`, nei
+>   default di Tharion; chi non ne ha mostra l'emblema ✦.
+> - via da `config.js` le costanti morte `SWORD_TIERS` e `FEATURES` (nessun
+>   consumatore) e `STEED` (conteneva solo un nome di default).
+>
+> Verificato in locale: **Tharion invariato** (CA 20, CD 15, att.inc +7, PF 60,
+> Imposizione 35, destriero 25, tutte e 5 le tab, ritratto e "Maestria: Vex" al
+> loro posto, grimorio con gli stessi 8 fissi divisi per livello — trucchetti
+> Luce/Dardo di Fuoco compresi); paladino di 1° livello **pulito** (nessun campo
+> residuo, `hasSteed` false, niente tab Cavalcatura, emblema ✦, niente maestria,
+> monete e inventario a zero, CA 18 = cotta di maglia + scudo); console pulita.
+> Cache busting `?v=71`. *Prossimo:* **5.B.5** (equipaggiamento dai pacchetti
+> del manuale + catalogo armi con le maestrie).
 
 **Blocco 5.C — Le classi, una alla volta**
 *(stesso pacchetto ripetibile, dati dal PDF PHB 2024 locale, riassunti IT originali — mai testo integrale)*

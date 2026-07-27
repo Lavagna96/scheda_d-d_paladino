@@ -537,7 +537,8 @@
     var state = window.AppStorage.getState();
     var nameInp = document.getElementById('steed-name');
     if (nameInp && document.activeElement !== nameInp) {
-      nameInp.value = state.steed.name || cfg.STEED.defaultName;
+      // Nessun nome di default: il destriero lo battezza chi lo evoca.
+      nameInp.value = state.steed.name || '';
     }
   }
 

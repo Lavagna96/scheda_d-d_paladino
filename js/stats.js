@@ -187,6 +187,16 @@
     setText('atk-weapon-hit', view.weapon.hitText);
     setText('atk-weapon-dmg', view.weapon.dmgText);
 
+    // Maestria: era scritta fissa nell'HTML (quella di Tharion), quindi la
+    // vedeva chiunque. Ora viene dall'arma del personaggio e sparisce se non
+    // ne ha una (5.B.3).
+    var mastEl = document.getElementById('atk-weapon-mastery');
+    if (mastEl) {
+      var mastery = (ch.weapon && ch.weapon.mastery) || '';
+      mastEl.textContent = mastery ? 'Maestria: ' + mastery : '';
+      mastEl.classList.toggle('hidden', !mastery);
+    }
+
     // Riga Soffio: solo per chi ha quell'attacco (Dragonide → risorsa 'breath').
     var hasBreath = view.resources.some(function (r) { return r.key === 'breath'; });
     var breathHit = document.getElementById('atk-breath-hit');
