@@ -494,9 +494,27 @@ invariato e fa da test di non-regressione a ogni passo.
       CA 12 + DES". Verificato: Tharion invariato (CA 20 Piastre + Scudo, CD
       15), console pulita. **I nomi italiani delle armi sono una traduzione
       mia** (il PDF è in inglese): da rivedere con Andrea se al tavolo usa
-      termini diversi. *Restano da fare:* le due schermate del wizard (pacchetto
-      A/B e scelta delle 2 maestrie) e l'editor della scheda che oggi ha ancora
-      arma/dado/tipo/maestria come testo libero.
+      termini diversi.
+      → **Wizard FATTO (2026-07-27), `?v=74`.** Il passo Equipaggiamento non ha
+      più select e campi liberi: due card coi pacchetti del manuale, contenuto
+      in chiaro (armatura con la sua CA, scudo +2, arma col dado, le scorte, le
+      monete) e sotto il selettore della **Maestria nelle armi** — chip
+      "Spada lunga · Sap" fra tutte le armi in cui la classe è competente
+      (`weaponProf`), con il conteggio giusto da `weaponMastery[1]` = 2 per
+      Paladino e Barbaro. `stepValid` ora chiede pacchetto scelto + maestrie
+      complete. Nei dati sono entrati `startingEquipment` (A/B), `weaponProf` e
+      `weaponMastery` del Paladino (fisso a 2: la sua tabella dei privilegi non
+      ha la colonna Maestria). `buildStateFromDraft` prende arma, dado e tipo di
+      danno dal catalogo, mette **le monete del pacchetto** (9 MO o 150 MO per
+      il Paladino) e **le scorte nella sacca** col peso vero, e salva in
+      `character.weaponMasteries` le armi di cui il PG sa usare la maestria.
+      Verificato in locale: Paladino pacchetto A → cotta di maglia + scudo,
+      spada lunga 1d8 tagl. con maestria Sap, 6 giavellotti da 2 lb nella sacca,
+      9 MO; Barbaro pacchetto B → nessuna arma né armatura, 75 MO, sacca vuota,
+      maestrie comunque salvate; cambio di classe che rifà le card e azzera le
+      maestrie non più valide; Tharion invariato (CA 20, CD 15, PF 60, "Maestria:
+      Vex"); console pulita. *Resta:* l'editor della scheda (`edit-sheet.js`),
+      ancora a testo libero — vedi Debiti aperti.
 
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
 > `js/create.js` (`window.AppCreate`, macchina a stati dei 6 passi, corpi
@@ -802,6 +820,22 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
 - [ ] **`spellsByLevel` delle sottoclassi non-Devozione** — le altre sottoclassi
       del Paladino (e quelle delle classi future) non hanno ancora la tabella:
       va aggiunta insieme a ciascuna sottoclasse.
+- [ ] **Point-buy: si può passare senza spendere i 27 punti** — `scoresValid()`
+      in `create.js` accetta qualsiasi spesa **≤** budget, quindi si arriva in
+      fondo con tutti 8 e un personaggio storpio senza un solo avviso. Serve
+      almeno un avvertimento (o bloccare finché i punti non sono spesi):
+      è una scelta di UX da fare.
+- [ ] **Peso dei kit non pesato** — Kit del sacerdote e Kit dell'esploratore
+      entrano nella sacca con `weight: 0`: il PHB ne dà contenuto e costo ma
+      non il peso complessivo, andrebbe sommato dai singoli oggetti.
+- [ ] **`weaponMasteries` del personaggio non è ancora mostrato** — il wizard lo
+      salva (le armi di cui sai usare la maestria), ma la scheda mostra solo la
+      maestria dell'arma impugnata. Serve una riga nei Tratti o nelle
+      Caratteristiche.
+- [ ] **Editor della scheda ancora a testo libero** — `edit-sheet.js` ha ancora
+      nome/dado/tipo/maestria dell'arma come campi liberi e la vecchia lista di
+      4 armature: va portato sul catalogo del manuale come il wizard (è la
+      seconda metà di 5.B.5).
 
 ## Bug risolti
 

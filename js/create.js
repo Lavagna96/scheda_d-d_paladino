@@ -60,6 +60,9 @@
     // quale classe è stato riempito, così cambiando classe si riparte dal kit
     // giusto.
     equip: null, equipForClass: null,
+    // Maestrie scelte (id di armi dal catalogo): il PHB le dà al livello 1 alle
+    // classi marziali — due tipi di arma per Paladino e Barbaro.
+    masteries: [],
     // Incantesimi scelti nel passo finale (b2.5): id dal catalogo del manuale.
     // Vuoti per i non-caster; per il Paladino solo preparedSpells (2 di liv. 1).
     cantrips: [], preparedSpells: []
@@ -137,43 +140,54 @@
     return { count: 2, from: allIds };
   }
 
-  // Armature selezionabili (stesse di js/edit-sheet.js): id vuoto = nessuna
-  // armatura → nel motore diventa la Difesa senza armatura se la classe ne ha
-  // una (es. Barbaro/COS). WEAPON_DICE = stessi dadi danno dell'editor scheda.
-  var ARMOR_OPTIONS = [
-    { id: '', label: 'Nessuna armatura' },
-    { id: 'cuoio-borchiato', label: 'Cuoio Borchiato' },
-    { id: 'mezza-piastra', label: 'Mezza Piastra' },
-    { id: 'cotta-maglia', label: 'Cotta di Maglia' },
-    { id: 'piastre', label: 'Piastre' }
-  ];
-  var WEAPON_DICE = ['1d4', '1d6', '1d8', '1d10', '1d12', '2d6'];
+  /* Equipaggiamento: in creazione si sceglie SOLO fra i due pacchetti del
+     manuale (A o B), come si fa al tavolo aprendo il PHB; la personalizzazione
+     — il master che ti fa partire con qualcosa in più — si fa dopo, nella
+     scheda (decisione 5.B.5). I pacchetti stanno nei dati
+     (`klass.startingEquipment`), qui non c'è più nessuna lista di armature né
+     campi liberi per nome/dado/tipo dell'arma. */
 
-  // Equipaggiamento iniziale sensato per classe: opzione A della lista
-  // "Starting Equipment" del PHB 2024 (Barbaro p.49 → Ascia bipenne, nessuna
-  // armatura perché usa la Difesa senza armatura; Paladino p.107 → Cotta di
-  // Maglia + Scudo + Spada lunga a una mano, 1d8). Tutti i campi restano
-  // modificabili nel passo; la maestria resta vuota (facoltativa). Le classi
-  // non ancora giocabili usano il kit neutro di defaultEquipFor().
-  var CLASS_EQUIP = {
-    barbaro:  { armorId: '', shield: false, weaponName: 'Ascia bipenne', weaponDie: '1d12', weaponType: 'tagl.', weaponMastery: '' },
-    paladino: { armorId: 'cotta-maglia', shield: true, weaponName: 'Spada lunga', weaponDie: '1d8', weaponType: 'tagl.', weaponMastery: '' }
-  };
+  function packsFor(classId) {
+    var klass = (window.MANUAL_55.classes || {})[classId] || {};
 
-  // Copia FRESCA dei default per una classe (mai un riferimento a CLASS_EQUIP,
-  // che verrebbe poi mutato dagli input del passo). Fallback neutro per le
-  // classi senza preset dedicato.
+    return klass.startingEquipment || null;
+  }
+
+  function weaponById(id) {
+    var found = null;
+    (window.MANUAL_55.weapons || []).forEach(function (w) {
+      if (w.id === id) {
+        found = w;
+      }
+    });
+
+    return found;
+  }
+
+  // Draft dell'equipaggiamento: solo la lettera del pacchetto scelto. Le classi
+  // senza pacchetto nei dati (non ancora giocabili) restano senza nulla.
   function defaultEquipFor(classId) {
-    var p = CLASS_EQUIP[classId];
-    if (p) {
-      return {
-        armorId: p.armorId, shield: p.shield,
-        weaponName: p.weaponName, weaponDie: p.weaponDie,
-        weaponType: p.weaponType, weaponMastery: p.weaponMastery
-      };
-    }
+    return { pack: packsFor(classId) ? 'a' : '' };
+  }
 
-    return { armorId: '', shield: false, weaponName: '', weaponDie: '1d8', weaponType: '', weaponMastery: '' };
+  // Armi su cui la classe può scegliere la maestria: quelle in cui è competente
+  // (klass.weaponProf: 'sem' semplici, 'gue' da guerra). Senza il dato le
+  // consideriamo tutte, per non bloccare le classi non ancora rifinite.
+  function masteryChoicesFor(classId) {
+    var klass = (window.MANUAL_55.classes || {})[classId] || {};
+    var prof = klass.weaponProf || ['sem', 'gue'];
+
+    return (window.MANUAL_55.weapons || []).filter(function (w) {
+      return prof.indexOf(w.cat.split('-')[0]) !== -1;
+    });
+  }
+
+  // Quante maestrie sceglie questa classe al livello di creazione (0 = nessuna,
+  // es. una classe senza Maestria nelle Armi).
+  function masteryCountFor(classId) {
+    var klass = (window.MANUAL_55.classes || {})[classId] || {};
+
+    return (klass.weaponMastery || [])[CREATE_LEVEL] || 0;
   }
 
   // Livello di partenza fisso in creazione (decisione 5.B): 1. Gli indici
@@ -240,9 +254,16 @@
       return finaleValid();
     }
 
-    // Equipaggiamento: nessun vincolo (i default di classe riempiono già i
-    // campi e tutto è modificabile).
-    return true;
+    // Equipaggiamento: serve un pacchetto scelto e tutte le maestrie assegnate
+    // (chi non ne ha ne deve scegliere 0, quindi passa comunque).
+    return equipValid();
+  }
+
+  function equipValid() {
+    ensureEquipDraft();
+    var packOk = !packsFor(draft.classId) || !!draft.equip.pack;
+
+    return packOk && draft.masteries.length === masteryCountFor(draft.classId);
   }
 
   // Validità del passo finale (b2.5): i non-caster non hanno nulla da
@@ -783,74 +804,80 @@
     }
   }
 
-  // Campo "etichetta + controllo" con la spaziatura uniforme del passo
-  // (.create-field): usato sia per i <select> (armatura, dado) sia per gli
-  // input di testo (nome arma, tipo, maestria).
-  function equipField(labelText, controlEl) {
-    var field = el('div', 'create-field');
-    field.appendChild(el('label', 'create-label', labelText));
-    field.appendChild(controlEl);
-
-    return field;
+  // Riga di dettaglio dentro la card di un pacchetto: "Cotta di Maglia — CA 16".
+  function packLine(text) {
+    return el('div', 'create-pack-line', text);
   }
 
-  function equipSelect(options, selectedValue, ariaLabel, onChange) {
-    var select = document.createElement('select');
-    select.className = 'edit-select';
-    select.setAttribute('aria-label', ariaLabel);
-    options.forEach(function (opt) {
-      var o = document.createElement('option');
-      o.value = opt.id;
-      o.textContent = opt.label;
-      if (opt.id === selectedValue) {
-        o.selected = true;
-      }
-      select.appendChild(o);
+  // Card selezionabile di un pacchetto (A o B), col contenuto in chiaro.
+  function packCard(letter, pack, selected, onPick) {
+    var card = el('button', 'create-pack' + (selected ? ' on' : ''));
+    card.type = 'button';
+    card.appendChild(el('div', 'create-pack-title', letter.toUpperCase() + ' · ' + pack.label));
+
+    if (pack.armorId) {
+      card.appendChild(packLine(window.AppEngine.armorLabel(pack.armorId)));
+    }
+    if (pack.shield) {
+      var sh = window.MANUAL_55.shield || { name: 'Scudo', ac: 2 };
+      card.appendChild(packLine(sh.name + ' — CA +' + sh.ac));
+    }
+    var w = pack.weaponId ? weaponById(pack.weaponId) : null;
+    if (w) {
+      card.appendChild(packLine(w.name + ' — ' + w.die + ' ' + w.dmg));
+    }
+    (pack.extra || []).forEach(function (it) {
+      card.appendChild(packLine((it.qty > 1 ? it.qty + ' × ' : '') + it.name));
     });
-    select.addEventListener('change', function () { onChange(select.value); });
+    var mo = (pack.coins || {}).mo || 0;
+    if (mo) {
+      card.appendChild(packLine(mo + ' monete d\'oro'));
+    }
+    if (!pack.armorId && !pack.weaponId) {
+      card.appendChild(packLine('Nessun equipaggiamento: te lo compri col master.'));
+    }
 
-    return select;
-  }
+    card.addEventListener('click', function () { onPick(letter); });
 
-  function equipTextInput(value, onInput) {
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'create-in';
-    input.value = value || '';
-    input.addEventListener('input', function () { onInput(input.value); });
-
-    return input;
+    return card;
   }
 
   function renderEquipaggiamento(container) {
     ensureEquipDraft();
     var eq = draft.equip;
+    var packs = packsFor(draft.classId);
 
-    // Armatura.
-    container.appendChild(equipField('Armatura',
-      equipSelect(ARMOR_OPTIONS, eq.armorId, 'Armatura', function (v) { eq.armorId = v; })));
+    if (!packs) {
+      container.appendChild(el('div', 'create-saves-line',
+        'Per questa classe l\'equipaggiamento iniziale non è ancora nei dati del manuale: si parte senza nulla e si aggiunge dalla scheda.'));
+    } else {
+      container.appendChild(el('div', 'edit-section-label', 'Equipaggiamento iniziale'));
+      container.appendChild(el('div', 'create-saves-line',
+        'Le due opzioni del manuale. Quello che il master ti concede in più lo aggiungi dopo, dalla scheda.'));
 
-    // Scudo: chip on/off, indipendente dall'armatura (come nel motore: la
-    // Difesa senza armatura ammette comunque lo scudo).
-    var shieldChip = el('button', 'chip' + (eq.shield ? ' on' : ''), 'Scudo equipaggiato');
-    shieldChip.type = 'button';
-    shieldChip.addEventListener('click', function () {
-      eq.shield = !eq.shield;
-      shieldChip.classList.toggle('on', eq.shield);
-    });
-    container.appendChild(equipField('Scudo', shieldChip));
+      var cardRow = el('div', 'create-pack-row');
+      ['a', 'b'].forEach(function (letter) {
+        if (!packs[letter]) {
+          return;
+        }
+        cardRow.appendChild(packCard(letter, packs[letter], eq.pack === letter, function (picked) {
+          eq.pack = picked;
+          render(); // ridisegna: cambia la card selezionata
+        }));
+      });
+      container.appendChild(cardRow);
+    }
 
-    // Arma.
-    container.appendChild(el('div', 'edit-section-label', 'Arma'));
-    container.appendChild(equipField('Nome',
-      equipTextInput(eq.weaponName, function (v) { eq.weaponName = v; })));
-    container.appendChild(equipField('Dado danni',
-      equipSelect(WEAPON_DICE.map(function (d) { return { id: d, label: d }; }),
-        eq.weaponDie, 'Dado danni', function (v) { eq.weaponDie = v; })));
-    container.appendChild(equipField('Tipo di danno',
-      equipTextInput(eq.weaponType, function (v) { eq.weaponType = v; })));
-    container.appendChild(equipField('Maestria (facoltativa)',
-      equipTextInput(eq.weaponMastery, function (v) { eq.weaponMastery = v; })));
+    // Maestria nelle armi: scelta vera fra le armi in cui la classe è
+    // competente, non più un campo di testo facoltativo (5.B.5).
+    var count = masteryCountFor(draft.classId);
+    if (count > 0) {
+      var choices = masteryChoicesFor(draft.classId).map(function (w) {
+        return { id: w.id, name: w.name + ' · ' + w.mastery };
+      });
+      buildSpellPicker(container, 'Maestria nelle armi — scegline ' + count,
+        choices, count, 'masteries');
+    }
   }
 
   /* ---------- passo finale: Sottoclasse e Incantesimi (b2.5) ---------- */
@@ -969,10 +996,17 @@
     var manual = window.MANUAL_55;
     var klass = manual.classes[draft.classId] || {};
     var species = manual.species[draft.speciesId] || {};
-    var eq = draft.equip || defaultEquipFor(draft.classId);
+    var pack = chosenPack();
 
-    var armor = { shield: !!eq.shield };
-    if (eq.armorId) { armor.id = eq.armorId; }
+    var armor = { shield: !!(pack && pack.shield) };
+    if (pack && pack.armorId) { armor.id = pack.armorId; }
+
+    /* Arma impugnata: quella del pacchetto, con dado e tipo di danno presi dal
+       catalogo invece che digitati a mano. La maestria è quella scelta nel
+       passo, se riguarda proprio quest'arma (le altre restano privilegi del
+       personaggio, non proprietà dell'arma in mano). */
+    var w = pack && pack.weaponId ? weaponById(pack.weaponId) : null;
+    var mastery = (w && draft.masteries.indexOf(w.id) !== -1) ? w.mastery : '';
 
     return {
       name: (draft.name || '').trim(),
@@ -989,32 +1023,65 @@
       fightingStyle: 'nessuno',
       armor: armor,
       weapon: {
-        name: eq.weaponName || '', die: eq.weaponDie || '1d8',
-        type: eq.weaponType || '', mastery: eq.weaponMastery || ''
+        name: w ? w.name : '', die: w ? w.die : '1d8',
+        type: w ? w.dmg : '', mastery: mastery
       },
+      // Maestrie possedute (id di armi): il personaggio le sa usare anche se
+      // in mano ha un'altra arma.
+      weaponMasteries: (draft.masteries || []).slice(),
       modifiers: [], extraResources: [], items: [], feats: [], levelChoices: {}
     };
   }
 
+  // Pacchetto scelto (o null: classe senza pacchetti nei dati).
+  function chosenPack() {
+    var packs = packsFor(draft.classId);
+    var letter = (draft.equip || {}).pack;
+
+    return (packs && letter && packs[letter]) || null;
+  }
+
+  /* Roba del pacchetto che finisce nella sacca personale: le armi di scorta
+     (giavellotti, asce da lancio) col loro peso dal catalogo, e i kit. Il peso
+     dei kit non è nel PHB, resta 0 (vedi Debiti aperti nella ROADMAP). */
+  function packInventory() {
+    var pack = chosenPack();
+
+    return ((pack && pack.extra) || []).map(function (it) {
+      var w = it.weaponId ? weaponById(it.weaponId) : null;
+
+      return {
+        name: it.name,
+        desc: it.desc || (w ? w.die + ' ' + w.dmg + ' · ' + w.mastery : ''),
+        qty: it.qty || 1,
+        weight: w ? w.weight : 0
+      };
+    });
+  }
+
   // Stato completo e pulito del nuovo personaggio. I pool correnti partono al
   // massimo del livello 1 (ricavati dal motore: PF pieni, Imposizione piena
-  // per il Paladino, nessun destriero); monete/inventario/diario vuoti
-  // (partenza minimale, decisione 5.B). Gli incantesimi scelti finiscono nel
-  // grimorio.
+  // per il Paladino, nessun destriero); monete ed equipaggiamento sono quelli
+  // del pacchetto scelto (5.B.5), diario vuoto. Gli incantesimi scelti
+  // finiscono nel grimorio.
   function buildStateFromDraft() {
     var character = buildCharacter();
     var poolMax = (window.AppEngine.derive(character).poolMax) || {};
+    var packCoins = (chosenPack() || {}).coins || {};
 
     return {
       version: 3,
       character: character,
       pools: { hp: poolMax.hp || 0, loh: poolMax.loh || 0, steedhp: 0, tempHp: 0 },
       spent: {},
-      coins: { mp: 0, mo: 0, ma: 0, mr: 0 },
+      coins: {
+        mp: packCoins.mp || 0, mo: packCoins.mo || 0,
+        ma: packCoins.ma || 0, mr: packCoins.mr || 0
+      },
       steed: { name: '' },
       treasury: {
         carryMax: (character.abilities.FOR || 10) * 15, // capacità PHB = FOR × 15
-        partyItems: [], personalItems: []
+        partyItems: [], personalItems: packInventory()
       },
       diary: { sessions: [], png: [], quests: { active: [], completed: [] } },
       inspiration: false,
@@ -1137,7 +1204,7 @@
       scoreMethod: 'pointbuy',
       abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 },
       profSkills: [],
-      equip: null, equipForClass: null,
+      equip: null, equipForClass: null, masteries: [],
       cantrips: [], preparedSpells: []
     };
     document.body.classList.remove('in-dashboard');

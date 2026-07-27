@@ -40,7 +40,23 @@ window.MANUAL_55 = {
       rages: [0, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6],
       rageDamage: [0, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4],
       weaponMastery: [0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      weaponProf: ['sem', 'gue'],
       unarmoredDefense: 'COS', // CA senza armatura = 10 + DES + COS (Blocco 5.A.2)
+      /* Equipaggiamento iniziale (PHB, opzioni A e B). Niente armatura: il
+         Barbaro usa la Difesa senza Armatura, ed è addestrato solo a leggere e
+         medie. */
+      startingEquipment: {
+        a: {
+          label: 'Kit del barbaro',
+          armorId: '', shield: false, weaponId: 'ascia-bipenne',
+          extra: [
+            { name: 'Ascia da lancio', qty: 4, weaponId: 'ascia-da-lancio' },
+            { name: 'Kit dell\'esploratore', qty: 1, desc: 'Zaino, giaciglio, 2 fiaschette d\'olio, razioni per 10 giorni, corda, acciarino, 10 torce, otre.' }
+          ],
+          coins: { mo: 15 }
+        },
+        b: { label: '75 monete d\'oro', coins: { mo: 75 } }
+      },
       classResources: {
         furia: { name: 'Furia', kind: 'uses', byLevelRef: 'rages', resetOn: 'long' }
       },
@@ -202,6 +218,29 @@ window.MANUAL_55 = {
          Firestore); i bonus che scalano con una caratteristica stanno nel
          registry CLASS_BONUSES di js/engine.js. 'pool' = riserva spendibile
          (come i PF), 'uses' = res-card a ricarica. */
+      /* Competenza nelle armi ('sem' = semplici, 'gue' = da guerra) e numero di
+         tipi di arma di cui puoi usare la maestria, per livello. Il PHB dà al
+         Paladino la Maestria nelle Armi al 1° su DUE tipi e non prevede
+         aumenti (la sua tabella dei privilegi non ha la colonna Maestria,
+         a differenza di Barbaro e Guerriero). */
+      weaponProf: ['sem', 'gue'],
+      weaponMastery: [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      /* Equipaggiamento iniziale: le due opzioni del PHB, senza vie di mezzo.
+         La personalizzazione (master che concede altro) si fa dopo, nella
+         scheda (decisione 5.B.5). `extra` = roba che finisce nell'inventario. */
+      startingEquipment: {
+        a: {
+          label: 'Kit del paladino',
+          armorId: 'cotta-maglia', shield: true, weaponId: 'spada-lunga',
+          extra: [
+            { name: 'Giavellotto', qty: 6, weaponId: 'giavellotto' },
+            { name: 'Simbolo sacro', qty: 1, desc: 'Focus per gli incantesimi da paladino.' },
+            { name: 'Kit del sacerdote', qty: 1, desc: 'Zaino, coperta, acqua santa, lampada, razioni per 7 giorni, veste, acciarino.' }
+          ],
+          coins: { mo: 9 }
+        },
+        b: { label: '150 monete d\'oro', coins: { mo: 150 } }
+      },
       /* Incantesimi che la CLASSE tiene sempre preparati, dal livello indicato
          (PHB 2024: Punizione Divina dal 2° con Punizione del Paladino, Trova
          Destriero dal 5° con Destriero Fedele). Non contano verso il numero di

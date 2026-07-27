@@ -356,18 +356,49 @@ body.in-create .dashboard-view {
   cursor: not-allowed;
 }
 
-/* ---------- passo Equipaggiamento (sotto-step b2.4) ----------
-   Campi "etichetta + controllo" con spaziatura uniforme: i <select>
-   (armatura, dado danni) riusano .edit-select (edit-sheet.css), gli input di
-   testo riusano .create-in (annullando qui il suo margine, gestito dal
-   wrapper) e lo scudo riusa .chip. Nessun campo per lo stile di combattimento:
-   non è una scelta di livello 1 (Paladino: livello 2; Barbaro: mai). */
+/* ---------- passo Equipaggiamento (5.B.5) ----------
+   Due card selezionabili coi pacchetti A e B del manuale, col contenuto in
+   chiaro (armatura con la sua CA, arma col dado, monete): niente più campi
+   liberi. Sotto, le chip della Maestria nelle armi riusano .chip/.chip-row.
+   Nessun campo per lo stile di combattimento: non è una scelta di livello 1
+   (Paladino: livello 2; Barbaro: mai). */
 
-.create-field {
-  margin-bottom: var(--space-4);
+.create-pack-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
 }
 
-.create-field .create-in,
-.create-field .edit-select {
-  margin-bottom: 0;
+.create-pack {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.create-pack.on {
+  border-color: var(--accent-gold);
+  border-width: 2px;
+  padding: calc(var(--space-3) - 1px) calc(var(--space-4) - 1px);
+  background: rgba(201, 164, 67, 0.08);
+}
+
+.create-pack-title {
+  font-family: var(--font-title);
+  font-size: 15px;
+  color: var(--accent-gold);
+  margin-bottom: var(--space-2);
+}
+
+.create-pack-line {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
 }
