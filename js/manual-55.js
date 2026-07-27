@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 20,
+  version: 21,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -2119,6 +2119,93 @@ window.MANUAL_55 = {
      Selezione curata ed estendibile, riassunti originali in italiano,
      verificati sul PHB 2024. Non ancora consumati da nessuna vista/motore
      (il sync verso Firestore è lo Step 4.4, separato). */
+  /* Proprietà di maestria (PHB 2024, "Mastery Properties"). I NOMI restano in
+     inglese come già nell'app (`weapon.mastery: 'Vex'`): il manuale di
+     riferimento è in inglese e non c'è una fonte italiana ufficiale da seguire
+     (decisione 2026-07-27). Le descrizioni sono riassunti originali in
+     italiano. Si sbloccano solo con un privilegio tipo Maestria nelle Armi. */
+  /* Armature (PHB 2024, cap. 6). Erano 4 sole, scritte in `engine.js`; ora
+     stanno nei dati con CA, requisito di Forza, furtivita, peso e costo, cosi
+     il wizard e l editor della scheda possono mostrare quanto vale davvero
+     un armatura invece del solo nome (5.B.5).
+     dexCap: null = bonus DES pieno (leggere), un numero = tetto al bonus
+     (medie), 0 = il modificatore DES non si applica (pesanti). Gli id delle
+     quattro gia in uso non cambiano: stanno negli stati salvati. */
+  armors: [
+    { id: 'imbottita', name: 'Imbottita', cat: 'leggera', baseAc: 11, dexCap: null, stealth: false, weight: 8, cost: 5 },
+    { id: 'cuoio', name: 'Cuoio', cat: 'leggera', baseAc: 11, dexCap: null, stealth: true, weight: 10, cost: 10 },
+    { id: 'cuoio-borchiato', name: 'Cuoio Borchiato', cat: 'leggera', baseAc: 12, dexCap: null, stealth: true, weight: 13, cost: 45 },
+    { id: 'pelle', name: 'Pelle', cat: 'media', baseAc: 12, dexCap: 2, stealth: true, weight: 12, cost: 10 },
+    { id: 'camicia-maglia', name: 'Camicia di Maglia', cat: 'media', baseAc: 13, dexCap: 2, stealth: true, weight: 20, cost: 50 },
+    { id: 'scaglie', name: 'Corazza a Scaglie', cat: 'media', baseAc: 14, dexCap: 2, stealth: false, weight: 45, cost: 50 },
+    { id: 'corazza', name: 'Corazza di Piastre', cat: 'media', baseAc: 14, dexCap: 2, stealth: true, weight: 20, cost: 400 },
+    { id: 'mezza-piastra', name: 'Mezza Piastra', cat: 'media', baseAc: 15, dexCap: 2, stealth: false, weight: 40, cost: 750 },
+    { id: 'anelli', name: 'Cotta ad Anelli', cat: 'pesante', baseAc: 14, dexCap: 0, stealth: false, weight: 40, cost: 30 },
+    { id: 'cotta-maglia', name: 'Cotta di Maglia', cat: 'pesante', baseAc: 16, dexCap: 0, stealth: false, strReq: 13, weight: 55, cost: 75 },
+    { id: 'strisce', name: 'Corazza a Strisce', cat: 'pesante', baseAc: 17, dexCap: 0, stealth: false, strReq: 15, weight: 60, cost: 200 },
+    { id: 'piastre', name: 'Piastre', cat: 'pesante', baseAc: 18, dexCap: 0, stealth: false, strReq: 15, weight: 65, cost: 1500 }
+  ],
+
+  shield: { name: 'Scudo', ac: 2, weight: 6, cost: 10 },
+
+  weaponMasteries: {
+    Cleave: { name: 'Cleave', desc: 'Colpendo in mischia puoi fare un secondo attacco contro un altro nemico entro 1,5 m dal primo e a portata; il secondo non somma il tuo modificatore ai danni (se non è negativo). Una volta per turno.' },
+    Graze: { name: 'Graze', desc: 'Se manchi il bersaglio, gli infliggi comunque danni pari al modificatore di caratteristica usato per l attacco, dello stesso tipo dell arma.' },
+    Nick: { name: 'Nick', desc: 'L attacco extra della proprietà Leggera lo fai dentro l azione di Attacco invece che con l azione bonus. Una volta per turno.' },
+    Push: { name: 'Push', desc: 'Colpendo una creatura Grande o più piccola puoi spingerla fino a 3 m in linea retta lontano da te.' },
+    Sap: { name: 'Sap', desc: 'La creatura colpita ha svantaggio al suo prossimo tiro per colpire, fino all inizio del tuo turno successivo.' },
+    Slow: { name: 'Slow', desc: 'Se colpisci e infliggi danni, la velocità del bersaglio cala di 3 m fino all inizio del tuo turno successivo; più colpi non sommano la riduzione.' },
+    Topple: { name: 'Topple', desc: 'Colpendo, il bersaglio fa un TS Costituzione (CD 8 + il modificatore usato per l attacco + il tuo bonus di competenza): se fallisce cade Prono.' },
+    Vex: { name: 'Vex', desc: 'Se colpisci e infliggi danni, hai vantaggio al tuo prossimo tiro per colpire contro quella creatura, entro la fine del tuo turno successivo.' }
+  },
+
+  /* Tabella delle armi (PHB 2024, cap. 6). Serve al passo Equipaggiamento e
+     alla scelta della Maestria in creazione, e all editor della scheda: prima
+     arma, dado, tipo e maestria erano campi di testo liberi (5.B.5).
+     cat: 'sem-mis' | 'sem-dist' | 'gue-mis' | 'gue-dist' (semplice/da guerra,
+     mischia/distanza) — la competenza di classe si esprime su queste.
+     cost = in monete d oro (0.1 = 1 MA, 0.05 = 5 MR); weight in libbre. */
+  weapons: [
+    { id: 'clava', name: 'Clava', cat: 'sem-mis', die: '1d4', dmg: 'cont.', props: ['Leggera'], mastery: 'Slow', weight: 2, cost: 0.1 },
+    { id: 'pugnale', name: 'Pugnale', cat: 'sem-mis', die: '1d4', dmg: 'perf.', props: ['Accurata', 'Leggera', 'Lanciabile (6/18 m)'], mastery: 'Nick', weight: 1, cost: 2 },
+    { id: 'randello', name: 'Randello', cat: 'sem-mis', die: '1d8', dmg: 'cont.', props: ['A due mani'], mastery: 'Push', weight: 10, cost: 0.2 },
+    { id: 'ascia-da-lancio', name: 'Ascia da lancio', cat: 'sem-mis', die: '1d6', dmg: 'tagl.', props: ['Leggera', 'Lanciabile (6/18 m)'], mastery: 'Vex', weight: 2, cost: 5 },
+    { id: 'giavellotto', name: 'Giavellotto', cat: 'sem-mis', die: '1d6', dmg: 'perf.', props: ['Lanciabile (9/36 m)'], mastery: 'Slow', weight: 2, cost: 0.5 },
+    { id: 'martello-leggero', name: 'Martello leggero', cat: 'sem-mis', die: '1d4', dmg: 'cont.', props: ['Leggera', 'Lanciabile (6/18 m)'], mastery: 'Nick', weight: 2, cost: 2 },
+    { id: 'mazza', name: 'Mazza', cat: 'sem-mis', die: '1d6', dmg: 'cont.', props: [], mastery: 'Sap', weight: 4, cost: 5 },
+    { id: 'bastone-ferrato', name: 'Bastone ferrato', cat: 'sem-mis', die: '1d6', dmg: 'cont.', props: ['Versatile (1d8)'], mastery: 'Topple', weight: 4, cost: 0.2 },
+    { id: 'falcetto', name: 'Falcetto', cat: 'sem-mis', die: '1d4', dmg: 'tagl.', props: ['Leggera'], mastery: 'Nick', weight: 2, cost: 1 },
+    { id: 'lancia', name: 'Lancia', cat: 'sem-mis', die: '1d6', dmg: 'perf.', props: ['Lanciabile (6/18 m)', 'Versatile (1d8)'], mastery: 'Sap', weight: 3, cost: 1 },
+    { id: 'dardo', name: 'Dardo', cat: 'sem-dist', die: '1d4', dmg: 'perf.', props: ['Accurata', 'Lanciabile (6/18 m)'], mastery: 'Vex', weight: 0.25, cost: 0.05 },
+    { id: 'balestra-leggera', name: 'Balestra leggera', cat: 'sem-dist', die: '1d8', dmg: 'perf.', props: ['Munizioni (24/96 m)', 'Ricarica', 'A due mani'], mastery: 'Slow', weight: 5, cost: 25 },
+    { id: 'arco-corto', name: 'Arco corto', cat: 'sem-dist', die: '1d6', dmg: 'perf.', props: ['Munizioni (24/96 m)', 'A due mani'], mastery: 'Vex', weight: 2, cost: 25 },
+    { id: 'fionda', name: 'Fionda', cat: 'sem-dist', die: '1d4', dmg: 'cont.', props: ['Munizioni (9/36 m)'], mastery: 'Slow', weight: 0, cost: 0.1 },
+    { id: 'ascia-da-battaglia', name: 'Ascia da battaglia', cat: 'gue-mis', die: '1d8', dmg: 'tagl.', props: ['Versatile (1d10)'], mastery: 'Topple', weight: 4, cost: 10 },
+    { id: 'mazzafrusto', name: 'Mazzafrusto', cat: 'gue-mis', die: '1d8', dmg: 'cont.', props: [], mastery: 'Sap', weight: 2, cost: 10 },
+    { id: 'falcione', name: 'Falcione', cat: 'gue-mis', die: '1d10', dmg: 'tagl.', props: ['Pesante', 'Portata', 'A due mani'], mastery: 'Graze', weight: 6, cost: 20 },
+    { id: 'ascia-bipenne', name: 'Ascia bipenne', cat: 'gue-mis', die: '1d12', dmg: 'tagl.', props: ['Pesante', 'A due mani'], mastery: 'Cleave', weight: 7, cost: 30 },
+    { id: 'spadone', name: 'Spadone', cat: 'gue-mis', die: '2d6', dmg: 'tagl.', props: ['Pesante', 'A due mani'], mastery: 'Graze', weight: 6, cost: 50 },
+    { id: 'alabarda', name: 'Alabarda', cat: 'gue-mis', die: '1d10', dmg: 'tagl.', props: ['Pesante', 'Portata', 'A due mani'], mastery: 'Cleave', weight: 6, cost: 20 },
+    { id: 'lancia-da-cavaliere', name: 'Lancia da cavaliere', cat: 'gue-mis', die: '1d10', dmg: 'perf.', props: ['Pesante', 'Portata', 'A due mani (se non sei in sella)'], mastery: 'Topple', weight: 6, cost: 10 },
+    { id: 'spada-lunga', name: 'Spada lunga', cat: 'gue-mis', die: '1d8', dmg: 'tagl.', props: ['Versatile (1d10)'], mastery: 'Sap', weight: 3, cost: 15 },
+    { id: 'maglio', name: 'Maglio', cat: 'gue-mis', die: '2d6', dmg: 'cont.', props: ['Pesante', 'A due mani'], mastery: 'Topple', weight: 10, cost: 10 },
+    { id: 'stella-del-mattino', name: 'Stella del mattino', cat: 'gue-mis', die: '1d8', dmg: 'perf.', props: [], mastery: 'Sap', weight: 4, cost: 15 },
+    { id: 'picca', name: 'Picca', cat: 'gue-mis', die: '1d10', dmg: 'perf.', props: ['Pesante', 'Portata', 'A due mani'], mastery: 'Push', weight: 18, cost: 5 },
+    { id: 'stocco', name: 'Stocco', cat: 'gue-mis', die: '1d8', dmg: 'perf.', props: ['Accurata'], mastery: 'Vex', weight: 2, cost: 25 },
+    { id: 'scimitarra', name: 'Scimitarra', cat: 'gue-mis', die: '1d6', dmg: 'tagl.', props: ['Accurata', 'Leggera'], mastery: 'Nick', weight: 3, cost: 25 },
+    { id: 'spada-corta', name: 'Spada corta', cat: 'gue-mis', die: '1d6', dmg: 'perf.', props: ['Accurata', 'Leggera'], mastery: 'Vex', weight: 2, cost: 10 },
+    { id: 'tridente', name: 'Tridente', cat: 'gue-mis', die: '1d8', dmg: 'perf.', props: ['Lanciabile (6/18 m)', 'Versatile (1d10)'], mastery: 'Topple', weight: 4, cost: 5 },
+    { id: 'martello-da-guerra', name: 'Martello da guerra', cat: 'gue-mis', die: '1d8', dmg: 'cont.', props: ['Versatile (1d10)'], mastery: 'Push', weight: 5, cost: 15 },
+    { id: 'piccone-da-guerra', name: 'Piccone da guerra', cat: 'gue-mis', die: '1d8', dmg: 'perf.', props: ['Versatile (1d10)'], mastery: 'Sap', weight: 2, cost: 5 },
+    { id: 'frusta', name: 'Frusta', cat: 'gue-mis', die: '1d4', dmg: 'tagl.', props: ['Accurata', 'Portata'], mastery: 'Slow', weight: 3, cost: 2 },
+    { id: 'cerbottana', name: 'Cerbottana', cat: 'gue-dist', die: '1', dmg: 'perf.', props: ['Munizioni (7,5/30 m)', 'Ricarica'], mastery: 'Vex', weight: 1, cost: 10 },
+    { id: 'balestra-a-mano', name: 'Balestra a mano', cat: 'gue-dist', die: '1d6', dmg: 'perf.', props: ['Munizioni (9/36 m)', 'Leggera', 'Ricarica'], mastery: 'Vex', weight: 3, cost: 75 },
+    { id: 'balestra-pesante', name: 'Balestra pesante', cat: 'gue-dist', die: '1d10', dmg: 'perf.', props: ['Munizioni (30/120 m)', 'Pesante', 'Ricarica', 'A due mani'], mastery: 'Push', weight: 18, cost: 50 },
+    { id: 'arco-lungo', name: 'Arco lungo', cat: 'gue-dist', die: '1d8', dmg: 'perf.', props: ['Munizioni (45/180 m)', 'Pesante', 'A due mani'], mastery: 'Slow', weight: 2, cost: 50 },
+    { id: 'moschetto', name: 'Moschetto', cat: 'gue-dist', die: '1d12', dmg: 'perf.', props: ['Munizioni (12/36 m)', 'Ricarica', 'A due mani'], mastery: 'Slow', weight: 10, cost: 500 },
+    { id: 'pistola', name: 'Pistola', cat: 'gue-dist', die: '1d10', dmg: 'perf.', props: ['Munizioni (9/27 m)', 'Ricarica'], mastery: 'Vex', weight: 3, cost: 250 }
+  ],
+
   feats: {
     'stile-difesa': {
       name: 'Difesa', category: 'stile', prereq: 'Talento di Stile di Combattimento',

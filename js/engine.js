@@ -46,16 +46,29 @@
     { id: 'storia', label: 'Storia', abil: 'INT' }
   ];
 
-  /* CA base per armatura indossata (PHB 2024, cap. 6). dexCap: Infinity =
-     bonus DES pieno (armatura leggera), un numero = tetto al bonus DES
-     positivo (armatura media, es. +2), 0 = il mod DES non si applica affatto
-     (armatura pesante — vedi nota nel calcolo di ac più sotto). */
-  var ARMORS = {
-    'cuoio-borchiato': { label: 'Cuoio Borchiato', baseAc: 12, dexCap: Infinity },
-    'mezza-piastra': { label: 'Mezza Piastra', baseAc: 15, dexCap: 2 },
-    'cotta-maglia': { label: 'Cotta di Maglia', baseAc: 16, dexCap: 0 },
-    piastre: { label: 'Piastre', baseAc: 18, dexCap: 0 }
-  };
+  /* Armatura indossata: il dato viene da `MANUAL_55.armors` (5.B.5, prima era
+     una tabellina di 4 voci qui dentro). `dexCap: null` nei dati significa
+     bonus DES pieno (armature leggere) e qui diventa Infinity; un numero è il
+     tetto al bonus DES positivo (medie); 0 = il mod DES non si applica affatto
+     (pesanti — vedi nota nel calcolo di ac più sotto). */
+  function armorById(id) {
+    var list = (window.MANUAL_55 && window.MANUAL_55.armors) || [];
+    var found = null;
+    list.forEach(function (a) {
+      if (a.id === id) {
+        found = a;
+      }
+    });
+    if (!found) {
+      return null;
+    }
+
+    return {
+      label: found.name,
+      baseAc: found.baseAc,
+      dexCap: found.dexCap === null ? Infinity : found.dexCap
+    };
+  }
 
   /* Bonus/valori di classe che scalano con una caratteristica o hanno logica:
      vivono nel motore (Fase 0: le formule del PHB stanno qui), NON nei dati.
@@ -165,7 +178,7 @@
     });
     var passivePerception = 10 + skills.percezione.total;
 
-    var armor = ARMORS[(ch.armor || {}).id];
+    var armor = armorById((ch.armor || {}).id);
     var hasArmor = !!(ch.armor && ch.armor.id && ch.armor.id !== 'nessuna');
     var ac;
     if (armor) {
@@ -188,7 +201,8 @@
       ac = 10 + mods.DES + (klass.unarmoredDefense ? mods[klass.unarmoredDefense] : 0);
     }
     var defenseBonus = (ch.fightingStyle === 'difesa' && hasArmor) ? 1 : 0;
-    ac += (ch.armor && ch.armor.shield ? 2 : 0) + defenseBonus + modSum(ch, 'ca');
+    var shieldAc = ((window.MANUAL_55 && window.MANUAL_55.shield) || {}).ac || 2;
+    ac += (ch.armor && ch.armor.shield ? shieldAc : 0) + defenseBonus + modSum(ch, 'ca');
     var acNote = (armor ? armor.label : 'Senza armatura') +
                  (ch.armor && ch.armor.shield ? ' + Scudo' : '');
 
@@ -329,12 +343,30 @@
     return cache;
   }
 
+  /* Etichetta di un'armatura con quanto vale davvero, per i menu di scelta:
+     "Cotta di Maglia — CA 16", "Cuoio Borchiato — CA 12 + DES" (5.B.5). */
+  function armorLabel(id) {
+    var a = armorById(id);
+    if (!a) {
+      return 'Nessuna armatura';
+    }
+    var ca = 'CA ' + a.baseAc;
+    if (a.dexCap === Infinity) {
+      ca += ' + DES';
+    } else if (a.dexCap > 0) {
+      ca += ' + DES (max ' + a.dexCap + ')';
+    }
+
+    return a.label + ' — ' + ca;
+  }
+
   window.AppEngine = {
     derive: derive,
     getView: getView,
     abilityMod: abilityMod,
     profBonus: profBonus,
     formatMod: fmt,
+    armorLabel: armorLabel,
     SKILLS: SKILLS
   };
 })();

@@ -483,6 +483,20 @@ invariato e fa da test di non-regressione a ogni passo.
       come già oggi (`mastery: 'Vex'`): il PDF è in inglese e non c'è una fonte
       italiana ufficiale. L'acquisto a budget con l'opzione B (negozio coi
       prezzi del cap. 6) resta un punto separato, più avanti.
+      → **Dati FATTI (2026-07-27), manuale `version: 21`:** `weapons` (38 armi,
+      dalla tabella di pag. 214 del PDF: id, nome, categoria semplice/da guerra
+      × mischia/distanza, dado, tipo di danno, proprietà, maestria, peso,
+      costo in MO), `weaponMasteries` (le 8 proprietà con riassunto originale in
+      italiano, nomi in inglese) e `armors` (12 armature di pag. 218 con CA,
+      tetto DES, requisito di Forza, furtività, peso, costo) + `shield`.
+      `engine.js` non ha più la sua tabellina di 4 armature: legge dai dati e
+      espone `armorLabel(id)` → "Cotta di Maglia — CA 16", "Cuoio Borchiato —
+      CA 12 + DES". Verificato: Tharion invariato (CA 20 Piastre + Scudo, CD
+      15), console pulita. **I nomi italiani delle armi sono una traduzione
+      mia** (il PDF è in inglese): da rivedere con Andrea se al tavolo usa
+      termini diversi. *Restano da fare:* le due schermate del wizard (pacchetto
+      A/B e scelta delle 2 maestrie) e l'editor della scheda che oggi ha ancora
+      arma/dado/tipo/maestria come testo libero.
 
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
 > `js/create.js` (`window.AppCreate`, macchina a stati dei 6 passi, corpi
@@ -761,6 +775,33 @@ Della **Fase 5** (da sciogliere al blocco giusto; raccomandazione già annotata)
   bastone, pozione, tomo). Usi limitati opzionali → diventano una res-card
   vera nella tab Risorse, esattamente come l'attuale "Scudo magico".
   La Lama Vincolante esistente resta com'è (fuori scope, nessuna migrazione).
+
+## Debiti aperti (trovati strada facendo)
+
+*Obiettivo dichiarato da Andrea (2026-07-27): arrivare ad avere **tutto
+completo di tutto**. Qui finisce ogni cosa incompleta che incontro mentre
+lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
+
+- [ ] **4 incantesimi del giuramento non sono nel catalogo** — Faro di Speranza,
+      Libertà di Movimento, Guardiano della Fede, Colpo Infuocato. Nella
+      tabella `devozione.spellsByLevel` (livelli 9/13/17) stanno con `id: null`:
+      si elencano ma non si aprono. Non tocca nessuno finché Tharion è al 7°,
+      ma va chiuso prima che qualcuno arrivi al 9°. Fonte: PHB pag. 110 del PDF.
+- [ ] **Statblock del destriero scritto fisso nell'HTML** — CA 12, velocità,
+      caratteristiche e le tre forme (Celestiale/Folletto/Immondo) sono markup
+      statico in `index.html`: è il destriero di Tharion, uguale per chiunque.
+      Va ai dati come il resto (stesso trattamento di 5.B.3).
+- [ ] **Nome del file di export sempre `tharion-velnar-backup.json`** —
+      hardcoded in `js/app.js` (`opt-export`): esportando un altro personaggio
+      il file porta comunque il nome di Tharion. Va costruito dal nome del
+      personaggio attivo.
+- [ ] **Trucchetti scelti in creazione** — `grimoire.cantrips` ora viene letto
+      dal grimorio (5.B.3), ma nessuna classe già implementata ne ha: il
+      percorso resta da collaudare davvero con la prima classe che li prende
+      (Mago/Stregone/Chierico, Blocco 5.C).
+- [ ] **`spellsByLevel` delle sottoclassi non-Devozione** — le altre sottoclassi
+      del Paladino (e quelle delle classi future) non hanno ancora la tabella:
+      va aggiunta insieme a ciascuna sottoclasse.
 
 ## Bug risolti
 
