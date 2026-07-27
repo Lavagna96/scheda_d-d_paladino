@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 28,
+  version: 29,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -141,6 +141,10 @@ window.MANUAL_55 = {
       subclasses: {
         berserker: {
           name: 'Cammino del Berserker',
+          // Riga di richiamo mostrata nel picker del level-up (stesso ruolo dei
+          // tenets del Paladino, ma i Cammini del Barbaro non hanno precetti:
+          // qui c'è solo il tema del Cammino, non un giuramento).
+          tenets: 'Incanala la Furia in una violenza pura.',
           features: {
             3: [
               { name: 'Frenesia', desc: 'Se usi Attacco Sconsiderato mentre sei in Furia, infliggi danni extra al primo bersaglio che colpisci nel turno con un attacco basato sulla Forza: tira un numero di d6 pari al tuo bonus ai danni da Furia e sommali. Il tipo di danno è quello dell\'arma o del colpo senz\'armi usato.' }
@@ -153,6 +157,67 @@ window.MANUAL_55 = {
             ],
             14: [
               { name: 'Presenza Intimidatoria', desc: 'Azione bonus: ogni creatura a tua scelta entro un\'Emanazione di 9 metri da te deve superare un TS di Saggezza (CD 8 + modificatore di Forza + bonus di competenza) o è Spaventata per 1 minuto, ripetendo il TS alla fine di ogni suo turno. Dopo l\'uso devi finire un riposo lungo per riusarla, oppure puoi spendere un uso di Furia (nessuna azione) per ripristinarla.' }
+            ]
+          }
+        },
+        /* Cuore Selvaggio, Albero del Mondo e Zelota (PHB 2024, p.54-56 del
+           PDF): completano i 4 Cammini del Barbaro — prima c'era solo
+           Berserker. Il Barbaro non è incantatore: dove un Cammino dà accesso
+           a un incantesimo (rituale, senza slot), il nome resta in prosa nella
+           descrizione — nessun aggancio al grimorio, non serve. */
+        'cuore-selvaggio': {
+          name: 'Cammino del Cuore Selvaggio',
+          tenets: 'Cammina in comunione col mondo animale.',
+          features: {
+            3: [
+              { name: 'Chi Parla agli Animali', desc: 'Puoi lanciare Sensi Bestiali e Parlare con gli Animali, ma solo come rituali; la Saggezza è la tua caratteristica da incantatore per loro.' },
+              { name: 'Furia della Natura Selvaggia', desc: 'Ogni volta che attivi la Furia, scegli uno di questi effetti finché dura. Orso: resistenza a tutti i tipi di danno tranne Forza, Necrotico e Psichico. Aquila: puoi Disimpegnarti e Scattare come parte dell\'azione bonus con cui entri in Furia, e in seguito farle entrambe con una sola azione bonus. Lupo: i tuoi alleati hanno vantaggio ad attaccare un tuo nemico entro 1,5 m da te.' }
+            ],
+            6: [
+              { name: 'Aspetto della Natura Selvaggia', desc: 'Scegli uno di questi effetti; puoi cambiarlo a ogni riposo lungo. Gufo: hai (o migliori di 18 m) Scurovisione fino a 18 m. Pantera: velocità di scalata pari alla tua velocità. Salmone: velocità di nuoto pari alla tua velocità.' }
+            ],
+            10: [
+              { name: 'Chi Parla alla Natura', desc: 'Puoi lanciare Comunione con la Natura, ma solo come rituale; la Saggezza è la tua caratteristica da incantatore per esso.' }
+            ],
+            14: [
+              { name: 'Potere della Natura Selvaggia', desc: 'Ogni volta che attivi la Furia, scegli uno di questi effetti finché dura. Falco: velocità di volo pari alla tua velocità, se non indossi armatura. Leone: i nemici entro 1,5 m da te hanno svantaggio ad attaccare chiunque non sia te o un altro barbaro con questo stesso effetto attivo. Ariete: un colpo in mischia contro una creatura Grande o più piccola può renderla Prona.' }
+            ]
+          }
+        },
+        'albero-del-mondo': {
+          name: 'Cammino dell\'Albero del Mondo',
+          tenets: 'Segui le radici e i rami del multiverso.',
+          features: {
+            3: [
+              { name: 'Vitalità dell\'Albero', desc: 'Quando attivi la Furia, ottieni PF temporanei pari al tuo livello da barbaro. Inoltre, a inizio di ogni tuo turno mentre sei in Furia, puoi scegliere un\'altra creatura entro 3 m: tira un numero di d6 pari al tuo bonus ai danni da Furia e dalle come PF temporanei. I PF temporanei residui svaniscono quando la Furia finisce.' }
+            ],
+            6: [
+              { name: 'Rami dell\'Albero', desc: 'Quando una creatura a vista comincia il turno entro 9 m da te mentre sei in Furia, puoi usare una reazione per evocarle attorno rami spettrali: TS Forza (CD 8 + modificatore di Forza + bonus di competenza) o viene teletrasportata in uno spazio libero a vista entro 1,5 m da te; dopo, puoi ridurne a 0 la velocità fino alla fine del turno.' }
+            ],
+            10: [
+              { name: 'Radici Percotenti', desc: 'Nel tuo turno, la portata delle armi da mischia Pesanti o Versatili che impugni aumenta di 3 m. Colpendo con una di queste puoi attivare la proprietà di maestria Spinta o Rovesciare oltre a un\'altra maestria che stai già usando con quell\'arma.' }
+            ],
+            14: [
+              { name: 'Viaggiare lungo l\'Albero', desc: 'Quando attivi la Furia, e con un\'azione bonus mentre dura, puoi teletrasportarti fino a 18 m in uno spazio libero a vista. Una volta per Furia puoi estendere la portata a 45 m e portare con te fino a 6 creature volontarie entro 3 m, che arrivano in spazi liberi entro 3 m dalla tua destinazione.' }
+            ]
+          }
+        },
+        zelota: {
+          name: 'Cammino dello Zelota',
+          tenets: 'Va in Furia in unione estatica con un dio.',
+          features: {
+            3: [
+              { name: 'Furia Divina', desc: 'A ogni tuo turno mentre sei in Furia, la prima creatura che colpisci con un\'arma o un colpo senz\'armi subisce danni extra pari a 1d6 più metà del tuo livello da barbaro (arrotondato per difetto), Necrotici o Radiosi a tua scelta.' },
+              { name: 'Guerriero degli Dèi', desc: 'Hai una riserva di quattro d12 da spendere per guarire: con un\'azione bonus ne tiri alcuni e recuperi PF pari al totale. La riserva si ricarica del tutto al riposo lungo, e il suo massimo sale a 5 dadi al 6° livello, 6 al 12° e 7 al 17°.' }
+            ],
+            6: [
+              { name: 'Concentrazione Fanatica', desc: 'Una volta per Furia attiva, se fallisci un TS puoi ripeterlo con un bonus pari al tuo bonus ai danni da Furia, tenendo il nuovo risultato.' }
+            ],
+            10: [
+              { name: 'Presenza Zelante', desc: 'Azione bonus: fino a dieci creature a tua scelta entro 18 m ottengono vantaggio ai tiri per colpire e ai TS fino all\'inizio del tuo prossimo turno. Dopo l\'uso serve un riposo lungo per riusarla, oppure puoi spendere un uso di Furia (nessuna azione) per ripristinarla.' }
+            ],
+            14: [
+              { name: 'Furia degli Dèi', desc: 'Quando attivi la Furia, puoi assumere per 1 minuto (o finché non scendi a 0 PF) la forma di un guerriero divino; una volta per riposo lungo. In quella forma ottieni Volo (velocità di volo pari alla tua, puoi librarti), Resistenza (ai danni Necrotici, Psichici e Radiosi) e Rivivificazione (con una reazione, spendendo un uso di Furia, puoi impedire a una creatura entro 9 m di scendere a 0 PF portandola invece a un numero di PF pari al tuo livello da barbaro).' }
             ]
           }
         }

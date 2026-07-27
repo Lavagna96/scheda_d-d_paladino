@@ -832,11 +832,38 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      Soldato), ascia bipenne con maestria Cleave, seconda maestria (Lancia),
      pacchetto di classe + pacchetto del background sommati nella sacca (9
      voci, pesi tutti valorizzati), 29 MO, PF 14. Console pulita.
-   - **Gap noto e volutamente non toccato**: il Barbaro ha nel PHB 4 Cammini
-     (Berserker, Cuore Selvaggio, Albero del Mondo, Zelota) e ne è modellato
-     **solo uno**, Berserker — stesso trattamento delle 4 sottoclassi mancanti
-     al Paladino. Non richiesto in questo giro; stesso pattern, si può
-     riprendere quando servirà.
+   - **Gap poi chiuso lo stesso giorno**: il Barbaro ha nel PHB 4 Cammini
+     (Berserker, Cuore Selvaggio, Albero del Mondo, Zelota), ne era modellato
+     solo uno. → **Completati anche gli altri 3 (2026-07-27), `?v=87`, manuale
+     `version` 28→29**, stesso trattamento appena dato ai 4 giuramenti del
+     Paladino — il nuovo `buildSubclassSection` di `levelup.js` non ha
+     richiesto NESSUNA modifica: gli bastava trovare più di una voce in
+     `subclasses` per smettere di auto-assegnare e mostrare il picker vero.
+     Aggiunti ai dati (PHB p.54-56 del PDF): **Cuore Selvaggio** (Chi Parla
+     agli Animali + Furia della Natura Selvaggia a 3, Aspetto della Natura
+     Selvaggia a 6, Chi Parla alla Natura a 10, Potere della Natura Selvaggia
+     a 14 — i tre rituali di lancio restano in prosa, il Barbaro non è
+     incantatore e non serve agganciarli al grimorio), **Albero del Mondo**
+     (Vitalità dell'Albero a 3, Rami dell'Albero a 6, Radici Percotenti a 10,
+     Viaggiare lungo l'Albero a 14), **Zelota** (Furia Divina + Guerriero
+     degli Dèi a 3, Concentrazione Fanatica a 6, Presenza Zelante a 10, Furia
+     degli Dèi a 14). Aggiunta anche una riga di richiamo tematico a tutti e
+     4 i Cammini (compreso il Berserker, che non l'aveva) per coerenza nel
+     picker, riusando lo stesso campo `tenets` del Paladino anche se qui non
+     sono precetti in senso proprio.
+     **Bug di test, non di prodotto**: durante la verifica il pannello di
+     level-up non si apriva per il Barbaro iniettato via localStorage — non
+     era un bug nel codice ma una corsa fra il mio script di test e
+     `AppLevelUp.init()` (il bottone non aveva ancora il listener agganciato
+     quando lo clickavo). Confermato chiamando `init()` di nuovo a mano prima
+     del click; verificato che il codice reale, in un caricamento normale
+     dell'app, non ha questo problema (Tharion apre il pannello al primo
+     click, senza reinizializzazioni). Verificato: un Barbaro di livello 2 che
+     sale a 3 vede le 4 card (Berserker/Cuore Selvaggio/Albero del
+     Mondo/Zelota) coi richiami tematici, sceglie Zelota e la scheda mostra
+     subito Furia Divina e Guerriero degli Dèi nei Tratti; Tharion (Paladino)
+     non è minimamente toccato da un cambiamento pensato per un'altra classe.
+     Console pulita in ogni prova.
 2. [ ] **Guerriero** (no caster) — stili extra, ASI a 6/14, attacchi extra multipli, Azione Impetuosa, Recuperare Energie.
 3. [ ] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
 4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
@@ -1008,13 +1035,9 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
       è competente. Serviva perché i personaggi nati prima del wizard — cioè
       Tharion — non ne avevano nessuna registrata. **Quali siano le sue due
       resta una scelta di Andrea**: il manuale ovviamente non lo dice.
-- [ ] **Barbaro: solo 1 Cammino su 4** — nel PHB ne ha Berserker, Cuore
-      Selvaggio, Albero del Mondo e Zelota; modellato solo Berserker. Stesso
-      pattern già risolto per il Paladino (vedi 4.2): quando si riprende, va
-      aggiunto anche il picker vero nel level-up — oggi con 1 sola sottoclasse
-      il Barbaro la assegna da solo, col nuovo `buildSubclassSection` basta che
-      i dati abbiano più di 1 voce e il picker compare da sé, nessun altro
-      codice da toccare.
+- [x] ~~**Barbaro: solo 1 Cammino su 4**~~ — FATTO (2026-07-27): tutti e 4 i
+      Cammini modellati, vedi nota sotto "1. Barbaro" in Blocco 5.C. Il picker
+      del level-up li ha presi senza bisogno di alcuna modifica al codice.
 - [ ] **`renderGains()` ha un hardcode `classId === 'paladino'`** — in
       `levelup.js`, la riga dei guadagni di Imposizione delle Mani nel preview
       del level-up è agganciata al nome della classe invece che a "la classe ha
