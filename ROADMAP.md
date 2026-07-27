@@ -864,7 +864,59 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      subito Furia Divina e Guerriero degli Dèi nei Tratti; Tharion (Paladino)
      non è minimamente toccato da un cambiamento pensato per un'altra classe.
      Console pulita in ogni prova.
-2. [ ] **Guerriero** (no caster) — stili extra, ASI a 6/14, attacchi extra multipli, Azione Impetuosa, Recuperare Energie.
+2. [x] **Guerriero** (no caster) — stili extra, ASI a 6/14, attacchi extra multipli, Azione Impetuosa, Recuperare Energie.
+   → **Fatto (2026-07-27, `?v=88`, manuale `version` 29→30)**: privilegi 1→20 dal
+   PDF (p.90-91), sottoclasse **Campione** (p.93, la più semplice delle 4 —
+   Maestro di Battaglia, Cavaliere Occulto e Combattente Psionico restano da
+   fare, stesso trattamento già dato a Paladino/Barbaro), equipaggiamento
+   iniziale (3 opzioni A/B/C — la spada d'ordinanza è lo Spadone, con
+   Flagello aggiunto al catalogo armi perché mancava), competenze di classe
+   in `CLASS_SKILLS` (create.js).
+   - **Attacchi extra generalizzati**: il Guerriero arriva a 4 colpi (2 extra
+     attacchi a 11°, 3 a 20°), non 2 come Paladino/Barbaro — la vecchia soglia
+     singola `choicePoints.extraAttack` non bastava più. Sostituita con una
+     tabella `extraAttacks[livello]` per classe (colpi oltre al primo), letta
+     da `stats.js` per calcolare "Attacco Extra: N colpi"; Paladino e Barbaro
+     migrati alla stessa tabella (restano fermi a 1, cioè 2 colpi totali).
+   - **Riposo breve generalizzato**: `shortRest()` in `sheet.js` era hardcoded
+     solo su Channel Divinity (`state.spent.cd -= 1`). Il Guerriero ha DUE
+     risorse che si ricaricano al riposo breve (Recuperare Energie, Azione
+     Impetuosa) — generalizzato a "recupera 1 uso di ogni risorsa con
+     `resetOn:'short'`", aggiunto lo stesso flag alla card di Channel Divinity
+     (prima non ce l'aveva, funzionava solo per l'hardcode). Verificato: CD
+     2/2 → spendi 1 → riposo breve → torna 2/2 (invariato); Guerriero con
+     Recuperare Energie e Azione Impetuosa entrambe spese → riposo breve →
+     tornano su di 1 ciascuna; Indomabile (riposo lungo) resta intoccato dal
+     riposo breve; riposo lungo azzera tutto come prima.
+   - **Bug di creazione trovato e chiuso**: il wizard mostrava solo le opzioni
+     A/B dell'equipaggiamento di classe (`['a', 'b'].forEach(...)` hardcoded
+     in `create.js`) — invisibile finché tutte le classi modellate ne avevano
+     solo 2, ma il Guerriero ne ha 3 (C = 155 mo, nessun oggetto). Generalizzato
+     a `Object.keys(packs)`, verificato che la card C ora compare.
+   - **Bug di creazione più serio, trovato e chiuso**: lo Stile di
+     Combattimento del Guerriero si sceglie al **1° livello** (Paladino lo
+     sceglie al 2°), ma il wizard di creazione non aveva NESSUN passo per
+     sceglierlo — scriveva sempre `fightingStyle: 'nessuno'`, e il level-up
+     lo richiede solo quando `choicePoints.fightingStyle === livello`
+     raggiunto salendo, cosa che non succede mai per il livello 1 (è il
+     livello di partenza, non di arrivo di un level-up). Un Guerriero appena
+     creato restava quindi permanentemente senza stile finché non lo si
+     correggeva a mano dalla scheda. Aggiunto un picker (stessi 2 stili con
+     bonus meccanico di `levelup.js`: Duello, Difesa) nel passo finale del
+     wizard, mostrato solo quando `choicePoints.fightingStyle === CREATE_LEVEL
+     (1)` — quindi non tocca Paladino/Barbaro. Verificato: passo bloccato
+     finché non si sceglie, personaggio creato con `fightingStyle: 'difesa'`.
+   - **Verifica end-to-end**: Guerriero di prova iniettato a livello 11
+     (Campione) — privilegi di classe e sottoclasse tutti presenti in Tratti
+     nell'ordine giusto, Recuperare Energie 4/4, Azione Impetuosa 1/1,
+     Indomabile 1/1 nelle sezioni giuste, "Attacco Extra: 3 colpi" corretto.
+     Giro completo del wizard da zero (Umano, Guerriero, Soldato con Set da
+     gioco, punteggi consigliati FOR 17/COS 14 col bonus del background,
+     competenze Acrobazia+Percezione senza doppioni col background, pacchetto
+     A, 3 maestrie, Stile Difesa): personaggio salvato con tutti i campi
+     corretti. Tharion (Paladino) verificato invariato dopo ogni modifica
+     (CA 20, PF 60, Attacco Extra 2 colpi, Channel Divinity ancora 2/2 dopo
+     riposo breve). Console pulita in ogni prova.
 3. [ ] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
 4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
 5. [ ] **Ranger** (half-caster) — riusa gli slot half del Paladino; incantesimi noti, Nemico Prescelto.

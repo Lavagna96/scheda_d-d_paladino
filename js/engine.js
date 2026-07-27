@@ -241,7 +241,7 @@
 
     var resources = [];
     if (klass.channelDivinity && klass.channelDivinity[ch.level]) {
-      resources.push({ key: 'cd', max: klass.channelDivinity[ch.level] });
+      resources.push({ key: 'cd', max: klass.channelDivinity[ch.level], resetOn: 'short' });
     }
     resources.push({ key: 'hd', max: ch.level, ctx: ch.level + (klass.hitDie || 'd8') });
     if (ch.speciesId === 'dragonide') {

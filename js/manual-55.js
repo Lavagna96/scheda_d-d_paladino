@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 29,
+  version: 30,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -40,6 +40,9 @@ window.MANUAL_55 = {
       rages: [0, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6],
       rageDamage: [0, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4],
       weaponMastery: [0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      // Un solo Attacco Extra per tutta la progressione (mai un 3° colpo): stessa
+      // tabella generica letta da stats.js per il Guerriero, che invece scala.
+      extraAttacks: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       weaponProf: ['sem', 'gue'],
       unarmoredDefense: 'COS', // CA senza armatura = 10 + DES + COS (Blocco 5.A.2)
       /* Equipaggiamento iniziale (PHB, opzioni A e B). Niente armatura: il
@@ -62,7 +65,7 @@ window.MANUAL_55 = {
       },
       choicePoints: {
         subclass: 3, subclassFeatureLevels: [3, 6, 10, 14],
-        asi: [4, 8, 12, 16], epicBoon: 19, extraAttack: 5
+        asi: [4, 8, 12, 16], epicBoon: 19
       },
       /* Privilegi per livello 1→20 (Fase 5, step Barbaro): riassunti originali in
          italiano, verificati sul PHB 2024 (PDF locale, p.50-52). trait:false =
@@ -251,7 +254,152 @@ window.MANUAL_55 = {
       name: 'Guerriero', hitDie: 'd10', primaryAbility: 'FOR o DES', saves: ['FOR', 'COS'],
       casterType: 'none',
       secondWind: [0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-      weaponMastery: [0, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6]
+      weaponMastery: [0, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6],
+      weaponProf: ['sem', 'gue'],
+      /* Azione Impetuosa: 1 uso da 2° livello, 2 usi da 17°. Indomabile: 1 uso
+         da 9°, 2 da 13°, 3 da 17°. Attacchi extra oltre al primo: 1 da 5°
+         (2 colpi), 2 da 11° (3 colpi), 3 da 20° (4 colpi) — generico, letto da
+         stats.js al posto della vecchia soglia singola choicePoints.extraAttack
+         (bastava per Paladino/Barbaro, che restano fermi a 2 colpi). */
+      actionSurgeUses: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2],
+      indomitableUses: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3],
+      extraAttacks: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3],
+      startingEquipment: {
+        a: {
+          label: 'Kit del guerriero',
+          armorId: 'cotta-maglia', shield: false, weaponId: 'spadone',
+          extra: [
+            { name: 'Flagello', qty: 1, weaponId: 'flagello' },
+            { name: 'Giavellotto', qty: 8, weaponId: 'giavellotto' },
+            { name: 'Kit del perlustratore', qty: 1, weight: 55, desc: 'Zaino, tribbie, piede di porco, 2 fiaschette d\'olio, razioni per 10 giorni, corda, acciarino, 10 torce, otre.' }
+          ],
+          coins: { mo: 4 }
+        },
+        b: {
+          label: 'Armatura leggera e armi da lancio',
+          armorId: 'cuoio-borchiato', shield: false, weaponId: 'scimitarra',
+          extra: [
+            { name: 'Spada corta', qty: 1, weaponId: 'spada-corta' },
+            { name: 'Arco lungo', qty: 1, weaponId: 'arco-lungo' },
+            { name: 'Frecce', qty: 20, weight: 1, desc: 'In una faretra.' },
+            { name: 'Kit del perlustratore', qty: 1, weight: 55, desc: 'Zaino, tribbie, piede di porco, 2 fiaschette d\'olio, razioni per 10 giorni, corda, acciarino, 10 torce, otre.' }
+          ],
+          coins: { mo: 11 }
+        },
+        c: { label: '155 monete d\'oro', coins: { mo: 155 } }
+      },
+      classResources: {
+        secondwind: { name: 'Recuperare Energie', kind: 'uses', byLevelRef: 'secondWind', resetOn: 'short' },
+        actionsurge: { name: 'Azione Impetuosa', kind: 'uses', byLevelRef: 'actionSurgeUses', resetOn: 'short' },
+        indomitable: { name: 'Indomabile', kind: 'uses', byLevelRef: 'indomitableUses', resetOn: 'long' }
+      },
+      choicePoints: {
+        fightingStyle: 1,
+        subclass: 3, subclassFeatureLevels: [3, 7, 10, 15, 18],
+        asi: [4, 6, 8, 12, 14, 16],
+        epicBoon: 19
+      },
+      /* Privilegi 1→20 (PHB 2024 p.90-91 del PDF): riassunti originali in
+         italiano. trait:false = scelta gestita altrove (Stile di Combattimento
+         dal wizard, sottoclasse dal picker, ASI/Dono Epico dal level-up). */
+      levelFeatures: {
+        1: [
+          { name: 'Stile di Combattimento', trait: false, desc: 'Ottieni un talento di Stile di Combattimento a tua scelta (consigliato: Difesa). Puoi sostituirlo con un altro Stile di Combattimento ogni volta che sali di livello da guerriero.' },
+          { name: 'Recuperare Energie', desc: 'Come azione bonus, recuperi PF pari a 1d10 + il tuo livello da guerriero. Puoi usarlo un numero di volte pari alla colonna Recuperare Energie; ne recuperi uno al riposo breve e tutti al riposo lungo.' },
+          { name: 'Maestria nelle Armi', desc: 'Puoi usare la proprietà di maestria di tre tipi di arma Semplice o da Guerra a tua scelta; col crescere del livello aumentano i tipi utilizzabili. Al riposo lungo puoi cambiare le armi scelte.' }
+        ],
+        2: [
+          { name: 'Azione Impetuosa', desc: 'Nel tuo turno puoi intraprendere un\'azione aggiuntiva (tranne l\'azione Magia). Dopo l\'uso serve un riposo breve o lungo per riusarla; dal 17° livello puoi usarla due volte prima di un riposo, ma non due volte nello stesso turno.' },
+          { name: 'Mente Tattica', desc: 'Quando fallisci una prova di caratteristica, puoi spendere un uso di Recuperare Energie: invece di curarti, tiri 1d10 e lo sommi alla prova, trasformandola magari in un successo. Se fallisce comunque, l\'uso non viene consumato.' }
+        ],
+        3: [
+          { name: 'Sottoclasse del Guerriero', trait: false, desc: 'Scegli una specializzazione (Maestro di Battaglia, Campione, Cavaliere Occulto o Combattente Psionico). Ottieni i suoi privilegi al tuo livello da guerriero o inferiore.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        5: [
+          { name: 'Attacco Extra', trait: false, desc: 'Puoi attaccare due volte, invece di una, ogni volta che compi l\'azione di Attacco nel tuo turno.' },
+          { name: 'Spostamento Tattico', desc: 'Ogni volta che attivi Recuperare Energie con un\'azione bonus, puoi muoverti fino a metà della tua velocità senza provocare attacchi di opportunità.' }
+        ],
+        6: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        7: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio della tua specializzazione.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        9: [
+          { name: 'Indomabile', desc: 'Se fallisci un tiro salvezza, puoi ripeterlo con un bonus pari al tuo livello da guerriero. Devi tenere il nuovo risultato e non puoi riusare questo privilegio finché non finisci un riposo lungo.' },
+          { name: 'Maestro Tattico', desc: 'Quando attacchi con un\'arma di cui puoi usare la maestria, puoi sostituire quella proprietà con Spinta, Fiaccare o Rallentare per quell\'attacco.' }
+        ],
+        10: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio della tua specializzazione.' }
+        ],
+        11: [
+          { name: 'Due Attacchi Extra', desc: 'Puoi attaccare tre volte, invece di una, ogni volta che compi l\'azione di Attacco nel tuo turno.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        13: [
+          { name: 'Indomabile', desc: 'Puoi usare questo privilegio due volte prima di un riposo lungo.' },
+          { name: 'Attacchi Studiati', desc: 'Se manchi un tiro per colpire contro una creatura, hai vantaggio al prossimo tiro per colpire contro di lei prima della fine del tuo prossimo turno.' }
+        ],
+        14: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        15: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio della tua specializzazione.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        17: [
+          { name: 'Azione Impetuosa Migliorata', desc: 'Puoi usare Azione Impetuosa due volte prima di un riposo (mai due volte nello stesso turno).' },
+          { name: 'Indomabile', desc: 'Puoi usare questo privilegio tre volte prima di un riposo lungo.' }
+        ],
+        18: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni l\'ultimo privilegio della tua specializzazione.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono della Prodezza in Combattimento) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Tre Attacchi Extra', desc: 'Puoi attaccare quattro volte, invece di una, ogni volta che compi l\'azione di Attacco nel tuo turno.' }
+        ]
+      },
+      /* Sottoclassi del Guerriero: per ora solo Campione (PHB p.93), la più
+         semplice delle quattro (nessuna risorsa dedicata) — Maestro di
+         Battaglia, Cavaliere Occulto e Combattente Psionico si aggiungono in
+         seguito, stesso trattamento già dato alle sottoclassi di Paladino e
+         Barbaro. */
+      subclasses: {
+        campione: {
+          name: 'Campione',
+          tenets: 'Insegue l\'eccellenza fisica e la vittoria a ogni costo.',
+          features: {
+            3: [
+              { name: 'Critico Migliorato', desc: 'I tuoi tiri per colpire con armi e attacchi senz\'armi segnano un Colpo Critico anche con un 19 sul d20, oltre che con un 20.' },
+              { name: 'Atleta Impareggiabile', desc: 'Hai vantaggio alle prove di iniziativa e alle prove di Forza (Atletica). Inoltre, subito dopo aver segnato un Colpo Critico, puoi muoverti fino a metà della tua velocità senza provocare attacchi di opportunità.' }
+            ],
+            7: [
+              { name: 'Stile di Combattimento Aggiuntivo', desc: 'Ottieni un altro talento di Stile di Combattimento a tua scelta.' }
+            ],
+            10: [
+              { name: 'Guerriero Eroico', desc: 'In combattimento puoi darti Ispirazione Eroica ogni volta che inizi il tuo turno senza averla già.' }
+            ],
+            15: [
+              { name: 'Critico Superiore', desc: 'I tuoi tiri per colpire con armi e attacchi senz\'armi segnano un Colpo Critico con 18-20 sul d20.' }
+            ],
+            18: [
+              { name: 'Sopravvissuto', desc: 'Hai vantaggio ai tiri salvezza contro la morte, e se ottieni 18-20 su uno di essi ne hai il beneficio come se fosse un 20 naturale. Inoltre, a inizio di ogni tuo turno recuperi 5 + il tuo modificatore di Costituzione PF se sei Sanguinante e hai almeno 1 PF.' }
+            ]
+          }
+        }
+      }
     },
     ladro: {
       name: 'Ladro', hitDie: 'd8', primaryAbility: 'DES', saves: ['DES', 'INT'],
@@ -290,6 +438,7 @@ window.MANUAL_55 = {
          a differenza di Barbaro e Guerriero). */
       weaponProf: ['sem', 'gue'],
       weaponMastery: [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      extraAttacks: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       /* Equipaggiamento iniziale: le due opzioni del PHB, senza vie di mezzo.
          La personalizzazione (master che concede altro) si fa dopo, nella
          scheda (decisione 5.B.5). `extra` = roba che finisce nell'inventario. */
@@ -398,8 +547,7 @@ window.MANUAL_55 = {
         subclass: 3,
         subclassFeatureLevels: [3, 7, 15, 20],
         asi: [4, 8, 12, 16],
-        epicBoon: 19,
-        extraAttack: 5
+        epicBoon: 19
       },
       /* Sottoclassi (Giuramenti) — Step 4.2: per ora solo Devozione (scelta
          dell'utente), le altre si aggiungono in seguito. Riassunti originali
@@ -2666,6 +2814,7 @@ window.MANUAL_55 = {
     { id: 'fionda', name: 'Fionda', cat: 'sem-dist', die: '1d4', dmg: 'cont.', props: ['Munizioni (9/36 m)'], mastery: 'Slow', weight: 0, cost: 0.1 },
     { id: 'ascia-da-battaglia', name: 'Ascia da battaglia', cat: 'gue-mis', die: '1d8', dmg: 'tagl.', props: ['Versatile (1d10)'], mastery: 'Topple', weight: 4, cost: 10 },
     { id: 'mazzafrusto', name: 'Mazzafrusto', cat: 'gue-mis', die: '1d8', dmg: 'cont.', props: [], mastery: 'Sap', weight: 2, cost: 10 },
+    { id: 'flagello', name: 'Flagello', cat: 'gue-mis', die: '1d8', dmg: 'cont.', props: [], mastery: 'Sap', weight: 2, cost: 10 },
     { id: 'falcione', name: 'Falcione', cat: 'gue-mis', die: '1d10', dmg: 'tagl.', props: ['Pesante', 'Portata', 'A due mani'], mastery: 'Graze', weight: 6, cost: 20 },
     { id: 'ascia-bipenne', name: 'Ascia bipenne', cat: 'gue-mis', die: '1d12', dmg: 'tagl.', props: ['Pesante', 'A due mani'], mastery: 'Cleave', weight: 7, cost: 30 },
     { id: 'spadone', name: 'Spadone', cat: 'gue-mis', die: '2d6', dmg: 'tagl.', props: ['Pesante', 'A due mani'], mastery: 'Graze', weight: 6, cost: 50 },

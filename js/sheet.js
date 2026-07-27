@@ -506,9 +506,17 @@
     }
   }
 
+  // Riposo breve: recupera 1 uso di ogni risorsa con resetOn:'short' (era
+  // hardcoded solo su Channel Divinity — il Guerriero ne ha altre due:
+  // Recuperare Energie e Azione Impetuosa, con la stessa cadenza).
   function shortRest() {
     var state = window.AppStorage.getState();
-    state.spent.cd = Math.max(0, (state.spent.cd || 0) - 1);
+    var view = window.AppEngine.getView();
+    (view.resources || []).forEach(function (r) {
+      if (r.resetOn === 'short') {
+        state.spent[r.key] = Math.max(0, (state.spent[r.key] || 0) - 1);
+      }
+    });
     window.AppStorage.saveState(state);
     render();
     if (window.AppGrimorio) {

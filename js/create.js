@@ -79,7 +79,11 @@
     masteries: [],
     // Incantesimi scelti nel passo finale (b2.5): id dal catalogo del manuale.
     // Vuoti per i non-caster; per il Paladino solo preparedSpells (2 di liv. 1).
-    cantrips: [], preparedSpells: []
+    cantrips: [], preparedSpells: [],
+    // Stile di Combattimento: solo per le classi che lo danno al livello 1
+    // (choicePoints.fightingStyle === 1, es. Guerriero); le altre lo scelgono
+    // al level-up.
+    fightingStyleId: null
   };
 
   var progressFillEl, stepNumEl, stepTitleEl, stepBodyEl, backBtn, nextBtn, footerNoteEl;
@@ -95,6 +99,17 @@
     FOR: 'Forza', DES: 'Destrezza', COS: 'Costituzione',
     INT: 'Intelligenza', SAG: 'Saggezza', CAR: 'Carisma'
   };
+
+  // Stesse due opzioni con bonus meccanico di js/levelup.js (le uniche lette
+  // altrove nel motore): qui serve solo quando la classe dà lo Stile già al
+  // livello 1 (il Guerriero) invece che a un livello successivo, gestito dal
+  // level-up. Duplicata invece di condivisa: i due file non hanno un modulo
+  // comune da cui importare.
+  var FIGHTING_STYLES = [
+    { id: 'nessuno', label: 'Nessuno' },
+    { id: 'duello', label: 'Duello (+2 danni, arma a una mano)' },
+    { id: 'difesa', label: 'Difesa (+1 CA, con armatura)' }
+  ];
 
   // Point-buy (PHB 2024 p.37): 27 punti totali; costo per punteggio 8-15.
   var POINT_BUY_BUDGET = 27;
@@ -140,6 +155,7 @@
   // p.108). Le altre classi useranno un fallback finché non saranno modellate.
   var CLASS_SKILLS = {
     barbaro: { count: 2, from: ['addestrare-animali', 'atletica', 'intimidire', 'natura', 'percezione', 'sopravvivenza'] },
+    guerriero: { count: 2, from: ['acrobazia', 'addestrare-animali', 'atletica', 'storia', 'intuizione', 'intimidire', 'persuasione', 'percezione', 'sopravvivenza'] },
     paladino: { count: 2, from: ['atletica', 'intuizione', 'intimidire', 'medicina', 'persuasione', 'religione'] }
   };
 
@@ -359,8 +375,11 @@
   // teorico) in cui il catalogo avesse meno incantesimi del dovuto.
   function finaleValid() {
     var klass = (window.MANUAL_55 && window.MANUAL_55.classes[draft.classId]) || {};
+    // Stile di Combattimento: solo le classi che lo danno già al livello 1
+    // (Guerriero) lo scelgono qui; le altre lo scelgono al level-up.
+    var styleOk = (klass.choicePoints || {}).fightingStyle !== CREATE_LEVEL || !!draft.fightingStyleId;
     if (!klass.casterType || klass.casterType === 'none') {
-      return true;
+      return styleOk;
     }
     var needCantrips = Math.min(
       (klass.cantripsByLevel && klass.cantripsByLevel[CREATE_LEVEL]) || 0,
@@ -371,7 +390,7 @@
       classSpellsAt(draft.classId, 1).length
     );
 
-    return (draft.cantrips || []).length === needCantrips &&
+    return styleOk && (draft.cantrips || []).length === needCantrips &&
            (draft.preparedSpells || []).length === needPrepared;
   }
 
@@ -1115,13 +1134,12 @@
     } else {
       container.appendChild(el('div', 'edit-section-label', 'Equipaggiamento iniziale'));
       container.appendChild(el('div', 'create-saves-line',
-        'Le due opzioni del manuale. Quello che il master ti concede in più lo aggiungi dopo, dalla scheda.'));
+        'Le opzioni del manuale. Quello che il master ti concede in più lo aggiungi dopo, dalla scheda.'));
 
       var cardRow = el('div', 'create-pack-row');
-      ['a', 'b'].forEach(function (letter) {
-        if (!packs[letter]) {
-          return;
-        }
+      // Lettere in ordine (a, b, c…): non fisso a due, il Guerriero ne ha 3
+      // (A e B con oggetti, C solo monete).
+      Object.keys(packs).sort().forEach(function (letter) {
         cardRow.appendChild(packCard(letter, packs[letter], eq.pack === letter, function (picked) {
           eq.pack = picked;
           render(); // ridisegna: cambia la card selezionata
@@ -1227,12 +1245,38 @@
     refresh();
   }
 
+  // Chip dello Stile di Combattimento (solo classi con choicePoints.fightingStyle
+  // === CREATE_LEVEL, es. Guerriero): stessa UI a chip degli altri picker qui.
+  function buildFightingStylePicker(container) {
+    container.appendChild(el('div', 'edit-section-label', 'Stile di Combattimento'));
+    var row = el('div', 'chip-row');
+    var chipEls = {};
+    FIGHTING_STYLES.forEach(function (opt) {
+      var chip = el('button', 'chip' + (draft.fightingStyleId === opt.id ? ' on' : ''), opt.label);
+      chip.type = 'button';
+      chip.addEventListener('click', function () {
+        draft.fightingStyleId = opt.id;
+        Object.keys(chipEls).forEach(function (id) {
+          chipEls[id].classList.toggle('on', id === opt.id);
+        });
+        updateNav();
+      });
+      chipEls[opt.id] = chip;
+      row.appendChild(chip);
+    });
+    container.appendChild(row);
+  }
+
   function renderFinale(container) {
     var klass = window.MANUAL_55.classes[draft.classId] || {};
 
     // Nota sottoclasse: a livello 1 nessuna classe la sceglie (tutte al 3).
     container.appendChild(el('div', 'create-saves-line',
       'La sottoclasse si sceglie al livello 3, non alla creazione.'));
+
+    if ((klass.choicePoints || {}).fightingStyle === CREATE_LEVEL) {
+      buildFightingStylePicker(container);
+    }
 
     var isCaster = klass.casterType && klass.casterType !== 'none';
     if (!isCaster) {
@@ -1348,7 +1392,7 @@
       // Competenze: quelle scelte dalla classe più le due del background.
       profSkills: (draft.profSkills || []).concat(bgSkills()),
       profTools: bg ? [bg.tool || draft.bgTool.trim()].filter(Boolean) : [],
-      fightingStyle: 'nessuno',
+      fightingStyle: ((klass.choicePoints || {}).fightingStyle === CREATE_LEVEL && draft.fightingStyleId) || 'nessuno',
       armor: armor,
       weapon: {
         name: w ? w.name : '', die: w ? w.die : '1d8',
@@ -1600,7 +1644,8 @@
       bgTool: '', bgPack: 'a',
       miCantrips: [], miSpells: [],
       equip: null, equipForClass: null, masteries: [],
-      cantrips: [], preparedSpells: []
+      cantrips: [], preparedSpells: [],
+      fightingStyleId: null
     };
     document.body.classList.remove('in-dashboard');
     document.body.classList.add('in-create');

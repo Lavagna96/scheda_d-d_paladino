@@ -235,11 +235,18 @@
       setText('atk-breath-dmg', view.breath.dice + ' fuoco');
     }
 
-    // "Attacco Extra: N colpi": solo se la classe lo concede a questo livello.
+    // "Attacco Extra: N colpi": generico da klass.extraAttacks[livello] (colpi
+    // oltre al primo). Il Guerriero arriva a 4 colpi totali, non solo 2 come
+    // Paladino/Barbaro, quindi il numero va calcolato invece di un semplice
+    // mostra/nascondi a soglia fissa.
     var manual = window.MANUAL_55 || { classes: {} };
-    var cp = (manual.classes[view.classId] || {}).choicePoints || {};
+    var extraHits = ((manual.classes[view.classId] || {}).extraAttacks || [])[view.level] || 0;
     var extraEl = document.getElementById('atk-extra');
-    if (extraEl) { extraEl.classList.toggle('hidden', !(cp.extraAttack && view.level >= cp.extraAttack)); }
+    if (extraEl) {
+      var totalHits = 1 + extraHits;
+      extraEl.textContent = 'Attacco Extra: ' + totalHits + ' colpi';
+      extraEl.classList.toggle('hidden', totalHits < 2);
+    }
 
     var note = buildAttackNote(view, ch);
     setText('atk-note', note);
