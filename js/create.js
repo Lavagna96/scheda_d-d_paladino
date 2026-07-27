@@ -39,6 +39,10 @@
   var STEPS = [
     { id: 'specie', title: 'Specie' },
     { id: 'classe', title: 'Classe' },
+    // Il background sta PRIMA dei punteggi come nel manuale (prima l'origine,
+    // poi le caratteristiche): i suoi +2/+1 si vedono mentre si distribuiscono
+    // i punti, che è il momento in cui servono (5.B.4, alternativa A).
+    { id: 'background', title: 'Background' },
     { id: 'punteggi', title: 'Punteggi' },
     { id: 'competenze', title: 'Competenze' },
     { id: 'equipaggiamento', title: 'Equipaggiamento' },
@@ -55,6 +59,13 @@
     scoreMethod: 'pointbuy',
     abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 },
     profSkills: [],
+    /* Background (5.B.4): id scelto, come si distribuiscono i suoi aumenti di
+       caratteristica (`bonusMode` '2-1' oppure '1-1-1', con quali punteggi
+       prendono il +2 e il +1), lo strumento quando il background lo fa
+       scegliere, e quale dei suoi due pacchetti di equipaggiamento si prende. */
+    backgroundId: null,
+    bgBonusMode: '2-1', bgPlus2: null, bgPlus1: null,
+    bgTool: '', bgPack: 'a',
     // Equipaggiamento (b2.4): impostato in modo pigro dai default di classe
     // quando si entra nel passo (ensureEquipDraft); equipForClass ricorda per
     // quale classe è stato riempito, così cambiando classe si riparte dal kit
@@ -69,6 +80,10 @@
   };
 
   var progressFillEl, stepNumEl, stepTitleEl, stepBodyEl, backBtn, nextBtn, footerNoteEl;
+
+  // Riscrive il riepilogo del background nel passo Punteggi; null fuori da
+  // quel passo (lo imposta renderPunteggi, lo azzera render()).
+  var bgRecapRefresh = null;
 
   // Ordine e etichette delle 6 caratteristiche: stessa convenzione di
   // js/levelup.js e js/edit-sheet.js.
@@ -138,6 +153,59 @@
       : [];
 
     return { count: 2, from: allIds };
+  }
+
+  /* ---------- background (5.B.4) ---------- */
+
+  function bgById(id) {
+    return ((window.MANUAL_55.backgrounds || {})[id]) || null;
+  }
+
+  function currentBg() {
+    return bgById(draft.backgroundId);
+  }
+
+  // Aumenti di caratteristica del background come mappa {FOR: 0, DES: 2, …}.
+  // Il PHB: +2 a uno e +1 a un altro fra i tre elencati, oppure +1 a tutti e
+  // tre. Senza background (o con la distribuzione incompleta) è tutto a zero.
+  function bgBonusMap() {
+    var out = { FOR: 0, DES: 0, COS: 0, INT: 0, SAG: 0, CAR: 0 };
+    var bg = currentBg();
+    if (!bg) {
+      return out;
+    }
+    if (draft.bgBonusMode === '1-1-1') {
+      bg.abilities.forEach(function (k) { out[k] = 1; });
+
+      return out;
+    }
+    if (draft.bgPlus2) { out[draft.bgPlus2] = 2; }
+    if (draft.bgPlus1) { out[draft.bgPlus1] = 1; }
+
+    return out;
+  }
+
+  // Competenze in abilità che arrivano dal background: sono già acquisite, non
+  // si scelgono, e il passo Competenze le toglie dalla lista della classe.
+  function bgSkills() {
+    var bg = currentBg();
+
+    return bg ? bg.skills.slice() : [];
+  }
+
+  function bgValid() {
+    var bg = currentBg();
+    if (!bg) {
+      return false;
+    }
+    if (bg.toolChoice && !draft.bgTool.trim()) {
+      return false;
+    }
+    if (draft.bgBonusMode === '1-1-1') {
+      return true;
+    }
+
+    return !!draft.bgPlus2 && !!draft.bgPlus1 && draft.bgPlus2 !== draft.bgPlus1;
   }
 
   /* Equipaggiamento: in creazione si sceglie SOLO fra i due pacchetti del
@@ -244,6 +312,9 @@
     if (step.id === 'classe') {
       return !!draft.classId;
     }
+    if (step.id === 'background') {
+      return bgValid();
+    }
     if (step.id === 'punteggi') {
       return scoresValid();
     }
@@ -299,14 +370,15 @@
       });
     }
     if (draft.scoreMethod === 'pointbuy') {
-      // Di fatto sempre vero se gli stepper rispettano i vincoli (8-15,
-      // costo entro budget), ma la verifica resta esplicita.
       var inRange = ABILITY_ORDER.every(function (k) {
         var v = draft.abilities[k];
         return v >= 8 && v <= 15;
       });
 
-      return inRange && pointBuyUsed() <= POINT_BUY_BUDGET;
+      /* I 27 punti vanno spesi TUTTI: prima bastava non sforare, così si
+         arrivava in fondo con tutti 8 e un personaggio storpio senza un solo
+         avviso (5.B.4). Lasciarne indietro non avvantaggia nessuno. */
+      return inRange && pointBuyUsed() === POINT_BUY_BUDGET;
     }
 
     return true; // manuale: ha sempre un valore, nessun budget da rispettare
@@ -673,7 +745,150 @@
     return wrap;
   }
 
+  function renderBackground(container) {
+    var manual = window.MANUAL_55;
+    var all = manual.backgrounds || {};
+
+    container.appendChild(el('div', 'create-saves-line',
+      'Da dove vieni: dà due competenze, uno strumento, un talento d\'origine e gli aumenti di caratteristica.'));
+
+    var chipRow = el('div', 'chip-row');
+    container.appendChild(chipRow);
+    var detail = el('div');
+    container.appendChild(detail);
+
+    function renderDetail() {
+      detail.textContent = '';
+      var bg = currentBg();
+      if (!bg) {
+        return;
+      }
+      var feat = (manual.originFeats || {})[bg.featId] || {};
+      var skillLabels = bg.skills.map(function (id) {
+        var s = (window.AppEngine.SKILLS || []).filter(function (x) { return x.id === id; })[0];
+
+        return s ? s.label : id;
+      });
+
+      detail.appendChild(el('div', 'edit-section-label', 'Cosa ti dà'));
+      detail.appendChild(el('div', 'create-pack-line',
+        'Competenze: ' + skillLabels.join(', ')));
+      detail.appendChild(el('div', 'create-pack-line',
+        'Strumenti: ' + (bg.tool || bg.toolChoice + ' (a scelta)')));
+      detail.appendChild(el('div', 'create-pack-line',
+        'Talento: ' + feat.name + (bg.featNote ? ' — ' + bg.featNote : '')));
+      if (feat.desc) {
+        detail.appendChild(el('div', 'create-saves-line', feat.desc));
+      }
+
+      // Strumento da scegliere (es. "uno a scelta fra gli strumenti da
+      // artigiano"): campo libero, il catalogo degli strumenti non c'è ancora.
+      if (bg.toolChoice) {
+        var toolIn = document.createElement('input');
+        toolIn.type = 'text';
+        toolIn.className = 'create-in';
+        toolIn.value = draft.bgTool;
+        toolIn.placeholder = bg.toolChoice + ' — quale?';
+        toolIn.addEventListener('input', function () {
+          draft.bgTool = toolIn.value;
+          updateNav();
+        });
+        detail.appendChild(el('div', 'edit-section-label', 'Quale ' + bg.toolChoice.toLowerCase() + '?'));
+        detail.appendChild(toolIn);
+      }
+
+      // Aumenti di caratteristica: +2 e +1, oppure +1 a tutte e tre.
+      detail.appendChild(el('div', 'edit-section-label', 'Aumenti di caratteristica'));
+      var modeRow = el('div', 'chip-row');
+      [{ id: '2-1', label: '+2 e +1' }, { id: '1-1-1', label: '+1 a tutte e tre' }].forEach(function (m) {
+        var chip = el('button', 'chip' + (draft.bgBonusMode === m.id ? ' on' : ''), m.label);
+        chip.type = 'button';
+        chip.addEventListener('click', function () {
+          draft.bgBonusMode = m.id;
+          renderDetail();
+          updateNav();
+        });
+        modeRow.appendChild(chip);
+      });
+      detail.appendChild(modeRow);
+
+      if (draft.bgBonusMode === '2-1') {
+        [{ key: 'bgPlus2', label: 'Chi prende +2' }, { key: 'bgPlus1', label: 'Chi prende +1' }].forEach(function (slot) {
+          detail.appendChild(el('div', 'create-label', slot.label));
+          var row = el('div', 'chip-row');
+          bg.abilities.forEach(function (k) {
+            var chip = el('button', 'chip' + (draft[slot.key] === k ? ' on' : ''), ABILITY_LABELS[k]);
+            chip.type = 'button';
+            chip.addEventListener('click', function () {
+              // Un punteggio non può prendere sia il +2 sia il +1: scegliendolo
+              // qui, si libera dall'altro slot.
+              var other = slot.key === 'bgPlus2' ? 'bgPlus1' : 'bgPlus2';
+              if (draft[other] === k) {
+                draft[other] = null;
+              }
+              draft[slot.key] = draft[slot.key] === k ? null : k;
+              renderDetail();
+              updateNav();
+            });
+            row.appendChild(chip);
+          });
+          detail.appendChild(row);
+        });
+      } else {
+        detail.appendChild(el('div', 'create-saves-line',
+          '+1 a ' + bg.abilities.map(function (k) { return ABILITY_LABELS[k]; }).join(', ') + '.'));
+      }
+    }
+
+    Object.keys(all).forEach(function (id) {
+      var chip = el('button', 'chip' + (draft.backgroundId === id ? ' on' : ''), all[id].name);
+      chip.type = 'button';
+      chip.addEventListener('click', function () {
+        if (draft.backgroundId === id) {
+          return;
+        }
+        draft.backgroundId = id;
+        // Cambiando background le scelte precedenti non valgono più.
+        draft.bgPlus2 = null;
+        draft.bgPlus1 = null;
+        draft.bgTool = '';
+        render();
+      });
+      chipRow.appendChild(chip);
+    });
+
+    renderDetail();
+    updateNav();
+  }
+
   function renderPunteggi(container) {
+    /* Riepilogo del background in cima: i suoi aumenti si vedono mentre si
+       distribuiscono i punti — è il motivo per cui questo passo viene dopo. */
+    var bg = currentBg();
+    if (bg) {
+      var recap = el('div', 'create-bg-recap');
+      recap.appendChild(el('div', 'create-bg-recap-title', bg.name));
+      var righe = el('div');
+      recap.appendChild(righe);
+      container.appendChild(recap);
+
+      /* Si riscrive a ogni modifica dei punteggi (updateNav la richiama):
+         altrimenti resterebbe ferma ai valori di partenza e non servirebbe a
+         nulla — il punto di questo passo è vedere il totale mentre distribuisci. */
+      bgRecapRefresh = function () {
+        var bonus = bgBonusMap();
+        righe.textContent = '';
+        bg.abilities.forEach(function (k) {
+          var b = bonus[k];
+          var base = draft.abilities[k];
+          righe.appendChild(el('div', 'create-pack-line',
+            ABILITY_LABELS[k] + ': ' + (base == null ? '—' : base) +
+            (b && base != null ? ' + ' + b + ' = ' + (base + b) : (b ? ' + ' + b : ' (nessun aumento)'))));
+        });
+      };
+      bgRecapRefresh();
+    }
+
     // Selettore di metodo: 3 chip (riuso .chip/.chip-row di edit-sheet.css).
     // Il click cambia draft.scoreMethod, reimposta draft.abilities in modo
     // coerente (resetAbilitiesForMethod) e ridisegna solo la sezione sotto.
@@ -734,12 +949,30 @@
 
     var skillsDef = classSkillsFor(draft.classId);
     var allSkills = (window.AppEngine && window.AppEngine.SKILLS) || [];
+    var fromBg = bgSkills();
 
-    // Se si torna qui dopo essere tornati indietro e aver cambiato classe,
-    // scarta eventuali competenze scelte per la classe precedente che non
-    // sono più tra quelle disponibili per la classe attuale.
+    function labelOf(id) {
+      var s = allSkills.filter(function (x) { return x.id === id; })[0];
+
+      return s ? s.label : id;
+    }
+
+    /* Competenze già arrivate dal background: il PHB dice che non si prende
+       due volte la stessa, quindi spariscono dalla lista della classe (e il
+       numero da scegliere non cambia: si sceglie fra le rimanenti). */
+    if (fromBg.length) {
+      container.appendChild(el('div', 'create-saves-line',
+        'Dal background: ' + fromBg.map(labelOf).join(', ') + ' — già tue, non si ripetono qui sotto.'));
+    }
+
+    var disponibili = skillsDef.from.filter(function (id) {
+      return fromBg.indexOf(id) === -1;
+    });
+
+    // Se si torna qui dopo aver cambiato classe o background, scarta le
+    // competenze non più selezionabili.
     draft.profSkills = draft.profSkills.filter(function (id) {
-      return skillsDef.from.indexOf(id) !== -1;
+      return disponibili.indexOf(id) !== -1;
     });
 
     container.appendChild(el('div', 'edit-section-label', 'Scegli ' + skillsDef.count + ' competenze'));
@@ -757,7 +990,7 @@
       var atCap = n >= skillsDef.count;
       counterEl.textContent = n + ' / ' + skillsDef.count;
 
-      skillsDef.from.forEach(function (id) {
+      disponibili.forEach(function (id) {
         var chip = chipEls[id];
         var isOn = draft.profSkills.indexOf(id) !== -1;
         chip.classList.toggle('on', isOn);
@@ -768,7 +1001,7 @@
       updateNav();
     }
 
-    skillsDef.from.forEach(function (id) {
+    disponibili.forEach(function (id) {
       var match = allSkills.filter(function (s) { return s.id === id; })[0];
       var chip = el('button', 'chip', match ? match.label : id);
       chip.type = 'button';
@@ -866,6 +1099,37 @@
         }));
       });
       container.appendChild(cardRow);
+    }
+
+    /* Secondo pacchetto: quello del background. Il PHB ne dà uno per la classe
+       e uno per l'origine, e si sceglie A o B in entrambi (5.B.4). */
+    var bg = currentBg();
+    if (bg) {
+      container.appendChild(el('div', 'edit-section-label', 'Dal background — ' + bg.name));
+      var bgRow = el('div', 'create-pack-row');
+      ['a', 'b'].forEach(function (letter) {
+        var pack = bg.equipment[letter];
+        if (!pack) {
+          return;
+        }
+        var card = el('button', 'create-pack' + (draft.bgPack === letter ? ' on' : ''));
+        card.type = 'button';
+        card.appendChild(el('div', 'create-pack-title',
+          letter.toUpperCase() + ' · ' + (pack.label || 'Solo monete')));
+        (pack.items || []).forEach(function (it) {
+          card.appendChild(el('div', 'create-pack-line', it));
+        });
+        var bgMo = (pack.coins || {}).mo || 0;
+        if (bgMo) {
+          card.appendChild(el('div', 'create-pack-line', bgMo + ' monete d\'oro'));
+        }
+        card.addEventListener('click', function () {
+          draft.bgPack = letter;
+          render();
+        });
+        bgRow.appendChild(card);
+      });
+      container.appendChild(bgRow);
     }
 
     // Maestria nelle armi: scelta vera fra le armi in cui la classe è
@@ -992,11 +1256,23 @@
   // manuale. Parte da zero: nessun residuo di Tharion. Sottoclasse assente
   // (si sceglie al livello 3) e stile di combattimento 'nessuno' (arriva col
   // level-up); i TS competenti sono quelli fissi della classe.
+  // Punteggi finali = quelli del passo Punteggi + gli aumenti del background.
+  function finalAbilities() {
+    var bonus = bgBonusMap();
+    var out = {};
+    ABILITY_ORDER.forEach(function (k) {
+      out[k] = (draft.abilities[k] || 0) + bonus[k];
+    });
+
+    return out;
+  }
+
   function buildCharacter() {
     var manual = window.MANUAL_55;
     var klass = manual.classes[draft.classId] || {};
     var species = manual.species[draft.speciesId] || {};
     var pack = chosenPack();
+    var bg = currentBg();
 
     var armor = { shield: !!(pack && pack.shield) };
     if (pack && pack.armorId) { armor.id = pack.armorId; }
@@ -1017,9 +1293,15 @@
       speciesId: draft.speciesId,
       speciesLabel: species.name || '',
       avatar: '✦',
-      abilities: Object.assign({}, draft.abilities),
+      // Punteggi finali: quelli distribuiti nel passo Punteggi più gli aumenti
+      // del background (5.B.4).
+      abilities: finalAbilities(),
+      backgroundId: draft.backgroundId,
+      backgroundName: bg ? bg.name : '',
       profSaves: (klass.saves || []).slice(),
-      profSkills: (draft.profSkills || []).slice(),
+      // Competenze: quelle scelte dalla classe più le due del background.
+      profSkills: (draft.profSkills || []).concat(bgSkills()),
+      profTools: bg ? [bg.tool || draft.bgTool.trim()].filter(Boolean) : [],
       fightingStyle: 'nessuno',
       armor: armor,
       weapon: {
@@ -1029,7 +1311,9 @@
       // Maestrie possedute (id di armi): il personaggio le sa usare anche se
       // in mano ha un'altra arma.
       weaponMasteries: (draft.masteries || []).slice(),
-      modifiers: [], extraResources: [], items: [], feats: [], levelChoices: {}
+      // Talento d'origine: lo dà il background e vale dal livello 1.
+      feats: bg ? [{ id: bg.featId, level: 1, source: 'background' }] : [],
+      modifiers: [], extraResources: [], items: [], levelChoices: {}
     };
   }
 
@@ -1046,8 +1330,7 @@
      dei kit non è nel PHB, resta 0 (vedi Debiti aperti nella ROADMAP). */
   function packInventory() {
     var pack = chosenPack();
-
-    return ((pack && pack.extra) || []).map(function (it) {
+    var lista = ((pack && pack.extra) || []).map(function (it) {
       var w = it.weaponId ? weaponById(it.weaponId) : null;
 
       return {
@@ -1058,6 +1341,22 @@
         weight: it.weight != null ? it.weight : (w ? w.weight : 0)
       };
     });
+
+    /* Roba del background: nel PHB è un elenco di oggetti comuni senza pesi
+       nella riga del background, quindi entra con peso 0 — meglio averla in
+       lista che non averla (vedi Debiti aperti). */
+    var bgPack = bgChosenPack();
+    ((bgPack && bgPack.items) || []).forEach(function (name) {
+      lista.push({ name: name, desc: 'Dal background', qty: 1, weight: 0 });
+    });
+
+    return lista;
+  }
+
+  function bgChosenPack() {
+    var bg = currentBg();
+
+    return (bg && bg.equipment[draft.bgPack]) || null;
   }
 
   // Stato completo e pulito del nuovo personaggio. I pool correnti partono al
@@ -1068,7 +1367,15 @@
   function buildStateFromDraft() {
     var character = buildCharacter();
     var poolMax = (window.AppEngine.derive(character).poolMax) || {};
-    var packCoins = (chosenPack() || {}).coins || {};
+    // Monete: si sommano quelle del pacchetto di classe e quelle del background.
+    var classCoins = (chosenPack() || {}).coins || {};
+    var bgCoins = (bgChosenPack() || {}).coins || {};
+    var packCoins = {
+      mp: (classCoins.mp || 0) + (bgCoins.mp || 0),
+      mo: (classCoins.mo || 0) + (bgCoins.mo || 0),
+      ma: (classCoins.ma || 0) + (bgCoins.ma || 0),
+      mr: (classCoins.mr || 0) + (bgCoins.mr || 0)
+    };
 
     return {
       version: 3,
@@ -1114,6 +1421,7 @@
 
   function render() {
     var step = STEPS[stepIndex];
+    bgRecapRefresh = null; // il riepilogo appartiene al solo passo Punteggi
 
     if (progressFillEl) {
       progressFillEl.style.width = ((stepIndex + 1) / STEPS.length * 100) + '%';
@@ -1132,6 +1440,9 @@
       } else if (step.id === 'classe') {
         stepBodyEl.classList.add('has-fields');
         renderClasse(stepBodyEl);
+      } else if (step.id === 'background') {
+        stepBodyEl.classList.add('has-fields');
+        renderBackground(stepBodyEl);
       } else if (step.id === 'punteggi') {
         stepBodyEl.classList.add('has-fields');
         renderPunteggi(stepBodyEl);
@@ -1159,6 +1470,12 @@
   // ridisegnare tutto il corpo del passo (che perderebbe focus/selezione).
   function updateNav() {
     var isLast = stepIndex === STEPS.length - 1;
+
+    // Le sezioni dei punteggi chiamano updateNav a ogni modifica: è il punto
+    // giusto per tenere allineato il riepilogo del background.
+    if (bgRecapRefresh) {
+      bgRecapRefresh();
+    }
 
     if (nextBtn) {
       nextBtn.textContent = isLast ? 'Crea personaggio' : 'Avanti →';
@@ -1205,6 +1522,9 @@
       scoreMethod: 'pointbuy',
       abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 },
       profSkills: [],
+      backgroundId: null,
+      bgBonusMode: '2-1', bgPlus2: null, bgPlus1: null,
+      bgTool: '', bgPack: 'a',
       equip: null, equipForClass: null, masteries: [],
       cantrips: [], preparedSpells: []
     };

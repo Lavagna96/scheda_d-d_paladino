@@ -402,3 +402,20 @@ body.in-create .dashboard-view {
   line-height: 1.6;
   color: var(--text-secondary);
 }
+
+/* Riepilogo del background in cima al passo Punteggi: mostra i tre punteggi
+   toccati dai suoi aumenti mentre si distribuiscono i punti (5.B.4). */
+.create-bg-recap {
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  background: rgba(201, 164, 67, 0.06);
+}
+
+.create-bg-recap-title {
+  font-family: var(--font-title);
+  font-size: 14px;
+  color: var(--accent-gold);
+  margin-bottom: var(--space-2);
+}

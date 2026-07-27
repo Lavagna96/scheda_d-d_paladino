@@ -465,11 +465,36 @@ invariato e fa da test di non-regressione a ogni passo.
 - [x] 5.B.3 Ripulire i globali di Tharion — FATTO (2026-07-27, *b4*). Più ampio
       di com'era scritto: la causa dei residui non era solo `config.js` ma il
       **merge conservativo** di `storage.js`.
-- [ ] 5.B.4 Passo **Background** nel wizard: nel 5.5 dà +2/+1 (o +1/+1/+1) su
-      tre punteggi, un **talento d'origine**, 2 competenze in abilità, una in
-      strumenti ed equipaggiamento (PHB pag. 176 del PDF). Oggi il wizard lo
-      salta del tutto: i punteggi restano i grezzi del point-buy e mancano
-      talento e competenze. È il buco più grosso rispetto al manuale.
+- [x] 5.B.4 Passo **Background** nel wizard — FATTO (2026-07-27, manuale
+      `version: 24`, `?v=79`). Scelta l'**alternativa A** fra 3 con preview: il
+      background sta *prima* dei Punteggi, come nel manuale, così i suoi
+      aumenti si vedono mentre si distribuiscono i punti. Il wizard passa a
+      **7 passi**.
+      Nei dati: i **16 background** del PHB (pag. 177-184 del PDF) con le tre
+      caratteristiche, il talento d'origine, le 2 competenze, lo strumento
+      (fisso o da scegliere) e l'equipaggiamento A/B; i **10 talenti d'origine**
+      con riassunti originali in italiano.
+      Nel wizard: schermata Background con le 16 scelte, il dettaglio di cosa
+      dà, la distribuzione **+2/+1 oppure +1/+1/+1** (un punteggio non può
+      prendere entrambi) e il campo per lo strumento quando è a scelta. Il
+      passo Punteggi mostra in cima un riepilogo che **si aggiorna a ogni
+      modifica** (base + bonus = totale). Il passo Competenze toglie dalla
+      lista di classe le due già date dal background, come vuole il PHB. Il
+      passo Equipaggiamento ha ora **due pacchetti**, quello di classe e quello
+      del background, e le monete si sommano.
+      Nel personaggio generato: punteggi finali coi bonus applicati,
+      `backgroundId`/`backgroundName`, `profTools` (campo nuovo), il talento
+      d'origine in `feats` con `source: 'background'`, competenze di classe +
+      background, inventario e monete dei due pacchetti.
+      **Chiuso anche il debito del point-buy**: i 27 punti ora vanno spesi
+      tutti, prima bastava non sforare.
+      Verificato in locale (Paladino Dragonide Accolito, array standard): SAG
+      10+1=11 e CAR 8+2=10 nel riepilogo aggiornato dal vivo, 4 competenze
+      (Atletica e Intimidire scelte + Intuizione e Religione dal background,
+      sparite dalla lista), strumenti da calligrafo, talento Iniziato alla
+      Magia, 17 MO (9 dalla classe + 8 dal background), PF 11, sacca coi due
+      pacchetti; Tharion invariato (CA 20, CD 15, PF 60, nessun background);
+      console pulita.
 - [x] 5.B.5 Equipaggiamento dai **pacchetti del manuale** + catalogo armi
       (decisione 2026-07-27, alternativa B di 3 con preview). Oggi arma, dado,
       tipo e maestria sono campi di testo liberi e le armature solo nomi: si

@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 23,
+  version: 24,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -2210,6 +2210,106 @@ window.MANUAL_55 = {
   ],
 
   shield: { name: 'Scudo', ac: 2, weight: 6, cost: 10 },
+
+  /* Talenti d'origine (PHB 2024, cap. 5): li dà il background, uno fisso
+     ciascuno, e valgono dal livello 1. Riassunti originali in italiano.
+     `needsChoice` segnala quelli che chiedono ancora qualcosa all'utente —
+     oggi solo Iniziato alla Magia, che vuole 2 trucchetti e 1 incantesimo di
+     1° livello dalla lista indicata (5.B.4: la scelta arriva col passo). */
+  originFeats: {
+    allerta: { name: 'Allerta',
+      desc: 'Aggiungi il bonus di competenza all\'iniziativa. Inoltre, tirata l\'iniziativa, puoi scambiare il tuo risultato con quello di un alleato consenziente.' },
+    artigiano: { name: 'Artigiano',
+      desc: 'Competenza con tre tipi di strumenti da artigiano a scelta. Compri oggetti non magici con il 20% di sconto e, con un riposo lungo, puoi fabbricare un oggetto semplice fra quelli elencati dal talento.' },
+    guaritore: { name: 'Guaritore',
+      desc: 'Con un\'azione Utilizza spendi una carica del kit da guaritore per far recuperare a una creatura entro 1,5 m il suo dado vita + il modificatore di Costituzione in PF. Quando tiri i dadi per curare, ogni 1 va ritirato una volta.' },
+    fortunato: { name: 'Fortunato',
+      desc: 'Hai punti Fortuna pari al tuo bonus di competenza, che recuperi col riposo lungo. Spendendone uno puoi darti vantaggio a un tiro per colpire, una prova o un TS, oppure svantaggio a chi attacca te.' },
+    'iniziato-alla-magia': { name: 'Iniziato alla Magia', needsChoice: true,
+      desc: 'Impari 2 trucchetti e 1 incantesimo di 1° livello dalla lista della classe indicata dal background. L\'incantesimo lo lanci gratis una volta a riposo lungo, oppure spendendo slot se ne hai. La caratteristica da incantatore è quella della lista scelta.' },
+    musicista: { name: 'Musicista',
+      desc: 'Competenza con tre strumenti musicali a scelta. Dopo un riposo dai ispirazione a un numero di alleati che ti hanno sentito suonare pari al tuo bonus di competenza.' },
+    'attaccante-selvaggio': { name: 'Attaccante Selvaggio',
+      desc: 'Una volta per turno, quando colpisci con un\'arma, puoi ritirare i dadi dei danni e usare il risultato che preferisci.' },
+    esperto: { name: 'Esperto',
+      desc: 'Ottieni competenza in tre elementi a scelta fra abilità e strumenti.' },
+    rissaiolo: { name: 'Rissaiolo',
+      desc: 'Competenza con gli attrezzi da improvvisare come armi. I tuoi colpi senz\'armi infliggono 1d4 contundenti e, quando colpisci con un colpo senz\'armi o un\'arma improvvisata, una volta per turno puoi spingere il bersaglio di 1,5 m.' },
+    tenace: { name: 'Tenace',
+      desc: 'I tuoi punti ferita massimi aumentano di 2 per livello, ora e a ogni livello successivo.' }
+  },
+
+  /* I 16 background del PHB 2024 (pag. 177-184 del PDF). Ognuno dà: tre
+     caratteristiche su cui distribuire +2 e +1 (oppure +1/+1/+1), un talento
+     d'origine, due competenze in abilità, una competenza in strumenti e un
+     equipaggiamento A/B. `tool` è una stringa fissa; `toolChoice` indica invece
+     una famiglia da cui scegliere. Riassunti e nomi in italiano. */
+  backgrounds: {
+    accolito: { name: 'Accolito', abilities: ['INT', 'SAG', 'CAR'], featId: 'iniziato-alla-magia',
+      featNote: 'lista del Chierico', skills: ['intuizione', 'religione'],
+      tool: 'Strumenti da calligrafo',
+      equipment: { a: { label: 'Kit del tempio', items: ['Strumenti da calligrafo', 'Libro di preghiere', 'Simbolo sacro', 'Pergamena (10 fogli)', 'Veste'], coins: { mo: 8 } }, b: { coins: { mo: 50 } } } },
+    artigiano: { name: 'Artigiano', abilities: ['FOR', 'DES', 'INT'], featId: 'artigiano',
+      skills: ['indagare', 'persuasione'],
+      toolChoice: 'Strumenti da artigiano',
+      equipment: { a: { label: 'Kit della bottega', items: ['Strumenti da artigiano', '2 Borse', 'Abiti da viaggio'], coins: { mo: 32 } }, b: { coins: { mo: 50 } } } },
+    ciarlatano: { name: 'Ciarlatano', abilities: ['DES', 'COS', 'CAR'], featId: 'esperto',
+      skills: ['inganno', 'rapidita-di-mano'],
+      tool: 'Kit da falsario',
+      equipment: { a: { label: 'Kit del truffatore', items: ['Kit da falsario', 'Costume', 'Abiti eleganti'], coins: { mo: 15 } }, b: { coins: { mo: 50 } } } },
+    criminale: { name: 'Criminale', abilities: ['DES', 'COS', 'INT'], featId: 'allerta',
+      skills: ['rapidita-di-mano', 'furtivita'],
+      tool: 'Arnesi da scasso',
+      equipment: { a: { label: 'Kit del ladro', items: ['2 Pugnali', 'Arnesi da scasso', 'Piede di porco', '2 Borse', 'Abiti da viaggio'], coins: { mo: 16 } }, b: { coins: { mo: 50 } } } },
+    intrattenitore: { name: 'Intrattenitore', abilities: ['FOR', 'DES', 'CAR'], featId: 'musicista',
+      skills: ['acrobazia', 'intrattenere'],
+      toolChoice: 'Strumento musicale',
+      equipment: { a: { label: 'Kit del palco', items: ['Strumento musicale', '2 Costumi', 'Specchio', 'Profumo', 'Abiti da viaggio'], coins: { mo: 11 } }, b: { coins: { mo: 50 } } } },
+    contadino: { name: 'Contadino', abilities: ['FOR', 'COS', 'SAG'], featId: 'tenace',
+      skills: ['addestrare-animali', 'natura'],
+      tool: 'Strumenti da carpentiere',
+      equipment: { a: { label: 'Kit del campo', items: ['Falcetto', 'Strumenti da carpentiere', 'Kit da guaritore', 'Pentola di ferro', 'Pala', 'Abiti da viaggio'], coins: { mo: 30 } }, b: { coins: { mo: 50 } } } },
+    guardia: { name: 'Guardia', abilities: ['FOR', 'INT', 'SAG'], featId: 'allerta',
+      skills: ['atletica', 'percezione'],
+      toolChoice: 'Set da gioco',
+      equipment: { a: { label: 'Kit della torre', items: ['Lancia', 'Balestra leggera', '20 Dardi', 'Set da gioco', 'Lanterna schermata', 'Manette', 'Faretra', 'Abiti da viaggio'], coins: { mo: 12 } }, b: { coins: { mo: 50 } } } },
+    guida: { name: 'Guida', abilities: ['DES', 'COS', 'SAG'], featId: 'iniziato-alla-magia',
+      featNote: 'lista del Druido', skills: ['furtivita', 'sopravvivenza'],
+      tool: 'Strumenti da cartografo',
+      equipment: { a: { label: 'Kit del sentiero', items: ['Arco corto', '20 Frecce', 'Strumenti da cartografo', 'Giaciglio', 'Faretra', 'Tenda', 'Abiti da viaggio'], coins: { mo: 3 } }, b: { coins: { mo: 50 } } } },
+    eremita: { name: 'Eremita', abilities: ['COS', 'SAG', 'CAR'], featId: 'guaritore',
+      skills: ['medicina', 'religione'],
+      tool: 'Kit da erborista',
+      equipment: { a: { label: 'Kit del rifugio', items: ['Bastone ferrato', 'Kit da erborista', 'Giaciglio', 'Libro di filosofia', 'Lampada', 'Olio (3 fiaschette)', 'Abiti da viaggio'], coins: { mo: 16 } }, b: { coins: { mo: 50 } } } },
+    mercante: { name: 'Mercante', abilities: ['COS', 'INT', 'CAR'], featId: 'fortunato',
+      skills: ['addestrare-animali', 'persuasione'],
+      tool: 'Strumenti da navigatore',
+      equipment: { a: { label: 'Kit della carovana', items: ['Strumenti da navigatore', '2 Borse', 'Abiti da viaggio'], coins: { mo: 22 } }, b: { coins: { mo: 50 } } } },
+    nobile: { name: 'Nobile', abilities: ['FOR', 'INT', 'CAR'], featId: 'esperto',
+      skills: ['storia', 'persuasione'],
+      toolChoice: 'Set da gioco',
+      equipment: { a: { label: 'Kit di corte', items: ['Set da gioco', 'Abiti eleganti', 'Profumo'], coins: { mo: 29 } }, b: { coins: { mo: 50 } } } },
+    studioso: { name: 'Studioso', abilities: ['COS', 'INT', 'SAG'], featId: 'iniziato-alla-magia',
+      featNote: 'lista del Mago', skills: ['arcano', 'storia'],
+      tool: 'Strumenti da calligrafo',
+      equipment: { a: { label: 'Kit dello scriptorium', items: ['Bastone ferrato', 'Strumenti da calligrafo', 'Libro di storia', 'Pergamena (8 fogli)', 'Veste'], coins: { mo: 8 } }, b: { coins: { mo: 50 } } } },
+    marinaio: { name: 'Marinaio', abilities: ['FOR', 'DES', 'SAG'], featId: 'rissaiolo',
+      skills: ['acrobazia', 'percezione'],
+      tool: 'Strumenti da navigatore',
+      equipment: { a: { label: 'Kit di bordo', items: ['Pugnale', 'Strumenti da navigatore', 'Corda', 'Abiti da viaggio'], coins: { mo: 20 } }, b: { coins: { mo: 50 } } } },
+    scriba: { name: 'Scriba', abilities: ['DES', 'INT', 'SAG'], featId: 'esperto',
+      skills: ['indagare', 'percezione'],
+      tool: 'Strumenti da calligrafo',
+      equipment: { a: { label: 'Kit dello scriba', items: ['Strumenti da calligrafo', 'Abiti eleganti', 'Lampada', 'Olio (3 fiaschette)', 'Pergamena (12 fogli)'], coins: { mo: 23 } }, b: { coins: { mo: 50 } } } },
+    soldato: { name: 'Soldato', abilities: ['FOR', 'DES', 'COS'], featId: 'attaccante-selvaggio',
+      skills: ['atletica', 'intimidire'],
+      toolChoice: 'Set da gioco',
+      equipment: { a: { label: 'Kit della compagnia', items: ['Lancia', 'Arco corto', '20 Frecce', 'Set da gioco', 'Kit da guaritore', 'Faretra', 'Abiti da viaggio'], coins: { mo: 14 } }, b: { coins: { mo: 50 } } } },
+    vagabondo: { name: 'Vagabondo', abilities: ['DES', 'SAG', 'CAR'], featId: 'fortunato',
+      skills: ['intuizione', 'furtivita'],
+      tool: 'Arnesi da scasso',
+      equipment: { a: { label: 'Kit della strada', items: ['2 Pugnali', 'Arnesi da scasso', 'Set da gioco', 'Giaciglio', '2 Borse', 'Abiti da viaggio'], coins: { mo: 16 } }, b: { coins: { mo: 50 } } } }
+  },
 
   weaponMasteries: {
     Cleave: { name: 'Cleave', desc: 'Colpendo in mischia puoi fare un secondo attacco contro un altro nemico entro 1,5 m dal primo e a portata; il secondo non somma il tuo modificatore ai danni (se non è negativo). Una volta per turno.' },
