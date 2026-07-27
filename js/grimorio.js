@@ -64,9 +64,13 @@
       return [];
     }
     var sub = (klass.subclasses || {})[ch.subclassId] || null;
+    var grim = window.AppStorage.getState().grimoire || {};
     var ids = spellsFromTable(klass.spellsByLevel, ch.level)
       .concat(spellsFromTable(sub && sub.spellsByLevel, ch.level))
-      .concat((window.AppStorage.getState().grimoire || {}).cantrips || []);
+      .concat(grim.cantrips || [])
+      // `always`: incantesimi sempre pronti per via di un talento (Iniziato
+      // alla Magia), che non contano fra quelli preparabili.
+      .concat(grim.always || []);
 
     // niente doppioni se un incantesimo arriva da due fonti
     return ids.filter(function (id, i) { return ids.indexOf(id) === i; });
@@ -105,7 +109,13 @@
         list.push(Object.assign({}, spell, { fixed: true }));
       }
     });
+    var fissi = getFixedIds();
     getPreparedIds().forEach(function (id) {
+      // Un incantesimo già fisso (da classe, giuramento o talento) non si
+      // ripete fra i preparati: sarebbe la stessa riga due volte.
+      if (fissi.indexOf(id) !== -1) {
+        return;
+      }
       var spell = getManualSpell(id);
       if (spell) {
         list.push(Object.assign({}, spell, { fixed: false }));

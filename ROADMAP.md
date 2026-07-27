@@ -495,6 +495,27 @@ invariato e fa da test di non-regressione a ogni passo.
       Magia, 17 MO (9 dalla classe + 8 dal background), PF 11, sacca coi due
       pacchetti; Tharion invariato (CA 20, CD 15, PF 60, nessun background);
       console pulita.
+      → **Iniziato alla Magia completo (2026-07-27, manuale `version: 25`,
+      `?v=81`):** era l'unico talento d'origine che chiede altre scelte, e il
+      wizard lo salvava senza farle fare. Ora i tre background che lo danno
+      (Accolito → Chierico, Guida → Druido, Studioso → Mago) hanno `featList`
+      nei dati, e il passo Background mostra i selettori per **2 trucchetti e 1
+      incantesimo di 1° livello** da quella lista; senza, non si va avanti.
+      I trucchetti finiscono in `grimoire.cantrips`, l'incantesimo nel nuovo
+      `grimoire.always` (sempre pronto per via di un talento, non conta fra i
+      preparabili) — il grimorio legge entrambi e li mostra come FISSI.
+      Il passo finale **toglie dalle scelte** quello che il talento ha già dato
+      (con una riga che lo dice), e il grimorio non ripete un incantesimo già
+      fisso fra i preparati: prendendo Comando dal talento non compare due
+      volte.
+      **Doppioni nella sacca fusi** (richiesta di Andrea): se classe e
+      background danno la stessa identica cosa — il simbolo sacro del Paladino
+      Accolito — resta una voce sola.
+      Verificato in locale: Accolito con Fiamma Sacra, Luce e Comando dal
+      talento → grimorio con 2 trucchetti FISSI e Comando FISSO al 1° livello
+      accanto ai 2 preparati scelti, Comando sparito dalle scelte del passo
+      finale, sacca a 7 voci invece di 8; Tharion invariato (CA 20, CD 15, PF
+      60, grimorio con gli stessi fissi e preparati); console pulita.
 - [x] 5.B.5 Equipaggiamento dai **pacchetti del manuale** + catalogo armi
       (decisione 2026-07-27, alternativa B di 3 con preview). Oggi arma, dado,
       tipo e maestria sono campi di testo liberi e le armature solo nomi: si

@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 24,
+  version: 25,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -2246,7 +2246,7 @@ window.MANUAL_55 = {
      una famiglia da cui scegliere. Riassunti e nomi in italiano. */
   backgrounds: {
     accolito: { name: 'Accolito', abilities: ['INT', 'SAG', 'CAR'], featId: 'iniziato-alla-magia',
-      featNote: 'lista del Chierico', skills: ['intuizione', 'religione'],
+      featNote: 'lista del Chierico', featList: 'chierico', skills: ['intuizione', 'religione'],
       tool: 'Strumenti da calligrafo',
       equipment: { a: { label: 'Kit del tempio', items: ['Strumenti da calligrafo', 'Libro di preghiere', 'Simbolo sacro', 'Pergamena (10 fogli)', 'Veste'], coins: { mo: 8 } }, b: { coins: { mo: 50 } } } },
     artigiano: { name: 'Artigiano', abilities: ['FOR', 'DES', 'INT'], featId: 'artigiano',
@@ -2274,7 +2274,7 @@ window.MANUAL_55 = {
       toolChoice: 'Set da gioco',
       equipment: { a: { label: 'Kit della torre', items: ['Lancia', 'Balestra leggera', '20 Dardi', 'Set da gioco', 'Lanterna schermata', 'Manette', 'Faretra', 'Abiti da viaggio'], coins: { mo: 12 } }, b: { coins: { mo: 50 } } } },
     guida: { name: 'Guida', abilities: ['DES', 'COS', 'SAG'], featId: 'iniziato-alla-magia',
-      featNote: 'lista del Druido', skills: ['furtivita', 'sopravvivenza'],
+      featNote: 'lista del Druido', featList: 'druido', skills: ['furtivita', 'sopravvivenza'],
       tool: 'Strumenti da cartografo',
       equipment: { a: { label: 'Kit del sentiero', items: ['Arco corto', '20 Frecce', 'Strumenti da cartografo', 'Giaciglio', 'Faretra', 'Tenda', 'Abiti da viaggio'], coins: { mo: 3 } }, b: { coins: { mo: 50 } } } },
     eremita: { name: 'Eremita', abilities: ['COS', 'SAG', 'CAR'], featId: 'guaritore',
@@ -2290,7 +2290,7 @@ window.MANUAL_55 = {
       toolChoice: 'Set da gioco',
       equipment: { a: { label: 'Kit di corte', items: ['Set da gioco', 'Abiti eleganti', 'Profumo'], coins: { mo: 29 } }, b: { coins: { mo: 50 } } } },
     studioso: { name: 'Studioso', abilities: ['COS', 'INT', 'SAG'], featId: 'iniziato-alla-magia',
-      featNote: 'lista del Mago', skills: ['arcano', 'storia'],
+      featNote: 'lista del Mago', featList: 'mago', skills: ['arcano', 'storia'],
       tool: 'Strumenti da calligrafo',
       equipment: { a: { label: 'Kit dello scriptorium', items: ['Bastone ferrato', 'Strumenti da calligrafo', 'Libro di storia', 'Pergamena (8 fogli)', 'Veste'], coins: { mo: 8 } }, b: { coins: { mo: 50 } } } },
     marinaio: { name: 'Marinaio', abilities: ['FOR', 'DES', 'SAG'], featId: 'rissaiolo',

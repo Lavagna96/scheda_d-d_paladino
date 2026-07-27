@@ -66,6 +66,9 @@
     backgroundId: null,
     bgBonusMode: '2-1', bgPlus2: null, bgPlus1: null,
     bgTool: '', bgPack: 'a',
+    // Iniziato alla Magia (Accolito, Guida, Studioso): 2 trucchetti e 1
+    // incantesimo di 1° livello dalla lista di classe indicata dal background.
+    miCantrips: [], miSpells: [],
     // Equipaggiamento (b2.4): impostato in modo pigro dai default di classe
     // quando si entra nel passo (ensureEquipDraft); equipForClass ricorda per
     // quale classe è stato riempito, così cambiando classe si riparte dal kit
@@ -193,12 +196,23 @@
     return bg ? bg.skills.slice() : [];
   }
 
+  // Il background dà Iniziato alla Magia? In quel caso servono anche i suoi
+  // incantesimi, presi dalla lista di classe indicata (`featList`).
+  function magicInitiateList() {
+    var bg = currentBg();
+
+    return (bg && bg.featId === 'iniziato-alla-magia' && bg.featList) || null;
+  }
+
   function bgValid() {
     var bg = currentBg();
     if (!bg) {
       return false;
     }
     if (bg.toolChoice && !draft.bgTool.trim()) {
+      return false;
+    }
+    if (magicInitiateList() && (draft.miCantrips.length !== 2 || draft.miSpells.length !== 1)) {
       return false;
     }
     if (draft.bgBonusMode === '1-1-1') {
@@ -797,6 +811,21 @@
         detail.appendChild(toolIn);
       }
 
+      /* Iniziato alla Magia è l'unico talento d'origine che chiede altre
+         scelte: 2 trucchetti e 1 incantesimo di 1° livello dalla lista della
+         classe indicata dal background (Chierico, Druido o Mago). */
+      var miList = magicInitiateList();
+      if (miList) {
+        var nomeLista = (window.MANUAL_55.classes[miList] || {}).name || miList;
+        buildSpellPicker(detail, 'Trucchetti del ' + nomeLista + ' — scegline 2',
+          classSpellsAt(miList, 0), 2, 'miCantrips');
+        buildSpellPicker(detail, 'Incantesimo di 1° livello del ' + nomeLista + ' — scegline 1',
+          classSpellsAt(miList, 1), 1, 'miSpells');
+      } else {
+        draft.miCantrips = [];
+        draft.miSpells = [];
+      }
+
       // Aumenti di caratteristica: +2 e +1, oppure +1 a tutte e tre.
       detail.appendChild(el('div', 'edit-section-label', 'Aumenti di caratteristica'));
       var modeRow = el('div', 'chip-row');
@@ -1221,16 +1250,33 @@
     var needCantrips = (klass.cantripsByLevel && klass.cantripsByLevel[CREATE_LEVEL]) || 0;
     var needPrepared = (klass.preparedByLevel && klass.preparedByLevel[CREATE_LEVEL]) || 0;
 
+    /* Quello che il talento d'origine ha già dato non si può riprendere qui:
+       gli incantesimi da talento non contano fra i preparabili, quindi
+       sceglierli di nuovo sarebbe solo uno spreco (e un doppione a video). */
+    var giaAvuti = (draft.miCantrips || []).concat(draft.miSpells || []);
+    function senzaGiaAvuti(list) {
+      return list.filter(function (s) { return giaAvuti.indexOf(s.id) === -1; });
+    }
+
+    if (giaAvuti.length) {
+      container.appendChild(el('div', 'create-saves-line',
+        'Dal talento d\'origine hai già: ' + giaAvuti.map(function (id) {
+          var s = (window.MANUAL_55.spells || []).filter(function (x) { return x.id === id; })[0];
+
+          return s ? s.name : id;
+        }).join(', ') + '.'));
+    }
+
     if (needCantrips > 0) {
       buildSpellPicker(container, 'Trucchetti (scegline ' + needCantrips + ')',
-        classSpellsAt(draft.classId, 0), needCantrips, 'cantrips');
+        senzaGiaAvuti(classSpellsAt(draft.classId, 0)), needCantrips, 'cantrips');
     } else {
       draft.cantrips = [];
     }
 
     if (needPrepared > 0) {
       buildSpellPicker(container, 'Incantesimi preparati di 1° livello (scegline ' + needPrepared + ')',
-        classSpellsAt(draft.classId, 1), needPrepared, 'preparedSpells');
+        senzaGiaAvuti(classSpellsAt(draft.classId, 1)), needPrepared, 'preparedSpells');
     } else {
       draft.preparedSpells = [];
     }
@@ -1350,7 +1396,21 @@
       lista.push({ name: name, desc: 'Dal background', qty: 1, weight: 0 });
     });
 
-    return lista;
+    /* Se classe e background danno la stessa identica cosa — il simbolo sacro
+       del Paladino Accolito — resta una sola voce: due righe uguali nella sacca
+       sono solo confusione. Vince quella con la quantità maggiore. */
+    var unici = [];
+    lista.forEach(function (it) {
+      var gia = unici.filter(function (x) { return x.name === it.name; })[0];
+      if (!gia) {
+        unici.push(it);
+      } else if ((it.qty || 1) > (gia.qty || 1)) {
+        gia.qty = it.qty;
+        gia.weight = it.weight;
+      }
+    });
+
+    return unici;
   }
 
   function bgChosenPack() {
@@ -1396,7 +1456,12 @@
       deathSaves: { success: 0, fail: 0 },
       grimoire: {
         prepared: (draft.preparedSpells || []).slice(),
-        cantrips: (draft.cantrips || []).slice()
+        // I trucchetti del talento si sommano a quelli eventuali della classe.
+        cantrips: (draft.cantrips || []).concat(draft.miCantrips || []),
+        /* `always` = incantesimi che il personaggio ha sempre pronti per via di
+           un talento, senza contare verso quelli preparabili. Oggi ci finisce
+           quello di Iniziato alla Magia. */
+        always: (draft.miSpells || []).slice()
       }
     };
   }
@@ -1525,6 +1590,7 @@
       backgroundId: null,
       bgBonusMode: '2-1', bgPlus2: null, bgPlus1: null,
       bgTool: '', bgPack: 'a',
+      miCantrips: [], miSpells: [],
       equip: null, equipForClass: null, masteries: [],
       cantrips: [], preparedSpells: []
     };

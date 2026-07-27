@@ -65,7 +65,7 @@
     diary: { sessions: [], png: [], quests: { active: [], completed: [] } },
     inspiration: false,
     deathSaves: { success: 0, fail: 0 },
-    grimoire: { prepared: [], cantrips: [] }
+    grimoire: { prepared: [], cantrips: [], always: [] }
   };
 
   function getBaseState() {
