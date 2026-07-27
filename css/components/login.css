@@ -212,6 +212,18 @@ body.auth-locked #lg-locked-info {
   margin: 0;
 }
 
+/* Campo dell'autofill passkey: non serve a scrivere, quindi resta stretto e
+   centrato — è solo il bersaglio da toccare per far comparire la QuickType.
+   Larghezza esplicita: #lg-locked-info è un flex item centrato, quindi si
+   restringe al contenuto e il width:100% di .login-in non avrebbe un
+   riferimento su cui calcolarsi. */
+.login-unlock-in {
+  width: 260px;
+  max-width: 100%;
+  margin: 12px 0 0;
+  text-align: center;
+}
+
 /* In modalità lucchetto il pulsante Face ID va mostrato anche se ha .hidden
    (nascosto di default finché il supporto non è stato verificato) */
 body.auth-locked #lg-faceid-wrap {

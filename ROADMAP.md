@@ -133,6 +133,27 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
       (`app-faceid-last-active` aggiornato su pagehide/visibilitychange e
       ogni 30 s in auth-in; lucchetto solo se inattivi > 5 min). Il foglio
       "Continua" di iOS non è eliminabile (UX di sistema WebAuthn).
+      → **Rifinitura 2026-07-27 (`?v=69`): Conditional UI (autofill passkey).**
+      L'auto-scan apriva il foglio modale in mezzo allo schermo appena si
+      atterrava sul lucchetto; ora `cloud.js` chiama
+      `AppFaceId.watchConditional()`, che non apre nulla e resta in ascolto:
+      iOS propone la passkey con Face ID **sopra la tastiera** quando si tocca
+      il campo `#lg-unlock` (`autocomplete="username webauthn"`). Il medaglione
+      resta la riserva (annulla l'ascolto e fa la `get()` modale) per iOS senza
+      autofill. Perché l'autofill veda la passkey serve una credenziale
+      *discoverable*: `enable()` ora usa `residentKey: 'required'` e segna
+      `app-faceid-discoverable`; **le credenziali create prima vanno
+      riattivate** (Account → Disattiva/Attiva), altrimenti resta solo il
+      medaglione — è il motivo per cui il campo si mostra solo se
+      `canUseConditional()` è vera. Aggiunto anche `app-faceid-uid`: con
+      `allowCredentials` vuoto la passkey la sceglie l'utente, quindi si
+      controlla che lo `userHandle` sia l'uid giusto. Resta un **lucchetto
+      locale, non autenticazione**: la challenge è generata dal client e
+      nessuno verifica l'assertion (Firebase Auth non ha WebAuthn nativo; una
+      login vera richiederebbe una Cloud Function che emette un custom token).
+      Verificato in locale (gating corretto nei 4 casi, layout del campo,
+      console pulita). **Da collaudare su iPhone dopo il deploy** — il punto
+      incerto è la QuickType in PWA standalone da home screen.
 - [ ] 1.4 Test su iPhone standalone (PWA): viewport, tastiera, safe-area. Commit.
 
 ### Fase 2 — Dashboard profilo e multi-personaggio

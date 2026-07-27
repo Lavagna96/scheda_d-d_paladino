@@ -467,10 +467,21 @@ import {
       }
     });
 
+    // Campo dell'autofill passkey: si mostra solo se la Conditional UI è
+    // davvero disponibile, altrimenti sarebbe una casella inerte e resta il
+    // solo medaglione.
+    var unlockField = document.getElementById('lg-unlock');
+    if (unlockField && window.AppFaceId) {
+      AppFaceId.canUseConditional().then(function (ok) {
+        show(unlockField, ok);
+      });
+    }
+
     var faceidBtn = document.getElementById('lg-faceid');
     if (faceidBtn) {
       faceidBtn.addEventListener('click', function () {
         setLoginError('');
+        window.AppFaceId.cancelConditional(); // libera la richiesta in attesa
         window.AppFaceId.unlock().then(function (ok) {
           if (ok) {
             enterApp();
@@ -485,6 +496,9 @@ import {
     if (lockLogoutBtn) {
       lockLogoutBtn.addEventListener('click', function () {
         // Solo logout: il Face ID resta attivo, serve al prossimo accesso.
+        if (window.AppFaceId) {
+          AppFaceId.cancelConditional(); // niente ascolto appeso sulla schermata di login
+        }
         signOut(auth);
       });
     }
@@ -581,9 +595,11 @@ import {
         var giaBloccato = document.body.classList.contains('auth-locked');
         setAuthPhase('auth-locked');
         if (!giaBloccato) {
-          AppFaceId.unlock().then(function (ok) {
-            // Nessun messaggio d'errore qui: se iOS rifiuta la get() senza
-            // gesto utente resta la riserva del medaglione #lg-faceid.
+          // Niente unlock() automatica: all'atterraggio nessun foglio nativo
+          // in mezzo allo schermo. Si resta in ascolto dell'autofill (la
+          // passkey compare sopra la tastiera toccando #lg-unlock); il
+          // medaglione #lg-faceid è la riserva quando l'autofill non c'è.
+          AppFaceId.watchConditional().then(function (ok) {
             if (ok) {
               enterApp();
             }

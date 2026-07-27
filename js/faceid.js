@@ -8,14 +8,27 @@
    * biometrica locale. La credenziale creata è legata a dispositivo +
    * origine (localhost e github.io sono origini diverse: comportamento
    * atteso, va riattivata su ognuna).
+   *
+   * Due strade per lo sblocco, nell'ordine:
+   * 1. Conditional UI (autofill): all'avvio l'app si mette in ascolto senza
+   *    aprire nulla; iOS propone la passkey con Face ID sopra la tastiera
+   *    quando l'utente tocca il campo #lg-unlock. Richiede una credenziale
+   *    *discoverable* (residentKey 'required'), quindi vale solo per quelle
+   *    create da questa versione in poi.
+   * 2. Medaglione Face ID: la get() classica col foglio modale di sistema,
+   *    riserva per iOS senza autofill o per le credenziali vecchie.
+   * In nessuno dei due casi il popup nativo compare da solo all'atterraggio.
    */
 
   var LS_ENABLED = 'app-faceid';
   var LS_CRED = 'app-faceid-cred';
+  var LS_UID = 'app-faceid-uid';
+  var LS_DISCOVERABLE = 'app-faceid-discoverable'; // '1' = passkey buona per l'autofill
   var LS_LAST_ACTIVE = 'app-faceid-last-active';
   var GRACE_MS = 5 * 60 * 1000; // tolleranza: sotto i 5 minuti di inattività niente lucchetto
 
   var _unlocked = false; // già sbloccato in questa sessione di pagina?
+  var conditionalAbort = null; // richiesta conditional in attesa (WebAuthn ne ammette una sola)
 
   /* ---------- helpers base64url <-> ArrayBuffer ---------- */
 
@@ -106,6 +119,7 @@
     if (!isSupported()) {
       return Promise.reject(new Error('WebAuthn non supportato su questo dispositivo.'));
     }
+    cancelConditional(); // una create() con una get() in attesa fallirebbe
     var challenge = crypto.getRandomValues(new Uint8Array(32));
     var userId = new TextEncoder().encode(uid);
 
@@ -121,12 +135,17 @@
         authenticatorSelection: {
           authenticatorAttachment: 'platform',
           userVerification: 'required',
-          residentKey: 'discouraged'
+          // Discoverable: condizione necessaria perché iOS offra la passkey
+          // nella barra QuickType sopra la tastiera (Conditional UI).
+          residentKey: 'required',
+          requireResidentKey: true
         },
         timeout: 60000
       }
     }).then(function (credential) {
       localStorage.setItem(LS_CRED, bufToBase64Url(credential.rawId));
+      localStorage.setItem(LS_UID, uid);
+      localStorage.setItem(LS_DISCOVERABLE, '1');
       localStorage.setItem(LS_ENABLED, '1');
       _unlocked = true;
       touchActivity();
@@ -134,16 +153,101 @@
   }
 
   function disable() {
+    cancelConditional();
     localStorage.removeItem(LS_ENABLED);
     localStorage.removeItem(LS_CRED);
+    localStorage.removeItem(LS_UID);
+    localStorage.removeItem(LS_DISCOVERABLE);
   }
 
-  /* ---------- sblocco ---------- */
+  /* ---------- sblocco con autofill (Conditional UI) ---------- */
+
+  function isConditionalAvailable() {
+    if (!isSupported() || !PublicKeyCredential.isConditionalMediationAvailable) {
+      return Promise.resolve(false);
+    }
+
+    return PublicKeyCredential.isConditionalMediationAvailable()
+      .then(function (ok) { return !!ok; })
+      .catch(function () { return false; });
+  }
+
+  // Vero solo per le credenziali create come discoverable: quelle vecchie
+  // (residentKey 'discouraged') non compaiono mai nella QuickType, per loro
+  // resta il medaglione finché l'utente non riattiva lo sblocco.
+  function canUseConditional() {
+    if (!isEnabled() || localStorage.getItem(LS_DISCOVERABLE) !== '1') {
+      return Promise.resolve(false);
+    }
+
+    return isConditionalAvailable();
+  }
+
+  // Chiude la richiesta in attesa: WebAuthn ne ammette una sola per volta,
+  // quindi va annullata prima di ogni get()/create() col foglio modale.
+  function cancelConditional() {
+    if (conditionalAbort) {
+      conditionalAbort.abort();
+      conditionalAbort = null;
+    }
+  }
+
+  // Con allowCredentials vuoto la passkey la sceglie l'utente: controllo che
+  // lo userHandle sia l'uid con cui era stato attivato lo sblocco.
+  function matchesAccount(credential) {
+    var atteso = localStorage.getItem(LS_UID);
+    var handle = credential && credential.response && credential.response.userHandle;
+    if (!atteso || !handle) {
+      return true; // credenziale senza uid salvato: non irrigidire lo sblocco
+    }
+
+    return new TextDecoder().decode(handle) === atteso;
+  }
+
+  // Mette l'app in ascolto: NON apre popup e non blocca nulla. La promise si
+  // risolve true solo quando l'utente sceglie la passkey dalla QuickType.
+  function watchConditional() {
+    return canUseConditional().then(function (ok) {
+      if (!ok) {
+        return false;
+      }
+      cancelConditional();
+      conditionalAbort = new AbortController();
+
+      return navigator.credentials.get({
+        mediation: 'conditional',
+        signal: conditionalAbort.signal,
+        publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(32)),
+          rpId: location.hostname,
+          allowCredentials: [], // obbligatoriamente vuoto in conditional
+          userVerification: 'required',
+          timeout: 300000
+        }
+      }).then(function (credential) {
+        conditionalAbort = null;
+        if (!matchesAccount(credential)) {
+          return false; // passkey di un altro account: non sblocca questa sessione
+        }
+        _unlocked = true;
+        touchActivity();
+
+        return true;
+      }).catch(function () {
+        conditionalAbort = null; // annullata, scaduta o rifiutata: nessun errore a video
+
+        return false;
+      });
+    });
+  }
+
+  /* ---------- sblocco col medaglione (foglio modale) ---------- */
 
   function unlock() {
     if (!isSupported() || !isEnabled()) {
       return Promise.resolve(false);
     }
+    cancelConditional(); // altrimenti la get() modale trova una richiesta pendente
     var challenge = crypto.getRandomValues(new Uint8Array(32));
     var credId = base64UrlToBuf(localStorage.getItem(LS_CRED));
 
@@ -173,6 +277,9 @@
     shouldLock: shouldLock,
     enable: enable,
     disable: disable,
-    unlock: unlock
+    unlock: unlock,
+    canUseConditional: canUseConditional,
+    watchConditional: watchConditional,
+    cancelConditional: cancelConditional
   };
 })();
