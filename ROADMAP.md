@@ -896,6 +896,18 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
       fondo con tutti 8 e un personaggio storpio senza un solo avviso. Serve
       almeno un avvertimento (o bloccare finché i punti non sono spesi):
       è una scelta di UX da fare.
+- [x] ~~**Peso degli oggetti che arrivano dal background**~~ — FATTO
+      (2026-07-27, manuale `version: 27`): la roba dei pacchetti dei background
+      entrava in sacca con `weight: 0`, falsando il carico trasportato. Ora c'è
+      `gearWeights` nel manuale, con il peso totale di ognuna delle 45 voci
+      (tabella dell'equipaggiamento a pag. 222 e schede degli strumenti a pag.
+      219-220 del PDF); le voci a cui il PHB non dà un peso — pergamena,
+      profumo, munizioni — o che dipendono dalla forma scelta — set da gioco,
+      strumento musicale, strumenti da artigiano — sono a `null`, cioè 0
+      **dichiarato**, non dimenticato. Verificato: Barbaro Contadino → sacca da
+      93 lb su 255 di capacità (kit dell'esploratore 55, pentola 10, strumenti
+      da carpentiere 6, pala 5, abiti 4, kit da guaritore 3, falcetto 2, 4 asce
+      da lancio da 2).
 - [x] ~~**Peso dei kit non pesato**~~ — FATTO (2026-07-27): il peso c'era
       eccome, nella tabella dell'equipaggiamento (PDF pag. 222) e non nella
       descrizione dei kit — Kit del sacerdote 29 lb, Kit dell'esploratore

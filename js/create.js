@@ -1392,8 +1392,16 @@
        nella riga del background, quindi entra con peso 0 — meglio averla in
        lista che non averla (vedi Debiti aperti). */
     var bgPack = bgChosenPack();
+    var pesi = window.MANUAL_55.gearWeights || {};
     ((bgPack && bgPack.items) || []).forEach(function (name) {
-      lista.push({ name: name, desc: 'Dal background', qty: 1, weight: 0 });
+      lista.push({
+        name: name,
+        desc: 'Dal background',
+        qty: 1,
+        // Peso dalla tabella dell'equipaggiamento; 0 per le voci a cui il
+        // manuale non dà un peso o che dipendono dalla forma scelta.
+        weight: pesi[name] || 0
+      });
     });
 
     /* Se classe e background danno la stessa identica cosa — il simbolo sacro

@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 26,
+  version: 27,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -2278,6 +2278,64 @@ window.MANUAL_55 = {
         action: 'Sguardo Maligno',
         desc: 'Azione bonus, ricarica al riposo lungo: una creatura entro 18 m che il destriero vede fa un TS Saggezza contro la tua CD incantesimi, o è Spaventata fino alla fine del tuo prossimo turno.' }
     ]
+  },
+
+  /* Peso degli oggetti comuni che arrivano dai pacchetti dei background, in
+     libbre (PHB 2024: tabella dell'equipaggiamento a pag. 222 e voci degli
+     strumenti a pag. 219-220). Le chiavi sono i nomi esatti usati in
+     `backgrounds[*].equipment`, e il valore è il peso TOTALE di quella voce —
+     "2 Borse" pesa per due. Senza questi, la roba del background entrava in
+     sacca con peso 0 e il carico trasportato era sbagliato.
+     `null` = il manuale non gli dà un peso (pergamena, profumo, munizioni) o
+     dipende dalla forma scelta (set da gioco, strumento musicale, strumenti da
+     artigiano): restano a 0 dichiaratamente, non per dimenticanza. */
+  gearWeights: {
+    'Abiti da viaggio': 4,
+    'Abiti eleganti': 6,
+    'Arco corto': 2,
+    'Arnesi da scasso': 1,
+    'Balestra leggera': 5,
+    'Bastone ferrato': 4,
+    'Corda': 5,
+    'Costume': 4,
+    '2 Costumi': 8,
+    '2 Borse': 2,
+    '2 Pugnali': 2,
+    'Pugnale': 1,
+    'Falcetto': 2,
+    'Faretra': 1,
+    'Giaciglio': 7,
+    'Kit da erborista': 3,
+    'Kit da falsario': 5,
+    'Kit da guaritore': 3,
+    'Lampada': 1,
+    'Lancia': 3,
+    'Lanterna schermata': 2,
+    'Libro di filosofia': 5,
+    'Libro di preghiere': 5,
+    'Libro di storia': 5,
+    'Manette': 6,
+    'Olio (3 fiaschette)': 3,
+    'Pala': 5,
+    'Pentola di ferro': 10,
+    'Piede di porco': 5,
+    'Simbolo sacro': 1,
+    'Specchio': 0.5,
+    'Strumenti da calligrafo': 5,
+    'Strumenti da carpentiere': 6,
+    'Strumenti da cartografo': 6,
+    'Strumenti da navigatore': 2,
+    'Tenda': 20,
+    'Veste': 4,
+    '20 Dardi': null,
+    '20 Frecce': null,
+    'Pergamena (8 fogli)': null,
+    'Pergamena (10 fogli)': null,
+    'Pergamena (12 fogli)': null,
+    'Profumo': null,
+    'Set da gioco': null,
+    'Strumenti da artigiano': null,
+    'Strumento musicale': null
   },
 
   backgrounds: {
