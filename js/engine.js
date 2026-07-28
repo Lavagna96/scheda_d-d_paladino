@@ -124,13 +124,19 @@
   }
 
   /* Max di una risorsa di classe dai dati (klass.classResources): tabella
-     byLevel oppure { from, max } costante. Ritorna 0 se non attiva al livello. */
-  function resMax(def, level, klass) {
+     byLevel oppure { from, max } costante, oppure scalata da una
+     caratteristica (es. Ispirazione Bardica = mod CAR, minimo `min`) — stesso
+     principio di CLASS_BONUSES ma per un NUMERO DI USI invece che un bonus.
+     Ritorna 0 se non attiva al livello. */
+  function resMax(def, level, klass, mods) {
     if (!def) { return 0; }
     /* byLevel = tabella propria; byLevelRef = nome di una tabella già presente
        sulla classe (es. 'rages' del Barbaro), per non duplicare i numeri. */
     var table = def.byLevel || (def.byLevelRef && klass && klass[def.byLevelRef]);
     if (table) { return table[level] || 0; }
+    if (def.abilityMod && mods) {
+      return Math.max(def.min || 0, mods[def.abilityMod] || 0);
+    }
     if (typeof def.max === 'number') {
       return (def.from && level < def.from) ? 0 : def.max;
     }
@@ -247,7 +253,7 @@
     var hasSteed = !!(steedRes && ch.level >= (steedRes.from || 1));
     var poolMax = {
       hp: hpMax,
-      loh: resMax(classRes.loh, ch.level, klass),
+      loh: resMax(classRes.loh, ch.level, klass, mods),
       steedhp: hasSteed ? 5 + 10 * (ch.steedSlotLevel || 2) : 0,
       tempHp: 0
     };
@@ -276,9 +282,15 @@
     Object.keys(classRes).forEach(function (key) {
       var def = classRes[key];
       if (def.kind === 'uses') {
-        var max = resMax(def, ch.level, klass);
+        var max = resMax(def, ch.level, klass, mods);
         if (max > 0) {
-          resources.push({ key: key, max: max, name: def.name, resetOn: def.resetOn });
+          /* resetOnAt: la risorsa "migliora" il proprio recupero da un certo
+             livello (es. Ispirazione Bardica: solo riposo lungo fino al 4°,
+             poi anche breve dal 5° con Fonte d'Ispirazione) — generico, non
+             legato al Bardo in particolare. */
+          var resetOn = (def.resetOnAt && ch.level >= def.resetOnAt.level)
+            ? def.resetOnAt.value : def.resetOn;
+          resources.push({ key: key, max: max, name: def.name, resetOn: resetOn });
         }
       }
     });

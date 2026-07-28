@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 35,
+  version: 36,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -232,7 +232,123 @@ window.MANUAL_55 = {
       bardicDie: [null, 'd6', 'd6', 'd6', 'd6', 'd8', 'd8', 'd8', 'd8', 'd8', 'd10', 'd10', 'd10', 'd10', 'd10', 'd12', 'd12', 'd12', 'd12', 'd12', 'd12'],
       cantripsByLevel: [0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       preparedByLevel: [0, 4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22],
-      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9]
+      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9],
+      // Niente Maestria nelle Armi (nessuna colonna dedicata, come Chierico
+      // e Druido): solo armi semplici.
+      weaponProf: ['sem'],
+      startingEquipment: {
+        a: {
+          label: 'Kit del bardo',
+          armorId: 'cuoio', shield: false, weaponId: 'pugnale',
+          extra: [
+            { name: 'Pugnale', qty: 1, weaponId: 'pugnale' },
+            { name: 'Strumento Musicale (a scelta)', qty: 1, weight: 2, desc: 'Strumento a scelta tra quelli in cui sei competente; funge anche da focus per gli incantesimi da bardo.' },
+            { name: 'Kit del giullare', qty: 1, weight: 58, desc: 'Zaino, giaciglio, campanella, lanterna cieca, 3 costumi, specchio, 8 fiaschette d\'olio, razioni per 9 giorni, acciarino, otre.' }
+          ],
+          coins: { mo: 19 }
+        },
+        b: { label: '90 monete d\'oro', coins: { mo: 90 } }
+      },
+      classResources: {
+        // Ispirazione Bardica: usi = mod CAR (minimo 1), non una tabella per
+        // livello — il motore la scala da resMax()/abilityMod (nuovo, prima
+        // esistevano solo tabelle per livello). Solo riposo lungo fino al 4°
+        // livello; dal 5° (Fonte d'Ispirazione) anche il riposo breve la
+        // recupera per intero, come i Punti Focus del Monaco.
+        inspiration: {
+          name: 'Ispirazione Bardica', kind: 'uses', abilityMod: 'CAR', min: 1,
+          resetOn: 'long', resetOnAt: { level: 5, value: 'short-full' }
+        }
+      },
+      choicePoints: {
+        subclass: 3, subclassFeatureLevels: [3, 6, 14],
+        asi: [4, 8, 12, 16], epicBoon: 19,
+        // Competenza: 2 abilità al 2° livello, altre 2 al 9° — stessa forma
+        // {level,count} già usata da Ladro/Ranger.
+        expertise: [{ level: 2, count: 2 }, { level: 9, count: 2 }]
+      },
+      /* Privilegi 1→20 (PHB 2024 p.59-61 del PDF): riassunti originali in
+         italiano. trait:false = scelta gestita altrove (Competenza/sottoclasse
+         dal wizard/picker, ASI/Dono Epico dal level-up). Ai livelli 11/13/15/17
+         il PHB non ha un privilegio nuovo, solo i numeri delle tabelle
+         (Trucchetti/Preparati/slot) che salgono da soli — nessuna voce qui. */
+      levelFeatures: {
+        1: [
+          { name: 'Ispirazione Bardica', desc: 'Come azione bonus doni un dado Ispirazione Bardica (d6) a una creatura entro 18 m che ti vede o sente; una volta nella prossima ora, se fallisce una Prova del d20, può tirare il dado e sommarlo al risultato. Il dado cresce col livello (colonna Dado Bardico: d8 dal 5°, d10 dal 10°, d12 dal 15°). Puoi donarlo un numero di volte pari al modificatore di Carisma (minimo 1); recuperi tutti gli usi al riposo lungo.' },
+          { name: 'Incantesimi', desc: 'Impari a incanalare la magia attraverso la tua arte. Conosci due trucchetti da bardo e prepari incantesimi di 1° livello o superiore (4 all\'inizio) usando il Carisma come caratteristica da incantatore; puoi sostituire un trucchetto o un incantesimo preparato ogni volta che sali di livello da bardo.' }
+        ],
+        2: [
+          { name: 'Competenza', trait: false, desc: 'Ottieni Competenza (bonus di competenza raddoppiato) in due delle tue abilità in cui sei già competente. Ne ottieni altre due al 9° livello.' },
+          { name: 'Tuttofare', desc: 'Sommi metà del tuo bonus di competenza (per difetto) a qualunque prova di caratteristica che usi un\'abilità in cui non sei già competente e che non applichi già il bonus di competenza.' }
+        ],
+        3: [
+          { name: 'Sottoclasse del Bardo', trait: false, desc: 'Scegli un Collegio (della Danza, dell\'Incanto, della Sapienza o del Valore). Ottieni i suoi privilegi al tuo livello da bardo o inferiore.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        5: [
+          { name: 'Fonte d\'Ispirazione', desc: 'Recuperi tutti gli usi spesi di Ispirazione Bardica al riposo breve o lungo, non solo a quello lungo. Inoltre puoi spendere uno slot incantesimo (senza azione) per recuperare un uso di Ispirazione Bardica.' }
+        ],
+        6: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio del tuo Collegio.' }
+        ],
+        7: [
+          { name: 'Contro-Incanto', desc: 'Con una reazione, se tu o una creatura entro 9 m fallite un TS contro un effetto che applica Affascinato o Spaventato, puoi far ripetere il tiro con vantaggio.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        9: [
+          { name: 'Competenza', trait: false, desc: 'Ottieni Competenza in altre due abilità in cui sei già competente.' }
+        ],
+        10: [
+          { name: 'Segreti Magici', desc: 'Ogni volta che il numero della colonna Incantesimi Preparati aumenta (compreso questo livello), puoi scegliere uno dei tuoi nuovi incantesimi preparati anche dalle liste di Chierico, Druido o Mago: conta come incantesimo da bardo per te. Puoi sostituirlo con un altro delle stesse liste ogni volta che sali di livello da bardo.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        14: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio del tuo Collegio.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        18: [
+          { name: 'Ispirazione Superiore', desc: 'Quando tiri Iniziativa, se hai meno di due usi di Ispirazione Bardica ne recuperi finché non arrivi ad averne due.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono del Richiamo degli Incantesimi) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Parole della Creazione', desc: 'Hai sempre preparati gli incantesimi Parola di Potere: Guarigione e Parola di Potere: Morte. Quando lanci uno dei due, puoi colpire anche una seconda creatura entro 3 m dal primo bersaglio.' }
+        ]
+      },
+      /* Collegi del Bardo: per ora solo Collegio della Sapienza (PHB p.64, il
+         più semplice dei quattro da modellare — Danza richiederebbe una CA
+         alternativa a due caratteristiche (DES+CAR) mai vista finora, Valore
+         dà Attacco Extra che nel motore è una tabella di classe non
+         condizionabile per sottoclasse, Incanto ha risorse dedicate nuove; la
+         Sapienza invece resta descrittiva, riusando solo Ispirazione Bardica
+         già tracciata). Danza, Incanto e Valore si aggiungono in seguito. */
+      subclasses: {
+        sapienza: {
+          name: 'Collegio della Sapienza',
+          tenets: 'Raccoglie incantesimi e segreti da fonti diverse, condividendo il sapere in biblioteche e università.',
+          features: {
+            3: [
+              { name: 'Competenze Bonus', desc: 'Ottieni competenza in tre abilità a tua scelta.' },
+              { name: 'Parole Taglienti', desc: 'Con una reazione, quando una creatura entro 18 m che vedi supera una prova di caratteristica, un tiro per colpire o un tiro per i danni, spendi un uso di Ispirazione Bardica: tiri il dado e lo sottrai dal risultato, potendo trasformare un successo in un fallimento.' }
+            ],
+            6: [
+              { name: 'Scoperte Magiche', desc: 'Impari due incantesimi a scelta dalle liste di Chierico, Druido o Mago (anche in combinazione), di livello per cui hai slot o trucchetti. Li hai sempre preparati e puoi sostituirli ogni volta che sali di livello da bardo.' }
+            ],
+            14: [
+              { name: 'Abilità Impareggiabile', desc: 'Quando fallisci una prova di caratteristica o un tiro per colpire, puoi spendere un uso di Ispirazione Bardica: tiri il dado e lo sommi al risultato, potendo trasformare il fallimento in un successo. Con un fallimento, l\'uso non si consuma.' }
+            ]
+          }
+        }
+      }
     },
     chierico: {
       name: 'Chierico', hitDie: 'd8', primaryAbility: 'SAG', saves: ['SAG', 'CAR'],

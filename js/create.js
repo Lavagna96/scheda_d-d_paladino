@@ -157,6 +157,9 @@
   // p.108). Le altre classi useranno un fallback finché non saranno modellate.
   var CLASS_SKILLS = {
     barbaro: { count: 2, from: ['addestrare-animali', 'atletica', 'intimidire', 'natura', 'percezione', 'sopravvivenza'] },
+    // Unica classe con "scegli 3 fra tutte le 18" (PHB p.58): nessuna lista
+    // ristretta come le altre classi.
+    bardo: { count: 3, from: ['acrobazia', 'addestrare-animali', 'arcano', 'atletica', 'furtivita', 'indagare', 'inganno', 'intimidire', 'intrattenere', 'intuizione', 'medicina', 'natura', 'percezione', 'persuasione', 'rapidita-di-mano', 'religione', 'sopravvivenza', 'storia'] },
     chierico: { count: 2, from: ['storia', 'intuizione', 'medicina', 'persuasione', 'religione'] },
     druido: { count: 2, from: ['arcano', 'addestrare-animali', 'intuizione', 'medicina', 'natura', 'percezione', 'religione', 'sopravvivenza'] },
     guerriero: { count: 2, from: ['acrobazia', 'addestrare-animali', 'atletica', 'storia', 'intuizione', 'intimidire', 'persuasione', 'percezione', 'sopravvivenza'] },

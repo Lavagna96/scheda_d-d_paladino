@@ -1177,7 +1177,65 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      Vincolante" nella tab Tratti (`index.html`) è HTML statico, non
      condizionale — compare per QUALUNQUE personaggio, non solo per Tharion.
      Segnalato con `spawn_task` invece di un fix silenzioso fuori scope.
-8. [ ] **Bardo** (full) — Ispirazione Bardica, Collegio.
+8. [x] **Bardo** (full) — Ispirazione Bardica, Collegio.
+   → **Fatto (2026-07-28, `?v=100`, manuale `version` 35→36)**: privilegi 1→20
+   dal PDF (p.59-61), sottoclasse **Collegio della Sapienza** (p.64, il più
+   semplice dei quattro da modellare — Danza vorrebbe una CA a due
+   caratteristiche mai vista finora, Valore dà Attacco Extra che nel motore
+   è una tabella di classe non condizionabile per sottoclasse, Incanto ha
+   risorse dedicate nuove; la Sapienza resta descrittiva, riusando solo
+   Ispirazione Bardica), equipaggiamento iniziale (kit + Strumento Musicale
+   a scelta), competenze di classe (unica classe con "scegli 3 fra tutte le
+   18", non una lista ristretta). Le tabelle numeriche (Dado Bardico,
+   Trucchetti, Preparati, slot) erano già corrette nello stub.
+   - **Meccanica nuova nel motore: risorsa scalata da una caratteristica**.
+     Ispirazione Bardica non è una tabella per livello come tutte le risorse
+     viste finora (Furia, Punti Focus, Forma Selvatica…): sono usi pari al
+     modificatore di Carisma (minimo 1). `resMax()` in `engine.js` ora
+     accetta anche `abilityMod`/`min` oltre a `byLevel`/`byLevelRef`/`max`,
+     stesso principio già usato da `CLASS_BONUSES` per i bonus (Aura di
+     Protezione, Arma Sacra) ma applicato per la prima volta a un NUMERO DI
+     USI. Verificato: CAR 18 → 4 usi, CAR 10 → 1 uso (minimo).
+   - **Meccanica nuova nel motore: recupero che "migliora" con il livello**.
+     Ispirazione Bardica si recupera solo al riposo lungo fino al 4°
+     livello; dal 5° (Fonte d'Ispirazione) anche al riposo breve, per
+     intero. Aggiunto `resetOnAt: {level, value}` ai `classResources`
+     (generico, non legato al Bardo) che sostituisce `resetOn` dal livello
+     indicato in poi. **Il wizard di level-up ha mostrato il cambiamento da
+     solo**: salendo dal 4° al 5° livello la card "Nuovi privilegi" ha
+     incluso "Fonte d'Ispirazione" e la sezione Risorse ha spostato da sola
+     Ispirazione Bardica da "Riposo Lungo" a "Riposo Breve" — nessuna riga
+     di codice nuova in `levelup.js`, generalizzava già tutto.
+   - **Niente Maestria nelle Armi** (come Chierico e Druido): solo
+     `weaponProf: ['sem']`.
+   - **Bug pre-esistenti trovati, non di questa classe** (stesso pattern
+     della card "Lama Vincolante" già chiusa questa sessione): la card
+     "Punizione Divina" nella tab Info/Comb e il promemoria "Punizione
+     Divina = az. bonus…" nel Grimorio sono entrambi HTML statico —
+     compaiono per QUALUNQUE personaggio, non solo per un Paladino (trovato
+     con un Bardo di prova, che non ha nulla a che fare con Punizione
+     Divina). Segnalati con `spawn_task` invece di un fix silenzioso fuori
+     scope.
+   - **Verifica end-to-end**: Bardo di prova iniettato a livello 9 (Collegio
+     della Sapienza, CAR 18) — CD/attacco/etichetta "Carisma" corretti,
+     Ispirazione Bardica 4/4 in Riposo Breve (short-full già attivo dal
+     5°), tutti i privilegi di classe e sottoclasse in Tratti nell'ordine
+     giusto. Test dedicato del recupero: a livello 1 (CAR comunque 18)
+     Ispirazione Bardica resta in Riposo Lungo e un riposo breve non la
+     tocca; un riposo lungo la recupera per intero. Giro completo del
+     wizard da zero (Tiefling, Bardo, Intrattenitore con strumento "Liuto"
+     a scelta, punteggi consigliati DES 14+1/CAR 15+2, 3 competenze di
+     classe + 2 dal background senza doppioni, pacchetto A + pacchetto del
+     background, 2 trucchetti + 4 incantesimi preparati): personaggio
+     creato con tutti i campi corretti (Pugnale con `finesse:true` derivato
+     da solo, PF 9, 30 MO). Level-up 1→5 a tavolino: Competenza (Espero) al
+     2° con picker sulle 5 abilità competenti, sottoclasse Collegio della
+     Sapienza auto-assegnata al 3° (unica opzione modellata), ASI al 4°
+     (CAR 17→18, Ispirazione Bardica 3→4 mostrato live nel picker mentre si
+     alzava CAR), Fonte d'Ispirazione al 5° col cambio di sezione delle
+     risorse confermato. Tharion (Paladino) verificato invariato dopo ogni
+     prova (CA 20, PF 60, CD 15, Aura +3, +8 all'arma). Console pulita in
+     ogni prova.
 9. [ ] **Stregone** (full) — Punti Stregoneria, Metamagia.
 10. [ ] **Mago** (full) — libro incantesimi, Recupero Arcano, Tradizione.
 11. [ ] **Warlock** (pact) — slot pact (già in tabella), Invocazioni, Suppliche, Patto.
