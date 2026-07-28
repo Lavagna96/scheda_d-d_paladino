@@ -52,6 +52,13 @@ body.in-dashboard #global-fab {
   justify-content: center;
 }
 
+/* Toggle griglia/righe: stesso cerchio di .dash-gear, appena a sinistra
+   (36px + gap di 8px). L'icona mostrata è quella della vista in cui si
+   andrebbe cliccando (js/dashboard.js, updateLayoutToggleIcon). */
+.dash-layout-toggle {
+  right: calc(var(--space-4) + 44px);
+}
+
 .dash-head {
   width: 100%;
   max-width: 440px;
@@ -229,4 +236,126 @@ body.in-dashboard #global-fab {
   cursor: pointer;
   color: var(--accent-gold-dim);
   font-style: normal;
+}
+
+/* ---------- swipe-to-delete (card e riga, js/dashboard.js buildSwipeItem) ----------
+   Wrapper .dash-swipe: overflow:hidden lo ritaglia sulla forma arrotondata
+   (così anche il pulsante Elimina, dentro, esce già "smussato" a destra) e
+   porta l'ombra che prima stava su .dash-card — lì verrebbe tagliata proprio
+   da questo overflow:hidden. */
+
+.dash-swipe {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.dash-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 84px;
+  border: none;
+  background: var(--ruby);
+  color: #fff;
+  font-family: var(--font-title);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+}
+
+.dash-swipe .dash-card,
+.dash-swipe .dash-row {
+  position: relative;
+  z-index: 1; /* sopra il pulsante Elimina, finché non si scorre via */
+  box-shadow: none;
+  transition: transform 0.25s ease;
+  transform: translateX(0);
+}
+
+.dash-swipe.open .dash-card,
+.dash-swipe.open .dash-row {
+  transform: translateX(-84px);
+}
+
+/* ---------- layout a righe (toggle griglia/righe) ---------- */
+
+.dash-list.mode-list {
+  gap: 10px;
+}
+
+.dash-list.mode-list .dash-swipe {
+  border-radius: var(--radius-md);
+  box-shadow: none; /* le righe non avevano un'ombra propria da preservare */
+}
+
+.dash-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(201, 164, 67, 0.3);
+  background: var(--bg-card);
+  cursor: pointer;
+}
+
+.dash-row-thumb {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center 18%;
+  border: 1px solid var(--border-gold);
+}
+
+.dash-row-thumb.no-portrait {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-title);
+  font-size: 18px;
+  color: var(--accent-gold);
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(201, 164, 67, 0.18), transparent 60%),
+    linear-gradient(160deg, #2b261d, #1c1915);
+}
+
+.dash-row-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-row-name {
+  font-family: var(--font-title);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-row-line {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-row-lvl {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 12px;
+  color: #241d0d;
+  background: linear-gradient(180deg, #e0bb5c, #b8923a);
+  border-radius: var(--radius-xs);
+  padding: 4px 9px;
+  flex-shrink: 0;
 }

@@ -14,7 +14,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   initializeFirestore, persistentLocalCache, persistentSingleTabManager,
-  doc, getDoc, getDocs, collection, setDoc, onSnapshot, serverTimestamp, writeBatch
+  doc, getDoc, getDocs, collection, setDoc, deleteDoc, onSnapshot, serverTimestamp, writeBatch
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 (function () {
@@ -349,6 +349,30 @@ import {
     });
   }
 
+  /* Elimina un personaggio (swipe-to-delete dalla dashboard, js/dashboard.js):
+     stato locale rimosso subito, doc Firestore cancellato, poi la dashboard
+     si ricarica da sé — non serve un caso speciale per "era l'ultimo
+     personaggio": la lista vuota resta comunque con lo slot "+ Nuovo
+     personaggio" per ripartire. */
+  function deleteCharacter(id) {
+    localStorage.removeItem('char-' + id + '-state');
+    if (localStorage.getItem('app-active-char') === id) {
+      localStorage.removeItem('app-active-char');
+    }
+
+    if (!user) {
+      loadDashboard();
+
+      return Promise.resolve();
+    }
+
+    return deleteDoc(doc(db, 'users', user.uid, 'characters', id)).then(function () {
+      loadDashboard();
+    }).catch(function () {
+      loadDashboard();
+    });
+  }
+
   /* Dopo l'autenticazione (ed eventuale sblocco Face ID) si atterra sempre
      sulla dashboard, TRANNE quando arriva da lì una scelta già fatta
      (sessionStorage 'app-skip-dashboard', impostato da onSelectCharacter
@@ -639,6 +663,7 @@ import {
     enabled: true,
     schedulePush: schedulePush,
     createCharacter: createCharacter,
+    deleteCharacter: deleteCharacter,
     getUser: function () { return user; }
   };
 })();
