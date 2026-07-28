@@ -46,7 +46,9 @@
     { id: 'punteggi', title: 'Punteggi' },
     { id: 'competenze', title: 'Competenze' },
     { id: 'equipaggiamento', title: 'Equipaggiamento' },
-    { id: 'finale', title: 'Sottoclasse e Incantesimi' }
+    { id: 'finale', title: 'Sottoclasse e Incantesimi' },
+    // Ultimo passo: nessuna dipendenza dagli altri, per questo sta in coda.
+    { id: 'identita', title: 'Identità' }
   ];
 
   var stepIndex = 0; // passo corrente, 0-based
@@ -73,6 +75,11 @@
     // Iniziato alla Magia (Accolito, Guida, Studioso): 2 trucchetti e 1
     // incantesimo di 1° livello dalla lista di classe indicata dal background.
     miCantrips: [], miSpells: [],
+    // Background Personalizzato (house rule del tavolo, non è nel PHB): stesse
+    // scelte dei 16 background ufficiali ma tutte libere invece che fissate
+    // dal manuale — vedi customBg().
+    customAbilities: [], customFeatId: null, customFeatList: null,
+    customSkills: [], customKitBgId: null,
     // Equipaggiamento (b2.4): impostato in modo pigro dai default di classe
     // quando si entra nel passo (ensureEquipDraft); equipForClass ricorda per
     // quale classe è stato riempito, così cambiando classe si riparte dal kit
@@ -89,7 +96,10 @@
     // al level-up.
     fightingStyleId: null,
     // Competenza: solo per le classi che la danno al livello 1 (Ladro).
-    expertiseSkills: []
+    expertiseSkills: [],
+    // Identità (passo finale): allineamento su due assi e le 2 lingue scelte
+    // oltre al Comune (già dato di default, non tracciato qui).
+    alignmentLaw: null, alignmentMorality: null, languages: []
   };
 
   var progressFillEl, stepNumEl, stepTitleEl, stepBodyEl, backBtn, nextBtn, footerNoteEl;
@@ -97,6 +107,12 @@
   // Riscrive il riepilogo del background nel passo Punteggi; null fuori da
   // quel passo (lo imposta renderPunteggi, lo azzera render()).
   var bgRecapRefresh = null;
+
+  // Quale sezione dell'accordion del background Personalizzato è aperta: solo
+  // stato di UI, non entra nel draft del personaggio (stessa idea di
+  // bgRecapRefresh sopra). Senza questo, ogni scelta dentro una sezione
+  // ridisegna l'intero accordion e lo farebbe ripartire sempre dalla prima.
+  var customOpenSectionId = 'caratteristiche';
 
   // Ordine e etichette delle 6 caratteristiche: stessa convenzione di
   // js/levelup.js e js/edit-sheet.js.
@@ -115,6 +131,22 @@
     { id: 'nessuno', label: 'Nessuno' },
     { id: 'duello', label: 'Duello (+2 danni, arma a una mano)' },
     { id: 'difesa', label: 'Difesa (+1 CA, con armatura)' }
+  ];
+
+  // Lingue Standard del PHB 2024 (passo Identità), Comune escluso perché è
+  // già dato di default a tutti. Scope volutamente limitato alla regola base:
+  // niente lingue bonus di classe (Gergo Ladresco, Esploratore Provetto…),
+  // privilegi non ancora modellati nel motore.
+  var STANDARD_LANGUAGES = [
+    { id: 'lingua-segni', name: 'Lingua dei Segni Comune' },
+    { id: 'draconico', name: 'Draconico' },
+    { id: 'nanico', name: 'Nanico' },
+    { id: 'elfico', name: 'Elfico' },
+    { id: 'gigante', name: 'Gigante' },
+    { id: 'gnomesco', name: 'Gnomesco' },
+    { id: 'goblin', name: 'Goblin' },
+    { id: 'halfling', name: 'Halfling' },
+    { id: 'orchesco', name: 'Orchesco' }
   ];
 
   // Point-buy (PHB 2024 p.37): 27 punti totali; costo per punteggio 8-15.
@@ -190,7 +222,42 @@
 
   /* ---------- background (5.B.4) ---------- */
 
+  // Background Personalizzato: costruito al volo dalle scelte del draft, con
+  // la STESSA forma di un background del manuale, così tutto il resto del
+  // file (bgBonusMap, bgSkills, magicInitiateList, buildCharacter…) continua
+  // a funzionare senza saperne nulla.
+  function customBg() {
+    var out = {
+      name: 'Personalizzato',
+      abilities: (draft.customAbilities || []).slice(),
+      featId: draft.customFeatId,
+      skills: (draft.customSkills || []).slice(),
+      toolChoice: 'Strumento',
+      equipment: { b: { coins: { mo: 50 } } }
+    };
+    if (draft.customFeatId === 'iniziato-alla-magia' && draft.customFeatList) {
+      out.featList = draft.customFeatList;
+      var listName = (window.MANUAL_55.classes[draft.customFeatList] || {}).name || '';
+      out.featNote = listName ? ('lista del ' + listName) : '';
+    }
+    // draft.customKitBgId punta sempre a un id reale (mai a 'personalizzato'):
+    // si legge diretto da window.MANUAL_55.backgrounds, mai da bgById, per non
+    // rischiare ricorsione.
+    if (draft.customKitBgId) {
+      var source = (window.MANUAL_55.backgrounds || {})[draft.customKitBgId];
+      if (source && source.equipment && source.equipment.a) {
+        out.equipment.a = source.equipment.a;
+      }
+    }
+
+    return out;
+  }
+
   function bgById(id) {
+    if (id === 'personalizzato') {
+      return customBg();
+    }
+
     return ((window.MANUAL_55.backgrounds || {})[id]) || null;
   }
 
@@ -238,6 +305,12 @@
     var bg = currentBg();
     if (!bg) {
       return false;
+    }
+    if (draft.backgroundId === 'personalizzato') {
+      if (draft.customAbilities.length !== 3) { return false; }
+      if (!draft.customFeatId) { return false; }
+      if (draft.customFeatId === 'iniziato-alla-magia' && !draft.customFeatList) { return false; }
+      if (draft.customSkills.length !== 2) { return false; }
     }
     if (bg.toolChoice && !draft.bgTool.trim()) {
       return false;
@@ -380,6 +453,9 @@
     }
     if (step.id === 'finale') {
       return finaleValid();
+    }
+    if (step.id === 'identita') {
+      return !!draft.alignmentLaw && !!draft.alignmentMorality && (draft.languages || []).length === 2;
     }
 
     // Equipaggiamento: serve un pacchetto scelto e tutte le maestrie assegnate
@@ -905,6 +981,23 @@
     return wrap;
   }
 
+  // Azzera tutte le scelte legate al background precedente, sia quelle dei 16
+  // background fissi (bonus caratteristica, strumento, Iniziato alla Magia)
+  // sia quelle esclusive del Personalizzato: cambiare background — incluso
+  // andare verso o venire da "Personalizzato" — riparte sempre pulito.
+  function resetBgChoices() {
+    draft.bgPlus2 = null;
+    draft.bgPlus1 = null;
+    draft.bgTool = '';
+    draft.miCantrips = [];
+    draft.miSpells = [];
+    draft.customAbilities = [];
+    draft.customFeatId = null;
+    draft.customFeatList = null;
+    draft.customSkills = [];
+    draft.customKitBgId = null;
+  }
+
   function renderBackground(container) {
     var manual = window.MANUAL_55;
     var all = manual.backgrounds || {};
@@ -917,8 +1010,248 @@
     var detail = el('div');
     container.appendChild(detail);
 
+    // Blocco aumenti di caratteristica (+2 e +1, oppure +1 a tutte e tre):
+    // condiviso fra il pannello piatto dei 16 background reali e la sezione 1
+    // dell'accordion del Personalizzato — cambia solo `bg.abilities`, da cui
+    // pesca le caratteristiche disponibili.
+    function renderAbilityBonusBlock(box, bg) {
+      box.appendChild(el('div', 'edit-section-label', 'Aumenti di caratteristica'));
+      var modeRow = el('div', 'chip-row');
+      [{ id: '2-1', label: '+2 e +1' }, { id: '1-1-1', label: '+1 a tutte e tre' }].forEach(function (m) {
+        var chip = el('button', 'chip' + (draft.bgBonusMode === m.id ? ' on' : ''), m.label);
+        chip.type = 'button';
+        chip.addEventListener('click', function () {
+          draft.bgBonusMode = m.id;
+          renderDetail();
+          updateNav();
+        });
+        modeRow.appendChild(chip);
+      });
+      box.appendChild(modeRow);
+
+      if (draft.bgBonusMode === '2-1') {
+        [{ key: 'bgPlus2', label: 'Chi prende +2' }, { key: 'bgPlus1', label: 'Chi prende +1' }].forEach(function (slot) {
+          box.appendChild(el('div', 'create-label', slot.label));
+          var row = el('div', 'chip-row');
+          bg.abilities.forEach(function (k) {
+            var chip = el('button', 'chip' + (draft[slot.key] === k ? ' on' : ''), ABILITY_LABELS[k]);
+            chip.type = 'button';
+            chip.addEventListener('click', function () {
+              // Un punteggio non può prendere sia il +2 sia il +1: scegliendolo
+              // qui, si libera dall'altro slot.
+              var other = slot.key === 'bgPlus2' ? 'bgPlus1' : 'bgPlus2';
+              if (draft[other] === k) {
+                draft[other] = null;
+              }
+              draft[slot.key] = draft[slot.key] === k ? null : k;
+              renderDetail();
+              updateNav();
+            });
+            row.appendChild(chip);
+          });
+          box.appendChild(row);
+        });
+      } else {
+        box.appendChild(el('div', 'create-saves-line',
+          '+1 a ' + bg.abilities.map(function (k) { return ABILITY_LABELS[k]; }).join(', ') + '.'));
+      }
+    }
+
+    // Riga di header di una sezione dell'accordion: titolo (con ✓ se la
+    // sezione è già completa) + freccia, contenuto nel body. Stesso markup di
+    // js/diary.js (accordion-item/-header/-chevron/-body). `sectionId` è la
+    // chiave con cui si confronta customOpenSectionId — apre questa sezione
+    // se combacia, e il click sull'header aggiorna quella variabile invece di
+    // limitarsi a un toggle locale: così sopravvive al redraw completo che
+    // segue quasi ogni scelta nell'accordion.
+    function addAccordionSection(accordion, sectionId, title, doneFn, buildFn) {
+      var isOpen = customOpenSectionId === sectionId;
+      var item = el('div', 'accordion-item' + (isOpen ? ' open' : ''));
+      var header = el('div', 'accordion-header');
+      var h3 = document.createElement('h3');
+      h3.textContent = (doneFn() ? '✓ ' : '') + title;
+      header.appendChild(h3);
+      header.appendChild(el('span', 'accordion-chevron', '▼'));
+      header.addEventListener('click', function () {
+        item.classList.toggle('open');
+        customOpenSectionId = item.classList.contains('open') ? sectionId : null;
+      });
+      var body = el('div', 'accordion-body');
+      buildFn(body);
+
+      item.appendChild(header);
+      item.appendChild(body);
+      accordion.appendChild(item);
+    }
+
+    /* Background Personalizzato (house rule del tavolo, non è nel PHB): stessi
+       tasselli meccanici dei 16 background ufficiali — 3 caratteristiche, un
+       talento d'origine, 2 competenze, uno strumento, un pacchetto o 50 mo —
+       ma tutti a scelta libera. UI ad accordion invece del pannello piatto:
+       troppe scelte indipendenti per stare tutte in fila. */
+    function renderCustomBackground(box, manual) {
+      // Stessa pulizia del pannello piatto (sotto, in renderDetail): se il
+      // talento scelto non è più Iniziato alla Magia, i trucchetti/incantesimo
+      // presi in precedenza non devono restare orfani nel grimorio.
+      if (draft.customFeatId !== 'iniziato-alla-magia') {
+        draft.miCantrips = [];
+        draft.miSpells = [];
+      }
+
+      var accordion = el('div', 'accordion');
+      box.appendChild(accordion);
+
+      // 1. Caratteristiche: scegline 3 fra le 6, poi distribuisci gli aumenti.
+      addAccordionSection(accordion, 'caratteristiche', 'Caratteristiche', function () {
+        if (draft.customAbilities.length !== 3) {
+          return false;
+        }
+        if (draft.bgBonusMode === '1-1-1') {
+          return true;
+        }
+
+        return !!draft.bgPlus2 && !!draft.bgPlus1 && draft.bgPlus2 !== draft.bgPlus1;
+      }, function (body) {
+        buildSpellPicker(body, 'Scegline 3', ABILITY_ORDER.map(function (k) {
+          return { id: k, name: ABILITY_LABELS[k] };
+        }), 3, 'customAbilities', renderDetail);
+        if (draft.customAbilities.length === 3) {
+          renderAbilityBonusBlock(body, { abilities: draft.customAbilities });
+        }
+      });
+
+      // 2. Talento d'origine: selezione singola fra tutti e 10 del manuale.
+      addAccordionSection(accordion, 'talento', 'Talento d\'origine', function () {
+        if (!draft.customFeatId) {
+          return false;
+        }
+        if (draft.customFeatId !== 'iniziato-alla-magia') {
+          return true;
+        }
+
+        return !!draft.customFeatList && draft.miCantrips.length === 2 && draft.miSpells.length === 1;
+      }, function (body) {
+        var feats = manual.originFeats || {};
+        var row = el('div', 'chip-row');
+        Object.keys(feats).forEach(function (id) {
+          var chip = el('button', 'chip' + (draft.customFeatId === id ? ' on' : ''), feats[id].name);
+          chip.type = 'button';
+          chip.addEventListener('click', function () {
+            if (draft.customFeatId !== id) {
+              draft.customFeatList = null;
+            }
+            draft.customFeatId = id;
+            renderDetail();
+            updateNav();
+          });
+          row.appendChild(chip);
+        });
+        body.appendChild(row);
+
+        var chosen = feats[draft.customFeatId];
+        if (chosen && chosen.desc) {
+          body.appendChild(el('div', 'create-saves-line', chosen.desc));
+        }
+
+        if (draft.customFeatId === 'iniziato-alla-magia') {
+          var listRow = el('div', 'chip-row');
+          ['chierico', 'druido', 'mago'].forEach(function (cid) {
+            var nome = (manual.classes[cid] || {}).name || cid;
+            var chip = el('button', 'chip' + (draft.customFeatList === cid ? ' on' : ''), nome);
+            chip.type = 'button';
+            chip.addEventListener('click', function () {
+              draft.customFeatList = cid;
+              renderDetail();
+              updateNav();
+            });
+            listRow.appendChild(chip);
+          });
+          body.appendChild(el('div', 'create-label', 'Lista incantesimi'));
+          body.appendChild(listRow);
+
+          if (draft.customFeatList) {
+            var nomeLista = (manual.classes[draft.customFeatList] || {}).name || draft.customFeatList;
+            buildSpellPicker(body, 'Trucchetti del ' + nomeLista + ' — scegline 2',
+              classSpellsAt(draft.customFeatList, 0), 2, 'miCantrips', renderDetail);
+            buildSpellPicker(body, 'Incantesimo di 1° livello del ' + nomeLista + ' — scegline 1',
+              classSpellsAt(draft.customFeatList, 1), 1, 'miSpells', renderDetail);
+          }
+        }
+      });
+
+      // 3. Competenze: scegline 2 fra tutte le 18 abilità.
+      addAccordionSection(accordion, 'competenze', 'Competenze', function () {
+        return draft.customSkills.length === 2;
+      }, function (body) {
+        var items = (window.AppEngine.SKILLS || []).map(function (s) {
+          return { id: s.id, name: s.label };
+        });
+        buildSpellPicker(body, 'Scegline 2', items, 2, 'customSkills', renderDetail);
+      });
+
+      // 4. Strumento: campo libero, come per i background reali con toolChoice.
+      addAccordionSection(accordion, 'strumento', 'Strumento', function () {
+        return !!draft.bgTool.trim();
+      }, function (body) {
+        var toolIn = document.createElement('input');
+        toolIn.type = 'text';
+        toolIn.className = 'create-in';
+        toolIn.value = draft.bgTool;
+        toolIn.placeholder = 'Quale strumento?';
+        toolIn.addEventListener('input', function () {
+          draft.bgTool = toolIn.value;
+          updateNav();
+        });
+        // Niente redraw a ogni tasto (perderebbe il focus): solo quando si
+        // esce dal campo, per aggiornare il segno di spunta dell'header.
+        toolIn.addEventListener('blur', function () {
+          renderDetail();
+        });
+        body.appendChild(toolIn);
+      });
+
+      // 5. Equipaggiamento: o i 50 mo di default, o il pacchetto A preso in
+      // prestito da uno dei 16 background reali.
+      addAccordionSection(accordion, 'equipaggiamento', 'Equipaggiamento', function () {
+        return true; // facoltativo: senza scelta restano comunque i 50 mo
+      }, function (body) {
+        var row = el('div', 'chip-row');
+        Object.keys(all).forEach(function (id) {
+          var chip = el('button', 'chip' + (draft.customKitBgId === id ? ' on' : ''), all[id].name);
+          chip.type = 'button';
+          chip.addEventListener('click', function () {
+            draft.customKitBgId = draft.customKitBgId === id ? null : id;
+            renderDetail();
+            updateNav();
+          });
+          row.appendChild(chip);
+        });
+        body.appendChild(row);
+
+        var source = draft.customKitBgId ? all[draft.customKitBgId] : null;
+        var pack = source && source.equipment && source.equipment.a;
+        if (pack) {
+          body.appendChild(el('div', 'create-pack-title', 'A · ' + (pack.label || '')));
+          (pack.items || []).forEach(function (it) {
+            body.appendChild(el('div', 'create-pack-line', it));
+          });
+          var mo = (pack.coins || {}).mo || 0;
+          if (mo) {
+            body.appendChild(el('div', 'create-pack-line', mo + ' monete d\'oro'));
+          }
+        }
+        body.appendChild(el('div', 'create-saves-line',
+          'Se non scegli nulla qui, nel passo Equipaggiamento avrai solo l\'opzione da 50 mo.'));
+      });
+    }
+
     function renderDetail() {
       detail.textContent = '';
+      if (draft.backgroundId === 'personalizzato') {
+        renderCustomBackground(detail, manual);
+
+        return;
+      }
       var bg = currentBg();
       if (!bg) {
         return;
@@ -972,47 +1305,7 @@
         draft.miSpells = [];
       }
 
-      // Aumenti di caratteristica: +2 e +1, oppure +1 a tutte e tre.
-      detail.appendChild(el('div', 'edit-section-label', 'Aumenti di caratteristica'));
-      var modeRow = el('div', 'chip-row');
-      [{ id: '2-1', label: '+2 e +1' }, { id: '1-1-1', label: '+1 a tutte e tre' }].forEach(function (m) {
-        var chip = el('button', 'chip' + (draft.bgBonusMode === m.id ? ' on' : ''), m.label);
-        chip.type = 'button';
-        chip.addEventListener('click', function () {
-          draft.bgBonusMode = m.id;
-          renderDetail();
-          updateNav();
-        });
-        modeRow.appendChild(chip);
-      });
-      detail.appendChild(modeRow);
-
-      if (draft.bgBonusMode === '2-1') {
-        [{ key: 'bgPlus2', label: 'Chi prende +2' }, { key: 'bgPlus1', label: 'Chi prende +1' }].forEach(function (slot) {
-          detail.appendChild(el('div', 'create-label', slot.label));
-          var row = el('div', 'chip-row');
-          bg.abilities.forEach(function (k) {
-            var chip = el('button', 'chip' + (draft[slot.key] === k ? ' on' : ''), ABILITY_LABELS[k]);
-            chip.type = 'button';
-            chip.addEventListener('click', function () {
-              // Un punteggio non può prendere sia il +2 sia il +1: scegliendolo
-              // qui, si libera dall'altro slot.
-              var other = slot.key === 'bgPlus2' ? 'bgPlus1' : 'bgPlus2';
-              if (draft[other] === k) {
-                draft[other] = null;
-              }
-              draft[slot.key] = draft[slot.key] === k ? null : k;
-              renderDetail();
-              updateNav();
-            });
-            row.appendChild(chip);
-          });
-          detail.appendChild(row);
-        });
-      } else {
-        detail.appendChild(el('div', 'create-saves-line',
-          '+1 a ' + bg.abilities.map(function (k) { return ABILITY_LABELS[k]; }).join(', ') + '.'));
-      }
+      renderAbilityBonusBlock(detail, bg);
     }
 
     Object.keys(all).forEach(function (id) {
@@ -1023,14 +1316,31 @@
           return;
         }
         draft.backgroundId = id;
-        // Cambiando background le scelte precedenti non valgono più.
-        draft.bgPlus2 = null;
-        draft.bgPlus1 = null;
-        draft.bgTool = '';
+        resetBgChoices();
         render();
       });
       chipRow.appendChild(chip);
     });
+
+    // Chip finale, visivamente distinta (bordo tratteggiato, .chip-custom):
+    // il background house rule del tavolo, non nel PHB.
+    var customChip = el('button', 'chip chip-custom' + (draft.backgroundId === 'personalizzato' ? ' on' : ''), '+ Personalizzato');
+    customChip.type = 'button';
+    customChip.addEventListener('click', function () {
+      if (draft.backgroundId === 'personalizzato') {
+        return;
+      }
+      draft.backgroundId = 'personalizzato';
+      resetBgChoices();
+      // A differenza dei 16 background reali (che hanno sempre sia 'a' sia
+      // 'b'), customBg() garantisce solo 'b' (i 50 mo) finché non si sceglie
+      // un pacchetto in prestito: il default 'a' del draft lascerebbe
+      // silenziosamente senza equipaggiamento chi non tocca questo passo.
+      draft.bgPack = 'b';
+      customOpenSectionId = 'caratteristiche';
+      render();
+    });
+    chipRow.appendChild(customChip);
 
     renderDetail();
     updateNav();
@@ -1324,7 +1634,11 @@
   // manuale), che scrive gli id scelti in draft[draftKey]. Stessa meccanica dei
   // chip competenza (cap a count, contatore, stato disabilitato al tetto);
   // scarta le selezioni non più valide se la lista cambia (cambio classe).
-  function buildSpellPicker(container, title, spells, count, draftKey) {
+  // `onChange` (opzionale) è richiamato dopo ogni click, oltre al refresh
+  // interno: serve al background Personalizzato, dove una scelta qui dentro
+  // fa comparire altra UI sotto (es. il blocco aumenti caratteristica dopo la
+  // terza caratteristica scelta).
+  function buildSpellPicker(container, title, spells, count, draftKey, onChange) {
     var validIds = spells.map(function (s) { return s.id; });
     draft[draftKey] = (draft[draftKey] || []).filter(function (id) {
       return validIds.indexOf(id) !== -1;
@@ -1364,6 +1678,12 @@
           draft[draftKey].push(s.id);
         }
         refresh();
+        // Solo sul click, non sul refresh iniziale qui sotto: onChange rifà
+        // renderDetail(), che ricostruisce anche questo stesso picker — se
+        // scattasse anche al primo refresh() andrebbe in ricorsione infinita.
+        if (onChange) {
+          onChange();
+        }
       });
       chipEls[s.id] = chip;
       chipRow.appendChild(chip);
@@ -1492,6 +1812,72 @@
     updateNav();
   }
 
+  /* ---------- passo: Identità (Allineamento e Lingue) ---------- */
+
+  var ALIGNMENT_LAW = ['Legale', 'Neutrale', 'Caotico'];
+  var ALIGNMENT_MORALITY = ['Buono', 'Neutrale', 'Malvagio'];
+
+  // Combinazione scelta come stringa, con la dicitura tradizionale "Neutrale
+  // Puro" per il caso Neutrale/Neutrale; vuota finché la scelta non è completa.
+  // Condivisa fra il riepilogo qui sotto e buildCharacter().
+  function computeAlignment() {
+    if (!draft.alignmentLaw || !draft.alignmentMorality) {
+      return '';
+    }
+    if (draft.alignmentLaw === 'Neutrale' && draft.alignmentMorality === 'Neutrale') {
+      return 'Neutrale Puro';
+    }
+
+    return draft.alignmentLaw + ' ' + draft.alignmentMorality;
+  }
+
+  // Riga di chip a selezione singola (stesso pattern di
+  // buildFightingStylePicker): click su una spegne le altre della riga.
+  function buildSingleChoiceRow(container, title, options, draftKey, onChange) {
+    container.appendChild(el('div', 'create-label', title));
+    var row = el('div', 'chip-row');
+    var chipEls = {};
+    options.forEach(function (label) {
+      var chip = el('button', 'chip' + (draft[draftKey] === label ? ' on' : ''), label);
+      chip.type = 'button';
+      chip.addEventListener('click', function () {
+        draft[draftKey] = label;
+        Object.keys(chipEls).forEach(function (l) {
+          chipEls[l].classList.toggle('on', l === label);
+        });
+        onChange();
+      });
+      chipEls[label] = chip;
+      row.appendChild(chip);
+    });
+    container.appendChild(row);
+  }
+
+  function renderIdentita(container) {
+    container.appendChild(el('div', 'edit-section-label', 'Allineamento'));
+
+    var recap = el('div', 'create-saves-line', '');
+
+    function refreshRecap() {
+      var val = computeAlignment();
+      recap.textContent = val ? ('Allineamento: ' + val) : 'Scegli legge e morale.';
+      updateNav();
+    }
+
+    buildSingleChoiceRow(container, 'Legge', ALIGNMENT_LAW, 'alignmentLaw', refreshRecap);
+    buildSingleChoiceRow(container, 'Morale', ALIGNMENT_MORALITY, 'alignmentMorality', refreshRecap);
+    container.appendChild(recap);
+    refreshRecap();
+
+    container.appendChild(el('div', 'create-saves-line',
+      'Il manuale assume che i personaggi giocanti non siano di allineamento malvagio; ' +
+      'verificate con il vostro Master prima di scegliere Legale/Neutrale/Caotico Malvagio.'));
+
+    container.appendChild(el('div', 'edit-section-label', 'Lingue'));
+    container.appendChild(el('span', 'chip on', 'Comune ✓'));
+    buildSpellPicker(container, 'Scegline altre 2 dalle Lingue Standard', STANDARD_LANGUAGES, 2, 'languages');
+  }
+
   /* ---------- generazione del personaggio (b3) ---------- */
 
   // Id del nuovo personaggio: slug dal nome (senza accenti/simboli) + suffisso
@@ -1589,6 +1975,14 @@
       weaponMasteries: (draft.masteries || []).slice(),
       // Talento d'origine: lo dà il background e vale dal livello 1.
       feats: bg ? [{ id: bg.featId, level: 1, source: 'background' }] : [],
+      // Identità (passo finale): allineamento come stringa già combinata
+      // ("Neutrale Puro" per Neutrale/Neutrale) e lingue col Comune davanti.
+      alignment: computeAlignment(),
+      languages: ['Comune'].concat((draft.languages || []).map(function (id) {
+        var l = STANDARD_LANGUAGES.filter(function (x) { return x.id === id; })[0];
+
+        return l ? l.name : id;
+      })),
       modifiers: [], extraResources: [], items: [], levelChoices: {}
     };
   }
@@ -1758,8 +2152,11 @@
       } else if (step.id === 'finale') {
         stepBodyEl.classList.add('has-fields');
         renderFinale(stepBodyEl);
+      } else if (step.id === 'identita') {
+        stepBodyEl.classList.add('has-fields');
+        renderIdentita(stepBodyEl);
       } else {
-        // Difensivo: tutti i 6 passi hanno ora un contenuto reale, questo ramo
+        // Difensivo: tutti i passi hanno ora un contenuto reale, questo ramo
         // non dovrebbe mai scattare.
         stepBodyEl.classList.remove('has-fields');
         stepBodyEl.textContent = '';
@@ -1820,6 +2217,7 @@
 
   function open() {
     stepIndex = 0;
+    customOpenSectionId = 'caratteristiche';
     draft = {
       name: '', speciesId: null, classId: null,
       dragonAncestryId: null, elfLineageId: null, elfSkillId: null,
@@ -1831,9 +2229,12 @@
       bgBonusMode: '2-1', bgPlus2: null, bgPlus1: null,
       bgTool: '', bgPack: 'a',
       miCantrips: [], miSpells: [],
+      customAbilities: [], customFeatId: null, customFeatList: null,
+      customSkills: [], customKitBgId: null,
       equip: null, equipForClass: null, masteries: [],
       cantrips: [], preparedSpells: [],
-      fightingStyleId: null, expertiseSkills: []
+      fightingStyleId: null, expertiseSkills: [],
+      alignmentLaw: null, alignmentMorality: null, languages: []
     };
     document.body.classList.remove('in-dashboard');
     document.body.classList.add('in-create');

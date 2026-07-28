@@ -222,6 +222,18 @@
       speciesTitleEl.textContent = 'Tratti ' + (character.speciesLabel || (species && species.name) || '');
     }
 
+    /* Allineamento e lingue (passo Identità della creazione, 5.B.7): campi
+       assenti sui personaggi creati prima di questa funzionalità, quindi con
+       un trattino di fallback invece di restare vuoti. */
+    var alignEl = document.getElementById('identity-alignment');
+    if (alignEl) {
+      alignEl.textContent = character.alignment || '—';
+    }
+    var langEl = document.getElementById('identity-languages');
+    if (langEl) {
+      langEl.textContent = (character.languages || []).length ? character.languages.join(', ') : '—';
+    }
+
     /* Card "Lama Vincolante": HTML statico pensato per Tharion, mai reso
        condizionale — compariva per QUALUNQUE personaggio, anche uno senza
        quell'oggetto (trovato testando il Druido). Visibile solo se il

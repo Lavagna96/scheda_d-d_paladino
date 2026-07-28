@@ -419,3 +419,10 @@ body.in-create .dashboard-view {
   color: var(--accent-gold);
   margin-bottom: var(--space-2);
 }
+
+/* Chip "+ Personalizzato" nel passo Background: house rule del tavolo, non
+   uno dei 16 background del PHB — bordo tratteggiato per distinguerla a
+   colpo d'occhio dalle altre. */
+.chip-custom {
+  border-style: dashed;
+}
