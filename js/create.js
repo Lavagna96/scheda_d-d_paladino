@@ -1470,11 +1470,13 @@
       // Abilità d'attacco (Blocco 5.A.3, letta da js/engine.js): Accurata →
       // agile (finesse), 'dist' nella categoria → a distanza. Senza questi due
       // flag il motore presume sempre Forza, sbagliato per un Ladro DES.
+      // 'A due mani' esclude lo Stile Duellante (serve un'arma a una mano).
       weapon: {
         name: w ? w.name : '', die: w ? w.die : '1d8',
         type: w ? w.dmg : '', mastery: mastery,
         finesse: w ? (w.props || []).indexOf('Accurata') !== -1 : false,
-        ranged: w ? w.cat.indexOf('dist') !== -1 : false
+        ranged: w ? w.cat.indexOf('dist') !== -1 : false,
+        twoHanded: w ? (w.props || []).indexOf('A due mani') !== -1 : false
       },
       // Maestrie possedute (id di armi): il personaggio le sa usare anche se
       // in mano ha un'altra arma.

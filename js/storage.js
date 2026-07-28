@@ -48,7 +48,7 @@
     expertiseSkills: [],
     fightingStyle: 'nessuno',
     armor: { id: '', shield: false },
-    weapon: { name: '', die: '1d8', type: '', mastery: '', finesse: false, ranged: false },
+    weapon: { name: '', die: '1d8', type: '', mastery: '', finesse: false, ranged: false, twoHanded: false },
     initiativeNote: '',
     modifiers: [],
     extraResources: [],

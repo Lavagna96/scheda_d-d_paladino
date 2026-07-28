@@ -302,8 +302,12 @@
       : (w.finesse && mods.DES > mods.FOR) ? 'DES'
       : 'FOR';
     var weaponHit = mods[wAbil] + pb + modSum(ch, 'attacco');
-    var weaponDmgBonus = mods[wAbil] + modSum(ch, 'danni') +
-                         (ch.fightingStyle === 'duello' ? 2 : 0);
+    /* Stile Duellante: il PHB lo richiede su un'arma da mischia impugnata con
+       una sola mano (niente a distanza, niente A due mani) — mancava questo
+       controllo, quindi il +2 compariva anche con un arco o uno spadone.
+       Difesa invece era già corretta più sotto (richiede un'armatura). */
+    var duelloOk = ch.fightingStyle === 'duello' && !w.ranged && !w.twoHanded;
+    var weaponDmgBonus = mods[wAbil] + modSum(ch, 'danni') + (duelloOk ? 2 : 0);
     var swDef = bonuses.sacredWeapon;
     var sacredWeaponBonus = swDef ? Math.max(swDef.min || 0, mods[swDef.ability]) : 0;
 

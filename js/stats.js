@@ -241,8 +241,16 @@
       (it.effects || []).forEach(function (e) { if (e.target === 'attacco') { atkBonus += e.value; } });
     });
     if (atkBonus > 0) { parts.push('Colpire e danni includono i bonus magici dell\'arma (+' + atkBonus + ').'); }
-    if (ch.fightingStyle === 'duello') { parts.push('Stile Duellante +2 ai danni.'); }
-    if (ch.fightingStyle === 'difesa') { parts.push('Stile Difesa +1 alla CA.'); }
+    /* Le note valgono solo quando il bonus si applica DAVVERO (stesse
+       condizioni di engine.js): Duellante serve un'arma da mischia a una
+       mano, Difesa un'armatura indosso. Prima comparivano sempre, anche con
+       un arco in mano o senz'armatura — il numero nella riga Colpire/Danni
+       era già corretto, solo la nota mentiva. */
+    var hasArmorForNote = !!(ch.armor && ch.armor.id && ch.armor.id !== 'nessuna');
+    if (ch.fightingStyle === 'duello' && !(ch.weapon || {}).ranged && !(ch.weapon || {}).twoHanded) {
+      parts.push('Stile Duellante +2 ai danni.');
+    }
+    if (ch.fightingStyle === 'difesa' && hasArmorForNote) { parts.push('Stile Difesa +1 alla CA.'); }
     if (view.sacredWeaponBonus > 0) {
       parts.push('Con Arma Sacra: ' + view.sacredWeaponText + ' al colpire (→ ' +
         window.AppEngine.formatMod(view.weapon.hit + view.sacredWeaponBonus) + ') e danni Radiosi.');

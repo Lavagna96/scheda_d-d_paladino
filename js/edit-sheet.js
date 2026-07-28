@@ -463,8 +463,10 @@
           // Abilità d'attacco (Blocco 5.A.3, letta da js/engine.js): Accurata
           // → agile (finesse), 'dist' nella categoria → a distanza. Presa dal
           // catalogo, non più persa quando si sceglie un'arma dal menu.
+          // 'A due mani' esclude lo Stile Duellante (serve un'arma a una mano).
           character.weapon.finesse = (picked.props || []).indexOf('Accurata') !== -1;
           character.weapon.ranged = picked.cat.indexOf('dist') !== -1;
+          character.weapon.twoHanded = (picked.props || []).indexOf('A due mani') !== -1;
         } else {
           character.weapon.name = draft.weaponName;
           character.weapon.die = draft.weaponDie;

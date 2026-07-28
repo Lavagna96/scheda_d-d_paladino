@@ -1301,6 +1301,20 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
   regolare a bind avvenuto, console pulita. Cache busting `?v=56`.
   Committato e deployato (`ae3ef6e`, run Pages verde, live verificato).
 
+- 2026-07-28 — **Stile Duellante si applicava anche con archi e spadoni.**
+  Trovato lavorando sul Ranger: `js/engine.js` sommava il +2 ai danni di
+  `fightingStyle === 'duello'` senza controllare l'arma, mentre lo Stile
+  Difesa aveva già il controllo giusto (richiede un'armatura). Il PHB lo
+  richiede su un'arma da mischia impugnata a una mano.
+  **Fix**: nuovo flag `weapon.twoHanded` derivato dal catalogo (props
+  contiene 'A due mani'), come già fatto per `finesse`/`ranged`; il bonus
+  ora richiede `!weapon.ranged && !weapon.twoHanded`. Corretta anche la nota
+  sotto gli Attacchi (`stats.js`), che prima compariva sempre per entrambi
+  gli stili — ora Duellante controlla l'arma e Difesa l'armatura indosso,
+  stesse condizioni del calcolo numerico. Verificato: Tharion (Spada lunga,
+  non a due mani) invariato; un test con Arco lungo + Stile Duello perde
+  correttamente sia il bonus che la nota dopo il fix. Cache busting `?v=96`.
+
 ## Decisioni prese
 
 - 2026-07-21 — Fase 3, step 3.1: UX = **bottom sheet per sezione** con
