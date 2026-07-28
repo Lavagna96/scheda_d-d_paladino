@@ -95,6 +95,30 @@
   line-height: 1.2;
 }
 
+.combat-stat-speed {
+  flex: 0 0 auto;
+  text-align: center;
+  padding: var(--space-2) var(--space-1);
+  border-radius: var(--radius-md);
+}
+
+.combat-stat-speed .big {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  line-height: 1.1;
+}
+
+.combat-stat-speed .lab {
+  font-family: var(--font-title);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
 /* ===== Cartiglio CA + Tiri Morte (medaglione) ===== */
 .combat-stats-core {
   flex: 1;

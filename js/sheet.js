@@ -106,6 +106,7 @@
     var acNote = document.getElementById('combat-ac-note');
     var initEl = document.getElementById('combat-init');
     var initNote = document.getElementById('combat-init-note');
+    var speedEl = document.getElementById('combat-speed');
     if (acEl) {
       acEl.textContent = view.ac;
     }
@@ -117,6 +118,9 @@
     }
     if (initNote) {
       initNote.textContent = view.initiativeNote;
+    }
+    if (speedEl) {
+      speedEl.textContent = view.speedM + ' m';
     }
   }
 
