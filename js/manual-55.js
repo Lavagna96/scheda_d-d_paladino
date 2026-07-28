@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 33,
+  version: 34,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -240,7 +240,121 @@ window.MANUAL_55 = {
       channelDivinity: [0, 0, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4],
       cantripsByLevel: [0, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
       preparedByLevel: [0, 4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22],
-      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9]
+      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9],
+      // Niente Maestria nelle Armi (nessuna colonna dedicata in tabella, a
+      // differenza di Barbaro/Guerriero): solo armi semplici.
+      weaponProf: ['sem'],
+      startingEquipment: {
+        a: {
+          label: 'Kit del chierico',
+          armorId: 'camicia-maglia', shield: true, weaponId: 'mazza',
+          extra: [
+            { name: 'Simbolo sacro', qty: 1, weight: 1, desc: 'Focus per gli incantesimi da chierico.' },
+            { name: 'Kit del sacerdote', qty: 1, weight: 29, desc: 'Zaino, coperta, acqua santa, lampada, razioni per 7 giorni, veste, acciarino.' }
+          ],
+          coins: { mo: 7 }
+        },
+        b: { label: '110 monete d\'oro', coins: { mo: 110 } }
+      },
+      choicePoints: {
+        subclass: 3, subclassFeatureLevels: [3, 6, 17],
+        asi: [4, 8, 12, 16], epicBoon: 19
+      },
+      /* Privilegi 1→20 (PHB 2024 p.68-71 del PDF): riassunti originali in
+         italiano. trait:false = scelta gestita altrove (sottoclasse dal
+         picker, ASI/Dono Epico dal level-up). Ai livelli 9/11/13/15/18 il
+         PHB non ha un privilegio nuovo, solo i numeri delle tabelle (Incanalare/
+         Trucchetti/Preparati) che salgono da soli — nessuna voce qui. */
+      levelFeatures: {
+        1: [
+          { name: 'Incantesimi', desc: 'Impari a incanalare la magia divina tramite preghiera e meditazione. Conosci tre trucchetti da chierico e prepari incantesimi di 1° livello o superiore (4 all\'inizio) usando la Saggezza come caratteristica da incantatore; puoi cambiare la lista a ogni riposo lungo.' },
+          { name: 'Ordine Divino', desc: 'Scegli un ruolo sacro. Protettore: ottieni competenza con le armi da guerra e addestramento con l\'armatura pesante. Taumaturgo: conosci un trucchetto in più dalla lista del chierico, e ottieni un bonus (pari al tuo modificatore di Saggezza, minimo +1) alle prove di Intelligenza (Arcano o Religione).' }
+        ],
+        2: [
+          { name: 'Incanalare Divinità', desc: 'Canalizzi energia divina per alimentare due effetti: Scintilla Divina (azione magica: tiri 1d8 + Saggezza e o curi una creatura entro 9 m di quel totale, o la costringi a un TS di Costituzione subendo danni Necrotici o Radiosi pari al totale, metà con un successo; il dado sale a 2d8 al 7°, 3d8 al 13°, 4d8 al 18°) e Scacciare i Non Morti (azione magica: ogni Non Morto scelto entro 9 m fa un TS di Saggezza o è Spaventato e Incapacitato per 1 minuto, cercando di allontanarsi da te). Puoi usarla due volte; ne recuperi un uso al riposo breve e tutti al riposo lungo.' }
+        ],
+        3: [
+          { name: 'Sottoclasse del Chierico', trait: false, desc: 'Scegli un Dominio (Vita, Luce, Inganno o Guerra). Ottieni i suoi privilegi al tuo livello da chierico o inferiore.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        5: [
+          { name: 'Bruciare i Non Morti', desc: 'Quando usi Scacciare i Non Morti, tiri un numero di d8 pari al tuo modificatore di Saggezza (minimo 1d8) e sommi i risultati: ogni Non Morto che fallisce il TS subisce danni Radiosi pari a quel totale, senza interrompere l\'effetto di paura.' }
+        ],
+        6: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio del tuo Dominio.' }
+        ],
+        7: [
+          { name: 'Colpi Benedetti', desc: 'Scegli un\'opzione. Colpo Divino: una volta per turno, quando colpisci con un\'arma, infliggi 1d8 danni extra Necrotici o Radiosi a tua scelta. Incantesimi Potenti: sommi il tuo modificatore di Saggezza ai danni dei tuoi trucchetti da chierico.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        10: [
+          { name: 'Intervento Divino', desc: 'Come azione magica scegli un incantesimo da chierico di 5° livello o inferiore che non richieda una reazione: lo lanci senza spendere uno slot né componenti materiali. Serve un riposo lungo per riusarlo.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        14: [
+          { name: 'Colpi Benedetti Migliorati', desc: 'L\'opzione scelta per Colpi Benedetti migliora. Colpo Divino: il danno extra sale a 2d8. Incantesimi Potenti: quando un tuo trucchetto infligge danno, puoi anche dare PF temporanei (pari al doppio del tuo modificatore di Saggezza) a te o a un\'altra creatura entro 18 m.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        17: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni l\'ultimo privilegio del tuo Dominio.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono del Fato) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Intervento Divino Maggiore', desc: 'Quando usi Intervento Divino, puoi scegliere Desiderio come incantesimo: se lo fai, non puoi riusare Intervento Divino finché non fai 2d4 riposi lunghi.' }
+        ]
+      },
+      /* Domini del Chierico: per ora solo Dominio della Vita (PHB p.72-73, il
+         più semplice dei quattro — solo guarigione, nessuna risorsa nuova
+         oltre a Incanalare Divinità già tracciata). Luce, Inganno e Guerra si
+         aggiungono in seguito, stesso trattamento già dato alle altre classi. */
+      subclasses: {
+        vita: {
+          name: 'Dominio della Vita',
+          tenets: 'Allevia le ferite del mondo con la forza vitale che sostiene ogni cosa.',
+          spellsByLevel: {
+            3: [
+              { id: 'aiuto', name: 'Aiuto' },
+              { id: 'benedizione', name: 'Benedizione' },
+              { id: 'cura-ferite', name: 'Cura Ferite' },
+              { id: 'ristorare-inferiore', name: 'Ristorare Inferiore' }
+            ],
+            5: [
+              { id: 'parola-curativa-di-massa', name: 'Parola Curativa di Massa' },
+              { id: 'rivivificare', name: 'Rivivificare' }
+            ],
+            7: [
+              { id: 'aura-vita', name: 'Aura di Vita' },
+              { id: 'guardia-della-morte', name: 'Guardia della Morte' }
+            ],
+            9: [
+              { id: 'ristorare-superiore', name: 'Ristorare Superiore' },
+              { id: 'cura-ferite-di-massa', name: 'Cura Ferite di Massa' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Discepolo della Vita', desc: 'Quando un incantesimo lanciato con uno slot restituisce PF a una creatura, quella creatura ne recupera altri 2 più il livello dello slot, nel turno in cui lanci l\'incantesimo.' },
+              { name: 'Preservare la Vita', desc: 'Come azione magica, presenti il tuo simbolo sacro e spendi un uso di Incanalare Divinità per guarire PF pari a cinque volte il tuo livello da chierico, da dividere fra le creature Sanguinanti entro 9 m (te compreso); nessuna può superare la metà dei propri PF massimi.' }
+            ],
+            6: [
+              { name: 'Guaritore Benedetto', desc: 'Subito dopo aver lanciato con uno slot un incantesimo che restituisce PF ad altri, recuperi anche tu PF pari a 2 più il livello dello slot.' }
+            ],
+            17: [
+              { name: 'Guarigione Suprema', desc: 'Quando dovresti tirare uno o più dadi per restituire PF con un incantesimo o con Incanalare Divinità, usa invece il massimo possibile per ciascun dado.' }
+            ]
+          }
+        }
+      }
     },
     druido: {
       name: 'Druido', hitDie: 'd8', primaryAbility: 'SAG', saves: ['INT', 'SAG'],
@@ -1430,7 +1544,7 @@ window.MANUAL_55 = {
       classes: ['paladino', 'chierico', 'stregone', 'warlock', 'mago'],
       meta: 'Azione · 9 m · 1 min CONC · V, S, M',
       desc: 'Una creatura a vista fa TS Carisma o è trasportata per la durata in un demipiano innocuo (Incapacitata lì dentro); alla fine dell\'incantesimo torna nel suo spazio o nel più vicino libero. Se è una creatura extraplanare e l\'incantesimo dura un minuto intero, non torna: resta bandita nel suo piano d\'origine.' },
-    { id: 'guardiano-fede', name: 'Guardiano della Fede', level: 4, school: 'Evocazione',
+    { id: 'guardiano-fede', name: 'Guardiano della Fede', level: 4, school: 'Convocazione',
       classes: ['chierico'],
       meta: 'Azione · 9 m · 8 ore · V',
       desc: 'Un guardiano spettrale Grande e invulnerabile occupa uno spazio libero a vista. Il nemico che gli arriva entro 3 m per la prima volta nel turno, o vi comincia il turno, fa un TS Destrezza: 20 danni radiosi se fallisce, metà se riesce. Svanisce dopo aver inflitto 60 danni.' },
@@ -1442,6 +1556,10 @@ window.MANUAL_55 = {
       classes: ['paladino', 'chierico'],
       meta: 'Azione · Sé (aura 9 m) · 10 min CONC · V',
       desc: 'Gli alleati nell\'aura hanno resistenza ai danni necrotici e i loro PF massimi non possono essere ridotti. Chi inizia il turno nell\'aura con 0 PF recupera 1 PF.' },
+    { id: 'guardia-della-morte', name: 'Guardia della Morte', level: 4, school: 'Abiurazione',
+      classes: ['chierico', 'paladino'],
+      meta: 'Azione · Tocco · 8 ore · V, S',
+      desc: 'La creatura toccata, la prima volta che scenderebbe a 0 PF prima che l\'incantesimo finisca, scende invece a 1 PF (e l\'incantesimo termina). È anche immune agli effetti che la ucciderebbero all\'istante senza infliggere danni.' },
     { id: 'esilio', name: 'Esilio', level: 4, school: 'Abiurazione',
       classes: ['paladino', 'chierico', 'stregone', 'warlock', 'mago'],
       meta: 'Azione · 18 m · 1 min CONC · V, S, M',
@@ -2181,6 +2299,10 @@ window.MANUAL_55 = {
       classes: ['bardo', 'chierico'],
       meta: 'Azione bonus · 18 m · Istantaneo · V',
       desc: 'Fino a sei creature scelte entro gittata recuperano 2d4 + il tuo modificatore da incantatore PF. +1d4 per ogni slot oltre il 3°.' },
+    { id: 'rivivificare', name: 'Rivivificare', level: 3, school: 'Necromanzia',
+      classes: ['chierico', 'druido', 'paladino', 'ranger'],
+      meta: 'Azione · Tocco · Istantaneo · V, S, M (un diamante da 300+ MO, consumato)',
+      desc: 'Tocchi una creatura morta da non più di 1 minuto: torna in vita con 1 PF. Non funziona su chi è morto di vecchiaia né ripristina parti del corpo mancanti.' },
     { id: 'inviare', name: 'Inviare', level: 3, school: 'Divinazione',
       classes: ['bardo', 'chierico', 'mago'],
       meta: 'Azione · Illimitata · Istantaneo · V, S, M (un filo di rame)',
@@ -2379,10 +2501,6 @@ window.MANUAL_55 = {
       classes: ['chierico', 'druido'],
       meta: 'Azione · 9 m · Istantaneo · V, S, M (un misto di acqua e sabbia)',
       desc: 'Crei fino a 40 litri d\'acqua pulita in un contenitore aperto (o come pioggia in un cubo di 9 m, spegnendo fiamme scoperte), oppure ne distruggi altrettanti o disperdi nebbia in un cubo di 9 m. +40 litri (o +1,5 m al cubo) per ogni slot oltre il 1°.' },
-    { id: 'dardo-guida', name: 'Dardo Guida', level: 1, school: 'Evocazione',
-      classes: ['chierico'],
-      meta: 'Azione · 36 m · 1 round · V, S',
-      desc: 'Attacco con incantesimo a distanza: se colpisci, 4d6 radiosi e il prossimo attacco contro il bersaglio prima della fine del tuo prossimo turno ha vantaggio. +1d6 per ogni slot oltre il 1°.' },
     { id: 'infliggere-ferite', name: 'Infliggere Ferite', level: 1, school: 'Negromanzia',
       classes: ['chierico'],
       meta: 'Azione · Tocco · Istantaneo · V, S',
@@ -2413,10 +2531,6 @@ window.MANUAL_55 = {
       classes: ['chierico', 'mago'],
       meta: '1 minuto · 3 m · Istantaneo · V, S, M (una goccia di sangue, un pezzo di carne e polvere d\'ossa)',
       desc: 'Un cumulo di ossa o un cadavere Umanoide Medio o Piccolo entro gittata diventa Non Morto sotto il tuo controllo (Scheletro dalle ossa, Zombie dal cadavere), comandabile con un\'azione bonus entro 18 m. Resta sotto controllo per 24 ore, rinnovabili rilanciando l\'incantesimo. +2 creature controllate per ogni slot oltre il 3°.' },
-    { id: 'faro-di-speranza', name: 'Faro di Speranza', level: 3, school: 'Abiurazione',
-      classes: ['chierico'],
-      meta: 'Azione · 9 m · 1 min CONC · V, S',
-      desc: 'Le creature scelte entro gittata ottengono vantaggio ai TS Saggezza e ai tiri salvezza contro la morte, e recuperano il massimo possibile da qualsiasi cura, finché dura.' },
     { id: 'guardiani-spirituali', name: 'Guardiani Spirituali', level: 3, school: 'Convocazione',
       classes: ['chierico'],
       meta: 'Azione · Sé (emanazione 4,5 m) · 10 min CONC · V, S, M (una pergamena di preghiera)',
@@ -2433,10 +2547,6 @@ window.MANUAL_55 = {
       classes: ['chierico', 'druido', 'mago'],
       meta: 'Azione o Rituale · Sé · Istantaneo · V, S, M (incenso da 25+ MO, consumato)',
       desc: 'Ti metti in contatto con una divinità o i suoi servitori: poni una domanda su un obiettivo, evento o attività entro 7 giorni, ottenendo una risposta veritiera (spesso criptica). Se lanci l\'incantesimo più volte prima di un riposo lungo, ogni lancio successivo al primo ha il 25% cumulativo di probabilità di non dare risposta.' },
-    { id: 'guardiano-della-fede', name: 'Guardiano della Fede', level: 4, school: 'Convocazione',
-      classes: ['chierico'],
-      meta: 'Azione · 9 m · 8 ore · V',
-      desc: 'Un guardiano spettrale Grande, invulnerabile, appare e resta sospeso entro gittata, con l\'aspetto legato alla tua divinità. Un nemico che si muove entro 3 m per la prima volta nel turno o vi inizia il turno fa TS Destrezza o subisce 20 radiosi (metà se supera). Il guardiano svanisce dopo aver inflitto 60 danni totali.' },
     { id: 'plasmare-pietra', name: 'Plasmare Pietra', level: 4, school: 'Trasmutazione',
       classes: ['chierico', 'druido', 'mago'],
       meta: 'Azione · Tocco · Istantaneo · V, S, M (argilla morbida)',

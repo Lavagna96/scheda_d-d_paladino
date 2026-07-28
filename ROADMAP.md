@@ -1100,7 +1100,41 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      incantesimi preparati senza il doppione di Marchio del Cacciatore):
      personaggio creato con tutti i campi corretti. Tharion (Paladino)
      verificato invariato dopo ogni modifica. Console pulita in ogni prova.
-6. [ ] **Chierico** (full) — Incanalare Divinità (campo già esiste), Dominio.
+6. [x] **Chierico** (full) — Incanalare Divinità (campo già esiste), Dominio.
+   → **Fatto (2026-07-28, `?v=97`, manuale `version` 33→34)**: prima classe a
+   incantatore pieno. Privilegi 1→20 dal PDF (p.68-71), sottoclasse
+   **Dominio della Vita** (p.72-73, il più semplice dei quattro — Luce,
+   Inganno e Guerra restano da fare), equipaggiamento iniziale, competenze
+   di classe. Le tabelle numeriche (Incanalare Divinità, Trucchetti,
+   Preparati, slot) erano già corrette nello stub.
+   - **`klass.channelDivinity` è generico da tempo**: la card "Incanalare
+     Divinità" in `engine.js`/`stats.js` era già scritta per qualunque classe
+     con quella tabella (usata finora solo dal Paladino) — bastava
+     aggiungerla al Chierico senza toccare il motore.
+   - **Bug vero trovato e chiuso: l'etichetta della card era fissa in
+     inglese ("Channel Divinity")**, invisibile finché solo il Paladino la
+     usava. Tradotta in "Incanalare Divinità" in `index.html` (l'unico punto
+     dove compare, la card è condivisa fra le classi).
+   - **3 incantesimi duplicati nel catalogo, trovati con un controllo
+     sistematico per nome** (lo stesso bug già chiuso una volta questa
+     sessione per "Libertà di Movimento" — question mi ha spinto a
+     controllare TUTTO il catalogo invece di aspettare il prossimo
+     incidente): `dardo-guida` = doppione di `dardo-di-guida`,
+     `faro-di-speranza` = doppione di `faro-speranza`, `guardiano-della-fede`
+     = doppione di `guardiano-fede` (quest'ultimo aveva anche la scuola
+     sbagliata, 'Evocazione' invece di 'Convocazione' — corretta). Rimossi i
+     3 doppioni (mai referenziati altrove), verificato con uno script che
+     confronta i nomi su tutti i 407→405 incantesimi: zero doppioni residui.
+   - **Verifica end-to-end**: Chierico di prova a livello 7 (Dominio della
+     Vita) — CA/PF/slot/Incanalare Divinità corretti, tutti i privilegi di
+     classe e sottoclasse in Tratti nell'ordine giusto, Grimorio con titolo
+     ed etichetta "Saggezza" corretti. Giro completo del wizard da zero
+     (Nano, Chierico, Eremita, punteggi consigliati, 2 competenze di classe +
+     2 dal background senza doppioni, pacchetto A, 3 trucchetti + 4
+     incantesimi preparati, "Dardo di Guida" presente una sola volta dopo la
+     pulizia): personaggio creato con tutti i campi corretti. Tharion
+     (Paladino, che usa `faro-speranza`/`guardiano-fede` nel giuramento di
+     Vendetta/Gloria) verificato invariato. Console pulita in ogni prova.
 7. [ ] **Druido** (full) — Forma Selvatica, Circolo.
 8. [ ] **Bardo** (full) — Ispirazione Bardica, Collegio.
 9. [ ] **Stregone** (full) — Punti Stregoneria, Metamagia.
