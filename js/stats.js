@@ -187,6 +187,14 @@
     if (rageBonus) {
       parts.push('In Furia: +' + rageBonus + ' danni con attacchi basati sulla Forza.');
     }
+    /* Attacco Furtivo (Ladro): stessa idea della nota Furia — un bonus a
+       tabella (klass.sneakAttackD6) mai mostrato altrove, che si applica solo
+       una volta per turno con un'arma Accurata o a distanza e vantaggio (o un
+       alleato adiacente al bersaglio), quindi resta informativo. */
+    var sneakDice = (klass.sneakAttackD6 || [])[view.level];
+    if (sneakDice) {
+      parts.push('Attacco Furtivo: +' + sneakDice + 'd6 una volta per turno (arma Accurata o a distanza, con vantaggio o un alleato adiacente al bersaglio).');
+    }
 
     return parts.join(' ');
   }

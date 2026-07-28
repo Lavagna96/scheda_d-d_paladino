@@ -917,7 +917,60 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      corretti. Tharion (Paladino) verificato invariato dopo ogni modifica
      (CA 20, PF 60, Attacco Extra 2 colpi, Channel Divinity ancora 2/2 dopo
      riposo breve). Console pulita in ogni prova.
-3. [ ] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
+3. [x] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
+   → **Fatto (2026-07-28, `?v=89`, manuale `version` 30→31)**: privilegi 1→20
+   dal PDF (p.128-130), sottoclasse **Ladro Esperto** (p.136, la più semplice
+   delle 4 — Assassino, Spadanima e Truffatore Arcano restano da fare),
+   equipaggiamento iniziale, competenze di classe in `CLASS_SKILLS`.
+   - **Meccanica nuova nel motore: Competenza (Espero)**. Prima serviva un
+     posto per "raddoppia il bonus di competenza su un'abilità" — non
+     esisteva proprio (`ch.expertiseSkills`, sommato in `engine.js` solo se
+     la skill è già competente). Wizard di creazione: picker nel passo finale
+     quando `choicePoints.expertise` include il livello di creazione (il
+     Ladro lo dà al 1°); level-up: stesso picker generico al livello giusto
+     (il Ladro lo ridà al 6°, altre 2 in più). Verificato: Ladro con
+     Espero su Furtività e Rapidità di Mano → +12 invece di +8 (DES+4, doppio
+     PB+4+4), le altre abilità competenti restano a bonus singolo.
+   - **Bug vero trovato e chiuso: le armi Agili (finesse) e a distanza non
+     usavano mai Destrezza**. Il motore (`engine.js`) sa scegliere FOR o DES
+     in base ai flag `weapon.finesse`/`weapon.ranged`, ma NESSUN punto
+     dell'app li aveva mai scritti — non il wizard di creazione, non
+     l'editor equipaggiamento, non lo stato di default di Tharion (la sua
+     Spada lunga è un'arma personalizzata, quindi il buco è sempre rimasto
+     invisibile: un personaggio FOR come un Paladino non se ne accorge).
+     Per un Ladro DES è invece uno sbaglio pesante: con Spada Corta (Accurata)
+     il "Colpire" veniva calcolato sulla Forza, sbagliato di netto. Chiuso
+     derivando `finesse`/`ranged` dal catalogo (`props` contiene 'Accurata' →
+     agile, categoria contiene 'dist' → a distanza) sia in `create.js` che in
+     `edit-sheet.js`, ogni volta che si sceglie un'arma dal catalogo (le armi
+     personalizzate mantengono quello che avevano). Verificato: Ladro DES 18
+     con Spada Corta, livello 9 → Colpire +8 (prima +4), Danni 1d6+4 (prima
+     +0); Tharion (Spada lunga, Forza) invariato.
+   - **Competenza nelle armi ristretta correttamente**: il Ladro non è
+     competente con TUTTE le armi da guerra (niente Ascia bipenne), solo
+     quelle Accurate o Leggere. La `weaponProf` esistente (solo prefissi
+     'sem'/'gue') non poteva esprimerlo; aggiunto il token `'gue-finesse'`
+     al filtro condiviso da `create.js` ed `edit-sheet.js` (controlla
+     `props` per 'Accurata'/'Leggera' quando il prefisso è 'gue'). Verificato
+     nel wizard: la lista Maestria mostra tutte le armi semplici più
+     Stocco/Scimitarra/Spada corta/Frusta/Balestra a mano, non Spadone o
+     Ascia bipenne.
+   - **Bug di creazione minore, stesso genere di quello del Guerriero**:
+     `renderEquipaggiamento` in `create.js` già generalizzato per la classe,
+     ma non serviva altro qui (il Ladro ha solo 2 opzioni A/B, non 3 come il
+     Guerriero).
+   - **Verifica end-to-end**: Ladro di prova iniettato a livello 9 (Ladro
+     Esperto) — privilegi di classe e sottoclasse tutti presenti in Tratti
+     nell'ordine giusto, nota "Attacco Furtivo: +5d6…" sotto gli Attacchi
+     (stessa idea della nota Furia del Barbaro, letta da
+     `klass.sneakAttackD6[livello]`), nessuna card Risorse indesiderata (il
+     Ladro non ha risorse di classe). Giro completo del wizard da zero
+     (Elfo, Ladro, Criminale, punteggi consigliati, 4 competenze di classe +
+     2 dal background senza doppioni, pacchetto A, 2 maestrie filtrate,
+     Competenza su Furtività + Rapidità di Mano): personaggio salvato con
+     tutti i campi corretti, incluso `weapon.finesse: true` derivato da solo.
+     Tharion (Paladino) verificato invariato dopo ogni modifica. Console
+     pulita in ogni prova.
 4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
 5. [ ] **Ranger** (half-caster) — riusa gli slot half del Paladino; incantesimi noti, Nemico Prescelto.
 6. [ ] **Chierico** (full) — Incanalare Divinità (campo già esiste), Dominio.

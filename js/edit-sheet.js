@@ -69,13 +69,22 @@
     return (klass.weaponMastery || [])[ch.level] || 0;
   }
 
-  // Armi fra cui può scegliere: quelle in cui la classe è competente.
+  // Armi fra cui può scegliere: quelle in cui la classe è competente
+  // ('gue-finesse' = solo le da guerra Accurate o Leggere, come il Ladro).
   function masteryChoices(ch) {
     var klass = ((window.MANUAL_55.classes || {})[ch.classId]) || {};
     var prof = klass.weaponProf || ['sem', 'gue'];
 
     return (window.MANUAL_55.weapons || []).filter(function (w) {
-      return prof.indexOf(w.cat.split('-')[0]) !== -1;
+      var cat = w.cat.split('-')[0];
+      if (prof.indexOf(cat) !== -1) {
+        return true;
+      }
+      if (cat === 'gue' && prof.indexOf('gue-finesse') !== -1) {
+        return (w.props || []).indexOf('Accurata') !== -1 || (w.props || []).indexOf('Leggera') !== -1;
+      }
+
+      return false;
     });
   }
 
@@ -451,11 +460,19 @@
           character.weapon.die = picked.die;
           character.weapon.type = picked.dmg;
           character.weapon.mastery = picked.mastery;
+          // Abilità d'attacco (Blocco 5.A.3, letta da js/engine.js): Accurata
+          // → agile (finesse), 'dist' nella categoria → a distanza. Presa dal
+          // catalogo, non più persa quando si sceglie un'arma dal menu.
+          character.weapon.finesse = (picked.props || []).indexOf('Accurata') !== -1;
+          character.weapon.ranged = picked.cat.indexOf('dist') !== -1;
         } else {
           character.weapon.name = draft.weaponName;
           character.weapon.die = draft.weaponDie;
           character.weapon.type = draft.weaponType;
           character.weapon.mastery = draft.weaponMastery;
+          // Arma personalizzata: nessun dato di catalogo da cui derivarli,
+          // restano quelli già impostati (es. una magica basata su un'arma
+          // agile non deve perdere il flag risalvando).
         }
         // Maestrie: gli id scelti nei selettori, senza vuoti né doppioni.
         var chosen = [];

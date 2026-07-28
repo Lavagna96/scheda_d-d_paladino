@@ -169,11 +169,14 @@
     var skills = {};
     SKILLS.forEach(function (sk) {
       var prof = (ch.profSkills || []).indexOf(sk.id) !== -1;
-      var total = mods[sk.abil] + (prof ? pb : 0);
+      // Competenza (Ladro, dal 1° livello): raddoppia il bonus di competenza
+      // su un'abilità già competente — non si applica da sola senza prof.
+      var expertise = prof && (ch.expertiseSkills || []).indexOf(sk.id) !== -1;
+      var total = mods[sk.abil] + (prof ? pb : 0) + (expertise ? pb : 0);
       skills[sk.id] = {
         id: sk.id, label: sk.label, abil: sk.abil,
         abilShort: sk.abil.charAt(0) + sk.abil.slice(1).toLowerCase(),
-        prof: prof, total: total, text: fmt(total)
+        prof: prof, expertise: expertise, total: total, text: fmt(total)
       };
     });
     var passivePerception = 10 + skills.percezione.total;

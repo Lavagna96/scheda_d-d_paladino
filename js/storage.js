@@ -43,9 +43,12 @@
     abilities: { FOR: 10, DES: 10, COS: 10, INT: 10, SAG: 10, CAR: 10 },
     profSaves: [],
     profSkills: [],
+    // Competenza (doppio bonus di competenza) su alcune abilità già competenti
+    // — Espero del Ladro (id delle abilità, sottoinsieme di profSkills).
+    expertiseSkills: [],
     fightingStyle: 'nessuno',
     armor: { id: '', shield: false },
-    weapon: { name: '', die: '1d8', type: '', mastery: '' },
+    weapon: { name: '', die: '1d8', type: '', mastery: '', finesse: false, ranged: false },
     initiativeNote: '',
     modifiers: [],
     extraResources: [],

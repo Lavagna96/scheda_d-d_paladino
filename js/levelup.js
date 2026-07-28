@@ -88,13 +88,16 @@
     var needsStyle = cp.fightingStyle === nextLevel;
     var needsSubclass = cp.subclass === nextLevel;
     var needsEpicBoon = cp.epicBoon === nextLevel;
+    // Competenza (Ladro, 2 in più a un livello dato: 1° e 6° nel PHB).
+    var needsExpertise = (cp.expertise || []).indexOf(nextLevel) !== -1;
 
     /* bozza di scelte correnti (non ancora applicata allo stato) */
     var choice = {
       mode: null, // 'asi' | 'feat'
       pendingDeltas: { FOR: 0, DES: 0, COS: 0, INT: 0, SAG: 0, CAR: 0 },
       featId: null,
-      styleId: character.fightingStyle || 'nessuno'
+      styleId: character.fightingStyle || 'nessuno',
+      expertiseIds: []
     };
     var autoSubclassId = null;
     var autoEpicBoonId = null;
@@ -267,6 +270,9 @@
       if (needsSubclass && Object.keys(klass.subclasses || {}).length > 1 && !choice.subclassId) {
         ok = false;
       }
+      if (needsExpertise && choice.expertiseIds.length !== 2) {
+        ok = false;
+      }
       confirmBtn.disabled = !ok;
       confirmBtn.classList.toggle('is-disabled', !ok);
     }
@@ -430,6 +436,47 @@
       return wrap;
     }
 
+    /* ---------- sezione Competenza (Ladro: 2 in più, es. al 6° livello) ---------- */
+
+    function buildExpertiseSection() {
+      var wrap = el('div');
+      wrap.appendChild(el('div', 'edit-section-label', 'Competenza — scegline 2'));
+      var already = character.expertiseSkills || [];
+      var eligible = (character.profSkills || []).filter(function (id) {
+        return already.indexOf(id) === -1;
+      });
+      var skillsById = {};
+      window.AppEngine.SKILLS.forEach(function (s) { skillsById[s.id] = s; });
+      var row = el('div', 'chip-row');
+      var chipEls = {};
+
+      eligible.forEach(function (id) {
+        var chip = el('button', 'chip', (skillsById[id] || {}).label || id);
+        chip.type = 'button';
+        chip.addEventListener('click', function () {
+          var idx = choice.expertiseIds.indexOf(id);
+          if (idx !== -1) {
+            choice.expertiseIds.splice(idx, 1);
+          } else if (choice.expertiseIds.length < 2) {
+            choice.expertiseIds.push(id);
+          }
+          Object.keys(chipEls).forEach(function (chipId) {
+            var isOn = choice.expertiseIds.indexOf(chipId) !== -1;
+            chipEls[chipId].classList.toggle('on', isOn);
+            var disable = choice.expertiseIds.length >= 2 && !isOn;
+            chipEls[chipId].disabled = disable;
+            chipEls[chipId].classList.toggle('is-disabled', disable);
+          });
+          updateConfirmState();
+        });
+        chipEls[id] = chip;
+        row.appendChild(chip);
+      });
+      wrap.appendChild(row);
+
+      return wrap;
+    }
+
     /* ---------- righe di sola lettura (1 sola opzione disponibile oggi) ---------- */
 
     /* Con una sola sottoclasse la si assegna da sola (riga di sola lettura);
@@ -538,6 +585,12 @@
         ch.levelChoices[key].fightingStyle = choice.styleId;
       }
 
+      if (needsExpertise) {
+        ch.expertiseSkills = (ch.expertiseSkills || []).concat(choice.expertiseIds);
+        ch.levelChoices[key] = ch.levelChoices[key] || {};
+        ch.levelChoices[key].expertiseSkills = choice.expertiseIds.slice();
+      }
+
       // Con più di una sottoclasse vince la scelta fatta nel picker; con una
       // sola resta l'assegnazione automatica di sempre.
       var chosenSubclassId = choice.subclassId || autoSubclassId;
@@ -608,6 +661,10 @@
 
     if (needsStyle) {
       bodyEl.appendChild(buildStyleSection());
+    }
+
+    if (needsExpertise) {
+      bodyEl.appendChild(buildExpertiseSection());
     }
 
     if (needsSubclass) {

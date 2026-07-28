@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 30,
+  version: 31,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -404,7 +404,134 @@ window.MANUAL_55 = {
     ladro: {
       name: 'Ladro', hitDie: 'd8', primaryAbility: 'DES', saves: ['DES', 'INT'],
       casterType: 'none',
-      sneakAttackD6: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10]
+      sneakAttackD6: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10],
+      // Niente colonna Maestria nelle Armi nella tabella dei privilegi (PHB
+      // p.129): resta fissa a 2 tipi per tutta la progressione, come il
+      // Paladino — a differenza di Barbaro e Guerriero.
+      weaponMastery: [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      // 'gue-finesse' = solo le armi da guerra Accurate o Leggere (il Ladro
+      // non è competente con TUTTE le armi da guerra come Paladino/Barbaro/
+      // Guerriero, es. niente Ascia bipenne): vedi il filtro dedicato in
+      // create.js/edit-sheet.js.
+      weaponProf: ['sem', 'gue-finesse'],
+      startingEquipment: {
+        a: {
+          label: 'Kit del ladro',
+          armorId: 'cuoio', shield: false, weaponId: 'spada-corta',
+          extra: [
+            { name: 'Pugnale', qty: 2, weaponId: 'pugnale' },
+            { name: 'Arco corto', qty: 1, weaponId: 'arco-corto' },
+            { name: 'Frecce', qty: 20, weight: 1, desc: 'In una faretra.' },
+            { name: 'Strumenti da scasso', qty: 1, weight: 1, desc: 'Per scassinare serrature e disinnescare trappole.' },
+            { name: 'Kit dello scassinatore', qty: 1, weight: 42, desc: 'Zaino, biglie di ferro, campanella, 10 candele, piede di porco, lanterna cieca, 7 fiaschette d\'olio, razioni per 5 giorni, corda, acciarino, otre.' }
+          ],
+          coins: { mo: 8 }
+        },
+        b: { label: '100 monete d\'oro', coins: { mo: 100 } }
+      },
+      choicePoints: {
+        subclass: 3, subclassFeatureLevels: [3, 9, 13, 17],
+        asi: [4, 8, 10, 12, 16], epicBoon: 19,
+        // Competenza: 2 abilità al 1° livello, altre 2 al 6° (generico, vedi
+        // create.js/levelup.js).
+        expertise: [1, 6]
+      },
+      /* Privilegi 1→20 (PHB 2024 p.128-130 del PDF): riassunti originali in
+         italiano. trait:false = scelta gestita altrove (Competenza dal
+         wizard, sottoclasse dal picker, ASI/Dono Epico dal level-up). */
+      levelFeatures: {
+        1: [
+          { name: 'Competenza', trait: false, desc: 'Ottieni Competenza (bonus di competenza raddoppiato) in due delle tue abilità in cui sei già competente. Ne ottieni altre due al 6° livello.' },
+          { name: 'Attacco Furtivo', desc: 'Una volta per turno, infliggi danni extra (dado nella colonna Attacco Furtivo) a un bersaglio colpito con un\'arma Accurata o a distanza, se hai vantaggio al tiro oppure un alleato (non Incapacitato) è entro 1,5 m dal bersaglio e tu non hai svantaggio.' },
+          { name: 'Gergo Ladresco', desc: 'Conosci il Gergo Ladresco e un\'altra lingua a scelta.' },
+          { name: 'Maestria nelle Armi', desc: 'Puoi usare la proprietà di maestria di due tipi di arma a tua scelta fra quelle in cui sei competente. Al riposo lungo puoi cambiare le armi scelte.' }
+        ],
+        2: [
+          { name: 'Azione Scaltra', desc: 'Come azione bonus nel tuo turno puoi Scattare, Disimpegnarti o Nasconderti.' }
+        ],
+        3: [
+          { name: 'Sottoclasse del Ladro', trait: false, desc: 'Scegli una specializzazione (Ladro Esperto, Assassino, Spadanima o Truffatore Arcano). Ottieni i suoi privilegi al tuo livello da ladro o inferiore.' },
+          { name: 'Mira Ferma', desc: 'Come azione bonus ottieni vantaggio al prossimo tiro per colpire di questo turno, ma solo se non ti sei mosso in questo turno; dopo l\'uso la tua velocità è 0 fino alla fine del turno.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        5: [
+          { name: 'Colpo Scaltro', desc: 'Quando infliggi danno da Attacco Furtivo puoi rinunciare a uno o più dadi per aggiungere un effetto: Veleno (rinuncia 1d6, TS Costituzione o il bersaglio è Avvelenato 1 minuto, serve un Kit da avvelenatore), Sgambetto (rinuncia 1d6, TS Destrezza o il bersaglio Grande o più piccolo cade Prono), Ritirata (rinuncia 1d6, ti muovi fino a metà velocità senza provocare attacchi di opportunità).' },
+          { name: 'Schivata Prodigiosa', desc: 'Quando un attaccante che vedi ti colpisce, puoi usare una reazione per dimezzare (per difetto) i danni subiti.' }
+        ],
+        6: [
+          { name: 'Competenza', trait: false, desc: 'Ottieni Competenza in altre due abilità in cui sei già competente.' }
+        ],
+        7: [
+          { name: 'Schivare', desc: 'Se un effetto ti concede un TS di Destrezza per dimezzare i danni, con un successo non subisci nulla e con un fallimento solo metà; non funziona se sei Incapacitato.' },
+          { name: 'Talento Affidabile', desc: 'Nelle prove che usano un\'abilità o uno strumento in cui sei competente, un risultato di 9 o meno sul d20 vale come 10.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        9: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio della tua specializzazione.' }
+        ],
+        10: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        11: [
+          { name: 'Colpo Scaltro Migliorato', desc: 'Puoi usare fino a due effetti di Colpo Scaltro sullo stesso Attacco Furtivo, pagando il costo in dadi di ciascuno.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        13: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio della tua specializzazione.' }
+        ],
+        14: [
+          { name: 'Colpi Subdoli', desc: 'Nuovi effetti di Colpo Scaltro: Stordire (rinuncia 2d6, TS Costituzione o il bersaglio può solo muoversi o agire, non entrambi, al suo prossimo turno), Fuori Combattito (rinuncia 6d6, TS Costituzione o il bersaglio è Privo di Sensi 1 minuto o finché subisce danni), Offuscare (rinuncia 3d6, TS Destrezza o il bersaglio è Accecato fino alla fine del suo prossimo turno).' }
+        ],
+        15: [
+          { name: 'Mente Sfuggente', desc: 'Ottieni competenza nei tiri salvezza su Saggezza e Carisma.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        17: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni l\'ultimo privilegio della tua specializzazione.' }
+        ],
+        18: [
+          { name: 'Elusivo', desc: 'Nessun tiro per colpire contro di te può avere vantaggio, a meno che tu non sia Incapacitato.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono dello Spirito Notturno) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Colpo di Fortuna', desc: 'Se fallisci una Prova del d20, puoi trasformare il tiro in un 20. Dopo l\'uso serve un riposo breve o lungo per riusarlo.' }
+        ]
+      },
+      /* Sottoclassi del Ladro: per ora solo Ladro Esperto (PHB p.136, la più
+         semplice delle quattro — nessuna risorsa dedicata). Assassino,
+         Spadanima e Truffatore Arcano si aggiungono in seguito, stesso
+         trattamento già dato alle altre classi. */
+      subclasses: {
+        esperto: {
+          name: 'Ladro Esperto',
+          tenets: 'Cerca tesori e rovine come l\'avventuriero per eccellenza.',
+          features: {
+            3: [
+              { name: 'Mani Svelte', desc: 'Come azione bonus: una prova di Destrezza (Rapidità di Mano) per scassinare una serratura, disinnescare una trappola o rubare da una tasca con gli Strumenti da Scasso, oppure l\'azione Utilizzare (anche per un oggetto magico che di norma richiederebbe l\'azione Magia).' },
+              { name: 'Scalatore Provetto', desc: 'Ottieni velocità di scalata pari alla tua velocità, e calcoli la distanza di salto con la Destrezza invece della Forza.' }
+            ],
+            9: [
+              { name: 'Furtività Suprema', desc: 'Nuovo effetto di Colpo Scaltro: Attacco Furtivo (rinuncia 1d6) — se sei Invisibile per esserti Nascosto, l\'attacco non toglie quella condizione se finisci il turno dietro copertura Tre Quarti o Totale.' }
+            ],
+            13: [
+              { name: 'Uso di Congegni Magici', desc: 'Puoi tenere sintonia con fino a quattro oggetti magici insieme. Quando un oggetto magico consuma cariche, tira 1d6: con un 6 non consumi la carica. Puoi usare qualunque Pergamena di Incantesimo (con l\'Intelligenza come caratteristica); trucchetti e incantesimi di 1° livello riescono sempre, quelli di livello superiore richiedono una prova di Intelligenza (Arcano) CD 10 + livello, e la pergamena si distrugge se fallisci.' }
+            ],
+            17: [
+              { name: 'Riflessi da Ladro', desc: 'Nel primo round di ogni combattimento agisci due volte: un turno alla tua Iniziativa normale, l\'altro all\'Iniziativa meno 10.' }
+            ]
+          }
+        }
+      }
     },
     mago: {
       name: 'Mago', hitDie: 'd6', primaryAbility: 'INT', saves: ['INT', 'SAG'],

@@ -83,7 +83,9 @@
     // Stile di Combattimento: solo per le classi che lo danno al livello 1
     // (choicePoints.fightingStyle === 1, es. Guerriero); le altre lo scelgono
     // al level-up.
-    fightingStyleId: null
+    fightingStyleId: null,
+    // Competenza: solo per le classi che la danno al livello 1 (Ladro).
+    expertiseSkills: []
   };
 
   var progressFillEl, stepNumEl, stepTitleEl, stepBodyEl, backBtn, nextBtn, footerNoteEl;
@@ -156,6 +158,7 @@
   var CLASS_SKILLS = {
     barbaro: { count: 2, from: ['addestrare-animali', 'atletica', 'intimidire', 'natura', 'percezione', 'sopravvivenza'] },
     guerriero: { count: 2, from: ['acrobazia', 'addestrare-animali', 'atletica', 'storia', 'intuizione', 'intimidire', 'persuasione', 'percezione', 'sopravvivenza'] },
+    ladro: { count: 4, from: ['acrobazia', 'atletica', 'inganno', 'intuizione', 'intimidire', 'indagare', 'percezione', 'persuasione', 'rapidita-di-mano', 'furtivita'] },
     paladino: { count: 2, from: ['atletica', 'intuizione', 'intimidire', 'medicina', 'persuasione', 'religione'] }
   };
 
@@ -269,14 +272,24 @@
   }
 
   // Armi su cui la classe può scegliere la maestria: quelle in cui è competente
-  // (klass.weaponProf: 'sem' semplici, 'gue' da guerra). Senza il dato le
-  // consideriamo tutte, per non bloccare le classi non ancora rifinite.
+  // (klass.weaponProf: 'sem' semplici, 'gue' da guerra, 'gue-finesse' solo le
+  // da guerra Accurate o Leggere — il Ladro non è competente con TUTTE le
+  // armi da guerra, solo quelle). Senza il dato le consideriamo tutte, per
+  // non bloccare le classi non ancora rifinite.
   function masteryChoicesFor(classId) {
     var klass = (window.MANUAL_55.classes || {})[classId] || {};
     var prof = klass.weaponProf || ['sem', 'gue'];
 
     return (window.MANUAL_55.weapons || []).filter(function (w) {
-      return prof.indexOf(w.cat.split('-')[0]) !== -1;
+      var cat = w.cat.split('-')[0];
+      if (prof.indexOf(cat) !== -1) {
+        return true;
+      }
+      if (cat === 'gue' && prof.indexOf('gue-finesse') !== -1) {
+        return (w.props || []).indexOf('Accurata') !== -1 || (w.props || []).indexOf('Leggera') !== -1;
+      }
+
+      return false;
     });
   }
 
@@ -375,11 +388,15 @@
   // teorico) in cui il catalogo avesse meno incantesimi del dovuto.
   function finaleValid() {
     var klass = (window.MANUAL_55 && window.MANUAL_55.classes[draft.classId]) || {};
+    var cp = klass.choicePoints || {};
     // Stile di Combattimento: solo le classi che lo danno già al livello 1
     // (Guerriero) lo scelgono qui; le altre lo scelgono al level-up.
-    var styleOk = (klass.choicePoints || {}).fightingStyle !== CREATE_LEVEL || !!draft.fightingStyleId;
+    var styleOk = cp.fightingStyle !== CREATE_LEVEL || !!draft.fightingStyleId;
+    // Competenza (Ladro): stesso discorso, solo se la classe la dà al 1°.
+    var expertiseOk = (cp.expertise || []).indexOf(CREATE_LEVEL) === -1 ||
+      (draft.expertiseSkills || []).length === 2;
     if (!klass.casterType || klass.casterType === 'none') {
-      return styleOk;
+      return styleOk && expertiseOk;
     }
     var needCantrips = Math.min(
       (klass.cantripsByLevel && klass.cantripsByLevel[CREATE_LEVEL]) || 0,
@@ -390,7 +407,7 @@
       classSpellsAt(draft.classId, 1).length
     );
 
-    return styleOk && (draft.cantrips || []).length === needCantrips &&
+    return styleOk && expertiseOk && (draft.cantrips || []).length === needCantrips &&
            (draft.preparedSpells || []).length === needPrepared;
   }
 
@@ -1267,6 +1284,23 @@
     container.appendChild(row);
   }
 
+  // Chip di Competenza (Espero, Ladro dal 1° livello): solo fra le abilità in
+  // cui il personaggio è già competente (classe + background), conta esatta
+  // come i picker di incantesimi. `count` viene da choicePoints.expertise:
+  // sempre 2 nel PHB, sia al 1° che al 6° livello.
+  function buildExpertisePicker(container, count) {
+    var eligible = (draft.profSkills || []).concat(bgSkills());
+    draft.expertiseSkills = (draft.expertiseSkills || []).filter(function (id) {
+      return eligible.indexOf(id) !== -1;
+    });
+    var skillsById = {};
+    (window.AppEngine.SKILLS || []).forEach(function (s) { skillsById[s.id] = s; });
+    var options = eligible.map(function (id) {
+      return { id: id, name: (skillsById[id] || {}).label || id };
+    });
+    buildSpellPicker(container, 'Competenza — scegline ' + count, options, count, 'expertiseSkills');
+  }
+
   function renderFinale(container) {
     var klass = window.MANUAL_55.classes[draft.classId] || {};
 
@@ -1276,6 +1310,9 @@
 
     if ((klass.choicePoints || {}).fightingStyle === CREATE_LEVEL) {
       buildFightingStylePicker(container);
+    }
+    if (((klass.choicePoints || {}).expertise || []).indexOf(CREATE_LEVEL) !== -1) {
+      buildExpertisePicker(container, 2);
     }
 
     var isCaster = klass.casterType && klass.casterType !== 'none';
@@ -1392,11 +1429,19 @@
       // Competenze: quelle scelte dalla classe più le due del background.
       profSkills: (draft.profSkills || []).concat(bgSkills()),
       profTools: bg ? [bg.tool || draft.bgTool.trim()].filter(Boolean) : [],
+      // Competenza (Ladro): solo se la classe la dà al livello 1.
+      expertiseSkills: ((klass.choicePoints || {}).expertise || []).indexOf(CREATE_LEVEL) !== -1
+        ? (draft.expertiseSkills || []).slice() : [],
       fightingStyle: ((klass.choicePoints || {}).fightingStyle === CREATE_LEVEL && draft.fightingStyleId) || 'nessuno',
       armor: armor,
+      // Abilità d'attacco (Blocco 5.A.3, letta da js/engine.js): Accurata →
+      // agile (finesse), 'dist' nella categoria → a distanza. Senza questi due
+      // flag il motore presume sempre Forza, sbagliato per un Ladro DES.
       weapon: {
         name: w ? w.name : '', die: w ? w.die : '1d8',
-        type: w ? w.dmg : '', mastery: mastery
+        type: w ? w.dmg : '', mastery: mastery,
+        finesse: w ? (w.props || []).indexOf('Accurata') !== -1 : false,
+        ranged: w ? w.cat.indexOf('dist') !== -1 : false
       },
       // Maestrie possedute (id di armi): il personaggio le sa usare anche se
       // in mano ha un'altra arma.
@@ -1645,7 +1690,7 @@
       miCantrips: [], miSpells: [],
       equip: null, equipForClass: null, masteries: [],
       cantrips: [], preparedSpells: [],
-      fightingStyleId: null
+      fightingStyleId: null, expertiseSkills: []
     };
     document.body.classList.remove('in-dashboard');
     document.body.classList.add('in-create');
