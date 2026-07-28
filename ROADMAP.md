@@ -1135,7 +1135,48 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      pulizia): personaggio creato con tutti i campi corretti. Tharion
      (Paladino, che usa `faro-speranza`/`guardiano-fede` nel giuramento di
      Vendetta/Gloria) verificato invariato. Console pulita in ogni prova.
-7. [ ] **Druido** (full) — Forma Selvatica, Circolo.
+7. [x] **Druido** (full) — Forma Selvatica, Circolo.
+   → **Fatto (2026-07-28, `?v=98`, manuale `version` 34→35)**: privilegi 1→20
+   dal PDF (p.79-89), sottoclasse **Circolo della Luna** (p.85-86, la più
+   semplice delle quattro da modellare — Terra richiederebbe un picker di
+   terreno da rifare a ogni riposo lungo, Mare e Stelle risorse nuove; la
+   Luna invece ha solo incantesimi sempre preparati per livello, come il
+   Dominio della Vita del Chierico), equipaggiamento iniziale, competenze di
+   classe. Le tabelle numeriche (Forma Selvatica, Trucchetti, Preparati,
+   slot) erano già corrette nello stub.
+   - **Forma Selvatica generica da subito**: nessuna modifica al motore,
+     bastava dichiarare `classResources.wildshape` con lo stesso pattern già
+     usato da Recuperare Energie/Azione Impetuosa del Guerriero (1 uso
+     recuperato al riposo breve, tutti al riposo lungo) — la card dinamica,
+     `shortRest()` e la sezione Risorse la trattano come qualunque altra
+     risorsa senza sapere che è la "Forma Selvatica" del Druido.
+   - **Niente Maestria nelle Armi** (come il Chierico): solo `weaponProf:
+     ['sem']`, nessuna colonna dedicata nella tabella dei privilegi.
+   - **Ordine Primordiale (scelta di ruolo al 1°, come l'Ordine Divino del
+     Chierico) lasciato descrittivo**: stesso trattamento già dato a scelte
+     simili senza un aggancio meccanico nel motore (es. "Mente Sfuggente"
+     del Ladro) — nessun nuovo picker nel wizard per questo.
+   - **Verifica end-to-end**: Druido di prova iniettato a livello 14 (Circolo
+     della Luna) — CA/PF/slot corretti, Forma Selvatica 3/3, tutti i
+     privilegi di classe e sottoclasse in Tratti nell'ordine giusto,
+     Grimorio con etichetta "Saggezza" e "Cura Ferite"/"Raggio di Luna"
+     marcati FISSO ai livelli giusti. Giro completo del wizard da zero (Elfo,
+     Druido, Guida con Iniziato alla Magia — lista del Druido, punteggi
+     consigliati SAG 15+2/COS 14+1, 2 competenze di classe + 2 dal
+     background senza doppioni, pacchetto A, 2 trucchetti + 4 incantesimi
+     preparati oltre a Cura Ferite già fisso dal talento): personaggio
+     creato con tutti i campi corretti (PF 10, CA 14 cuoio+scudo). Level-up
+     1→3 a tavolino: guadagni automatici (PF, Dadi Ferita, Forma Selvatica,
+     slot, preparati) tutti corretti, sottoclasse Circolo della Luna
+     auto-assegnata al 3° livello (unica opzione modellata, nessun picker
+     necessario) con "Forme Circolari" comparsa subito nei Tratti. Riposo
+     breve testato: Forma Selvatica 0/2 → 1/2 (recupera esattamente 1 uso,
+     non tutti). Tharion (Paladino) verificato invariato dopo ogni prova
+     (CA 20, PF 60, CD 15, Aura +3). Console pulita in ogni prova.
+   - **Bug pre-esistente trovato, non di questa classe**: la card "Lama
+     Vincolante" nella tab Tratti (`index.html`) è HTML statico, non
+     condizionale — compare per QUALUNQUE personaggio, non solo per Tharion.
+     Segnalato con `spawn_task` invece di un fix silenzioso fuori scope.
 8. [ ] **Bardo** (full) — Ispirazione Bardica, Collegio.
 9. [ ] **Stregone** (full) — Punti Stregoneria, Metamagia.
 10. [ ] **Mago** (full) — libro incantesimi, Recupero Arcano, Tradizione.

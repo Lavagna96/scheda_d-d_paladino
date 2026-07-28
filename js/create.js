@@ -158,6 +158,7 @@
   var CLASS_SKILLS = {
     barbaro: { count: 2, from: ['addestrare-animali', 'atletica', 'intimidire', 'natura', 'percezione', 'sopravvivenza'] },
     chierico: { count: 2, from: ['storia', 'intuizione', 'medicina', 'persuasione', 'religione'] },
+    druido: { count: 2, from: ['arcano', 'addestrare-animali', 'intuizione', 'medicina', 'natura', 'percezione', 'religione', 'sopravvivenza'] },
     guerriero: { count: 2, from: ['acrobazia', 'addestrare-animali', 'atletica', 'storia', 'intuizione', 'intimidire', 'persuasione', 'percezione', 'sopravvivenza'] },
     ladro: { count: 4, from: ['acrobazia', 'atletica', 'inganno', 'intuizione', 'intimidire', 'indagare', 'percezione', 'persuasione', 'rapidita-di-mano', 'furtivita'] },
     monaco: { count: 2, from: ['acrobazia', 'atletica', 'storia', 'intuizione', 'religione', 'furtivita'] },

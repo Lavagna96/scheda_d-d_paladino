@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 34,
+  version: 35,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -362,7 +362,133 @@ window.MANUAL_55 = {
       wildShape: [0, 0, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4],
       cantripsByLevel: [0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       preparedByLevel: [0, 4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22],
-      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9]
+      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9],
+      // Niente Maestria nelle Armi (nessuna colonna dedicata, come Chierico):
+      // solo armi semplici.
+      weaponProf: ['sem'],
+      startingEquipment: {
+        a: {
+          label: 'Kit del druido',
+          armorId: 'cuoio', shield: true, weaponId: 'falcetto',
+          extra: [
+            { name: 'Focus Druidico (Bastone)', qty: 1, weaponId: 'bastone-ferrato', desc: 'Bastone che funge anche da focus per gli incantesimi da druido.' },
+            { name: 'Kit da erborista', qty: 1, weight: 3, desc: 'Per identificare piante, distillare veleni e mescolare pozioni.' },
+            { name: 'Kit dell\'esploratore', qty: 1, weight: 55, desc: 'Zaino, giaciglio, 2 fiaschette d\'olio, razioni per 10 giorni, corda, acciarino, 10 torce, otre.' }
+          ],
+          coins: { mo: 9 }
+        },
+        b: { label: '50 monete d\'oro', coins: { mo: 50 } }
+      },
+      classResources: {
+        // Torna 1 uso al riposo breve, tutti al riposo lungo — stesso pattern
+        // di Recuperare Energie/Azione Impetuosa del Guerriero.
+        wildshape: { name: 'Forma Selvatica', kind: 'uses', byLevelRef: 'wildShape', resetOn: 'short' }
+      },
+      choicePoints: {
+        subclass: 3, subclassFeatureLevels: [3, 6, 10, 14],
+        asi: [4, 8, 12, 16], epicBoon: 19
+      },
+      /* Privilegi 1→20 (PHB 2024 p.79-89 del PDF): riassunti originali in
+         italiano. trait:false = scelta gestita altrove (sottoclasse dal
+         picker, ASI/Dono Epico dal level-up). Ai livelli 9/11/13/16(numeri)/17
+         il PHB non ha un privilegio nuovo, solo i numeri delle tabelle
+         (Forma Selvatica/Trucchetti/Preparati/slot) che salgono da soli —
+         nessuna voce qui. */
+      levelFeatures: {
+        1: [
+          { name: 'Incantesimi', desc: 'Impari a incanalare la magia primordiale della natura. Conosci due trucchetti da druido e prepari incantesimi di 1° livello o superiore (4 all\'inizio) usando la Saggezza come caratteristica da incantatore; puoi sostituire un trucchetto o cambiare la lista dei preparati a ogni riposo lungo.' },
+          { name: 'Druidico', desc: 'Conosci il Druidico, il linguaggio segreto dei druidi, e hai sempre preparato l\'incantesimo Parlare con gli Animali. Puoi lasciare messaggi nascosti che solo chi conosce il Druidico nota automaticamente; gli altri li notano con una prova di Intelligenza (Indagare) CD 15, ma non li decifrano senza magia.' },
+          { name: 'Ordine Primordiale', desc: 'Scegli un ruolo sacro. Sapiente: conosci un trucchetto in più dalla lista del druido e ottieni un bonus (pari al tuo modificatore di Saggezza, minimo +1) alle prove di Intelligenza (Arcano o Natura). Guardiano: ottieni competenza con le armi da guerra e addestramento con l\'armatura media.' }
+        ],
+        2: [
+          { name: 'Forma Selvatica', desc: 'Come azione bonus assumi la forma di una Bestia che conosci, restando trasformato per metà del tuo livello da druido in ore o finché non riusi questo privilegio, non sei Incapacitato o non muori; puoi tornare alla forma normale prima, sempre come azione bonus. Puoi usarla due volte; recuperi un uso al riposo breve e tutti al riposo lungo (gli usi crescono col livello, colonna Forma Selvatica). Conosci quattro forme fra le Bestie di GS massimo 1/4 senza Velocità di volo (consigliati Ratto, Cavallo da sella, Ragno, Lupo); il numero di forme note e il GS massimo crescono col livello, e dall\'8° puoi assumere forme con Velocità di volo. In forma ottieni PF temporanei pari al tuo livello da druido, mantieni le tue caratteristiche mentali, privilegi, competenze e linguaggi ma usi le statistiche della Bestia per il resto; non puoi lanciare incantesimi, ma trasformarti non interrompe la Concentrazione.' },
+          { name: 'Compagno Selvatico', desc: 'Come azione magica, spendendo uno slot incantesimo o un uso di Forma Selvatica, evochi uno spirito della natura lanciando Trova Famiglio senza componenti materiali; il famiglio è di tipo Fatato e sparisce al riposo lungo.' }
+        ],
+        3: [
+          { name: 'Sottoclasse del Druido', trait: false, desc: 'Scegli un Circolo (della Terra, della Luna, del Mare o delle Stelle). Ottieni i suoi privilegi al tuo livello da druido o inferiore.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        5: [
+          { name: 'Resurgenza Selvatica', desc: 'Una volta per turno, se non hai usi di Forma Selvatica, puoi spendere uno slot incantesimo (senza azione) per ottenerne uno. Puoi anche spendere un uso di Forma Selvatica (senza azione) per ottenere uno slot di 1° livello, ma solo una volta prima di un riposo lungo.' }
+        ],
+        6: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio del tuo Circolo.' }
+        ],
+        7: [
+          { name: 'Furia Elementale', desc: 'Scegli un\'opzione. Incanti Potenti: sommi il modificatore di Saggezza ai danni dei tuoi trucchetti da druido. Colpo Primordiale: una volta per turno, quando colpisci con un\'arma o con un attacco in Forma Selvatica, infliggi 1d8 danni extra Freddo, Fuoco, Fulmine o Tuono a tua scelta.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        10: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio del tuo Circolo.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        14: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio del tuo Circolo.' }
+        ],
+        15: [
+          { name: 'Furia Elementale Migliorata', desc: 'L\'opzione scelta per Furia Elementale migliora. Incanti Potenti: quando lanci un trucchetto da druido con gittata di 3 m o superiore, la gittata aumenta di 90 m. Colpo Primordiale: il danno extra sale a 2d8.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        18: [
+          { name: 'Incantesimi in Forma Selvatica', desc: 'Mentre sei in Forma Selvatica puoi lanciare incantesimi, tranne quelli con una componente materiale che ha un costo indicato o che la consuma.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono del Viaggio Dimensionale) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Arcidruido', desc: 'La vitalità della natura ti scorre dentro. Forma Selvatica Perenne: quando tiri Iniziativa senza usi di Forma Selvatica, ne recuperi uno. Mago della Natura: puoi convertire usi di Forma Selvatica in uno slot incantesimo (senza azione), con ogni uso che vale 2 livelli di slot; una sola volta prima di un riposo lungo. Longevità: invecchi molto più lentamente (un anno ogni dieci che passano).' }
+        ]
+      },
+      /* Circoli del Druido: per ora solo Circolo della Luna (PHB p.85-86, il
+         più semplice dei quattro da modellare — niente scelta di terreno da
+         rifare a ogni riposo lungo come la Terra, niente risorsa nuova come
+         Mare/Stelle: solo incantesimi sempre preparati per livello, stesso
+         trattamento del Dominio della Vita del Chierico). Terra, Mare e
+         Stelle si aggiungono in seguito. */
+      subclasses: {
+        luna: {
+          name: 'Circolo della Luna',
+          tenets: 'Trae la sua magia dalla luna per trasformarsi e vegliare sui luoghi selvaggi.',
+          spellsByLevel: {
+            3: [
+              { id: 'cura-ferite', name: 'Cura Ferite' },
+              { id: 'raggio-di-luna', name: 'Raggio di Luna' },
+              { id: 'scintilla-stellare', name: 'Scintilla Stellare' }
+            ],
+            5: [
+              { id: 'evocare-animali', name: 'Evocare Animali' }
+            ],
+            7: [
+              { id: 'fonte-di-luce-lunare', name: 'Fonte di Luce Lunare' }
+            ],
+            9: [
+              { id: 'cura-ferite-di-massa', name: 'Cura Ferite di Massa' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Forme Circolari', desc: 'Quando assumi una Forma Selvatica, il GS massimo delle forme che puoi assumere sale al tuo livello da druido diviso 3 (per difetto), ben oltre il limite base della classe. Finché resti in forma la tua CA è 13 + il tuo modificatore di Saggezza, se più alta di quella della Bestia, e ottieni PF temporanei pari al triplo del tuo livello da druido.' }
+            ],
+            6: [
+              { name: 'Forme Circolari Migliorate', desc: 'In Forma Selvatica, ogni tuo attacco può infliggere danni Radiosi al posto del tipo normale (scegli a ogni colpo), e sommi il modificatore di Saggezza ai tiri salvezza su Costituzione.' }
+            ],
+            10: [
+              { name: 'Passo Lunare', desc: 'Come azione bonus ti teletrasporti fino a 9 m in uno spazio libero che vedi, con vantaggio al prossimo tiro per colpire prima della fine del turno. Puoi usarlo un numero di volte pari al tuo modificatore di Saggezza (minimo 1); recuperi tutti gli usi al riposo lungo, oppure ne recuperi uno spendendo uno slot di 2° livello o superiore.' }
+            ],
+            14: [
+              { name: 'Forma Lunare', desc: 'Una volta per turno, quando colpisci con un attacco in Forma Selvatica, puoi infliggere 2d10 danni Radiosi extra. Inoltre, quando usi Passo Lunare puoi teletrasportare con te anche una creatura volontaria entro 3 m.' }
+            ]
+          }
+        }
+      }
     },
     guerriero: {
       name: 'Guerriero', hitDie: 'd10', primaryAbility: 'FOR o DES', saves: ['FOR', 'COS'],
