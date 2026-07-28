@@ -997,7 +997,51 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      le altre 14 sotto, tutte le 18 presenti); un Ladro di prova con Espero su
      Furtività e Rapidità di Mano mostra il doppio pallino e +10 invece di
      +7/+3 sulle altre competenti. Console pulita in ogni prova.
-4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
+4. [x] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
+   → **Fatto (2026-07-28, `?v=92`, manuale `version` 31→32)**: privilegi 1→20
+   dal PDF (p.100-103), sottoclasse **Guerriero della Mano Aperta** (p.106,
+   la più semplice delle 4 — Misericordia, Ombra ed Elementi restano da
+   fare), equipaggiamento iniziale, competenze di classe. Le tre tabelle
+   numeriche (Dado Arti Marziali, Punti Focus, Movimento senza Armatura)
+   erano già nello stub, corrette ma completamente morte — nessun punto del
+   motore le leggeva.
+   - **Riposo breve "pieno" generalizzato**: i Punti Focus del PHB tornano
+     TUTTI al riposo breve, non 1 solo come Recuperare Energie/Azione
+     Impetuosa del Guerriero. `shortRest()` (`sheet.js`) e la sezione visiva
+     (`SECTION_BY_RESET` in `stats.js`) capiscono ora anche `resetOn:
+     'short-full'` accanto al vecchio `'short'` (parziale), senza toccare il
+     comportamento delle risorse esistenti. Verificato: Punti Focus spesi a
+     3/11 → riposo breve → tornano 11/11 in un colpo solo.
+   - **Difesa senza Armatura ristretta correttamente**: a differenza del
+     Barbaro (che la mantiene anche con lo scudo, lo dice il PHB), il Monaco
+     la perde impugnando uno scudo. Aggiunto il flag `unarmoredDefenseNoShield`
+     letto da `engine.js`: con lo scudo il Monaco perde il bonus di Saggezza
+     alla CA ma non lo scudo stesso (sommato comunque). Verificato: senza
+     scudo CA 10+DES+SAG, con lo scudo CA 10+DES soltanto (+2 dello scudo).
+   - **Nota "Arti Marziali" sotto gli Attacchi**, stessa idea delle note
+     Furia/Attacco Furtivo: il dado (`klass.martialArtsDie[livello]`)
+     sostituisce il danno normale del colpo senz'armi o di un'arma da
+     Monaco, qualunque arma sia nella riga sopra.
+   - **Velocità calcolata ma non ancora mostrata da nessuna parte**: la
+     scheda non ha mai avuto una vista per la velocità del personaggio (solo
+     quella della cavalcatura). Aggiunto `view.speedM` in `engine.js`
+     (specie + bonus di Movimento senza Armatura quando pertinente, con lo
+     stesso vincolo "niente scudo" del punto sopra) così il dato esiste ed è
+     corretto, ma resta da decidere DOVE mostrarlo — segnalato con
+     `spawn_task` invece di infilare una nuova card nella scheda senza
+     proposta. Verificato: Halfling Monaco livello 11 senza scudo 9+6=15 m,
+     con lo scudo torna a 9 m.
+   - **Verifica end-to-end**: Monaco di prova iniettato a livello 11 (Mano
+     Aperta) — CA 17 (10+DES+SAG), Attacco Extra 2 colpi, nota Arti Marziali
+     "d10" corretta, Punti Focus 11/11 nella sezione Riposo breve, Metabolismo
+     Sbalorditivo 1/1 in Riposo lungo, tutti i privilegi di classe e
+     sottoclasse in Tratti nell'ordine giusto. Giro completo del wizard da
+     zero (Halfling, Monaco, Eremita, punteggi consigliati, 2 competenze di
+         classe + 2 dal background senza doppioni, pacchetto A senza
+     maestrie da scegliere): personaggio creato con `armor.id` assente (il
+     Monaco non ha armatura, a differenza di tutte le altre classi finora),
+     arma Lancia non agile (corretto, non è Leggera). Tharion (Paladino)
+     verificato invariato dopo ogni modifica. Console pulita in ogni prova.
 5. [ ] **Ranger** (half-caster) — riusa gli slot half del Paladino; incantesimi noti, Nemico Prescelto.
 6. [ ] **Chierico** (full) — Incanalare Divinità (campo già esiste), Dominio.
 7. [ ] **Druido** (full) — Forma Selvatica, Circolo.

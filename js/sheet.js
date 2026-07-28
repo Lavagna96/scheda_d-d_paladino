@@ -508,13 +508,17 @@
 
   // Riposo breve: recupera 1 uso di ogni risorsa con resetOn:'short' (era
   // hardcoded solo su Channel Divinity — il Guerriero ne ha altre due:
-  // Recuperare Energie e Azione Impetuosa, con la stessa cadenza).
+  // Recuperare Energie e Azione Impetuosa, con la stessa cadenza). I Punti
+  // Focus del Monaco invece tornano TUTTI al riposo breve, non solo 1 —
+  // 'short-full' è lo stesso riposo ma con un recupero pieno.
   function shortRest() {
     var state = window.AppStorage.getState();
     var view = window.AppEngine.getView();
     (view.resources || []).forEach(function (r) {
       if (r.resetOn === 'short') {
         state.spent[r.key] = Math.max(0, (state.spent[r.key] || 0) - 1);
+      } else if (r.resetOn === 'short-full') {
+        state.spent[r.key] = 0;
       }
     });
     window.AppStorage.saveState(state);

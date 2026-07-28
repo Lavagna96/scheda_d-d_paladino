@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 31,
+  version: 32,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -545,7 +545,136 @@ window.MANUAL_55 = {
       casterType: 'none',
       martialArtsDie: [null, 'd6', 'd6', 'd6', 'd6', 'd8', 'd8', 'd8', 'd8', 'd8', 'd8', 'd10', 'd10', 'd10', 'd10', 'd10', 'd10', 'd12', 'd12', 'd12', 'd12'],
       focusPoints: [0, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-      unarmoredMovementM: [0, 0, 3, 3, 3, 3, 4.5, 4.5, 4.5, 4.5, 6, 6, 6, 6, 7.5, 7.5, 7.5, 7.5, 9, 9, 9]
+      unarmoredMovementM: [0, 0, 3, 3, 3, 3, 4.5, 4.5, 4.5, 4.5, 6, 6, 6, 6, 7.5, 7.5, 7.5, 7.5, 9, 9, 9],
+      unarmoredDefense: 'SAG',
+      // A differenza del Barbaro, il Monaco perde il bonus di CA (e quello di
+      // velocità, letto da js/engine.js) se impugna uno scudo — lo dice il PHB.
+      unarmoredDefenseNoShield: true,
+      extraAttacks: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      startingEquipment: {
+        a: {
+          label: 'Kit del monaco',
+          armorId: '', shield: false, weaponId: 'lancia',
+          extra: [
+            { name: 'Pugnale', qty: 5, weaponId: 'pugnale' },
+            { name: 'Strumenti da Artigiano o Strumento Musicale', qty: 1, weight: 5, desc: 'A scelta, coerenti con la competenza scelta al 1° livello.' },
+            { name: 'Kit dell\'esploratore', qty: 1, weight: 55, desc: 'Zaino, giaciglio, 2 fiaschette d\'olio, razioni per 10 giorni, corda, acciarino, 10 torce, otre.' }
+          ],
+          coins: { mo: 11 }
+        },
+        b: { label: '50 monete d\'oro', coins: { mo: 50 } }
+      },
+      classResources: {
+        // Torna TUTTO al riposo breve (non solo 1 uso, a differenza di
+        // Recuperare Energie/Azione Impetuosa del Guerriero): 'short-full'.
+        focus: { name: 'Punti Focus', kind: 'uses', byLevelRef: 'focusPoints', resetOn: 'short-full' },
+        // Si attiva tirando l'iniziativa (non simulata dall'app): resta un
+        // usa/spunta manuale, come la Furia del Barbaro non è "on/off".
+        uncannyMetabolism: { name: 'Metabolismo Sbalorditivo', kind: 'uses', max: 1, from: 2, resetOn: 'long' }
+      },
+      choicePoints: {
+        subclass: 3, subclassFeatureLevels: [3, 6, 11, 17],
+        asi: [4, 8, 12, 16], epicBoon: 19
+      },
+      /* Privilegi 1→20 (PHB 2024 p.100-103 del PDF): riassunti originali in
+         italiano. trait:false = scelta gestita altrove (sottoclasse dal
+         picker, ASI/Dono Epico dal level-up); "Aumento..." al 14° livello
+         (competenza in tutti i TS) resta descrittivo, come già per "Mente
+         Sfuggente" del Ladro — l'utente aggiorna a mano i TS dalla scheda. */
+      levelFeatures: {
+        1: [
+          { name: 'Arti Marziali', desc: 'Puoi tirare il Dado Arti Marziali al posto del danno normale di un colpo senz\'armi o di un\'arma da Monaco (le armi semplici da mischia e quelle da guerra Leggere), e puoi usare la Destrezza al posto della Forza per colpire e per i danni con questi attacchi. Puoi anche fare un colpo senz\'armi come azione bonus.' },
+          { name: 'Difesa senza Armatura', desc: 'Quando non indossi armatura né impugni uno scudo, la tua CA base è 10 + modificatore di Destrezza + modificatore di Saggezza.' }
+        ],
+        2: [
+          { name: 'Focus del Monaco', desc: 'Hai una riserva di Punti Focus (colonna omonima) da spendere per alimentare privilegi come Raffica di Colpi (1 punto: due colpi senz\'armi come azione bonus), Difesa Paziente (1 punto: Disimpegnarsi e Schivare come azione bonus) e Passo del Vento (1 punto: Disimpegnarsi e Scattare come azione bonus, gittata di salto raddoppiata). Un punto speso non si può riusare finché non fai un riposo, breve o lungo, dopo il quale li recuperi tutti.' },
+          { name: 'Movimento senza Armatura', desc: 'La tua velocità aumenta (colonna Movimento senza Armatura) quando non indossi armatura né impugni uno scudo.' },
+          { name: 'Metabolismo Sbalorditivo', desc: 'Quando tiri l\'Iniziativa, puoi recuperare tutti i Punti Focus spesi: se lo fai, tiri anche il tuo Dado Arti Marziali e recuperi PF pari al risultato più il tuo livello da monaco. Dopo l\'uso serve un riposo lungo per riusarlo.' }
+        ],
+        3: [
+          { name: 'Deviare Attacchi', desc: 'Quando un attacco che infligge danni Contundenti, Perforanti o Taglienti ti colpisce, puoi usare una reazione per ridurne i danni di 1d10 + il tuo modificatore di Destrezza + il tuo livello da monaco. Se lo riduci a 0, puoi spendere 1 Punto Focus per rimandare parte della forza a un bersaglio vicino, che con un fallimento a un TS di Destrezza subisce danni pari a due Dadi Arti Marziali + Destrezza.' },
+          { name: 'Sottoclasse del Monaco', trait: false, desc: 'Scegli una specializzazione (Guerriero della Mano Aperta, Guerriero della Misericordia, Guerriero dell\'Ombra o Guerriero degli Elementi). Ottieni i suoi privilegi al tuo livello da monaco o inferiore.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' },
+          { name: 'Caduta Lenta', desc: 'Puoi usare una reazione quando cadi per ridurre i danni della caduta di un ammontare pari a cinque volte il tuo livello da monaco.' }
+        ],
+        5: [
+          { name: 'Attacco Extra', trait: false, desc: 'Puoi attaccare due volte, invece di una, ogni volta che compi l\'azione di Attacco nel tuo turno.' },
+          { name: 'Colpo Stordente', desc: 'Una volta per turno, quando colpisci una creatura con un\'arma da Monaco o un colpo senz\'armi, puoi spendere 1 Punto Focus per tentare di stordirla: TS di Costituzione o è Stordita fino all\'inizio del tuo prossimo turno; con un successo la sua velocità è dimezzata e il prossimo tiro per colpire contro di lei ha vantaggio fino ad allora.' }
+        ],
+        6: [
+          { name: 'Colpi Potenziati', desc: 'Quando infliggi danno con un colpo senz\'armi, puoi scegliere che sia di tipo Forza invece del tipo normale.' },
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio della tua specializzazione.' }
+        ],
+        7: [
+          { name: 'Schivare', desc: 'Se un effetto ti concede un TS di Destrezza per dimezzare i danni, con un successo non subisci nulla e con un fallimento solo metà; non funziona se sei Incapacitato.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        9: [
+          { name: 'Movimento Acrobatico', desc: 'Quando non indossi armatura né impugni uno scudo, puoi muoverti lungo superfici verticali e sopra i liquidi nel tuo turno senza cadere durante quel movimento.' }
+        ],
+        10: [
+          { name: 'Focus Superiore', desc: 'Raffica di Colpi, Difesa Paziente e Passo del Vento migliorano: Raffica di Colpi fa tre colpi senz\'armi invece di due; Difesa Paziente dà anche PF temporanei pari a due Dadi Arti Marziali; Passo del Vento può portare con te una creatura consenziente Grande o più piccola entro 1,5 m.' },
+          { name: 'Auto-Guarigione', desc: 'Alla fine di ogni tuo turno puoi toglierti di dosso una fra Affascinato, Spaventato o Avvelenato. Inoltre digiunare non ti dà più livelli di Sfinimento.' }
+        ],
+        11: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio della tua specializzazione.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        13: [
+          { name: 'Deviare Energia', desc: 'Puoi usare Deviare Attacchi anche contro attacchi di qualunque tipo di danno, non solo Contundente, Perforante o Tagliente.' }
+        ],
+        14: [
+          { name: 'Sopravvissuto Disciplinato', desc: 'La tua disciplina fisica e mentale ti dà competenza in tutti i tiri salvezza. Inoltre, quando fallisci un TS, puoi spendere 1 Punto Focus per ripeterlo, tenendo il nuovo risultato.' }
+        ],
+        15: [
+          { name: 'Focus Perfetto', desc: 'Quando tiri l\'Iniziativa e non usi Metabolismo Sbalorditivo, recuperi Punti Focus spesi finché non arrivi a 4, se ne avevi 3 o meno.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        17: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni l\'ultimo privilegio della tua specializzazione.' }
+        ],
+        18: [
+          { name: 'Difesa Superiore', desc: 'A inizio del tuo turno puoi spendere 3 Punti Focus per proteggerti per 1 minuto (o finché non sei Incapacitato): in quel tempo hai Resistenza a tutti i danni tranne quelli di tipo Forza.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono dell\'Offesa Irresistibile) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Corpo e Mente', desc: 'I tuoi punteggi di Destrezza e Saggezza aumentano di 4, fino a un massimo di 25.' }
+        ]
+      },
+      /* Sottoclassi del Monaco: per ora solo Guerriero della Mano Aperta (PHB
+         p.106, la più semplice delle quattro — nessuna risorsa dedicata oltre
+         ai Punti Focus già tracciati). Misericordia, Ombra ed Elementi si
+         aggiungono in seguito, stesso trattamento già dato alle altre classi. */
+      subclasses: {
+        'mano-aperta': {
+          name: 'Guerriero della Mano Aperta',
+          tenets: 'Padroneggia le tecniche di combattimento a mani nude.',
+          features: {
+            3: [
+              { name: 'Tecnica della Mano Aperta', desc: 'Quando colpisci un bersaglio con un attacco di Raffica di Colpi, puoi imporgli uno di questi effetti: Confondere (non può fare attacchi di opportunità fino all\'inizio del suo prossimo turno), Spingere (TS Forza o è spinto fino a 4,5 m) oppure Ribaltare (TS Destrezza o cade Prono).' }
+            ],
+            6: [
+              { name: 'Totalità del Corpo', desc: 'Come azione bonus tiri il tuo Dado Arti Marziali e recuperi PF pari al risultato più il tuo modificatore di Saggezza (minimo 1). Puoi usarlo un numero di volte pari al tuo modificatore di Saggezza (minimo 1), tutti recuperati al riposo lungo.' }
+            ],
+            11: [
+              { name: 'Passo Spedito', desc: 'Quando usi un\'azione bonus diversa da Passo del Vento, puoi usare anche Passo del Vento subito dopo, senza costo aggiuntivo.' }
+            ],
+            17: [
+              { name: 'Palmo Tremante', desc: 'Quando colpisci con un colpo senz\'armi, puoi spendere 4 Punti Focus per innescare vibrazioni letali nel bersaglio, che durano finché non le fai terminare con un\'azione (o rinunciando a un attacco durante l\'azione di Attacco): il bersaglio deve allora superare un TS di Costituzione o subire 10d12 danni da Forza (metà con un successo).' }
+            ]
+          }
+        }
+      }
     },
     paladino: {
       name: 'Paladino', hitDie: 'd10', primaryAbility: 'FOR e CAR', saves: ['SAG', 'CAR'],

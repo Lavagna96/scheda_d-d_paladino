@@ -141,7 +141,9 @@
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3 4 4.5 4 8a4 4 0 0 1-8 0c0-1.2.6-2.2 1.2-2.8C8.5 10 8.8 6.5 12 3z"/></svg>';
   }
 
-  var SECTION_BY_RESET = { short: '.res-sec-short', long: '.res-sec-long', day: '.res-sec-day' };
+  // 'short-full' (Punti Focus del Monaco: torna TUTTO al riposo breve, non
+  // solo 1 uso) sta comunque nella sezione visiva "Riposo breve".
+  var SECTION_BY_RESET = { short: '.res-sec-short', 'short-full': '.res-sec-short', long: '.res-sec-long', day: '.res-sec-day' };
 
   function buildDynamicResCard(r) {
     var card = document.createElement('div');
@@ -262,6 +264,13 @@
     var sneakDice = (klass.sneakAttackD6 || [])[view.level];
     if (sneakDice) {
       parts.push('Attacco Furtivo: +' + sneakDice + 'd6 una volta per turno (arma Accurata o a distanza, con vantaggio o un alleato adiacente al bersaglio).');
+    }
+    /* Arti Marziali (Monaco): il dado sostituisce il danno normale del colpo
+       senz'armi o di un'arma da Monaco, qualunque cosa sia nella riga Arma
+       sopra — informativo per lo stesso motivo delle altre due note. */
+    var martialDie = (klass.martialArtsDie || [])[view.level];
+    if (martialDie) {
+      parts.push('Arti Marziali: ' + martialDie + ' al posto del danno normale del colpo senz\'armi o di un\'arma da Monaco, con Destrezza al posto della Forza se preferisci.');
     }
 
     return parts.join(' ');

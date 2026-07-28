@@ -200,14 +200,27 @@
     } else {
       /* CA senza armatura alternativa (Blocco 5.A.2): alcune classi sostituiscono
          la formula base con 10 + DES + una loro caratteristica (Barbaro: COS,
-         Monaco: SAG). Il dato vive in klass.unarmoredDefense (js/manual-55.js). */
-      ac = 10 + mods.DES + (klass.unarmoredDefense ? mods[klass.unarmoredDefense] : 0);
+         Monaco: SAG). Il dato vive in klass.unarmoredDefense (js/manual-55.js).
+         Il Barbaro la mantiene anche con lo scudo in mano (lo dice il PHB), il
+         Monaco no (`unarmoredDefenseNoShield`): con lo scudo perde il bonus di
+         SAG ma non lo scudo stesso, sommato comunque più sotto. */
+      var udApplies = !klass.unarmoredDefenseNoShield || !(ch.armor && ch.armor.shield);
+      ac = 10 + mods.DES + (klass.unarmoredDefense && udApplies ? mods[klass.unarmoredDefense] : 0);
     }
     var defenseBonus = (ch.fightingStyle === 'difesa' && hasArmor) ? 1 : 0;
     var shieldAc = ((window.MANUAL_55 && window.MANUAL_55.shield) || {}).ac || 2;
     ac += (ch.armor && ch.armor.shield ? shieldAc : 0) + defenseBonus + modSum(ch, 'ca');
     var acNote = (armor ? armor.label : 'Senza armatura') +
                  (ch.armor && ch.armor.shield ? ' + Scudo' : '');
+
+    /* Velocità (dati presenti da tempo — klass.unarmoredMovementM del Monaco,
+       species.speedM — ma mai calcolati né esposti prima: nessuna vista della
+       scheda mostra ancora la velocità, quindi il numero resta nel derive
+       finché non se ne decide la presentazione. */
+    var species = manual.species[ch.speciesId] || {};
+    var hasShield = !!(ch.armor && ch.armor.shield);
+    var unarmoredSpeedBonus = (!hasArmor && !hasShield && klass.unarmoredMovementM) ? (klass.unarmoredMovementM[ch.level] || 0) : 0;
+    var speedM = (species.speedM || 9) + unarmoredSpeedBonus;
 
     var initiative = mods.DES + modSum(ch, 'iniziativa');
 
@@ -306,6 +319,7 @@
       passivePerception: passivePerception,
       ac: ac,
       acNote: acNote,
+      speedM: speedM,
       initiative: initiative,
       initiativeText: fmt(initiative),
       initiativeNote: ch.initiativeNote || '',

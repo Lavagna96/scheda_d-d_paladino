@@ -159,6 +159,7 @@
     barbaro: { count: 2, from: ['addestrare-animali', 'atletica', 'intimidire', 'natura', 'percezione', 'sopravvivenza'] },
     guerriero: { count: 2, from: ['acrobazia', 'addestrare-animali', 'atletica', 'storia', 'intuizione', 'intimidire', 'persuasione', 'percezione', 'sopravvivenza'] },
     ladro: { count: 4, from: ['acrobazia', 'atletica', 'inganno', 'intuizione', 'intimidire', 'indagare', 'percezione', 'persuasione', 'rapidita-di-mano', 'furtivita'] },
+    monaco: { count: 2, from: ['acrobazia', 'atletica', 'storia', 'intuizione', 'religione', 'furtivita'] },
     paladino: { count: 2, from: ['atletica', 'intuizione', 'intimidire', 'medicina', 'persuasione', 'religione'] }
   };
 
