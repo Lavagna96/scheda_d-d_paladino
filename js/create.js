@@ -160,7 +160,8 @@
     guerriero: { count: 2, from: ['acrobazia', 'addestrare-animali', 'atletica', 'storia', 'intuizione', 'intimidire', 'persuasione', 'percezione', 'sopravvivenza'] },
     ladro: { count: 4, from: ['acrobazia', 'atletica', 'inganno', 'intuizione', 'intimidire', 'indagare', 'percezione', 'persuasione', 'rapidita-di-mano', 'furtivita'] },
     monaco: { count: 2, from: ['acrobazia', 'atletica', 'storia', 'intuizione', 'religione', 'furtivita'] },
-    paladino: { count: 2, from: ['atletica', 'intuizione', 'intimidire', 'medicina', 'persuasione', 'religione'] }
+    paladino: { count: 2, from: ['atletica', 'intuizione', 'intimidire', 'medicina', 'persuasione', 'religione'] },
+    ranger: { count: 3, from: ['addestrare-animali', 'atletica', 'intuizione', 'indagare', 'natura', 'percezione', 'furtivita', 'sopravvivenza'] }
   };
 
   // Competenze disponibili per una classe: usa CLASS_SKILLS se già
@@ -387,15 +388,29 @@
   // vincolo "esattamente N" delle competenze). La sottoclasse non entra: a
   // livello 1 nessuna classe la sceglie. Il Math.min protegge il caso (oggi
   // teorico) in cui il catalogo avesse meno incantesimi del dovuto.
+  // Voce di choicePoints.expertise per un dato livello: {level, count} — il
+  // conteggio non è sempre 2 (il Ranger ne dà 1 sola al 2° livello con Esploratore
+  // Provetto, 2 al 9° con Competenza), quindi ogni voce porta il proprio numero.
+  function expertiseEntryFor(cp, level) {
+    var found = null;
+    ((cp && cp.expertise) || []).forEach(function (e) {
+      if (e.level === level) {
+        found = e;
+      }
+    });
+
+    return found;
+  }
+
   function finaleValid() {
     var klass = (window.MANUAL_55 && window.MANUAL_55.classes[draft.classId]) || {};
     var cp = klass.choicePoints || {};
     // Stile di Combattimento: solo le classi che lo danno già al livello 1
     // (Guerriero) lo scelgono qui; le altre lo scelgono al level-up.
     var styleOk = cp.fightingStyle !== CREATE_LEVEL || !!draft.fightingStyleId;
-    // Competenza (Ladro): stesso discorso, solo se la classe la dà al 1°.
-    var expertiseOk = (cp.expertise || []).indexOf(CREATE_LEVEL) === -1 ||
-      (draft.expertiseSkills || []).length === 2;
+    // Competenza (Ladro, Ranger): stesso discorso, solo se la classe la dà al 1°.
+    var expertiseEntry = expertiseEntryFor(cp, CREATE_LEVEL);
+    var expertiseOk = !expertiseEntry || (draft.expertiseSkills || []).length === expertiseEntry.count;
     if (!klass.casterType || klass.casterType === 'none') {
       return styleOk && expertiseOk;
     }
@@ -1312,8 +1327,9 @@
     if ((klass.choicePoints || {}).fightingStyle === CREATE_LEVEL) {
       buildFightingStylePicker(container);
     }
-    if (((klass.choicePoints || {}).expertise || []).indexOf(CREATE_LEVEL) !== -1) {
-      buildExpertisePicker(container, 2);
+    var expertiseEntry = expertiseEntryFor(klass.choicePoints, CREATE_LEVEL);
+    if (expertiseEntry) {
+      buildExpertisePicker(container, expertiseEntry.count);
     }
 
     var isCaster = klass.casterType && klass.casterType !== 'none';
@@ -1335,18 +1351,34 @@
     /* Quello che il talento d'origine ha già dato non si può riprendere qui:
        gli incantesimi da talento non contano fra i preparabili, quindi
        sceglierli di nuovo sarebbe solo uno spreco (e un doppione a video). */
-    var giaAvuti = (draft.miCantrips || []).concat(draft.miSpells || []);
+    var miGia = (draft.miCantrips || []).concat(draft.miSpells || []);
+    /* Stesso discorso per gli incantesimi che la CLASSE tiene sempre
+       preparati fin dal 1° livello (klass.spellsByLevel[1], es. Marchio del
+       Cacciatore del Ranger dato da Nemico Prescelto): senza escluderli,
+       comparivano anche fra i preparabili normali — uno spreco della scelta
+       e un doppione, visto che il personaggio li ha comunque gratis. Il
+       Paladino non ne risente: i suoi (Punizione Divina, Trova Destriero)
+       arrivano dal 2° livello, dopo il livello di creazione. */
+    var classFreeIds = ((klass.spellsByLevel || {})[CREATE_LEVEL] || []).map(function (s) { return s.id; });
+    var giaAvuti = miGia.concat(classFreeIds);
     function senzaGiaAvuti(list) {
       return list.filter(function (s) { return giaAvuti.indexOf(s.id) === -1; });
     }
+    function spellNames(ids) {
+      return ids.map(function (id) {
+        var s = (window.MANUAL_55.spells || []).filter(function (x) { return x.id === id; })[0];
 
-    if (giaAvuti.length) {
+        return s ? s.name : id;
+      }).join(', ');
+    }
+
+    if (miGia.length) {
       container.appendChild(el('div', 'create-saves-line',
-        'Dal talento d\'origine hai già: ' + giaAvuti.map(function (id) {
-          var s = (window.MANUAL_55.spells || []).filter(function (x) { return x.id === id; })[0];
-
-          return s ? s.name : id;
-        }).join(', ') + '.'));
+        'Dal talento d\'origine hai già: ' + spellNames(miGia) + '.'));
+    }
+    if (classFreeIds.length) {
+      container.appendChild(el('div', 'create-saves-line',
+        'Sempre preparato dalla classe: ' + spellNames(classFreeIds) + '.'));
     }
 
     if (needCantrips > 0) {
@@ -1430,8 +1462,8 @@
       // Competenze: quelle scelte dalla classe più le due del background.
       profSkills: (draft.profSkills || []).concat(bgSkills()),
       profTools: bg ? [bg.tool || draft.bgTool.trim()].filter(Boolean) : [],
-      // Competenza (Ladro): solo se la classe la dà al livello 1.
-      expertiseSkills: ((klass.choicePoints || {}).expertise || []).indexOf(CREATE_LEVEL) !== -1
+      // Competenza (Ladro, Ranger): solo se la classe la dà al livello 1.
+      expertiseSkills: expertiseEntryFor(klass.choicePoints, CREATE_LEVEL)
         ? (draft.expertiseSkills || []).slice() : [],
       fightingStyle: ((klass.choicePoints || {}).fightingStyle === CREATE_LEVEL && draft.fightingStyleId) || 'nessuno',
       armor: armor,

@@ -213,14 +213,19 @@
     var acNote = (armor ? armor.label : 'Senza armatura') +
                  (ch.armor && ch.armor.shield ? ' + Scudo' : '');
 
-    /* Velocità (dati presenti da tempo — klass.unarmoredMovementM del Monaco,
-       species.speedM — ma mai calcolati né esposti prima: nessuna vista della
-       scheda mostra ancora la velocità, quindi il numero resta nel derive
-       finché non se ne decide la presentazione. */
+    /* Velocità (dati presenti da tempo — klass.speedBonusM, species.speedM —
+       ma mai calcolati né esposti prima: nessuna vista della scheda mostra
+       ancora la velocità, quindi il numero resta nel derive finché non se ne
+       decide la presentazione. Due condizioni diverse secondo la classe:
+       'unarmored' (default, Monaco) = niente armatura né scudo; 'notHeavy'
+       (Ranger, Marcia Spedita) = qualunque armatura tranne quella Pesante. */
     var species = manual.species[ch.speciesId] || {};
     var hasShield = !!(ch.armor && ch.armor.shield);
-    var unarmoredSpeedBonus = (!hasArmor && !hasShield && klass.unarmoredMovementM) ? (klass.unarmoredMovementM[ch.level] || 0) : 0;
-    var speedM = (species.speedM || 9) + unarmoredSpeedBonus;
+    var speedGateOk = klass.speedBonusGate === 'notHeavy'
+      ? (!armor || armor.cat !== 'pesante')
+      : (!hasArmor && !hasShield);
+    var speedBonus = (speedGateOk && klass.speedBonusM) ? (klass.speedBonusM[ch.level] || 0) : 0;
+    var speedM = (species.speedM || 9) + speedBonus;
 
     var initiative = mods.DES + modSum(ch, 'iniziativa');
 

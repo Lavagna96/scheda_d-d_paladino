@@ -1042,7 +1042,64 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      Monaco non ha armatura, a differenza di tutte le altre classi finora),
      arma Lancia non agile (corretto, non è Leggera). Tharion (Paladino)
      verificato invariato dopo ogni modifica. Console pulita in ogni prova.
-5. [ ] **Ranger** (half-caster) — riusa gli slot half del Paladino; incantesimi noti, Nemico Prescelto.
+5. [x] **Ranger** (half-caster) — riusa gli slot half del Paladino; incantesimi noti, Nemico Prescelto.
+   → **Fatto (2026-07-28, `?v=94`, manuale `version` 32→33)**: privilegi 1→20
+   dal PDF (p.118-120), sottoclasse **Cacciatore** (p.126, la più semplice
+   delle 4 — Domatore di Bestie, Vagabondo Fatato e Cercatore d'Ombre restano
+   da fare), equipaggiamento iniziale, competenze di classe. Le tabelle
+   `favoredEnemy`/`preparedByLevel`/`slotLevelByLevel` erano già corrette
+   nello stub (progressione da mezzo incantatore, identica al Paladino).
+   - **Marchio del Cacciatore gratis** modellato come Punizione
+     Divina/Evoca Destriero gratis del Paladino: `classResources.
+     huntersMarkFree` letto da `favoredEnemy[livello]`, incantesimo sempre
+     preparato via `spellsByLevel[1]`.
+   - **Competenza generalizzata per un conteggio variabile**: il Ladro dà
+     sempre 2 abilità, ma il Ranger ne dà 1 sola al 2° livello (Esploratore
+     Provetto) e 2 al 9° (Competenza) — `choicePoints.expertise` è passato da
+     un array di livelli a un array di `{level, count}`, con create.js e
+     levelup.js aggiornati per leggere il conteggio giusto invece del 2
+     fisso. Il Ladro (già in produzione) è stato migrato alla stessa forma;
+     verificato che i suoi due picker (1° e 6° livello, sempre 2) restano
+     identici.
+   - **Bug vero trovato e chiuso: un incantesimo "sempre preparato" dal 1°
+     livello poteva essere scelto di nuovo come preparato normale**. Il
+     Paladino non se ne accorgeva (i suoi due incantesimi gratuiti arrivano
+     dal 2° livello, dopo la creazione), ma il Ranger dà Marchio del
+     Cacciatore già al 1°: senza filtro comparirebbe anche fra gli
+     incantesimi preparabili nel wizard, sprecando una scelta su un
+     doppione. Esclusi in `create.js` (renderFinale) gli id in
+     `klass.spellsByLevel[CREATE_LEVEL]`, con una riga dedicata ("Sempre
+     preparato dalla classe: …") accanto a quella già esistente per Iniziato
+     alla Magia.
+   - **Bug vero trovato e chiuso: l'etichetta e il titolo del Grimorio erano
+     fissi su "Carisma"/"Tharion Velnar"**. Il valore numerico della card
+     era già corretto e generico (`view.spellAbilityModText`), ma la scritta
+     accanto restava sempre "Carisma" — invisibile finché tutti i caster
+     avevano CAR come caratteristica (Paladino); per un Ranger (Saggezza) la
+     card mostrava un\'etichetta sbagliata. Aggiunto `id="grim-cha-label"` e
+     `id="grim-char-name"` in `index.html`, valorizzati in `grimorio.js`
+     leggendo l\'etichetta giusta da `view.saves` (stessa italianizzazione
+     già usata per i Tiri Salvezza) e il nome vero del personaggio.
+     Verificato: Ranger di prova → "Saggezza" e "Grimorio — Test Ranger";
+     Tharion invariato ("Carisma", "Grimorio — Tharion Velnar").
+   - **Velocità (stesso debito del Monaco)**: Marcia Spedita (+10 piedi
+     mentre non si indossa un'armatura Pesante) richiede una condizione
+     diversa da quella del Monaco (qualunque armatura tranne quella Pesante,
+     non "nessuna armatura"). Generalizzato `speedBonusM`/`speedBonusGate`
+     in `engine.js` (rinominato da `unarmoredMovementM`, che restava
+     specifico del Monaco): `'unarmored'` (default, niente armatura né
+     scudo) oppure `'notHeavy'` (Ranger). Ancora non mostrata da nessuna
+     parte — stesso `spawn_task` già aperto per il Monaco.
+   - **Verifica end-to-end**: Ranger di prova a livello 9 (Cacciatore, arco
+     lungo) — Colpire/CD Incantesimi/slot corretti, Marchio del Cacciatore
+     gratis 4/4, Espero su Furtività (+12 invece di +8), velocità 12 m con
+     armatura leggera (9 base + 3 di Marcia Spedita, sbloccata dal livello
+     6). Giro completo del wizard da zero (Elfo, Ranger, Guida con Iniziato
+     alla Magia — lista del Druido, punteggi consigliati, 3 competenze di
+     classe + 2 dal background senza doppioni, pacchetto A, 2 maestrie,
+     incantesimi preparati senza il doppione di Marchio del Cacciatore):
+     personaggio creato con tutti i campi corretti. Tharion (Paladino)
+     verificato invariato dopo ogni modifica. Console pulita in ogni prova.
 6. [ ] **Chierico** (full) — Incanalare Divinità (campo già esiste), Dominio.
 7. [ ] **Druido** (full) — Forma Selvatica, Circolo.
 8. [ ] **Bardo** (full) — Ispirazione Bardica, Collegio.

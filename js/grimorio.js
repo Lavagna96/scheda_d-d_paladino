@@ -132,6 +132,8 @@
     var dcEl = document.getElementById('grim-dc');
     var atkEl = document.getElementById('grim-atk');
     var chaEl = document.getElementById('grim-cha');
+    var chaLabelEl = document.getElementById('grim-cha-label');
+    var nameEl = document.getElementById('grim-char-name');
     if (dcEl) {
       dcEl.textContent = view.spellDc;
     }
@@ -140,6 +142,20 @@
     }
     if (chaEl) {
       chaEl.textContent = view.spellAbilityModText;
+    }
+    /* Etichetta e titolo erano fissi su "Carisma"/"Tharion Velnar": invisibile
+       finché tutti i caster avevano CAR come caratteristica (Paladino), ma
+       sbagliato per il Ranger (Saggezza) e i prossimi caster a incantatore
+       pieno. La caratteristica giusta si legge da view.saves (stessa
+       etichetta italiana già usata per i Tiri Salvezza). */
+    if (chaLabelEl) {
+      var klass = (window.MANUAL_55.classes || {})[view.classId] || {};
+      var abilKey = klass.spellAbility || 'CAR';
+      var abilRow = (view.saves || []).filter(function (s) { return s.key === abilKey; })[0];
+      chaLabelEl.textContent = abilRow ? abilRow.label : 'Carisma';
+    }
+    if (nameEl) {
+      nameEl.textContent = view.name;
     }
     renderPrepCounter();
   }

@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 32,
+  version: 33,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -432,9 +432,10 @@ window.MANUAL_55 = {
       choicePoints: {
         subclass: 3, subclassFeatureLevels: [3, 9, 13, 17],
         asi: [4, 8, 10, 12, 16], epicBoon: 19,
-        // Competenza: 2 abilità al 1° livello, altre 2 al 6° (generico, vedi
-        // create.js/levelup.js).
-        expertise: [1, 6]
+        // Competenza: 2 abilità al 1° livello, altre 2 al 6° ({level,count}
+        // invece di un semplice array di livelli: il Ranger ne dà solo 1 al
+        // 2° livello, non sempre 2 — vedi create.js/levelup.js).
+        expertise: [{ level: 1, count: 2 }, { level: 6, count: 2 }]
       },
       /* Privilegi 1→20 (PHB 2024 p.128-130 del PDF): riassunti originali in
          italiano. trait:false = scelta gestita altrove (Competenza dal
@@ -545,7 +546,9 @@ window.MANUAL_55 = {
       casterType: 'none',
       martialArtsDie: [null, 'd6', 'd6', 'd6', 'd6', 'd8', 'd8', 'd8', 'd8', 'd8', 'd8', 'd10', 'd10', 'd10', 'd10', 'd10', 'd10', 'd12', 'd12', 'd12', 'd12'],
       focusPoints: [0, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-      unarmoredMovementM: [0, 0, 3, 3, 3, 3, 4.5, 4.5, 4.5, 4.5, 6, 6, 6, 6, 7.5, 7.5, 7.5, 7.5, 9, 9, 9],
+      // Rinominato da unarmoredMovementM (era specifico del nome, non del
+      // gate): stessa tabella, letta da klass.speedBonusM in engine.js.
+      speedBonusM: [0, 0, 3, 3, 3, 3, 4.5, 4.5, 4.5, 4.5, 6, 6, 6, 6, 7.5, 7.5, 7.5, 7.5, 9, 9, 9],
       unarmoredDefense: 'SAG',
       // A differenza del Barbaro, il Monaco perde il bonus di CA (e quello di
       // velocità, letto da js/engine.js) se impugna uno scudo — lo dice il PHB.
@@ -989,7 +992,147 @@ window.MANUAL_55 = {
       casterType: 'half', spellAbility: 'SAG',
       favoredEnemy: [0, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6],
       preparedByLevel: [0, 2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15],
-      slotLevelByLevel: [0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
+      slotLevelByLevel: [0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5],
+      // Nessuna colonna Maestria nella tabella dei privilegi (p.119): fissa a
+      // 2 tipi per tutta la progressione, come Paladino e Ladro.
+      weaponMastery: [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      weaponProf: ['sem', 'gue'],
+      extraAttacks: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      // Marcia Spedita (livello 6): +10 piedi di velocità mentre non indossi
+      // un'armatura Pesante (non "niente armatura", come il Monaco — da qui
+      // il gate diverso letto in engine.js).
+      speedBonusM: [0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+      speedBonusGate: 'notHeavy',
+      startingEquipment: {
+        a: {
+          label: 'Kit del ranger',
+          armorId: 'cuoio-borchiato', shield: false, weaponId: 'scimitarra',
+          extra: [
+            { name: 'Spada corta', qty: 1, weaponId: 'spada-corta' },
+            { name: 'Arco lungo', qty: 1, weaponId: 'arco-lungo' },
+            { name: 'Frecce', qty: 20, weight: 1, desc: 'In una faretra.' },
+            { name: 'Focus Druidico', qty: 1, weight: 0, desc: 'Un rametto di vischio, per gli incantesimi da ranger.' },
+            { name: 'Kit dell\'esploratore', qty: 1, weight: 55, desc: 'Zaino, giaciglio, 2 fiaschette d\'olio, razioni per 10 giorni, corda, acciarino, 10 torce, otre.' }
+          ],
+          coins: { mo: 7 }
+        },
+        b: { label: '150 monete d\'oro', coins: { mo: 150 } }
+      },
+      classResources: {
+        // Come Punizione Divina/Evoca Destriero gratis del Paladino: Marchio
+        // del Cacciatore lanciabile senza slot, tante volte quante la
+        // colonna Nemico Prescelto.
+        huntersMarkFree: { name: 'Marchio del Cacciatore (gratis)', kind: 'uses', byLevelRef: 'favoredEnemy', resetOn: 'long' }
+      },
+      choicePoints: {
+        fightingStyle: 2,
+        subclass: 3, subclassFeatureLevels: [3, 7, 11, 15],
+        asi: [4, 8, 12, 16], epicBoon: 19,
+        // Competenza: solo 1 abilità al 2° livello (Esploratore Provetto),
+        // 2 in più al 9° (Competenza) — non sempre 2 come per il Ladro.
+        expertise: [{ level: 2, count: 1 }, { level: 9, count: 2 }]
+      },
+      /* Incantesimo sempre preparato dalla classe (PHB 2024: Marchio del
+         Cacciatore dal 1° livello, gratis grazie a Nemico Prescelto). Stesso
+         formato di subclasses.spellsByLevel. */
+      spellsByLevel: {
+        1: [{ id: 'marchio-del-cacciatore', name: 'Marchio del Cacciatore' }]
+      },
+      /* Privilegi 1→20 (PHB 2024 p.118-120 del PDF): riassunti originali in
+         italiano. trait:false = scelta gestita altrove (Stile di
+         Combattimento/Competenza dal wizard, sottoclasse dal picker,
+         ASI/Dono Epico dal level-up). */
+      levelFeatures: {
+        1: [
+          { name: 'Incantesimi', desc: 'Impari a incanalare l\'essenza magica della natura. Prepari incantesimi da ranger di 1° livello o superiore (2 all\'inizio) usando la Saggezza come caratteristica da incantatore; puoi cambiarne uno a ogni riposo lungo.' },
+          { name: 'Nemico Prescelto', desc: 'Hai sempre preparato Marchio del Cacciatore e puoi lanciarlo senza spendere uno slot un numero di volte pari alla colonna Nemico Prescelto; recuperi tutti gli usi con un riposo lungo.' },
+          { name: 'Maestria nelle Armi', desc: 'Puoi usare la proprietà di maestria di due tipi di arma a tua scelta fra quelle in cui sei competente. Al riposo lungo puoi cambiare le armi scelte.' }
+        ],
+        2: [
+          { name: 'Esploratore Provetto', trait: false, desc: 'Ottieni Competenza in un\'abilità in cui sei già competente, e impari due lingue a tua scelta.' },
+          { name: 'Stile di Combattimento', trait: false, desc: 'Ottieni un talento di Stile di Combattimento a tua scelta (in alternativa, Guerriero Druidico: impari due trucchetti da druido, con Saggezza come caratteristica).' }
+        ],
+        3: [
+          { name: 'Sottoclasse del Ranger', trait: false, desc: 'Scegli una specializzazione (Cacciatore, Vagabondo Fatato, Cercatore d\'Ombre o Domatore di Bestie). Ottieni i suoi privilegi al tuo livello da ranger o inferiore.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        5: [
+          { name: 'Attacco Extra', trait: false, desc: 'Puoi attaccare due volte, invece di una, ogni volta che compi l\'azione di Attacco nel tuo turno.' }
+        ],
+        6: [
+          { name: 'Marcia Spedita', desc: 'La tua velocità aumenta di 3 metri mentre non indossi un\'armatura Pesante. Ottieni anche velocità di scalata e di nuoto pari alla tua velocità.' }
+        ],
+        7: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio della tua specializzazione.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        9: [
+          { name: 'Competenza', trait: false, desc: 'Ottieni Competenza in altre due abilità in cui sei già competente.' }
+        ],
+        10: [
+          { name: 'Instancabile', desc: 'Come azione magica puoi darti PF temporanei pari a 1d8 + il tuo modificatore di Saggezza (minimo 1); puoi usarlo un numero di volte pari al tuo modificatore di Saggezza (minimo 1), tutti recuperati al riposo lungo. Inoltre, a ogni riposo breve, il tuo livello di Sfinimento (se ne hai uno) scende di 1.' }
+        ],
+        11: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio della tua specializzazione.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        13: [
+          { name: 'Cacciatore Implacabile', desc: 'Subire danni non può più interrompere la tua concentrazione su Marchio del Cacciatore.' }
+        ],
+        14: [
+          { name: 'Velo della Natura', desc: 'Come azione bonus puoi diventare Invisibile fino alla fine del tuo prossimo turno. Puoi usarlo un numero di volte pari al tuo modificatore di Saggezza (minimo 1), tutti recuperati al riposo lungo.' }
+        ],
+        15: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni l\'ultimo privilegio della tua specializzazione.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        17: [
+          { name: 'Cacciatore Preciso', desc: 'Hai vantaggio ai tiri per colpire contro la creatura attualmente marcata dal tuo Marchio del Cacciatore.' }
+        ],
+        18: [
+          { name: 'Sensi Selvatici', desc: 'Ottieni Scorgimento (Blindsight) entro 9 metri.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono del Viaggio Dimensionale) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Flagello dei Nemici', desc: 'Il dado del danno extra di Marchio del Cacciatore diventa 1d10 invece di 1d6.' }
+        ]
+      },
+      /* Sottoclassi del Ranger: per ora solo Cacciatore (PHB p.126, la più
+         semplice delle quattro — solo scelte fra coppie di opzioni, nessuna
+         risorsa dedicata). Domatore di Bestie, Vagabondo Fatato e Cercatore
+         d'Ombre si aggiungono in seguito, stesso trattamento già dato alle
+         altre classi. */
+      subclasses: {
+        cacciatore: {
+          name: 'Cacciatore',
+          tenets: 'Proteggi la natura e le persone dalla distruzione.',
+          features: {
+            3: [
+              { name: 'Sapienza del Cacciatore', desc: 'Finché una creatura è marcata dal tuo Marchio del Cacciatore, sai se ha Immunità, Resistenze o Vulnerabilità, e quali.' },
+              { name: 'Preda del Cacciatore', desc: 'Scegli una fra due opzioni (la cambi a ogni riposo breve o lungo). Ammazzagiganti: una volta per turno, se colpisci con un\'arma un bersaglio che non è al massimo dei PF, infliggi 1d8 danni extra. Spezzabranco: una volta per turno, dopo un attacco con un\'arma, puoi attaccare di nuovo con la stessa arma un\'altra creatura entro 1,5 m dal primo bersaglio, nella gittata dell\'arma e non ancora attaccata questo turno.' }
+            ],
+            7: [
+              { name: 'Tattiche Difensive', desc: 'Scegli una fra due opzioni (la cambi a ogni riposo breve o lungo). Sfuggire alla Torma: gli attacchi di opportunità contro di te hanno svantaggio. Difesa dai Multiattacchi: quando una creatura ti colpisce con un attacco, ha svantaggio contro tutti gli altri tuoi attacchi questo turno.' }
+            ],
+            11: [
+              { name: 'Preda Superiore del Cacciatore', desc: 'Una volta per turno, quando infliggi danno a una creatura marcata dal tuo Marchio del Cacciatore, puoi infliggere anche il danno extra dell\'incantesimo a un\'altra creatura che vedi entro 9 m dalla prima.' }
+            ],
+            15: [
+              { name: 'Difesa Superiore del Cacciatore', desc: 'Quando subisci danno, puoi usare una reazione per darti Resistenza a quel tipo di danno (e a ogni altro danno dello stesso tipo) fino alla fine del turno corrente.' }
+            ]
+          }
+        }
+      }
     },
     stregone: {
       name: 'Stregone', hitDie: 'd6', primaryAbility: 'CAR', saves: ['COS', 'CAR'],

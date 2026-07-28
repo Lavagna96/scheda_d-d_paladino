@@ -88,8 +88,12 @@
     var needsStyle = cp.fightingStyle === nextLevel;
     var needsSubclass = cp.subclass === nextLevel;
     var needsEpicBoon = cp.epicBoon === nextLevel;
-    // Competenza (Ladro, 2 in più a un livello dato: 1° e 6° nel PHB).
-    var needsExpertise = (cp.expertise || []).indexOf(nextLevel) !== -1;
+    // Competenza: quante in più a questo livello (non sempre 2 — il Ranger
+    // ne dà 1 sola al 2° con Esploratore Provetto, 2 al 9° con Competenza).
+    var expertiseEntry = null;
+    (cp.expertise || []).forEach(function (e) { if (e.level === nextLevel) { expertiseEntry = e; } });
+    var needsExpertise = !!expertiseEntry;
+    var expertiseCount = expertiseEntry ? expertiseEntry.count : 0;
 
     /* bozza di scelte correnti (non ancora applicata allo stato) */
     var choice = {
@@ -270,7 +274,7 @@
       if (needsSubclass && Object.keys(klass.subclasses || {}).length > 1 && !choice.subclassId) {
         ok = false;
       }
-      if (needsExpertise && choice.expertiseIds.length !== 2) {
+      if (needsExpertise && choice.expertiseIds.length !== expertiseCount) {
         ok = false;
       }
       confirmBtn.disabled = !ok;
@@ -436,11 +440,11 @@
       return wrap;
     }
 
-    /* ---------- sezione Competenza (Ladro: 2 in più, es. al 6° livello) ---------- */
+    /* ---------- sezione Competenza (quante dipende da expertiseCount) ---------- */
 
     function buildExpertiseSection() {
       var wrap = el('div');
-      wrap.appendChild(el('div', 'edit-section-label', 'Competenza — scegline 2'));
+      wrap.appendChild(el('div', 'edit-section-label', 'Competenza — scegline ' + expertiseCount));
       var already = character.expertiseSkills || [];
       var eligible = (character.profSkills || []).filter(function (id) {
         return already.indexOf(id) === -1;
@@ -457,13 +461,13 @@
           var idx = choice.expertiseIds.indexOf(id);
           if (idx !== -1) {
             choice.expertiseIds.splice(idx, 1);
-          } else if (choice.expertiseIds.length < 2) {
+          } else if (choice.expertiseIds.length < expertiseCount) {
             choice.expertiseIds.push(id);
           }
           Object.keys(chipEls).forEach(function (chipId) {
             var isOn = choice.expertiseIds.indexOf(chipId) !== -1;
             chipEls[chipId].classList.toggle('on', isOn);
-            var disable = choice.expertiseIds.length >= 2 && !isOn;
+            var disable = choice.expertiseIds.length >= expertiseCount && !isOn;
             chipEls[chipId].disabled = disable;
             chipEls[chipId].classList.toggle('is-disabled', disable);
           });
