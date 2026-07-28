@@ -1508,6 +1508,69 @@ window.MANUAL_55 = {
     }
   },
 
+  /* Ascendenze draconiche (PHB 2024, tabella "Draconic Ancestors" p.186-187):
+     scelta al livello 1 dal Dragonide (Blocco 5.B, step Specie), determina il
+     tipo di danno di Soffio e Resistenza al Danno — vedi js/create.js
+     (renderAncestry), js/engine.js (breath.damageType) e js/traits.js
+     ({{dragon_ancestor}}/{{dragon_damage}}). */
+  dragonAncestors: {
+    nero: { name: 'Nero', dmg: 'Acido' },
+    blu: { name: 'Blu', dmg: 'Fulmine' },
+    ottone: { name: 'Ottone', dmg: 'Fuoco' },
+    bronzo: { name: 'Bronzo', dmg: 'Fulmine' },
+    rame: { name: 'Rame', dmg: 'Acido' },
+    oro: { name: 'Oro', dmg: 'Fuoco' },
+    verde: { name: 'Verde', dmg: 'Veleno' },
+    argento: { name: 'Argento', dmg: 'Freddo' },
+    rosso: { name: 'Rosso', dmg: 'Fuoco' },
+    bianco: { name: 'Bianco', dmg: 'Freddo' }
+  },
+
+  /* Retaggio Elfico (PHB 2024, tabella "Elven Lineages" p.189-190): scelto al
+     livello 1 dall'Elfo, determina trucchetto, scurovisione ed eventuale
+     bonus di velocità (Elfo dei Boschi), più un incantesimo sempre preparato
+     ai livelli 3 e 5 (1 lancio gratis a riposo lungo). Vedi js/create.js
+     (renderElfLineage), js/engine.js (speedM) e js/traits.js. */
+  elfLineages: {
+    drow: { name: 'Drow', cantrip: 'Luci Danzanti', darkvisionM: 36, level3: 'Fuoco Fatuo', level5: 'Oscurità' },
+    alto: { name: 'Elfo Alto', cantrip: 'Prestidigitazione (sostituibile a ogni riposo lungo)', darkvisionM: 18, level3: 'Individuazione del Magico', level5: 'Passo nella Nebbia' },
+    boschi: { name: 'Elfo dei Boschi', cantrip: 'Druidismo', darkvisionM: 18, speedBonusM: 1.5, level3: 'Incedere Spedito', level5: 'Passo senza Tracce' }
+  },
+
+  /* Ascendenza dei Giganti (PHB 2024, p.191-192): dono scelto al livello 1 dal
+     Goliath, usi pari al bonus di competenza per riposo lungo (risorsa
+     dinamica in js/engine.js, come la Furia del Barbaro). */
+  goliathGifts: {
+    nube: { name: 'Nube', desc: 'Azione bonus: ti teletrasporti fino a 9 m in uno spazio libero che vedi.' },
+    fuoco: { name: 'Fuoco', desc: 'Quando colpisci con un attacco e infliggi danno, aggiungi 1d10 danni Fuoco.' },
+    gelo: { name: 'Gelo', desc: 'Quando colpisci con un attacco e infliggi danno, aggiungi 1d6 danni Freddo e riduci la velocità del bersaglio di 3 m fino all\'inizio del tuo prossimo turno.' },
+    colle: { name: 'Colle', desc: 'Quando colpisci con un attacco una creatura Grande o più piccola e infliggi danno, puoi renderla Prona.' },
+    pietra: { name: 'Pietra', desc: 'Quando subisci danno, reazione: tiri 1d12 + mod. Costituzione e riduci il danno subito di quel totale.' },
+    tempesta: { name: 'Tempesta', desc: 'Quando subisci danno da una creatura entro 18 m, reazione: le infliggi 1d8 danni Tuono.' }
+  },
+
+  /* Retaggio Infernale (PHB 2024, tabella "Fiendish Legacies" p.196): scelto
+     al livello 1 dal Tiefling, dà resistenza a un tipo di danno e un
+     trucchetto, più un incantesimo sempre preparato ai livelli 3 e 5 (1
+     lancio gratis a riposo lungo). NOTA: nel PDF sorgente la cella
+     dell'incantesimo di 5° livello del Retaggio Infernale risulta assente dal
+     testo estratto (probabile difetto del file, non un dato omesso di
+     proposito) — da verificare quando possibile, per ora resta null. */
+  tieflingLegacies: {
+    abissale: { name: 'Abissale', resist: 'Veleno', cantrip: 'Spruzzo di Veleno', level3: 'Raggio Nauseante', level5: 'Immobilizzare Persona' },
+    ctonio: { name: 'Ctonio', resist: 'Necrotico', cantrip: 'Tocco Agghiacciante', level3: 'Falsa Vita', level5: 'Raggio di Indebolimento' },
+    infernale: { name: 'Infernale', resist: 'Fuoco', cantrip: 'Dardo di Fuoco', level3: 'Rimprovero Infernale', level5: null }
+  },
+
+  /* Retaggio Gnomesco (PHB 2024, p.190-191): scelto al livello 1 dallo Gnomo.
+     Gnomo dei Boschi ha in più un incantesimo sempre preparato con usi pari
+     al bonus di competenza per riposo lungo (risorsa dinamica come il Dono
+     del Goliath); Gnomo delle Rocce resta puramente descrittivo (congegni). */
+  gnomeLineages: {
+    boschi: { name: 'Gnomo dei Boschi', cantrip: 'Illusione Minore', preparedSpell: 'Parlare con gli Animali' },
+    rocce: { name: 'Gnomo delle Rocce', cantrip: 'Riparare e Prestidigitazione', desc: 'Con Prestidigitazione (10 minuti) crei un piccolo congegno a orologeria (max 3 contemporaneamente).' }
+  },
+
   species: {
     aasimar: {
       name: 'Aasimar', size: 'Media o Piccola', speedM: 9,
@@ -1522,9 +1585,9 @@ window.MANUAL_55 = {
     dragonide: {
       name: 'Dragonide', size: 'Media', speedM: 9,
       traits: [
-        { name: 'Ascendenza Draconica', trait: false, desc: 'Scegli il drago progenitore: determina il tipo di danno di soffio e resistenza (es. Oro = fuoco).' },
-        { name: 'Soffio', desc: 'Sostituisce un attacco dell\'azione Attacco: cono di 4,5 m o linea di 9 m; TS Destrezza (CD 8 + mod. Cos + bonus competenza), 1d10 danni del tipo dell\'ascendenza (2d10 al livello 5, 3d10 all\'11, 4d10 al 17), dimezzati se superato. Usi pari al bonus di competenza per riposo lungo.' },
-        { name: 'Resistenza al Danno', desc: 'Resistenza al tipo di danno della tua ascendenza.' },
+        { name: 'Ascendenza Draconica', trait: false, desc: 'Drago progenitore: {{dragon_ancestor}}. Determina il tipo di danno di Soffio e Resistenza ({{dragon_damage}}).' },
+        { name: 'Soffio', desc: 'Sostituisce un attacco dell\'azione Attacco: cono di 4,5 m o linea di 9 m; TS Destrezza (CD 8 + mod. Cos + bonus competenza), 1d10 danni {{dragon_damage}} (2d10 al livello 5, 3d10 all\'11, 4d10 al 17), dimezzati se superato. Usi pari al bonus di competenza per riposo lungo.' },
+        { name: 'Resistenza al Danno', desc: 'Resistenza ai danni {{dragon_damage}}.' },
         { name: 'Scurovisione', desc: '18 metri.' },
         { name: 'Volo Draconico', minLevel: 5, desc: 'Dal livello 5, azione bonus: ali spettrali per 10 minuti, velocità di volo pari alla velocità. 1/riposo lungo.' }
       ]
@@ -1532,10 +1595,10 @@ window.MANUAL_55 = {
     elfo: {
       name: 'Elfo', size: 'Media', speedM: 9,
       traits: [
-        { name: 'Scurovisione', desc: '18 metri.' },
-        { name: 'Retaggio Elfico', desc: 'Scegli Drow (Luci Danzanti; scurovisione 36 m), Elfo Alto (Prestidigitazione, sostituibile a ogni riposo lungo) o Elfo dei Boschi (velocità 10,5 m; Druidismo). Ai livelli 3 e 5 impari un incantesimo sempre preparato, con 1 lancio gratis per riposo lungo.' },
+        { name: 'Scurovisione', desc: '{{elf_darkvision}} metri.' },
+        { name: 'Retaggio Elfico', desc: 'Retaggio: {{elf_lineage}}. Trucchetto: {{elf_cantrip}}.{{elf_higher_spell}}' },
         { name: 'Ascendenza Fatata', desc: 'Vantaggio ai TS per evitare o terminare Affascinato.' },
-        { name: 'Sensi Acuti', desc: 'Competenza in Intuizione, Percezione o Sopravvivenza.' },
+        { name: 'Sensi Acuti', desc: 'Competenza in {{elf_skill}}.' },
         { name: 'Trance', desc: 'Non dormi e la magia non può addormentarti; riposo lungo in 4 ore di meditazione.' }
       ]
     },
@@ -1544,13 +1607,13 @@ window.MANUAL_55 = {
       traits: [
         { name: 'Scurovisione', desc: '18 metri.' },
         { name: 'Astuzia Gnomesca', desc: 'Vantaggio ai TS di Intelligenza, Saggezza e Carisma.' },
-        { name: 'Retaggio Gnomesco', desc: 'Gnomo dei Boschi: Illusione Minore e Parlare con gli Animali sempre preparato (lanci gratis pari al bonus di competenza per riposo lungo). Gnomo delle Rocce: Riparare e Prestidigitazione, con cui crei piccoli congegni a orologeria (max 3).' }
+        { name: 'Retaggio Gnomesco', desc: 'Retaggio: {{gnome_lineage}}. Trucchetto/i: {{gnome_cantrip}}.{{gnome_extra}}' }
       ]
     },
     goliath: {
       name: 'Goliath', size: 'Media (2,1–2,4 m)', speedM: 10.5,
       traits: [
-        { name: 'Ascendenza dei Giganti', desc: 'Scegli un dono (usi pari al bonus di competenza per riposo lungo): Nube (teletrasporto 9 m, az. bonus), Fuoco (+1d10 fuoco a un colpo), Gelo (+1d6 freddo e −3 m di velocità), Colle (Prono a creatura Grande o inferiore colpita), Pietra (reazione: riduci il danno subito di 1d12 + mod. Cos), Tempesta (reazione: 1d8 tuono a chi ti danneggia entro 18 m).' },
+        { name: 'Ascendenza dei Giganti', desc: 'Dono: {{goliath_gift}}. {{goliath_gift_desc}} Usi pari al bonus di competenza per riposo lungo.' },
         { name: 'Forma Grande', desc: 'Dal livello 5, azione bonus: diventi Grande per 10 minuti, vantaggio alle prove di Forza e +3 m di velocità. 1/riposo lungo.' },
         { name: 'Costituzione Possente', desc: 'Vantaggio ai TS per terminare Afferrato; conti come una taglia più grande per la capacità di carico.' }
       ]
@@ -1585,7 +1648,7 @@ window.MANUAL_55 = {
       name: 'Tiefling', size: 'Media o Piccola', speedM: 9,
       traits: [
         { name: 'Scurovisione', desc: '18 metri.' },
-        { name: 'Retaggio Infernale', desc: 'Scegli Abissale, Ctonio o Infernale: un trucchetto al livello 1, poi ai livelli 3 e 5 un incantesimo sempre preparato con 1 lancio gratis per riposo lungo.' },
+        { name: 'Retaggio Infernale', desc: 'Retaggio: {{tiefling_legacy}}. Resistenza ai danni {{tiefling_damage}}. Trucchetto: {{tiefling_cantrip}}.{{tiefling_higher_spell}}' },
         { name: 'Presenza Ultraterrena', desc: 'Conosci il trucchetto Taumaturgia.' }
       ]
     },

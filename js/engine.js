@@ -219,19 +219,19 @@
     var acNote = (armor ? armor.label : 'Senza armatura') +
                  (ch.armor && ch.armor.shield ? ' + Scudo' : '');
 
-    /* Velocità (dati presenti da tempo — klass.speedBonusM, species.speedM —
-       ma mai calcolati né esposti prima: nessuna vista della scheda mostra
-       ancora la velocità, quindi il numero resta nel derive finché non se ne
-       decide la presentazione. Due condizioni diverse secondo la classe:
-       'unarmored' (default, Monaco) = niente armatura né scudo; 'notHeavy'
-       (Ranger, Marcia Spedita) = qualunque armatura tranne quella Pesante. */
+    /* Velocità: due condizioni diverse secondo la classe: 'unarmored'
+       (default, Monaco) = niente armatura né scudo; 'notHeavy' (Ranger,
+       Marcia Spedita) = qualunque armatura tranne quella Pesante. L'Elfo dei
+       Boschi aggiunge 1,5 m dal suo Retaggio Elfico (js/create.js, scelta
+       specie). */
     var species = manual.species[ch.speciesId] || {};
+    var elfLineage = (manual.elfLineages || {})[ch.elfLineageId];
     var hasShield = !!(ch.armor && ch.armor.shield);
     var speedGateOk = klass.speedBonusGate === 'notHeavy'
       ? (!armor || armor.cat !== 'pesante')
       : (!hasArmor && !hasShield);
     var speedBonus = (speedGateOk && klass.speedBonusM) ? (klass.speedBonusM[ch.level] || 0) : 0;
-    var speedM = (species.speedM || 9) + speedBonus;
+    var speedM = (species.speedM || 9) + speedBonus + (elfLineage ? (elfLineage.speedBonusM || 0) : 0);
 
     var initiative = mods.DES + modSum(ch, 'iniziativa');
 
@@ -260,10 +260,15 @@
 
     var slots = (manual.slotTables[klass.casterType] || [])[ch.level] || [];
 
+    // Tipo di danno del Soffio/Resistenza: dall'ascendenza draconica scelta
+    // alla creazione (js/create.js); 'fuoco' come ripiego per personaggi
+    // creati prima di questa scelta (Blocco 5.B).
+    var dragonAncestor = (manual.dragonAncestors || {})[ch.dragonAncestryId];
     var breath = {
       dc: 8 + mods.COS + pb,
       dice: breathDice(ch.level),
-      uses: pb
+      uses: pb,
+      damageType: dragonAncestor ? dragonAncestor.dmg.toLowerCase() : 'fuoco'
     };
 
     var resources = [];
@@ -272,10 +277,26 @@
     }
     resources.push({ key: 'hd', max: ch.level, ctx: ch.level + (klass.hitDie || 'd8') });
     if (ch.speciesId === 'dragonide') {
-      resources.push({ key: 'breath', max: breath.uses, ctx: breath.dice + ' fuoco' });
+      resources.push({ key: 'breath', max: breath.uses, ctx: breath.dice + ' ' + breath.damageType });
       if (ch.level >= 5) {
         resources.push({ key: 'flight', max: 1 });
       }
+    }
+    /* Dono dell'Ascendenza dei Giganti (Goliath) e incantesimo sempre
+       preparato dello Gnomo dei Boschi: stesso schema del Soffio, card
+       dinamica (js/stats.js) perché il nome/testo dipende dalla scelta fatta
+       alla creazione (js/create.js). */
+    if (ch.speciesId === 'goliath') {
+      var goliathGift = (manual.goliathGifts || {})[ch.goliathGiftId];
+      if (goliathGift) {
+        resources.push({ key: 'goliathGift', max: pb, resetOn: 'long',
+          name: 'Dono: ' + goliathGift.name, ctx: goliathGift.desc });
+      }
+    }
+    if (ch.speciesId === 'gnomo' && ch.gnomeLineageId === 'boschi') {
+      var gnomeLineage = (manual.gnomeLineages || {})[ch.gnomeLineageId];
+      resources.push({ key: 'gnomeSpeak', max: pb, resetOn: 'long',
+        name: gnomeLineage.preparedSpell, ctx: 'usi senza slot' });
     }
     /* Risorse di classe a "usi" (res-card) dai dati, nell'ordine dichiarato;
        i 'pool' (es. Imposizione delle Mani) non sono res-card: vanno in poolMax. */

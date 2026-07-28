@@ -26,6 +26,7 @@ window.APP_CONFIG = {
       level: 7,
       speciesId: 'dragonide',
       speciesLabel: 'Dragonide d\'Oro',
+      dragonAncestryId: 'oro',
       avatar: '✦',
       /* Ritratti di Tharion: stanno nei SUOI default, non più fissi nell'HTML,
          altrimenti ogni personaggio nuovo si apriva con la sua faccia (5.B.3).

@@ -324,8 +324,10 @@
     var breathRow = breathHit ? breathHit.closest('tr') : null;
     if (breathRow) { breathRow.classList.toggle('hidden', !hasBreath); }
     if (hasBreath) {
+      setText('atk-breath-name', 'Soffio (' + view.breath.damageType.charAt(0).toUpperCase() +
+        view.breath.damageType.slice(1) + ')');
       setText('atk-breath-hit', 'TS DES ' + view.breath.dc);
-      setText('atk-breath-dmg', view.breath.dice + ' fuoco');
+      setText('atk-breath-dmg', view.breath.dice + ' ' + view.breath.damageType);
     }
 
     // "Attacco Extra: N colpi": generico da klass.extraAttacks[livello] (colpi

@@ -29,14 +29,81 @@
     });
   }
 
+  // Frase dell'incantesimo di livello 3/5 sempre preparato (Elfo/Tiefling):
+  // solo le clausole già sbloccate al livello corrente, mai un incantesimo
+  // che il personaggio non ha ancora imparato. `level5` può mancare dal dato
+  // (vedi tieflingLegacies.infernale, cella assente nel PDF sorgente): in tal
+  // caso, se il livello lo richiederebbe, lo segnala invece di inventarlo.
+  function higherSpellText(entry, level) {
+    if (!entry) {
+      return '';
+    }
+    var parts = [];
+    if (level >= 3 && entry.level3) {
+      parts.push(entry.level3 + ' (dal 3° livello)');
+    }
+    if (level >= 5) {
+      if (entry.level5) {
+        parts.push(entry.level5 + ' (dal 5°)');
+      } else if (entry.level5 === null) {
+        parts.push('incantesimo di 5° livello da verificare sul manuale');
+      }
+    }
+    if (!parts.length) {
+      return ' Ai livelli 3 e 5 impari un incantesimo sempre preparato (1 lancio gratis a riposo lungo).';
+    }
+
+    return ' Incantesimo sempre preparato: ' + parts.join(', ') + ' (1 lancio gratis a riposo lungo ciascuno).';
+  }
+
+  var ELF_SKILL_LABELS = { intuizione: 'Intuizione', percezione: 'Percezione', sopravvivenza: 'Sopravvivenza' };
+
   function buildTemplateCtx(view, character) {
+    var manual = window.MANUAL_55 || {};
+    var level = character.level;
+
+    var dragonAncestor = (manual.dragonAncestors || {})[character.dragonAncestryId];
+    var elfLineage = (manual.elfLineages || {})[character.elfLineageId];
+    var goliathGift = (manual.goliathGifts || {})[character.goliathGiftId];
+    var tieflingLegacy = (manual.tieflingLegacies || {})[character.tieflingLegacyId];
+    var gnomeLineage = (manual.gnomeLineages || {})[character.gnomeLineageId];
+
+    var gnomeExtra = '';
+    if (gnomeLineage && character.gnomeLineageId === 'boschi') {
+      gnomeExtra = ' Incantesimo sempre preparato: ' + gnomeLineage.preparedSpell +
+        ' (usi pari al bonus di competenza per riposo lungo).';
+    } else if (gnomeLineage && gnomeLineage.desc) {
+      gnomeExtra = ' ' + gnomeLineage.desc;
+    }
+
     return {
       mod_car: window.AppEngine.formatMod(view.mods.CAR),
       aura_bonus: view.aura.text,
       aura_range_m: view.aura.rangeM,
       sacred_weapon_bonus: view.sacredWeaponText,
       prof_bonus: view.profBonus,
-      level: character.level
+      level: level,
+
+      dragon_ancestor: dragonAncestor ? dragonAncestor.name : 'non scelta',
+      dragon_damage: dragonAncestor ? dragonAncestor.dmg.toLowerCase() : 'del tipo scelto',
+
+      elf_lineage: elfLineage ? elfLineage.name : 'non scelto',
+      elf_cantrip: elfLineage ? elfLineage.cantrip : 'nessuno',
+      elf_darkvision: elfLineage ? elfLineage.darkvisionM : 18,
+      elf_higher_spell: higherSpellText(elfLineage, level),
+      elf_skill: character.elfSkillId ? ELF_SKILL_LABELS[character.elfSkillId] : 'Intuizione, Percezione o Sopravvivenza (a scelta)',
+
+      goliath_gift: goliathGift ? goliathGift.name : 'non scelto',
+      goliath_gift_desc: goliathGift ? goliathGift.desc : '',
+
+      tiefling_legacy: tieflingLegacy ? tieflingLegacy.name : 'non scelto',
+      tiefling_damage: tieflingLegacy ? tieflingLegacy.resist.toLowerCase() : 'del tipo scelto',
+      tiefling_cantrip: tieflingLegacy ? tieflingLegacy.cantrip : 'nessuno',
+      tiefling_higher_spell: higherSpellText(tieflingLegacy, level),
+
+      gnome_lineage: gnomeLineage ? gnomeLineage.name : 'non scelto',
+      gnome_cantrip: gnomeLineage ? gnomeLineage.cantrip : 'nessuno',
+      gnome_extra: gnomeExtra
     };
   }
 

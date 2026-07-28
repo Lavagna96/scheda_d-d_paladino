@@ -56,6 +56,10 @@
   // implementati (b2.4+) non hanno ancora un campo dedicato qui.
   var draft = {
     name: '', speciesId: null, classId: null,
+    // Scelte legate alla specie (5.B.6), una per ogni specie che ne prevede
+    // una nel manuale — vedi SPECIES_REQUIRED_CHOICE e renderSpeciesChoice.
+    dragonAncestryId: null, elfLineageId: null, elfSkillId: null,
+    goliathGiftId: null, tieflingLegacyId: null, gnomeLineageId: null,
     scoreMethod: 'pointbuy',
     abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 },
     profSkills: [],
@@ -357,7 +361,10 @@
   function stepValid() {
     var step = STEPS[stepIndex];
     if (step.id === 'specie') {
-      return !!draft.speciesId && draft.name.trim().length > 0;
+      var requiredFields = SPECIES_REQUIRED_CHOICE[draft.speciesId] || [];
+      var choicesOk = requiredFields.every(function (f) { return !!draft[f]; });
+
+      return !!draft.speciesId && draft.name.trim().length > 0 && choicesOk;
     }
     if (step.id === 'classe') {
       return !!draft.classId;
@@ -478,6 +485,14 @@
     var list = el('div', 'create-tile-list');
     container.appendChild(list);
 
+    var choiceBox = el('div');
+    container.appendChild(choiceBox);
+
+    // Campi del draft da azzerare quando si cambia specie (nessuna scelta
+    // di una specie precedente resta valida per quella nuova).
+    var SPECIES_CHOICE_FIELDS = ['dragonAncestryId', 'elfLineageId', 'elfSkillId',
+      'goliathGiftId', 'tieflingLegacyId', 'gnomeLineageId'];
+
     Object.keys(window.MANUAL_55.species).forEach(function (id) {
       var sp = window.MANUAL_55.species[id];
       var meta = sp.size || '';
@@ -487,16 +502,90 @@
       var tile = buildTile(sp.name, meta, id === draft.speciesId);
 
       tile.addEventListener('click', function () {
+        if (draft.speciesId !== id) {
+          SPECIES_CHOICE_FIELDS.forEach(function (f) { draft[f] = null; });
+        }
         draft.speciesId = id;
         list.querySelectorAll('.create-tile').forEach(function (t) {
           t.classList.toggle('on', t === tile);
         });
+        renderSpeciesChoice();
         updateNav();
       });
 
       list.appendChild(tile);
     });
+
+    // Select generico "scegli tra le chiavi di una tabella del manuale":
+    // usato per ascendenza draconica, retaggio elfico/gnomesco, dono del
+    // Goliath e retaggio infernale — stessa UI (menu a tendina), stesso
+    // comportamento (nessuna preselezione, valore in draft[field]).
+    function appendChoiceSelect(labelText, table, getOptionLabel, field) {
+      choiceBox.appendChild(el('div', 'create-label', labelText));
+      var select = document.createElement('select');
+      select.className = 'edit-select';
+      var placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = '— scegli —';
+      select.appendChild(placeholder);
+      Object.keys(table).forEach(function (id) {
+        var opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = getOptionLabel(table[id]);
+        if (draft[field] === id) {
+          opt.selected = true;
+        }
+        select.appendChild(opt);
+      });
+      select.addEventListener('change', function () {
+        draft[field] = select.value || null;
+        updateNav();
+      });
+      choiceBox.appendChild(select);
+    }
+
+    // Scelte legate alla specie (5.B.6): ognuna determina un tipo di danno,
+    // una velocità o una risorsa che poi si riflette davvero in scheda
+    // (js/engine.js, js/stats.js) e nelle descrizioni dei tratti
+    // (js/traits.js), non solo testo informativo.
+    function renderSpeciesChoice() {
+      choiceBox.textContent = '';
+      var manual = window.MANUAL_55;
+
+      if (draft.speciesId === 'dragonide') {
+        appendChoiceSelect('Ascendenza draconica', manual.dragonAncestors || {},
+          function (a) { return a.name + ' — ' + a.dmg; }, 'dragonAncestryId');
+      } else if (draft.speciesId === 'elfo') {
+        appendChoiceSelect('Retaggio Elfico', manual.elfLineages || {},
+          function (l) { return l.name; }, 'elfLineageId');
+        appendChoiceSelect('Sensi Acuti — competenza', {
+          intuizione: { label: 'Intuizione' }, percezione: { label: 'Percezione' },
+          sopravvivenza: { label: 'Sopravvivenza' }
+        }, function (s) { return s.label; }, 'elfSkillId');
+      } else if (draft.speciesId === 'goliath') {
+        appendChoiceSelect('Dono dell\'Ascendenza dei Giganti', manual.goliathGifts || {},
+          function (g) { return g.name; }, 'goliathGiftId');
+      } else if (draft.speciesId === 'tiefling') {
+        appendChoiceSelect('Retaggio Infernale', manual.tieflingLegacies || {},
+          function (l) { return l.name + ' — resistenza ' + l.resist; }, 'tieflingLegacyId');
+      } else if (draft.speciesId === 'gnomo') {
+        appendChoiceSelect('Retaggio Gnomesco', manual.gnomeLineages || {},
+          function (l) { return l.name; }, 'gnomeLineageId');
+      }
+    }
+
+    renderSpeciesChoice();
   }
+
+  // Le specie con una scelta obbligatoria allo step Specie (5.B.6): id del
+  // campo draft richiesto, o due campi per l'Elfo (retaggio + Sensi Acuti).
+  var SPECIES_REQUIRED_CHOICE = {
+    dragonide: ['dragonAncestryId'],
+    elfo: ['elfLineageId', 'elfSkillId'],
+    goliath: ['goliathGiftId'],
+    tiefling: ['tieflingLegacyId'],
+    gnomo: ['gnomeLineageId']
+  };
 
   function renderClasse(container) {
     // Lista tile: una per classe del manuale (window.MANUAL_55.classes). Non
@@ -1457,6 +1546,14 @@
       level: CREATE_LEVEL,
       speciesId: draft.speciesId,
       speciesLabel: species.name || '',
+      // Scelte legate alla specie (5.B.6): ognuna vale solo per la specie a
+      // cui appartiene, mai riportata da una scelta precedente.
+      dragonAncestryId: draft.speciesId === 'dragonide' ? draft.dragonAncestryId : null,
+      elfLineageId: draft.speciesId === 'elfo' ? draft.elfLineageId : null,
+      elfSkillId: draft.speciesId === 'elfo' ? draft.elfSkillId : null,
+      goliathGiftId: draft.speciesId === 'goliath' ? draft.goliathGiftId : null,
+      tieflingLegacyId: draft.speciesId === 'tiefling' ? draft.tieflingLegacyId : null,
+      gnomeLineageId: draft.speciesId === 'gnomo' ? draft.gnomeLineageId : null,
       avatar: '✦',
       // Punteggi finali: quelli distribuiti nel passo Punteggi più gli aumenti
       // del background (5.B.4).
@@ -1464,8 +1561,12 @@
       backgroundId: draft.backgroundId,
       backgroundName: bg ? bg.name : '',
       profSaves: (klass.saves || []).slice(),
-      // Competenze: quelle scelte dalla classe più le due del background.
-      profSkills: (draft.profSkills || []).concat(bgSkills()),
+      // Competenze: quelle scelte dalla classe, le due del background, e —
+      // per l'Elfo — l'abilità di Sensi Acuti (Intuizione/Percezione/
+      // Sopravvivenza), senza doppioni se già competente per un'altra via.
+      profSkills: (draft.profSkills || []).concat(bgSkills())
+        .concat(draft.speciesId === 'elfo' && draft.elfSkillId ? [draft.elfSkillId] : [])
+        .filter(function (id, i, arr) { return arr.indexOf(id) === i; }),
       profTools: bg ? [bg.tool || draft.bgTool.trim()].filter(Boolean) : [],
       // Competenza (Ladro, Ranger): solo se la classe la dà al livello 1.
       expertiseSkills: expertiseEntryFor(klass.choicePoints, CREATE_LEVEL)
@@ -1721,6 +1822,8 @@
     stepIndex = 0;
     draft = {
       name: '', speciesId: null, classId: null,
+      dragonAncestryId: null, elfLineageId: null, elfSkillId: null,
+      goliathGiftId: null, tieflingLegacyId: null, gnomeLineageId: null,
       scoreMethod: 'pointbuy',
       abilities: { FOR: 8, DES: 8, COS: 8, INT: 8, SAG: 8, CAR: 8 },
       profSkills: [],
