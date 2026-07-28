@@ -34,6 +34,11 @@
     });
   }
 
+  /* Pallino di competenza (e il suo raddoppio per l'Espero, .master): righe
+     statiche in index.html per i tiri salvezza, ma il pallino e il colore
+     oro prima erano fissi su quelli di Tharion per ogni personaggio — qui
+     diventano dati (v.prof). Nessun tiro salvezza dà mai Espero, quindi
+     'master' non si usa in questa funzione. */
   function renderSaves(view) {
     document.querySelectorAll('[data-save]').forEach(function (row) {
       var s = null;
@@ -45,25 +50,88 @@
       if (!s) {
         return;
       }
+      var lbl = row.querySelector('.lbl');
       var v = row.querySelector('.v');
+      var dot = row.querySelector('.skill-dot');
       if (v) {
         v.textContent = s.text;
+        v.classList.toggle('prof', s.prof);
+      }
+      if (lbl) {
+        lbl.classList.toggle('prof', s.prof);
+      }
+      if (dot) {
+        dot.hidden = !s.prof;
       }
     });
     setText('ts-aura-note', 'Aura ' + view.aura.text + ' inclusa');
   }
 
+  /* Riga di un'abilità (Alternativa 2, 5.C Ladro): pallino singolo se
+     competente, doppio (.master) se ha anche Espero — stesso markup delle
+     righe statiche di prima, solo costruito dai dati invece che scritto a
+     mano per Tharion. */
+  function buildSkillRow(sk) {
+    var row = document.createElement('div');
+    row.className = 'stat-row';
+    row.setAttribute('data-skill', sk.id);
+
+    var lbl = document.createElement('span');
+    lbl.className = sk.prof ? 'lbl prof' : 'lbl';
+    var dot = document.createElement('span');
+    dot.className = sk.expertise ? 'skill-dot master' : 'skill-dot';
+    dot.hidden = !sk.prof;
+    lbl.appendChild(dot);
+    lbl.appendChild(document.createTextNode(sk.label + ' '));
+    var dim = document.createElement('span');
+    dim.className = 'dim';
+    dim.textContent = '(' + sk.abilShort + ')';
+    lbl.appendChild(dim);
+    row.appendChild(lbl);
+
+    var v = document.createElement('span');
+    v.className = sk.prof ? 'v prof' : 'v';
+    v.textContent = sk.text;
+    row.appendChild(v);
+
+    return row;
+  }
+
+  function buildSkillGroupHead(label) {
+    var head = document.createElement('div');
+    head.className = 'skill-group-head';
+    var plaque = document.createElement('span');
+    plaque.className = 'skill-group-label';
+    plaque.textContent = label;
+    var line = document.createElement('span');
+    line.className = 'skill-group-line';
+    head.appendChild(plaque);
+    head.appendChild(line);
+
+    return head;
+  }
+
+  /* Le 18 abilità del gioco (window.AppEngine.SKILLS) invece delle 9 fisse
+     di prima: competenti in cima (targhetta "Competenti"), le altre sotto
+     ("Altre abilità") — stesso linguaggio della scheda Risorse (Riposo
+     breve/lungo). La lista si ricostruisce a ogni render: sono 18 righe,
+     non serve una diff più furba. */
   function renderSkills(view) {
-    document.querySelectorAll('[data-skill]').forEach(function (row) {
-      var sk = view.skills[row.getAttribute('data-skill')];
-      if (!sk) {
-        return;
+    var list = document.getElementById('skills-list');
+    if (list) {
+      list.innerHTML = '';
+      var all = (window.AppEngine.SKILLS || []).map(function (s) { return view.skills[s.id]; }).filter(Boolean);
+      var profSkills = all.filter(function (sk) { return sk.prof; });
+      var restSkills = all.filter(function (sk) { return !sk.prof; });
+      if (profSkills.length) {
+        list.appendChild(buildSkillGroupHead('Competenti'));
+        profSkills.forEach(function (sk) { list.appendChild(buildSkillRow(sk)); });
       }
-      var v = row.querySelector('.v');
-      if (v) {
-        v.textContent = sk.text;
+      if (restSkills.length) {
+        list.appendChild(buildSkillGroupHead('Altre abilità'));
+        restSkills.forEach(function (sk) { list.appendChild(buildSkillRow(sk)); });
       }
-    });
+    }
     setText('skill-passive-perception', view.passivePerception);
   }
 

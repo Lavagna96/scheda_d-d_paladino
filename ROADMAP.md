@@ -971,6 +971,32 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      tutti i campi corretti, incluso `weapon.finesse: true` derivato da solo.
      Tharion (Paladino) verificato invariato dopo ogni modifica. Console
      pulita in ogni prova.
+   - **Debito segnalato e poi chiuso lo stesso giorno**: la card Abilità
+     mostrava solo 9 delle 18 abilità, scritte a mano per Tharion, con i
+     pallini di competenza/Espero mai dinamici per nessun personaggio.
+     Segnalato con `spawn_task` invece di un fix silenzioso in mezzo al
+     lavoro sul Ladro (è un cambiamento di layout, meritava una proposta);
+     l'utente ha chiesto 3 alternative con preview (elenco completo delle
+     18 sempre visibile, competenti raggruppate in cima, oppure compatta con
+     "Mostra tutte") — mockup pubblicato come artifact, scelta l'**Alternativa
+     2** ("Competenti" in cima, poi "Altre abilità", stesso linguaggio visivo
+     delle sezioni Riposo breve/lungo della scheda Risorse).
+     → **Fatto (`?v=91`)**: `index.html` non ha più le 9 righe fisse, solo un
+     contenitore (`#skills-list`) riempito da `js/stats.js` `renderSkills()`
+     a ogni render, con le 18 abilità di `window.AppEngine.SKILLS` divise fra
+     "Competenti" e "Altre abilità"; nuove classi `.skill-group-head/-label/
+     -line` in `stats.css` (stesso stile di `.card-title.sec`, in scala più
+     piccola). Anche i Tiri Salvezza, stesso bug: righe già tutte presenti ma
+     pallino fisso su SAG/CAR di Tharion, ora dinamico allo stesso modo.
+     **Bug trovato durante il collaudo**: l'attributo nativo `hidden` sul
+     pallino perdeva contro la regola `.skill-dot { display: inline-block }`
+     (uno stile d'autore batte sempre lo user-agent, qualunque specificità) —
+     tutti i pallini restavano visibili. Aggiunta `.skill-dot[hidden] {
+     display: none }` per ridichiararlo esplicitamente. Verificato: Tharion
+     invariato (Atletica/Intimidire/Percezione/Persuasione in "Competenti",
+     le altre 14 sotto, tutte le 18 presenti); un Ladro di prova con Espero su
+     Furtività e Rapidità di Mano mostra il doppio pallino e +10 invece di
+     +7/+3 sulle altre competenti. Console pulita in ogni prova.
 4. [ ] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
 5. [ ] **Ranger** (half-caster) — riusa gli slot half del Paladino; incantesimi noti, Nemico Prescelto.
 6. [ ] **Chierico** (full) — Incanalare Divinità (campo già esiste), Dominio.

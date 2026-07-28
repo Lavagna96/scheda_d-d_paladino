@@ -90,7 +90,45 @@
   vertical-align: middle;
 }
 
+/* L'attributo nativo [hidden] da solo perde contro la regola sopra (uno
+   stile d'autore batte sempre lo user-agent, qualunque sia la specificità):
+   va ridichiarato qui per nascondere davvero il pallino non competente. */
+.skill-dot[hidden] {
+  display: none;
+}
+
 .skill-dot.master {
   box-shadow: 8px 0 0 var(--accent-gold);
   margin-right: 12px;
+}
+
+/* Divisorio di gruppo nella card Abilità (5.C, Ladro): "Competenti" in cima,
+   "Altre abilità" sotto — stesso linguaggio visivo di .card-title.sec
+   (etichetta + filo dorato sfumato), in scala più piccola per un
+   sotto-titolo dentro la card. */
+.skill-group-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-1);
+}
+
+.skill-group-head:first-child {
+  margin-top: 0;
+}
+
+.skill-group-label {
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  white-space: nowrap;
+}
+
+.skill-group-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-gold), transparent);
 }

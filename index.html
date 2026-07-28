@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=89">
+<link rel="stylesheet" href="css/styles.css?v=91">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -105,7 +105,7 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=89" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="avatar.jpg?v=91" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
@@ -408,24 +408,16 @@
       </div>
       <div class="card">
         <h2 class="card-title sec">Tiri Salvezza <small id="ts-aura-note">Aura +3 inclusa</small></h2>
-        <div class="stat-row" data-save="FOR"><span>Forza</span><span class="v">+7</span></div>
-        <div class="stat-row" data-save="DES"><span>Destrezza</span><span class="v">+2</span></div>
-        <div class="stat-row" data-save="COS"><span>Costituzione</span><span class="v">+5</span></div>
-        <div class="stat-row" data-save="INT"><span>Intelligenza</span><span class="v">+3</span></div>
-        <div class="stat-row" data-save="SAG"><span class="prof"><span class="skill-dot"></span>Saggezza</span><span class="v prof">+6</span></div>
-        <div class="stat-row" data-save="CAR"><span class="prof"><span class="skill-dot"></span>Carisma</span><span class="v prof">+9</span></div>
+        <div class="stat-row" data-save="FOR"><span class="lbl"><span class="skill-dot" hidden></span>Forza</span><span class="v">+7</span></div>
+        <div class="stat-row" data-save="DES"><span class="lbl"><span class="skill-dot" hidden></span>Destrezza</span><span class="v">+2</span></div>
+        <div class="stat-row" data-save="COS"><span class="lbl"><span class="skill-dot" hidden></span>Costituzione</span><span class="v">+5</span></div>
+        <div class="stat-row" data-save="INT"><span class="lbl"><span class="skill-dot" hidden></span>Intelligenza</span><span class="v">+3</span></div>
+        <div class="stat-row" data-save="SAG"><span class="lbl"><span class="skill-dot" hidden></span>Saggezza</span><span class="v">+6</span></div>
+        <div class="stat-row" data-save="CAR"><span class="lbl"><span class="skill-dot" hidden></span>Carisma</span><span class="v">+9</span></div>
       </div>
       <div class="card">
         <h2 class="card-title sec">Abilità <button type="button" class="edit-pencil" id="edit-skills-btn" aria-label="Modifica abilità">✎</button></h2>
-        <div class="stat-row" data-skill="atletica"><span class="prof"><span class="skill-dot"></span>Atletica <span class="dim">(For)</span></span><span class="v prof">+7</span></div>
-        <div class="stat-row" data-skill="intimidire"><span class="prof"><span class="skill-dot"></span>Intimidire <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
-        <div class="stat-row" data-skill="persuasione"><span class="prof"><span class="skill-dot"></span>Persuasione <span class="dim">(Car)</span></span><span class="v prof">+6</span></div>
-        <div class="stat-row" data-skill="percezione"><span class="prof"><span class="skill-dot"></span>Percezione <span class="dim">(Sag)</span></span><span class="v prof">+3</span></div>
-        <div class="stat-row" data-skill="inganno"><span>Inganno <span class="dim">(Car)</span></span><span class="v">+3</span></div>
-        <div class="stat-row" data-skill="intrattenere"><span>Intrattenere <span class="dim">(Car)</span></span><span class="v">+3</span></div>
-        <div class="stat-row" data-skill="acrobazia"><span>Acrobazia <span class="dim">(Des)</span></span><span class="v">−1</span></div>
-        <div class="stat-row" data-skill="furtivita"><span>Furtività <span class="dim">(Des)</span></span><span class="v">−1</span></div>
-        <div class="stat-row" data-skill="rapidita-di-mano"><span>Rapidità di Mano <span class="dim">(Des)</span></span><span class="v">−1</span></div>
+        <div id="skills-list"></div>
         <div class="stat-row"><span class="dim">Percez. passiva</span><span class="v dim" id="skill-passive-perception">13</span></div>
       </div>
       </div>
@@ -917,7 +909,7 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img id="avatar-full-img" src="avatar-full.jpg?v=89" alt="Ritratto di Tharion Velnar">
+      <img id="avatar-full-img" src="avatar-full.jpg?v=91" alt="Ritratto di Tharion Velnar">
     </div>
     <figcaption class="avatar-frame-caption">
       <span class="afc-name">Tharion Velnar</span>
@@ -928,29 +920,29 @@
   </figure>
 </div>
 
-<script src="js/firebase-config.js?v=89"></script>
-<script src="js/manual-55.js?v=89"></script>
-<script src="js/config.js?v=89"></script>
-<script src="js/storage.js?v=89"></script>
-<script src="js/engine.js?v=89"></script>
-<script src="js/hp-bar.js?v=89"></script>
-<script src="js/header.js?v=89"></script>
-<script src="js/stats.js?v=89"></script>
-<script src="js/traits.js?v=89"></script>
-<script src="js/sheet.js?v=89"></script>
-<script src="js/grimorio.js?v=89"></script>
-<script src="js/treasury.js?v=89"></script>
-<script src="js/diary.js?v=89"></script>
-<script src="js/inspiration.js?v=89"></script>
-<script src="js/bottom-sheet.js?v=89"></script>
-<script src="js/edit-sheet.js?v=89"></script>
-<script src="js/items.js?v=89"></script>
-<script src="js/levelup.js?v=89"></script>
-<script src="js/app.js?v=89"></script>
-<script src="js/faceid.js?v=89"></script>
-<script src="js/dashboard.js?v=89"></script>
-<script src="js/create.js?v=89"></script>
-<script src="js/portrait.js?v=89"></script>
-<script type="module" src="js/cloud.js?v=89"></script>
+<script src="js/firebase-config.js?v=91"></script>
+<script src="js/manual-55.js?v=91"></script>
+<script src="js/config.js?v=91"></script>
+<script src="js/storage.js?v=91"></script>
+<script src="js/engine.js?v=91"></script>
+<script src="js/hp-bar.js?v=91"></script>
+<script src="js/header.js?v=91"></script>
+<script src="js/stats.js?v=91"></script>
+<script src="js/traits.js?v=91"></script>
+<script src="js/sheet.js?v=91"></script>
+<script src="js/grimorio.js?v=91"></script>
+<script src="js/treasury.js?v=91"></script>
+<script src="js/diary.js?v=91"></script>
+<script src="js/inspiration.js?v=91"></script>
+<script src="js/bottom-sheet.js?v=91"></script>
+<script src="js/edit-sheet.js?v=91"></script>
+<script src="js/items.js?v=91"></script>
+<script src="js/levelup.js?v=91"></script>
+<script src="js/app.js?v=91"></script>
+<script src="js/faceid.js?v=91"></script>
+<script src="js/dashboard.js?v=91"></script>
+<script src="js/create.js?v=91"></script>
+<script src="js/portrait.js?v=91"></script>
+<script type="module" src="js/cloud.js?v=91"></script>
 </body>
 </html>
