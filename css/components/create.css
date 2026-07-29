@@ -246,59 +246,24 @@ body.in-create .dashboard-view {
   border-color: var(--accent-gold);
 }
 
-.create-tile-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
+/* ---------- righe arricchite: Specie e Classe (restyling 2026-07-29) ----------
+   Specie: alternativa B tra 3 con preview. Classe: alternativa A, "coerente
+   con la Specie" — stessa identica grammatica visiva, riusata di proposito
+   invece di duplicarla (vedi buildPickRow in js/create.js). Blasone SVG
+   (SPECIES_ICONS/CLASS_ICONS) + tratto distintivo reale in anteprima
+   (SPECIES_TEASER/CLASS_TEASER). .pick-meta è un singolo testo (taglia/
+   velocità della Specie); .pick-chips/.pick-chip sono per più valori corti
+   (Dado Vita + tipo di incantatore della Classe) — uno dei due, mai insieme.
+   Sostituiva il vecchio .create-tile/.create-tile-list (rimossi: nessun
+   altro step li usava più dopo questo restyling). */
 
-.create-tile {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--space-1);
-  width: 100%;
-  box-sizing: border-box;
-  border: 1px solid var(--border-gold-soft);
-  border-radius: var(--radius-sm);
-  background: var(--bg-card);
-  padding: var(--space-3) var(--space-4);
-  min-height: var(--touch-min);
-  text-align: left;
-  cursor: pointer;
-}
-
-.create-tile.on {
-  border-color: var(--accent-gold);
-  background: rgba(201, 164, 67, 0.08);
-}
-
-.create-tile-name {
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.create-tile-meta {
-  font-family: var(--font-body);
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-/* ---------- passo Specie: righe arricchite (restyling 2026-07-29) ----------
-   Alternativa B tra 3 con preview: stessa lista verticale di prima, ma con
-   blasone SVG (js/create.js, SPECIES_ICONS) e un tratto distintivo reale in
-   anteprima (SPECIES_TEASER) invece della sola taglia/velocità. Solo per
-   questo step: la Classe resta su .create-tile fino al suo turno. */
-
-.species-list {
+.pick-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.species-row {
+.pick-row {
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
@@ -314,12 +279,12 @@ body.in-create .dashboard-view {
   cursor: pointer;
 }
 
-.species-row.on {
+.pick-row.on {
   border-left-color: var(--accent-gold);
   background: rgba(201, 164, 67, 0.08);
 }
 
-.species-badge {
+.pick-badge {
   width: 36px;
   height: 36px;
   flex: none;
@@ -331,43 +296,58 @@ body.in-create .dashboard-view {
   justify-content: center;
 }
 
-.species-row.on .species-badge {
+.pick-row.on .pick-badge {
   border-color: var(--accent-gold);
   background: rgba(201, 164, 67, 0.18);
 }
 
-.species-icon {
+.pick-icon {
   width: 19px;
   height: 19px;
   color: var(--accent-gold);
 }
 
-.species-body {
+.pick-body {
   flex: 1;
   min-width: 0;
 }
 
-.species-top {
+.pick-top {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2);
 }
 
-.species-name {
+.pick-name {
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.species-meta {
+.pick-meta {
   font-size: 11px;
   color: var(--text-secondary);
   white-space: nowrap;
 }
 
-.species-trait {
+.pick-chips {
+  display: flex;
+  gap: var(--space-1);
+  flex: none;
+}
+
+.pick-chip {
+  font-size: 9.5px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-gold-soft);
+  border-radius: var(--radius-pill);
+  padding: 1.5px 7px;
+  white-space: nowrap;
+}
+
+.pick-trait {
   font-size: 12px;
   color: var(--text-secondary);
   font-style: italic;
@@ -375,13 +355,13 @@ body.in-create .dashboard-view {
   line-height: 1.4;
 }
 
-.species-trait b {
+.pick-trait b {
   color: var(--accent-gold);
   font-style: normal;
   font-weight: 600;
 }
 
-.species-check {
+.pick-check {
   width: 18px;
   height: 18px;
   flex: none;
@@ -397,12 +377,12 @@ body.in-create .dashboard-view {
   transition: opacity 0.15s, transform 0.15s;
 }
 
-.species-row.on .species-check {
+.pick-row.on .pick-check {
   opacity: 1;
   transform: scale(1);
 }
 
-.species-check svg {
+.pick-check svg {
   width: 11px;
   height: 11px;
 }

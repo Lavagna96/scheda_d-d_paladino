@@ -416,19 +416,6 @@
     return node;
   }
 
-  // Tile selezionabile (specie o classe): nome in evidenza + riga piccola
-  // opzionale (taglia/velocità per le specie, caratteristica primaria per le
-  // classi). Marcata "on" se corrisponde già alla selezione nel draft.
-  function buildTile(name, meta, isSelected) {
-    var tile = el('button', 'create-tile' + (isSelected ? ' on' : ''));
-    tile.appendChild(el('span', 'create-tile-name', name));
-    if (meta) {
-      tile.appendChild(el('span', 'create-tile-meta', meta));
-    }
-
-    return tile;
-  }
-
   /* ---------- validazione ---------- */
 
   function stepValid() {
@@ -540,15 +527,59 @@
 
   /* ---------- passi: Specie e Classe (b2.1) ---------- */
 
-  /* Riga arricchita per lo step Specie (restyling 2026-07-29, alternativa B
-     tra 3 con preview): un blasone SVG minimale per specie (stesso stile a
-     tratto di js/items.js: viewBox 24x24, stroke corrente) e un tratto
-     distintivo vero come teaser, non solo taglia/velocità. Il tratto è preso
-     dai dati reali di window.MANUAL_55.species[id].traits (accorciato per
-     stare su una riga), non inventato. Solo per questo step: la Classe resta
-     su buildTile/.create-tile fino al suo turno di restyling. */
-  var SPECIES_ICON_ATTRS = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+  /* Riga arricchita per gli step a scelta singola del wizard (restyling
+     2026-07-29): blasone SVG (stesso stile a tratto di js/items.js: viewBox
+     24x24, stroke corrente) + un tratto distintivo vero come teaser, non
+     solo un dato secco. buildPickRow() è generico (usato da Specie con
+     alternativa B e poi da Classe con l'alternativa A, "coerente con la
+     Specie"); ogni step ha solo la propria mappa di icone/teaser e un thin
+     wrapper. Sostituiva il vecchio buildTile()/.create-tile (rimossi: nessun
+     altro step li usava più dopo questo restyling). */
+  var PICK_ICON_ATTRS = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
     'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+  var PICK_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M4 12 L10 18 L20 6"/></svg>';
+
+  // Riga selezionabile: blasone + nome/meta (o chip) + tratto teaser + spunta
+  // a destra quando selezionata. opts: { icon, name, meta, chips, teaser, isSelected }
+  // — meta è un testo singolo (Specie: taglia/velocità), chips un array di
+  // stringhe corte (Classe: Dado Vita, tipo di incantatore); usare l'uno o
+  // l'altro, non entrambi.
+  function buildPickRow(opts) {
+    var row = el('button', 'pick-row' + (opts.isSelected ? ' on' : ''));
+
+    var badge = el('span', 'pick-badge');
+    badge.innerHTML = '<svg class="pick-icon" ' + PICK_ICON_ATTRS + '>' + opts.icon + '</svg>';
+    row.appendChild(badge);
+
+    var body = el('div', 'pick-body');
+    var top = el('div', 'pick-top');
+    top.appendChild(el('span', 'pick-name', opts.name));
+    if (opts.chips) {
+      var chipsWrap = el('span', 'pick-chips');
+      opts.chips.forEach(function (c) {
+        chipsWrap.appendChild(el('span', 'pick-chip', c));
+      });
+      top.appendChild(chipsWrap);
+    } else if (opts.meta) {
+      top.appendChild(el('span', 'pick-meta', opts.meta));
+    }
+    body.appendChild(top);
+
+    if (opts.teaser) {
+      var traitLine = el('div', 'pick-trait');
+      traitLine.innerHTML = '<b>' + opts.teaser.trait + '</b> — ' + opts.teaser.desc;
+      body.appendChild(traitLine);
+    }
+    row.appendChild(body);
+
+    var check = el('span', 'pick-check');
+    check.innerHTML = PICK_CHECK_SVG;
+    row.appendChild(check);
+
+    return row;
+  }
+
   var SPECIES_ICONS = {
     aasimar: '<ellipse cx="12" cy="7" rx="6" ry="2.6"/><path d="M8 16 L10 10 M16 16 L14 10 M12 17 L12 10"/>',
     dragonide: '<path d="M3 13 L11 9 L16 6 L21 8 L16 10 L18 13 L13 13 L11 17 L8 13 Z"/>' +
@@ -565,9 +596,6 @@
     tiefling: '<path d="M9 18 C 6 14, 7 7, 4 4"/><path d="M15 18 C 18 14, 17 7, 20 4"/>',
     umano: '<path d="M12 3 L14 10 L21 12 L14 14 L12 21 L10 14 L3 12 L10 10 Z"/>'
   };
-  var SPECIES_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
-    'stroke-linecap="round" stroke-linejoin="round"><path d="M4 12 L10 18 L20 6"/></svg>';
-
   // Tratto distintivo per riga (nome del tratto + una riga di sapore), preso
   // dal primo tratto meccanicamente saliente di ogni specie in manual-55.js
   // (scurovisione esclusa: comune a troppe specie per distinguerle).
@@ -584,42 +612,81 @@
     umano: { trait: 'Versatile', desc: 'un talento di Origine a scelta' }
   };
 
-  function speciesIconSvg(id) {
-    return '<svg class="species-icon" ' + SPECIES_ICON_ATTRS + '>' + (SPECIES_ICONS[id] || '') + '</svg>';
-  }
-
   // Riga specie: blasone + nome/taglia-velocità + tratto teaser + spunta a
-  // destra quando selezionata. Sostituisce buildTile solo per questo step.
+  // destra quando selezionata (thin wrapper su buildPickRow).
   function buildSpeciesRow(sp, id, isSelected) {
-    var row = el('button', 'species-row' + (isSelected ? ' on' : ''));
-
-    var badge = el('span', 'species-badge');
-    badge.innerHTML = speciesIconSvg(id);
-    row.appendChild(badge);
-
-    var body = el('div', 'species-body');
-    var top = el('div', 'species-top');
-    top.appendChild(el('span', 'species-name', sp.name));
     var meta = sp.size || '';
     if (sp.speedM) {
       meta += (meta ? ' · ' : '') + sp.speedM.toLocaleString('it-IT') + ' m';
     }
-    top.appendChild(el('span', 'species-meta', meta));
-    body.appendChild(top);
 
-    var teaser = SPECIES_TEASER[id];
-    if (teaser) {
-      var traitLine = el('div', 'species-trait');
-      traitLine.innerHTML = '<b>' + teaser.trait + '</b> — ' + teaser.desc;
-      body.appendChild(traitLine);
+    return buildPickRow({
+      icon: SPECIES_ICONS[id] || '',
+      name: sp.name,
+      meta: meta,
+      teaser: SPECIES_TEASER[id],
+      isSelected: isSelected
+    });
+  }
+
+  /* Icone e tratto distintivo per lo step Classe (restyling 2026-07-29,
+     alternativa A: stessa grammatica visiva della Specie). Il tratto è la
+     meccanica che identifica ogni classe (risorsa di classe se i dati ce
+     l'hanno già — Furia, Ispirazione Bardica… — altrimenti il privilegio
+     noto del PHB anche per le 3 classi non ancora modellate 1→20, Stregone/
+     Mago/Warlock: sono comunque scelte valide nel wizard oggi). */
+  var CLASS_ICONS = {
+    barbaro: '<path d="M12 3 L12 21"/><path d="M12 6 C 6 4, 4 8, 6 11 C 9 10, 11 8, 12 6 Z"/>',
+    bardo: '<circle cx="7" cy="17" r="2.4"/><path d="M9.4 17 L9.4 5 L16 7 L16 12"/>',
+    chierico: '<circle cx="12" cy="12" r="3.6"/><path d="M12 4 L12 6.2 M12 17.8 L12 20 M4 12 L6.2 12 ' +
+      'M17.8 12 L20 12 M6.5 6.5 L8 8 M16 16 L17.5 17.5 M6.5 17.5 L8 16 M16 8 L17.5 6.5"/>',
+    druido: '<ellipse cx="12" cy="16" rx="4.2" ry="3.4"/><ellipse cx="7" cy="9.5" rx="1.6" ry="2.1"/>' +
+      '<ellipse cx="11.2" cy="7.3" rx="1.6" ry="2.1"/><ellipse cx="16" cy="9.5" rx="1.6" ry="2.1"/>',
+    guerriero: '<path d="M4 20 L11 13 M4 13 L11 20"/><path d="M13 11 L20 4 M13 4 L20 11"/><circle cx="12" cy="12" r="1"/>',
+    ladro: '<path d="M12 3 L12 15"/><path d="M8 7 L16 7"/><path d="M12 15 L9 20 L12 18 L15 20 Z"/>',
+    mago: '<path d="M4 5a2 2 0 0 1 2 -2h6v18H6a2 2 0 0 1 -2 -2z"/>' +
+      '<path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-6"/>',
+    monaco: '<circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="3.8"/>',
+    paladino: '<path d="M12 3 C 15 5, 17 5, 19 4 C 19 12, 17 17, 12 20 C 7 17, 5 12, 5 4 C 7 5, 9 5, 12 3 Z"/>' +
+      '<path d="M9.5 6.5 L12 4.5 L14.5 6.5"/>',
+    ranger: '<path d="M7 3 C 4 8, 4 16, 7 21"/><path d="M7 12 L19 12"/><path d="M15.5 8.5 L19 12 L15.5 15.5"/>',
+    stregone: '<circle cx="12" cy="15" r="1.6"/><path d="M12 13 C 10 9, 13 6, 11 3"/>' +
+      '<path d="M12 13 C 14.5 10.5, 13.5 7.5, 16 5.5"/>',
+    warlock: '<circle cx="8" cy="8" r="3.4"/><path d="M10.4 10.4 L20 20 M17 17 L19.5 14.5 M14.2 14.2 L16.5 11.9"/>'
+  };
+  var CLASS_TEASER = {
+    barbaro: { trait: 'Furia', desc: 'resistenza ai danni fisici, bonus quando colpisci' },
+    bardo: { trait: 'Ispirazione Bardica', desc: 'un dado da regalare per migliorare un tiro alleato' },
+    chierico: { trait: 'Incanalare Divinità', desc: 'energia divina per effetti speciali' },
+    druido: { trait: 'Forma Selvatica', desc: 'ti trasformi in una bestia' },
+    guerriero: { trait: 'Attacchi Extra', desc: 'colpisce più volte di chiunque altro' },
+    ladro: { trait: 'Attacco Furtivo', desc: 'danni extra quando colpisci di sorpresa' },
+    mago: { trait: 'Libro degli Incantesimi', desc: 'il repertorio più vasto, un incantesimo per ogni occasione' },
+    monaco: { trait: 'Punti Focus', desc: 'arti marziali, colpisci più volte senz\'armi' },
+    paladino: { trait: 'Imposizione delle Mani', desc: 'guerriero sacro, cura con le mani e Punizione Divina' },
+    ranger: { trait: 'Marchio del Cacciatore', desc: 'esploratore e cacciatore, metà incantatore' },
+    stregone: { trait: 'Punti Stregoneria', desc: 'magia nel sangue, plasmata con la Metamagia' },
+    warlock: { trait: 'Patto', desc: 'magia da un patto con un\'entità, pochi slot ma potenti' }
+  };
+  // Abbreviazione del tipo di incantatore per il chip (nessuna per 'none':
+  // niente da mostrare per le classi senza magia, come oggi il Barbaro).
+  var CASTER_CHIP = { full: 'Pieno', half: 'Mezzo', pact: 'Patto' };
+
+  // Riga classe: blasone + nome/Dado Vita/tipo incantatore + tratto teaser +
+  // spunta a destra quando selezionata (thin wrapper su buildPickRow).
+  function buildClassRow(kl, id, isSelected) {
+    var chips = [kl.hitDie];
+    if (CASTER_CHIP[kl.casterType]) {
+      chips.push(CASTER_CHIP[kl.casterType]);
     }
-    row.appendChild(body);
 
-    var check = el('span', 'species-check');
-    check.innerHTML = SPECIES_CHECK_SVG;
-    row.appendChild(check);
-
-    return row;
+    return buildPickRow({
+      icon: CLASS_ICONS[id] || '',
+      name: kl.name,
+      chips: chips,
+      teaser: CLASS_TEASER[id],
+      isSelected: isSelected
+    });
   }
 
   function renderSpecie(container) {
@@ -640,7 +707,7 @@
     container.appendChild(input);
 
     // Lista arricchita: una riga per specie del manuale (window.MANUAL_55.species).
-    var list = el('div', 'species-list');
+    var list = el('div', 'pick-list');
     container.appendChild(list);
 
     var choiceBox = el('div');
@@ -660,7 +727,7 @@
           SPECIES_CHOICE_FIELDS.forEach(function (f) { draft[f] = null; });
         }
         draft.speciesId = id;
-        list.querySelectorAll('.species-row').forEach(function (t) {
+        list.querySelectorAll('.pick-row').forEach(function (t) {
           t.classList.toggle('on', t === row);
         });
         renderSpeciesChoice();
@@ -742,26 +809,28 @@
   };
 
   function renderClasse(container) {
-    // Lista tile: una per classe del manuale (window.MANUAL_55.classes). Non
-    // filtrare: oggi solo Paladino e Barbaro hanno dati 1→20 completi, ma
-    // vanno mostrate comunque tutte (il "non ancora giocabile" si gestisce
-    // in un altro step).
-    var list = el('div', 'create-tile-list');
+    // Lista arricchita (restyling 2026-07-29, alternativa A: stessa
+    // grammatica visiva della Specie): una riga per classe del manuale
+    // (window.MANUAL_55.classes). Non filtrare: oggi solo 8 delle 12 hanno
+    // dati 1→20 completi (Stregone/Mago/Warlock ancora da fare nel Blocco
+    // 5.C), ma vanno mostrate comunque tutte — nessun segnale "in arrivo"
+    // in questa alternativa (era l'opzione B, scartata).
+    var list = el('div', 'pick-list');
     container.appendChild(list);
 
     Object.keys(window.MANUAL_55.classes).forEach(function (id) {
       var kl = window.MANUAL_55.classes[id];
-      var tile = buildTile(kl.name, kl.primaryAbility, id === draft.classId);
+      var row = buildClassRow(kl, id, id === draft.classId);
 
-      tile.addEventListener('click', function () {
+      row.addEventListener('click', function () {
         draft.classId = id;
-        list.querySelectorAll('.create-tile').forEach(function (t) {
-          t.classList.toggle('on', t === tile);
+        list.querySelectorAll('.pick-row').forEach(function (t) {
+          t.classList.toggle('on', t === row);
         });
         updateNav();
       });
 
-      list.appendChild(tile);
+      list.appendChild(row);
     });
   }
 

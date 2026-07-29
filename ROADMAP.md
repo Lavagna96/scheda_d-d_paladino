@@ -635,6 +635,27 @@ invariato e fa da test di non-regressione a ogni passo.
       di nuovo CA 20 / CD 15 con la sua spada magica. Console pulita.
       **Con questo 5.B.5 è chiuso.**
 
+- [ ] **Restyling visivo del wizard di creazione** — avviato 2026-07-29, fuori
+      sequenza rispetto al Blocco 5.C (una richiesta di Andrea prima di
+      riprendere le classi): passo dopo passo, verifica se lo step attuale ha
+      qualcosa da migliorare e, in caso, 3 alternative con preview prima di
+      implementare (regola CLAUDE.md). Introdotto `buildPickRow()` in
+      `create.js` — riga generica con blasone SVG + tratto distintivo reale
+      da teaser, sostituisce il vecchio `buildTile`/`.create-tile` (rimossi,
+      inutilizzati altrove). Fatti finora:
+      - **Specie** — alternativa **B** (lista arricchita) tra 3 con preview:
+        blasone per specie + un tratto meccanico reale (es. Elfo → "Trance —
+        mediti invece di dormire"), preso da `window.MANUAL_55.species`.
+        `?v=105`.
+      - **Classe** — alternativa **A** ("coerente con la Specie") tra 3 con
+        preview: stessa grammatica visiva, blasone + tratto (es. Barbaro →
+        "Furia — resistenza ai danni fisici") più due chip Dado Vita/tipo di
+        incantatore. Nessun segnale per le 3 classi non ancora modellate
+        1→20 (Stregone/Mago/Warlock) — l'opzione B lo proponeva, scartata.
+        `?v=106`.
+      Restano da valutare uno alla volta: Background, Punteggi, Competenze,
+      Equipaggiamento, Sottoclasse/Incantesimi, Identità.
+
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
 > `js/create.js` (`window.AppCreate`, macchina a stati dei 6 passi, corpi
 > segnaposto) e `css/components/create.css` (vista `#view-create` pilotata da
