@@ -783,3 +783,50 @@ body.in-create .dashboard-view {
 .spell-row.expanded .spell-row-desc {
   display: block;
 }
+
+/* ---------- passo Identità: Allineamento a controllo scorrevole
+   (restyling 2026-07-29) ----------
+   Sostituisce le due righe di chip a scelta singola (Legge, Morale): un
+   controllo a 3 stati con un rettangolo che scivola sopra l'opzione,
+   trascinabile col dito oltre che toccabile direttamente (js/create.js,
+   buildSegmentedRow). Nessuna opzione ha un trattamento diverso dalle
+   altre — l'utente sceglie liberamente, nessun avviso su combinazioni
+   specifiche (rimosso di proposito). */
+
+.seg-track {
+  position: relative;
+  display: flex;
+  border: 1px solid var(--border-gold-soft);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  padding: 3px;
+  margin-bottom: var(--space-4);
+  touch-action: none;
+}
+
+.seg-highlight {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: -999px;
+  width: calc(33.333% - 2px);
+  border-radius: var(--radius-pill);
+  background: var(--accent-gold);
+}
+
+.seg-opt {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  text-align: center;
+  padding: 10px 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.seg-opt.on {
+  color: #241d0d;
+  font-weight: 600;
+}

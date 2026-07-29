@@ -17,26 +17,23 @@
   **Fase 5 in corso, Blocco 5.C (le classi una alla volta):** 8 classi su 11
   complete (Barbaro, Guerriero, Ladro, Monaco, Ranger, Chierico, Druido,
   Bardo) — restano **Stregone, Mago, Warlock**.
-- **Prossimo passo:** ultimo commit `44007d6` (bump cache `?v=103`) **deployato
-  e verificato live** (curl conferma `?v=103` servito). Sessione del
-  2026-07-29 fuori sequenza rispetto al Blocco 5.C, tre feature testate da
-  Andrea e già in produzione:
-  - `77aef7a` — scelte di ascendenza/retaggio per Dragonide, Elfo, Goliath,
-    Tiefling e Gnomo nel wizard di creazione (prima erano solo testo, senza
-    incidere sulla scheda).
-  - `221081a` — background "Personalizzato" nel passo Background (scelta
-    libera coerente col PHB p.38) + nuovo passo finale **Identità**
-    (allineamento e lingue, mostrati in Tratti).
-  - `fd18699` — dashboard: swipe-to-delete in stile iOS sulle card + toggle
-    griglia/elenco a righe con preferenza ricordata sul dispositivo.
-  Riverificando i "Debiti aperti" il 2026-07-29 sono emerse 2 voci già chiuse
-  ma mai marcate (point-buy 27 punti, trucchetti in creazione — vedi sezione
-  debiti) e chiuso per davvero l'hardcode `classId === 'paladino'` in
-  `renderGains()`/`poolMax` (`engine.js`+`levelup.js`, cache `?v=104`, non
-  ancora deployato — committare quando Andrea conferma).
-  **Prossimo lavoro da scegliere:** riprendere il Blocco 5.C con **Stregone**
-  (9° classe, Punti Stregoneria + Metamagia), oppure i collaudi cloud mai
-  confermati sotto.
+- **Prossimo passo:** sessione del 2026-07-29 quasi interamente dedicata a un
+  **restyling visivo del wizard di creazione**, fuori sequenza rispetto al
+  Blocco 5.C su richiesta di Andrea (vedi "Avanzamento 5.B" più sotto per il
+  dettaglio passo per passo, ognuno con 3 alternative discusse con preview
+  prima di implementare, come da regola CLAUDE.md): **tutti e 8 i passi**
+  (Specie, Classe, Background, Punteggi, Competenze, Equipaggiamento,
+  Sottoclasse/Incantesimi, Identità) sono stati rivisti e migliorati, dal
+  commit `994a181` (Specie, `?v=105`) al commit più recente (Identità a
+  scorrimento, `?v=114`) — **ancora da deployare**, in coda insieme a:
+  - `77aef7a`/`221081a`/`fd18699` — ascendenza/retaggio specie, background
+    Personalizzato + passo Identità, dashboard swipe-to-delete/vista a
+    righe (già deployati e testati da Andrea, v=103).
+  - `88e8b16` — generalizzazione `renderGains()`/`poolMax` (via l'hardcode
+    `classId==='paladino'`), `?v=104`.
+  **Prossimo lavoro da scegliere dopo il deploy:** riprendere il Blocco 5.C
+  con **Stregone** (9° classe, Punti Stregoneria + Metamagia), oppure i
+  collaudi cloud mai confermati sotto.
   Restano in coda due collaudi cloud mai confermati: sync multi-device tra
   due dispositivi con lo stesso account, e la verifica nella console Firebase che
   `manuals/5.5/feats` sia arrivato su Firestore (step 4.4, dopo un deploy — il
@@ -742,7 +739,34 @@ invariato e fa da test di non-regressione a ogni passo.
         righe, 2 trucchetti + 1 preparato scelti correttamente); "Piuma
         Cadente" (Reazione) mostra ora solo "Reazione", non più il
         grilletto per esteso. Console pulita in ogni prova. `?v=112`.
-      Restano da valutare: Identità.
+      - **Identità (Allineamento)** — FATTO (2026-07-29). Iniziato con 3
+        alternative con preview (righe di chip invariate con piccoli tocchi
+        mirati), ma Andrea ha chiesto uno stile diverso durante la
+        discussione: un **controllo a scorrimento** (segmented control) con
+        un rettangolo dorato che scivola sopra Legge/Morale, ispirato a uno
+        screenshot mostrato in chat (interfaccia di un altro prodotto — solo
+        l'idea del cursore ripresa, non il suo stile a pergamena) e poi
+        esteso su richiesta per supportare anche il **trascinamento**, non
+        solo il tocco diretto. **Rimosso di proposito l'avviso statico**
+        sulle combinazioni Malvagio ("verificate col Master…"): l'utente
+        sceglie liberamente, nessuna opzione ha un trattamento diverso dalle
+        altre. Nuova `buildSegmentedRow()` in create.js (sostituisce
+        `buildSingleChoiceRow`, rimossa) + `.seg-track/-highlight/-opt` in
+        create.css.
+        **Bug trovato e corretto in sessione**: `track.setPointerCapture()`
+        veniva chiamato PRIMA di registrare la scelta — se la capture
+        falliva (succede con alcuni pointer id non standard), l'intero
+        gestore si interrompeva e il tocco non selezionava nulla. Risolto
+        mettendo la capture in un try/catch che non blocca il resto: il
+        tocco sceglie comunque, nel peggiore dei casi il trascinamento fuori
+        dal binario è solo meno fluido. Verificato: tocco diretto su
+        "Legale" e "Malvagio" seleziona entrambi correttamente (stesso
+        trattamento visivo, nessun colore diverso), il riepilogo si aggiorna
+        ("Allineamento: Legale Malvagio"), tornare sul passo con una scelta
+        già fatta la mostra subito senza ripartire da vuoto, "Crea
+        personaggio" si abilita al completamento. Console pulita. `?v=114`.
+      **Con questo il restyling visivo dei 7 passi del wizard (Specie →
+      Identità) è completo.**
 
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
 > `js/create.js` (`window.AppCreate`, macchina a stati dei 6 passi, corpi

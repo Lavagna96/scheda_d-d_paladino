@@ -2205,26 +2205,97 @@
     return draft.alignmentLaw + ' ' + draft.alignmentMorality;
   }
 
-  // Riga di chip a selezione singola (stesso pattern di
-  // buildFightingStylePicker): click su una spegne le altre della riga.
-  function buildSingleChoiceRow(container, title, options, draftKey, onChange) {
+  /* Controllo a 3 stati con trascinamento e tocco diretto (restyling
+     2026-07-29, scelto tra alternative con preview, poi esteso su richiesta
+     di Andrea per il trascinamento oltre al tocco). Il rettangolo segue il
+     dito in continuo durante il trascinamento, aggiornando la scelta appena
+     passa sopra un'altra opzione, e scatta esattamente in posizione al
+     rilascio; un tocco secco è solo un trascinamento senza movimento, stesso
+     percorso di codice. Sostituisce buildSingleChoiceRow (rimossa, non
+     usata altrove) solo per Legge/Morale — nessun avviso su nessuna
+     combinazione, libera scelta dell'utente. */
+  function buildSegmentedRow(container, title, options, draftKey, onChange) {
     container.appendChild(el('div', 'create-label', title));
-    var row = el('div', 'chip-row');
-    var chipEls = {};
-    options.forEach(function (label) {
-      var chip = el('button', 'chip' + (draft[draftKey] === label ? ' on' : ''), label);
-      chip.type = 'button';
-      chip.addEventListener('click', function () {
-        draft[draftKey] = label;
-        Object.keys(chipEls).forEach(function (l) {
-          chipEls[l].classList.toggle('on', l === label);
-        });
-        onChange();
-      });
-      chipEls[label] = chip;
-      row.appendChild(chip);
+
+    var track = el('div', 'seg-track');
+    var highlight = el('div', 'seg-highlight');
+    track.appendChild(highlight);
+    var optEls = options.map(function (label) {
+      var opt = el('div', 'seg-opt', label);
+      track.appendChild(opt);
+
+      return opt;
     });
-    container.appendChild(row);
+    container.appendChild(track);
+
+    var current = options.indexOf(draft[draftKey]); // -1 se non ancora scelto
+
+    function applyIndex(i) {
+      if (i === current) {
+        return;
+      }
+      current = i;
+      optEls.forEach(function (o, j) { o.classList.toggle('on', j === i); });
+      draft[draftKey] = options[i];
+      onChange();
+    }
+
+    function indexFromClientX(clientX) {
+      var rect = track.getBoundingClientRect();
+      var ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+
+      return Math.min(options.length - 1, Math.floor(ratio * options.length));
+    }
+
+    // Segue il dito in modo continuo (non a scatti tra le 3 posizioni),
+    // restando dentro il binario: la larghezza è quella reale di un'opzione.
+    function followClientX(clientX) {
+      var rect = track.getBoundingClientRect();
+      var w = optEls[0].offsetWidth;
+      var half = w / 2;
+      var x = Math.min(rect.width - half, Math.max(half, clientX - rect.left));
+      highlight.style.width = w + 'px';
+      highlight.style.left = (x - half) + 'px';
+    }
+
+    function snapTo(i) {
+      highlight.style.left = optEls[i].offsetLeft + 'px';
+      highlight.style.width = optEls[i].offsetWidth + 'px';
+    }
+
+    track.addEventListener('pointerdown', function (e) {
+      // La selezione al tocco non deve dipendere dalla pointer capture: se
+      // fallisse (capita con alcuni pointer id sintetici/non standard), il
+      // trascinamento fuori dal binario resta meno fluido ma il tocco
+      // sceglie comunque l'opzione giusta.
+      try {
+        track.setPointerCapture(e.pointerId);
+      } catch (err) {
+        // ignorato di proposito, vedi commento sopra
+      }
+      applyIndex(indexFromClientX(e.clientX));
+      followClientX(e.clientX);
+
+      function move(ev) {
+        applyIndex(indexFromClientX(ev.clientX));
+        followClientX(ev.clientX);
+      }
+      function up(ev) {
+        applyIndex(indexFromClientX(ev.clientX));
+        snapTo(current);
+        track.removeEventListener('pointermove', move);
+        track.removeEventListener('pointerup', up);
+      }
+      track.addEventListener('pointermove', move);
+      track.addEventListener('pointerup', up);
+    });
+
+    // Tornando su questo passo con una scelta già fatta, mostrala subito
+    // (spunta + rettangolo in posizione) invece di ripartire da vuoto.
+    if (current !== -1) {
+      optEls[current].classList.add('on');
+      snapTo(current);
+    }
   }
 
   function renderIdentita(container) {
@@ -2238,14 +2309,10 @@
       updateNav();
     }
 
-    buildSingleChoiceRow(container, 'Legge', ALIGNMENT_LAW, 'alignmentLaw', refreshRecap);
-    buildSingleChoiceRow(container, 'Morale', ALIGNMENT_MORALITY, 'alignmentMorality', refreshRecap);
+    buildSegmentedRow(container, 'Legge', ALIGNMENT_LAW, 'alignmentLaw', refreshRecap);
+    buildSegmentedRow(container, 'Morale', ALIGNMENT_MORALITY, 'alignmentMorality', refreshRecap);
     container.appendChild(recap);
     refreshRecap();
-
-    container.appendChild(el('div', 'create-saves-line',
-      'Il manuale assume che i personaggi giocanti non siano di allineamento malvagio; ' +
-      'verificate con il vostro Master prima di scegliere Legale/Neutrale/Caotico Malvagio.'));
 
     container.appendChild(el('div', 'edit-section-label', 'Lingue'));
     container.appendChild(el('span', 'chip on', 'Comune ✓'));
