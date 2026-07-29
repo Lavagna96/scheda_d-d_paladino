@@ -1152,10 +1152,19 @@
     container.appendChild(el('div', 'create-saves-line',
       'Da dove vieni: dà due competenze, uno strumento, un talento d\'origine e gli aumenti di caratteristica.'));
 
-    var chipRow = el('div', 'chip-row');
-    container.appendChild(chipRow);
-    var detail = el('div');
-    container.appendChild(detail);
+    // Lista arricchita (restyling 2026-07-29, alternativa B tra 3 con
+    // preview): ogni riga mostra già competenze e talento in anteprima senza
+    // dover toccare nulla; il tocco apre solo il dettaglio della riga scelta
+    // (bg-row-body, sotto), non un lungo scroll comune a tutte. Niente icone
+    // nuove: a differenza di Specie/Classe un background dà 4 cose diverse
+    // (competenze, strumento, talento, aumenti), non un tratto singolo che
+    // un blasone possa rappresentare da solo.
+    var list = el('div', 'bg-list');
+    container.appendChild(list);
+    // Contenitore del dettaglio: uno solo, appeso di volta in volta dentro la
+    // riga selezionata (sempre e solo una, come per Specie/Classe) — build
+    // completo su renderBackground(), tutta la logica sotto resta invariata.
+    var detail = el('div', 'bg-row-body');
 
     // Blocco aumenti di caratteristica (+2 e +1, oppure +1 a tutte e tre):
     // condiviso fra il pannello piatto dei 16 background reali e la sezione 1
@@ -1455,41 +1464,69 @@
       renderAbilityBonusBlock(detail, bg);
     }
 
-    Object.keys(all).forEach(function (id) {
-      var chip = el('button', 'chip' + (draft.backgroundId === id ? ' on' : ''), all[id].name);
-      chip.type = 'button';
-      chip.addEventListener('click', function () {
+    // Riga: nome + chevron + anteprima (competenze e talento, sempre
+    // visibili) sopra; il dettaglio (renderDetail/renderCustomBackground)
+    // entra solo nella riga aperta, cioè quella già selezionata — qui non
+    // c'è un concetto di "aperta ma non scelta": un background è sempre
+    // scelto o non lo è, stesso modello dati di prima (draft.backgroundId).
+    function buildBgRow(id, bg, isCustom) {
+      var isOn = draft.backgroundId === id;
+      var row = el('div', 'bg-row' + (isCustom ? ' bg-row-custom' : '') + (isOn ? ' on' : ''));
+
+      var head = el('div', 'bg-row-head');
+      head.appendChild(el('span', 'bg-row-name', isCustom ? '+ Personalizzato' : bg.name));
+      head.appendChild(el('span', 'bg-row-chevron', '▼'));
+      row.appendChild(head);
+
+      var previewText;
+      if (isCustom) {
+        previewText = 'Tutto a scelta libera';
+      } else {
+        var skillLabels = bg.skills.map(function (sid) {
+          var s = (window.AppEngine.SKILLS || []).filter(function (x) { return x.id === sid; })[0];
+
+          return s ? s.label : sid;
+        });
+        var feat = (manual.originFeats || {})[bg.featId] || {};
+        previewText = skillLabels.join(', ') + ' · ' + (feat.name || '');
+      }
+      var preview = el('div', 'bg-row-preview');
+      preview.textContent = previewText;
+      row.appendChild(preview);
+
+      head.addEventListener('click', function () {
         if (draft.backgroundId === id) {
           return;
         }
         draft.backgroundId = id;
         resetBgChoices();
+        if (isCustom) {
+          // A differenza dei 16 background reali (che hanno sempre sia 'a'
+          // sia 'b'), customBg() garantisce solo 'b' (i 50 mo) finché non si
+          // sceglie un pacchetto in prestito: il default 'a' del draft
+          // lascerebbe silenziosamente senza equipaggiamento chi non tocca
+          // questo passo.
+          draft.bgPack = 'b';
+          customOpenSectionId = 'caratteristiche';
+        }
         render();
       });
-      chipRow.appendChild(chip);
-    });
 
-    // Chip finale, visivamente distinta (bordo tratteggiato, .chip-custom):
-    // il background house rule del tavolo, non nel PHB.
-    var customChip = el('button', 'chip chip-custom' + (draft.backgroundId === 'personalizzato' ? ' on' : ''), '+ Personalizzato');
-    customChip.type = 'button';
-    customChip.addEventListener('click', function () {
-      if (draft.backgroundId === 'personalizzato') {
-        return;
+      if (isOn) {
+        row.appendChild(detail);
+        renderDetail();
       }
-      draft.backgroundId = 'personalizzato';
-      resetBgChoices();
-      // A differenza dei 16 background reali (che hanno sempre sia 'a' sia
-      // 'b'), customBg() garantisce solo 'b' (i 50 mo) finché non si sceglie
-      // un pacchetto in prestito: il default 'a' del draft lascerebbe
-      // silenziosamente senza equipaggiamento chi non tocca questo passo.
-      draft.bgPack = 'b';
-      customOpenSectionId = 'caratteristiche';
-      render();
-    });
-    chipRow.appendChild(customChip);
 
-    renderDetail();
+      return row;
+    }
+
+    Object.keys(all).forEach(function (id) {
+      list.appendChild(buildBgRow(id, all[id], false));
+    });
+    // Riga finale, visivamente distinta (bordo tratteggiato, .bg-row-custom):
+    // il background house rule del tavolo, non nel PHB.
+    list.appendChild(buildBgRow('personalizzato', null, true));
+
     updateNav();
   }
 

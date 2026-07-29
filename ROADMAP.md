@@ -653,7 +653,22 @@ invariato e fa da test di non-regressione a ogni passo.
         incantatore. Nessun segnale per le 3 classi non ancora modellate
         1→20 (Stregone/Mago/Warlock) — l'opzione B lo proponeva, scartata.
         `?v=106`.
-      Restano da valutare uno alla volta: Background, Punteggi, Competenze,
+      - **Background** — alternativa **B** ("righe con anteprima + accordion")
+        tra 3 con preview: qui il "tratto singolo" di Specie/Classe non basta
+        (un background dà 4 cose diverse: competenze, strumento, talento,
+        aumenti), quindi niente blasoni nuovi — ogni riga mostra già le 2
+        competenze e il talento in anteprima (es. Accolito → "Intuizione,
+        Religione · Iniziato alla Magia") senza dover toccare nulla; il tocco
+        apre solo il dettaglio della riga scelta (nuovo contenitore
+        `.bg-row-body`), non un lungo pannello comune a tutte. Tutta la
+        logica interna invariata (spell picker Iniziato alla Magia, aumenti
+        di caratteristica, accordion del Personalizzato): cambia solo dove il
+        loro contenitore viene appeso. Verificato: Accolito → trucchetto
+        scelto sopravvive al refresh parziale, Soldato → strumento a scelta +
+        aumenti FOR+2/COS+1 propagati al recap di Punteggi, Personalizzato →
+        accordion intatto (Caratteristiche si apre di default), console
+        pulita in ogni prova. `?v=107`.
+      Restano da valutare uno alla volta: Punteggi, Competenze,
       Equipaggiamento, Sottoclasse/Incantesimi, Identità.
 
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
