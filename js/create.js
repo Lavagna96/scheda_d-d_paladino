@@ -540,6 +540,88 @@
 
   /* ---------- passi: Specie e Classe (b2.1) ---------- */
 
+  /* Riga arricchita per lo step Specie (restyling 2026-07-29, alternativa B
+     tra 3 con preview): un blasone SVG minimale per specie (stesso stile a
+     tratto di js/items.js: viewBox 24x24, stroke corrente) e un tratto
+     distintivo vero come teaser, non solo taglia/velocità. Il tratto è preso
+     dai dati reali di window.MANUAL_55.species[id].traits (accorciato per
+     stare su una riga), non inventato. Solo per questo step: la Classe resta
+     su buildTile/.create-tile fino al suo turno di restyling. */
+  var SPECIES_ICON_ATTRS = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+  var SPECIES_ICONS = {
+    aasimar: '<ellipse cx="12" cy="7" rx="6" ry="2.6"/><path d="M8 16 L10 10 M16 16 L14 10 M12 17 L12 10"/>',
+    dragonide: '<path d="M3 13 L11 9 L16 6 L21 8 L16 10 L18 13 L13 13 L11 17 L8 13 Z"/>' +
+      '<circle cx="14" cy="9" r="0.6" fill="currentColor"/>',
+    elfo: '<path d="M12 3 C 19 6, 19 15, 12 21 C 5 15, 5 6, 12 3 Z"/><path d="M12 4 L12 20"/>',
+    gnomo: '<circle cx="12" cy="12" r="3.4"/><path d="M12 4 L12 7 M12 17 L12 20 M4 12 L7 12 M17 12 L20 12 ' +
+      'M6.3 6.3 L8.4 8.4 M15.6 15.6 L17.7 17.7 M6.3 17.7 L8.4 15.6 M15.6 8.4 L17.7 6.3"/>',
+    goliath: '<path d="M3 18 L9 7 L13 13 L16 9 L21 18 Z"/>' +
+      '<path d="M9 7 L11 10.5 L7 10.5 Z" fill="currentColor" stroke="none"/>',
+    halfling: '<circle cx="9" cy="9" r="3.2"/><circle cx="15" cy="9" r="3.2"/>' +
+      '<circle cx="9" cy="15" r="3.2"/><circle cx="15" cy="15" r="3.2"/><path d="M12 12 L12 20"/>',
+    nano: '<path d="M5 5 L11 11 M9 3 L15 9 L12 12 L6 6 Z"/><path d="M11 11 L4 18 L6 20 L13 13"/>',
+    orco: '<path d="M6 5 C 4 10, 5 15, 9 18"/><path d="M18 5 C 20 10, 19 15, 15 18"/>',
+    tiefling: '<path d="M9 18 C 6 14, 7 7, 4 4"/><path d="M15 18 C 18 14, 17 7, 20 4"/>',
+    umano: '<path d="M12 3 L14 10 L21 12 L14 14 L12 21 L10 14 L3 12 L10 10 Z"/>'
+  };
+  var SPECIES_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M4 12 L10 18 L20 6"/></svg>';
+
+  // Tratto distintivo per riga (nome del tratto + una riga di sapore), preso
+  // dal primo tratto meccanicamente saliente di ogni specie in manual-55.js
+  // (scurovisione esclusa: comune a troppe specie per distinguerle).
+  var SPECIES_TEASER = {
+    aasimar: { trait: 'Resistenza Celestiale', desc: 'resisti ai danni necrotici e radiosi' },
+    dragonide: { trait: 'Soffio', desc: 'cono o linea di danno del drago progenitore' },
+    elfo: { trait: 'Trance', desc: 'mediti invece di dormire, bastano 4 ore' },
+    gnomo: { trait: 'Astuzia Gnomesca', desc: 'vantaggio ai TS mentali' },
+    goliath: { trait: 'Ascendenza dei Giganti', desc: 'un dono ancestrale a scelta' },
+    halfling: { trait: 'Fortuna', desc: 'puoi ritirare un 1 naturale' },
+    nano: { trait: 'Robustezza Nanica', desc: '+1 PF massimi a ogni livello' },
+    orco: { trait: 'Tenacia Implacabile', desc: 'resti a 1 PF invece di cadere' },
+    tiefling: { trait: 'Retaggio Infernale', desc: 'resistenza e un trucchetto a scelta' },
+    umano: { trait: 'Versatile', desc: 'un talento di Origine a scelta' }
+  };
+
+  function speciesIconSvg(id) {
+    return '<svg class="species-icon" ' + SPECIES_ICON_ATTRS + '>' + (SPECIES_ICONS[id] || '') + '</svg>';
+  }
+
+  // Riga specie: blasone + nome/taglia-velocità + tratto teaser + spunta a
+  // destra quando selezionata. Sostituisce buildTile solo per questo step.
+  function buildSpeciesRow(sp, id, isSelected) {
+    var row = el('button', 'species-row' + (isSelected ? ' on' : ''));
+
+    var badge = el('span', 'species-badge');
+    badge.innerHTML = speciesIconSvg(id);
+    row.appendChild(badge);
+
+    var body = el('div', 'species-body');
+    var top = el('div', 'species-top');
+    top.appendChild(el('span', 'species-name', sp.name));
+    var meta = sp.size || '';
+    if (sp.speedM) {
+      meta += (meta ? ' · ' : '') + sp.speedM.toLocaleString('it-IT') + ' m';
+    }
+    top.appendChild(el('span', 'species-meta', meta));
+    body.appendChild(top);
+
+    var teaser = SPECIES_TEASER[id];
+    if (teaser) {
+      var traitLine = el('div', 'species-trait');
+      traitLine.innerHTML = '<b>' + teaser.trait + '</b> — ' + teaser.desc;
+      body.appendChild(traitLine);
+    }
+    row.appendChild(body);
+
+    var check = el('span', 'species-check');
+    check.innerHTML = SPECIES_CHECK_SVG;
+    row.appendChild(check);
+
+    return row;
+  }
+
   function renderSpecie(container) {
     // Campo nome personaggio.
     var label = el('label', 'create-label', 'Nome del personaggio');
@@ -557,8 +639,8 @@
     });
     container.appendChild(input);
 
-    // Lista tile: una per specie del manuale (window.MANUAL_55.species).
-    var list = el('div', 'create-tile-list');
+    // Lista arricchita: una riga per specie del manuale (window.MANUAL_55.species).
+    var list = el('div', 'species-list');
     container.appendChild(list);
 
     var choiceBox = el('div');
@@ -571,25 +653,21 @@
 
     Object.keys(window.MANUAL_55.species).forEach(function (id) {
       var sp = window.MANUAL_55.species[id];
-      var meta = sp.size || '';
-      if (sp.speedM) {
-        meta += (meta ? ' · ' : '') + sp.speedM.toLocaleString('it-IT') + ' m';
-      }
-      var tile = buildTile(sp.name, meta, id === draft.speciesId);
+      var row = buildSpeciesRow(sp, id, id === draft.speciesId);
 
-      tile.addEventListener('click', function () {
+      row.addEventListener('click', function () {
         if (draft.speciesId !== id) {
           SPECIES_CHOICE_FIELDS.forEach(function (f) { draft[f] = null; });
         }
         draft.speciesId = id;
-        list.querySelectorAll('.create-tile').forEach(function (t) {
-          t.classList.toggle('on', t === tile);
+        list.querySelectorAll('.species-row').forEach(function (t) {
+          t.classList.toggle('on', t === row);
         });
         renderSpeciesChoice();
         updateNav();
       });
 
-      list.appendChild(tile);
+      list.appendChild(row);
     });
 
     // Select generico "scegli tra le chiavi di una tabella del manuale":

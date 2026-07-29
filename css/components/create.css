@@ -286,6 +286,127 @@ body.in-create .dashboard-view {
   color: var(--text-secondary);
 }
 
+/* ---------- passo Specie: righe arricchite (restyling 2026-07-29) ----------
+   Alternativa B tra 3 con preview: stessa lista verticale di prima, ma con
+   blasone SVG (js/create.js, SPECIES_ICONS) e un tratto distintivo reale in
+   anteprima (SPECIES_TEASER) invece della sola taglia/velocità. Solo per
+   questo step: la Classe resta su .create-tile fino al suo turno. */
+
+.species-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.species-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-gold-soft);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  padding: var(--space-3) var(--space-3);
+  min-height: var(--touch-min);
+  text-align: left;
+  cursor: pointer;
+}
+
+.species-row.on {
+  border-left-color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.08);
+}
+
+.species-badge {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--border-gold);
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.species-row.on .species-badge {
+  border-color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.18);
+}
+
+.species-icon {
+  width: 19px;
+  height: 19px;
+  color: var(--accent-gold);
+}
+
+.species-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.species-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.species-name {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.species-meta {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.species-trait {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.species-trait b {
+  color: var(--accent-gold);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.species-check {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  color: #241d0d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.species-row.on .species-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.species-check svg {
+  width: 11px;
+  height: 11px;
+}
+
 /* ---------- passo Punteggi (sotto-step b2.2) ----------
    Le righe caratteristica riusano .edit-stat-list/.edit-stat-row/
    .edit-stat-label/.edit-stepper/.stepper-btn/.edit-stat-vals/
