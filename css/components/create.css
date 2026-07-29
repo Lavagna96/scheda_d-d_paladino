@@ -588,9 +588,31 @@ body.in-create .dashboard-view {
 /* ---------- passo Equipaggiamento (5.B.5) ----------
    Due card selezionabili coi pacchetti A e B del manuale, col contenuto in
    chiaro (armatura con la sua CA, arma col dado, monete): niente più campi
-   liberi. Sotto, le chip della Maestria nelle armi riusano .chip/.chip-row.
-   Nessun campo per lo stile di combattimento: non è una scelta di livello 1
-   (Paladino: livello 2; Barbaro: mai). */
+   liberi. Sotto, le chip della Maestria nelle armi riusano .chip/.chip-row,
+   raggruppate per maestria (restyling 2026-07-29, alternativa B tra 3 con
+   preview: vedi .mastery-group qui sotto). Nessun campo per lo stile di
+   combattimento: non è una scelta di livello 1 (Paladino: livello 2;
+   Barbaro: mai). */
+
+.mastery-group {
+  margin-bottom: var(--space-4);
+}
+
+.mastery-group-head {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.mastery-group-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0 0 var(--space-2);
+  line-height: 1.4;
+}
 
 .create-pack-row {
   display: flex;

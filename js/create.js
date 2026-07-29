@@ -1856,15 +1856,83 @@
     }
 
     // Maestria nelle armi: scelta vera fra le armi in cui la classe è
-    // competente, non più un campo di testo facoltativo (5.B.5).
+    // competente, non più un campo di testo facoltativo (5.B.5). Raggruppata
+    // per maestria (restyling 2026-07-29): vedi buildMasteryPicker.
     var count = masteryCountFor(draft.classId);
     if (count > 0) {
-      var choices = masteryChoicesFor(draft.classId).map(function (w) {
-        return { id: w.id, name: w.name + ' · ' + w.mastery };
-      });
-      buildSpellPicker(container, 'Maestria nelle armi — scegline ' + count,
-        choices, count, 'masteries');
+      buildMasteryPicker(container, count);
     }
+  }
+
+  /* Maestria nelle armi raggruppata per effetto (restyling 2026-07-29,
+     alternativa B tra 3 con preview): una classe competente con tutte le
+     armi (es. il Paladino, 38 voci) avrebbe una fila unica lunghissima —
+     stesso problema già risolto per le Competenze (renderCompetenze),
+     stessa soluzione, ma qui si raggruppa per la maestria stessa (Vex,
+     Sap…) invece che per categoria: la A tra le 3 preview avrebbe comunque
+     lasciato gruppi da ~10 armi, mentre la maestria dà 8 gruppi piccoli e
+     insegna cosa fa l'arma mentre si sceglie (desc reale dal manuale). */
+  function buildMasteryPicker(container, count) {
+    var weapons = masteryChoicesFor(draft.classId);
+    var validIds = weapons.map(function (w) { return w.id; });
+    draft.masteries = (draft.masteries || []).filter(function (id) {
+      return validIds.indexOf(id) !== -1;
+    });
+
+    container.appendChild(el('div', 'edit-section-label', 'Maestria nelle armi — scegline ' + count));
+    var counterEl = el('div', 'create-points-counter');
+    container.appendChild(counterEl);
+
+    var chipEls = {};
+
+    function refresh() {
+      var n = draft.masteries.length;
+      var atCap = n >= count;
+      counterEl.textContent = n + ' / ' + count;
+      weapons.forEach(function (w) {
+        var chip = chipEls[w.id];
+        var isOn = draft.masteries.indexOf(w.id) !== -1;
+        chip.classList.toggle('on', isOn);
+        var disable = atCap && !isOn;
+        chip.disabled = disable;
+        chip.classList.toggle('is-disabled', disable);
+      });
+      updateNav();
+    }
+
+    function buildChip(w) {
+      var chip = el('button', 'chip', w.name);
+      chip.type = 'button';
+      chip.addEventListener('click', function () {
+        var idx = draft.masteries.indexOf(w.id);
+        if (idx !== -1) {
+          draft.masteries.splice(idx, 1);
+        } else if (draft.masteries.length < count) {
+          draft.masteries.push(w.id);
+        }
+        refresh();
+      });
+      chipEls[w.id] = chip;
+
+      return chip;
+    }
+
+    var byMastery = {};
+    weapons.forEach(function (w) {
+      (byMastery[w.mastery] = byMastery[w.mastery] || []).push(w);
+    });
+    var masteryDefs = window.MANUAL_55.weaponMasteries || {};
+    Object.keys(masteryDefs).filter(function (m) { return byMastery[m]; }).forEach(function (m) {
+      var group = el('div', 'mastery-group');
+      group.appendChild(el('div', 'mastery-group-head', m));
+      group.appendChild(el('div', 'mastery-group-desc', masteryDefs[m].desc));
+      var row = el('div', 'chip-row');
+      byMastery[m].forEach(function (w) { row.appendChild(buildChip(w)); });
+      group.appendChild(row);
+      container.appendChild(group);
+    });
+
+    refresh();
   }
 
   /* ---------- passo finale: Sottoclasse e Incantesimi (b2.5) ---------- */

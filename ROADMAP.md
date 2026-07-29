@@ -697,8 +697,23 @@ invariato e fa da test di non-regressione a ogni passo.
         competenze su 6 gruppi, Atletica/Intimidire dal background escluse)
         conserva le selezioni ancora valide (2/3), console pulita in ogni
         prova. `?v=109`.
-      Restano da valutare uno alla volta: Equipaggiamento,
-      Sottoclasse/Incantesimi, Identità.
+      - **Equipaggiamento** — alternativa **B** ("raggruppate per Maestria")
+        tra 3 con preview: le card dei pacchetti A/B (classe e background)
+        restavano già ben fatte, il punto debole era sotto — "Maestria
+        nelle Armi" con una classe competente in tutto (es. Paladino, 38
+        armi) era un'unica fila lunghissima, stesso problema già risolto
+        per le Competenze col Bardo. Qui il raggruppamento non è per
+        categoria (l'alternativa A avrebbe comunque lasciato gruppi da
+        ~10 armi) ma per **maestria** (Vex, Sap, Nick…), con la descrizione
+        reale di ognuna dal manuale (`weaponMasteries[m].desc`) — 8 gruppi
+        piccoli invece di una fila di 38, e si impara cosa fa l'arma mentre
+        si sceglie. Nuova `buildMasteryPicker()` in create.js (sostituisce
+        la chiamata a `buildSpellPicker` generica per questo solo picker) +
+        `.mastery-group/-head/-desc` in create.css. Verificato: Paladino
+        (38 armi, 8 gruppi) → Ascia bipenne (Cleave) + Falcione (Graze)
+        selezionate, cap corretto (37/39 chip disabilitate), console pulita,
+        avanzamento a Sottoclasse/Incantesimi regolare. `?v=110`.
+      Restano da valutare uno alla volta: Sottoclasse/Incantesimi, Identità.
 
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
 > `js/create.js` (`window.AppCreate`, macchina a stati dei 6 passi, corpi
