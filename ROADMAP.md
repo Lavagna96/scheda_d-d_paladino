@@ -668,8 +668,21 @@ invariato e fa da test di non-regressione a ogni passo.
         aumenti FOR+2/COS+1 propagati al recap di Punteggi, Personalizzato →
         accordion intatto (Caratteristiche si apre di default), console
         pulita in ogni prova. `?v=107`.
-      Restano da valutare uno alla volta: Punteggi, Competenze,
-      Equipaggiamento, Sottoclasse/Incantesimi, Identità.
+      - **Punteggi** — alternativa **C** ("riepilogo fisso, righe invariate")
+        tra 3 con preview: le 6 righe caratteristica (stepper/select, per
+        tutti e 3 i metodi) restano identiche, si aggiunge solo una striscia
+        sopra il selettore di metodo — "Attacca con Forza, Carisma · TS:
+        Saggezza, Carisma" per il Paladino — con lo stesso dato reale delle
+        altre due opzioni scartate (A: tag inline; B: card col modificatore
+        in grande), preso da `klass.primaryAbility` (stringa libera, si cerca
+        ogni codice a 3 lettere al suo interno: "FOR o DES" → entrambe) e
+        `klass.saves` (già un array). Nuovo `.punteggi-recap` in create.css.
+        Verificato: Paladino → riga corretta, Guerriero/Mago/Ladro/Monaco →
+        parsing corretto anche coi primaryAbility multipli ("DES e SAG" →
+        entrambe), stepper Point-buy invariato (contatore 0→1 dopo un
+        click), console pulita. `?v=108`.
+      Restano da valutare uno alla volta: Competenze, Equipaggiamento,
+      Sottoclasse/Incantesimi, Identità.
 
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
 > `js/create.js` (`window.AppCreate`, macchina a stati dei 6 passi, corpi

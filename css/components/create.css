@@ -467,6 +467,26 @@ body.in-create .dashboard-view {
    del point-buy, la riga con <select> dell'Array standard e il pulsante
    "Consigliati per la classe". */
 
+/* Riepilogo fisso di attacco/TS per la classe scelta (restyling
+   2026-07-29, alternativa C tra 3 con preview): una striscia sola sopra il
+   selettore di metodo, le righe caratteristica sotto non cambiano. */
+.punteggi-recap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  border: 1px solid var(--border-gold-soft);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  margin: 0 0 var(--space-4);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.punteggi-recap b {
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
 .create-method-row {
   margin: 0 0 var(--space-4);
 }

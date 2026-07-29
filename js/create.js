@@ -1558,6 +1558,34 @@
       bgRecapRefresh();
     }
 
+    /* Riepilogo fisso delle caratteristiche che contano per la classe scelta
+       (restyling 2026-07-29, alternativa C tra 3 con preview): le 6 righe
+       sotto restano identiche a prima, si aggiunge solo questa striscia.
+       "Attacca con" viene da klass.primaryAbility — stringa libera nei dati
+       (es. "FOR e CAR"), qui si cerca ogni codice a 3 lettere al suo
+       interno; "TS" viene da klass.saves, già un array pulito. */
+    var klass = window.MANUAL_55.classes[draft.classId] || {};
+    var atkAbilities = ABILITY_ORDER.filter(function (k) {
+      return (klass.primaryAbility || '').indexOf(k) !== -1;
+    });
+    var savesAbilities = klass.saves || [];
+    if (atkAbilities.length || savesAbilities.length) {
+      var miniRecap = el('div', 'punteggi-recap');
+      if (atkAbilities.length) {
+        var atkLine = el('span');
+        atkLine.innerHTML = 'Attacca con <b>' +
+          atkAbilities.map(function (k) { return ABILITY_LABELS[k]; }).join(', ') + '</b>';
+        miniRecap.appendChild(atkLine);
+      }
+      if (savesAbilities.length) {
+        var tsLine = el('span');
+        tsLine.innerHTML = 'TS: <b>' +
+          savesAbilities.map(function (k) { return ABILITY_LABELS[k]; }).join(', ') + '</b>';
+        miniRecap.appendChild(tsLine);
+      }
+      container.appendChild(miniRecap);
+    }
+
     // Selettore di metodo: 3 chip (riuso .chip/.chip-row di edit-sheet.css).
     // Il click cambia draft.scoreMethod, reimposta draft.abilities in modo
     // coerente (resetAbilitiesForMethod) e ridisegna solo la sezione sotto.
