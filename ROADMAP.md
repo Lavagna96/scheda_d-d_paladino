@@ -9,24 +9,35 @@
 
 ## Dove siamo
 
-- **Ultimo aggiornamento:** 2026-07-24
+- **Ultimo aggiornamento:** 2026-07-29
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
-  GitHub Pages, ultimo commit `ace8167` (wizard di level-up, che chiude la
-  Fase 4). L'intera visione originale (login, dashboard multi-personaggio,
+  GitHub Pages. L'intera visione originale (login, dashboard multi-personaggio,
   editing, oggetti magici, level-up guidato per il Paladino) è realizzata e
   funzionante. Login e Face ID collaudati da Andrea su iPhone reale.
-  **La Fase 5 è ora pianificata in dettaglio (2026-07-22):** vedi la sua
-  sezione qui sotto e "Decisioni prese (Fase 5)".
-- **Prossimo passo:** **Blocco 5.A COMPLETO** e **Barbaro completo a livello
-  scheda + level-up** (motore dati-driven, dati 1→20, Berserker, tab
-  Risorse/attacchi generiche, wizard con guadagni Furia) — 8 commit **deployati
-  il 2026-07-23** (`3c46d64`→`536ae74`, run "pages build and deployment" verde,
-  live verificato con curl: `?v=66`, manuale `version 19`, motore/rendering
-  generici serviti), Tharion sempre verificato invariato. Tutto testato finora
-  solo con **stato iniettato** (nessun Barbaro reso in UI vera). In corso:
-  **Blocco 5.B — creazione di un personaggio da zero**, per creare e usare
-  davvero un Barbaro.
-  Restano anche in coda due collaudi cloud mai confermati: sync multi-device tra
+  **Fase 5 in corso, Blocco 5.C (le classi una alla volta):** 8 classi su 11
+  complete (Barbaro, Guerriero, Ladro, Monaco, Ranger, Chierico, Druido,
+  Bardo) — restano **Stregone, Mago, Warlock**.
+- **Prossimo passo:** ultimo commit `44007d6` (bump cache `?v=103`) **deployato
+  e verificato live** (curl conferma `?v=103` servito). Sessione del
+  2026-07-29 fuori sequenza rispetto al Blocco 5.C, tre feature testate da
+  Andrea e già in produzione:
+  - `77aef7a` — scelte di ascendenza/retaggio per Dragonide, Elfo, Goliath,
+    Tiefling e Gnomo nel wizard di creazione (prima erano solo testo, senza
+    incidere sulla scheda).
+  - `221081a` — background "Personalizzato" nel passo Background (scelta
+    libera coerente col PHB p.38) + nuovo passo finale **Identità**
+    (allineamento e lingue, mostrati in Tratti).
+  - `fd18699` — dashboard: swipe-to-delete in stile iOS sulle card + toggle
+    griglia/elenco a righe con preferenza ricordata sul dispositivo.
+  Riverificando i "Debiti aperti" il 2026-07-29 sono emerse 2 voci già chiuse
+  ma mai marcate (point-buy 27 punti, trucchetti in creazione — vedi sezione
+  debiti) e chiuso per davvero l'hardcode `classId === 'paladino'` in
+  `renderGains()`/`poolMax` (`engine.js`+`levelup.js`, cache `?v=104`, non
+  ancora deployato — committare quando Andrea conferma).
+  **Prossimo lavoro da scegliere:** riprendere il Blocco 5.C con **Stregone**
+  (9° classe, Punti Stregoneria + Metamagia), oppure i collaudi cloud mai
+  confermati sotto.
+  Restano in coda due collaudi cloud mai confermati: sync multi-device tra
   due dispositivi con lo stesso account, e la verifica nella console Firebase che
   `manuals/5.5/feats` sia arrivato su Firestore (step 4.4, dopo un deploy — il
   sync fallisce in silenzio se la regola non è deployata).
@@ -1361,20 +1372,20 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
 - [x] ~~**Nome del file di export sempre `tharion-velnar-backup.json`**~~ —
       FATTO (2026-07-27): il nome segue il personaggio attivo
       (`prova-backup.json`), slug con accenti e simboli normalizzati.
-- [ ] **Trucchetti scelti in creazione** — `grimoire.cantrips` ora viene letto
-      dal grimorio (5.B.3), ma nessuna classe già implementata ne ha: il
-      percorso resta da collaudare davvero con la prima classe che li prende
-      (Mago/Stregone/Chierico, Blocco 5.C).
+- [x] ~~**Trucchetti scelti in creazione**~~ — FATTO: collaudato davvero con
+      Druido (2026-07-27) e Bardo (2026-07-28), entrambi creati da zero col
+      wizard scegliendo trucchetti + incantesimi preparati.
 - [x] ~~**`spellsByLevel` delle sottoclassi non-Devozione**~~ — per il Paladino
       FATTO (2026-07-27): i 4 giuramenti sono tutti modellati (vedi 4.2). Resta
       da fare **solo per le classi future** — Barbaro ha ancora 1 solo Cammino
       dei 4 del PHB (Berserker), e ogni nuova classe del Blocco 5.C partirà
       allo stesso modo (1 sottoclasse, le altre dopo).
-- [ ] **Point-buy: si può passare senza spendere i 27 punti** — `scoresValid()`
-      in `create.js` accetta qualsiasi spesa **≤** budget, quindi si arriva in
-      fondo con tutti 8 e un personaggio storpio senza un solo avviso. Serve
-      almeno un avvertimento (o bloccare finché i punti non sono spesi):
-      è una scelta di UX da fare.
+- [x] ~~**Point-buy: si può passare senza spendere i 27 punti**~~ — in realtà
+      già FATTO nello stesso giro del 5.B.4 (2026-07-27): `scoresValid()` in
+      `create.js` richiede `pointBuyUsed() === POINT_BUY_BUDGET` (27 punti
+      esatti, non solo ≤27), col commento che lo dichiara. Questa voce era
+      rimasta per errore dopo il fix — trovato riverificando il codice il
+      2026-07-29.
 - [x] ~~**Peso degli oggetti che arrivano dal background**~~ — FATTO
       (2026-07-27, manuale `version: 27`): la roba dei pacchetti dei background
       entrava in sacca con `weight: 0`, falsando il carico trasportato. Ora c'è
@@ -1403,14 +1414,18 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
 - [x] ~~**Barbaro: solo 1 Cammino su 4**~~ — FATTO (2026-07-27): tutti e 4 i
       Cammini modellati, vedi nota sotto "1. Barbaro" in Blocco 5.C. Il picker
       del level-up li ha presi senza bisogno di alcuna modifica al codice.
-- [ ] **`renderGains()` ha un hardcode `classId === 'paladino'`** — in
-      `levelup.js`, la riga dei guadagni di Imposizione delle Mani nel preview
-      del level-up è agganciata al nome della classe invece che a "la classe ha
-      una risorsa di tipo `pool`" (le risorse `kind:'uses'`, es. Furia, sono già
-      generiche in un loop a parte). Non blocca nulla oggi — solo il Paladino
-      ha una risorsa `pool` — ma è esattamente il tipo di hardcode che il
-      Blocco 5.A voleva eliminare; da generalizzare quando una seconda classe
-      avrà una risorsa `pool` propria.
+- [x] ~~**`renderGains()` ha un hardcode `classId === 'paladino'`**~~ — FATTO
+      (2026-07-29). In `engine.js`, `poolMax` non ha più `loh` cablato: un
+      loop su `classRes` con `kind === 'pool'` (stesso principio già usato per
+      `kind:'uses'`) aggiunge qualunque risorsa a riserva con la sua chiave —
+      oggi solo Imposizione delle Mani, ma vale per qualunque classe futura.
+      In `levelup.js`, `renderGains()` ha lo stesso loop generico al posto del
+      controllo su `character.classId`, con etichetta presa da `classRes[key].name`.
+      Verificato in console col motore reale: Tharion 7→8 produce identica la
+      riga "Imposizione delle Mani: 35 → 40" (PF 60→68, CA 20, CD 15
+      invariati); un Barbaro (nessuna risorsa `pool`) deriva senza errori e
+      senza righe spurie (`poolMax` resta `hp`/`steedhp`/`tempHp`). Cache
+      busting `?v=104`.
 
 ## Bug risolti
 

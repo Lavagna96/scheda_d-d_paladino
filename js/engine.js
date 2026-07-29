@@ -253,10 +253,17 @@
     var hasSteed = !!(steedRes && ch.level >= (steedRes.from || 1));
     var poolMax = {
       hp: hpMax,
-      loh: resMax(classRes.loh, ch.level, klass, mods),
       steedhp: hasSteed ? 5 + 10 * (ch.steedSlotLevel || 2) : 0,
       tempHp: 0
     };
+    /* Risorse di classe "a riserva" (es. Imposizione delle Mani) dai dati,
+       nessun nome di classe cablato: qualunque classe con kind:'pool' nei
+       suoi classResources entra qui con la sua chiave. */
+    Object.keys(classRes).forEach(function (key) {
+      if (classRes[key].kind === 'pool') {
+        poolMax[key] = resMax(classRes[key], ch.level, klass, mods);
+      }
+    });
 
     var slots = (manual.slotTables[klass.casterType] || [])[ch.level] || [];
 

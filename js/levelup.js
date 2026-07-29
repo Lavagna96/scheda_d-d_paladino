@@ -198,10 +198,21 @@
         gainsContainer.appendChild(buildGainRow('Punti Ferita massimi', viewBefore.poolMax.hp, viewAfter.poolMax.hp));
         rows++;
       }
-      if (character.classId === 'paladino' && viewBefore.poolMax.loh !== viewAfter.poolMax.loh) {
-        gainsContainer.appendChild(buildGainRow('Imposizione delle Mani', viewBefore.poolMax.loh, viewAfter.poolMax.loh));
-        rows++;
-      }
+      var classRes = klass.classResources || {};
+      /* Risorse di classe "a riserva" (es. Imposizione delle Mani) dai dati,
+         stesso principio del loop "a usi" più sotto: nessun nome di classe
+         cablato, vale per qualunque classe con kind:'pool'. */
+      Object.keys(classRes).forEach(function (key) {
+        if (classRes[key].kind !== 'pool') {
+          return;
+        }
+        var pb = viewBefore.poolMax[key];
+        var pa = viewAfter.poolMax[key];
+        if (pb !== pa) {
+          gainsContainer.appendChild(buildGainRow(classRes[key].name || key, pb, pa));
+          rows++;
+        }
+      });
       var hitDie = klass.hitDie || '';
       gainsContainer.appendChild(buildGainRow('Dadi Ferita', level + hitDie, nextLevel + hitDie));
       rows++;
@@ -215,7 +226,6 @@
 
       /* Risorse di classe "a usi" dai dati (es. Furia del Barbaro): mostra i
          cambi di massimo, con il nome preso dal manuale (niente hardcoding). */
-      var classRes = klass.classResources || {};
       Object.keys(classRes).forEach(function (key) {
         var def = classRes[key];
         if (def.kind !== 'uses') {
