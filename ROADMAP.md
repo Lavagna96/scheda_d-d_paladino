@@ -713,7 +713,36 @@ invariato e fa da test di non-regressione a ogni passo.
         (38 armi, 8 gruppi) → Ascia bipenne (Cleave) + Falcione (Graze)
         selezionate, cap corretto (37/39 chip disabilitate), console pulita,
         avanzamento a Sottoclasse/Incantesimi regolare. `?v=110`.
-      Restano da valutare uno alla volta: Sottoclasse/Incantesimi, Identità.
+      - **Sottoclasse e Incantesimi** — alternativa **C** ("righe con
+        descrizione a comparsa") tra 3 con preview: qui raggruppare non
+        bastava (già provato due volte). Il problema è diverso — un Bardo
+        sceglie 4 preparati fra 23 nomi, ma a differenza di un'abilità o
+        un'arma il nome di un incantesimo ("Sussurri Dissonanti") non dice
+        cosa fa, si scopriva solo dopo in scheda. Ogni riga si tocca per
+        aprire/leggere la descrizione reale (stesso meccanismo già approvato
+        per il Background, bg-row/bg-row-body) e ha una spunta separata per
+        scegliere — si può leggere senza scegliere.
+        `buildSpellPicker()` (condivisa da questo passo e dai due picker di
+        Iniziato alla Magia nel Background) ora sceglie da sola righe
+        espandibili o chip piatte a seconda che gli elementi abbiano un
+        campo `desc` (incantesimi veri) o no (caratteristiche/competenze/
+        lingue, restano chip): nessuna firma di funzione cambiata, zero
+        tocchi agli altri 6 call site non-incantesimo. Nuove
+        `.spell-list/-row/-head/-check/-name/-meta/-chevron/-desc` in
+        create.css. **Bug trovato e corretto in sessione**: il tag del
+        tempo di lancio tagliava solo al primo "·", ma per le Reazioni il
+        grilletto sta tra parentesi PRIMA del primo "·" (es. "Reazione (a
+        una caduta tua...)"), quindi restava lunghissimo e sovrapposto al
+        nome — tagliato anche al primo "(". Verificato: Bardo (36 righe fra
+        trucchetti e preparati) → espandere "Amici" ne mostra la
+        descrizione reale senza selezionarlo, selezionare 2 trucchetti
+        disabilita gli altri 11 lasciando intatta la sezione preparati
+        (0/4), la riga resta espansa dopo il refresh; Chierico → stesso
+        meccanismo nel picker di Iniziato alla Magia del Background (24
+        righe, 2 trucchetti + 1 preparato scelti correttamente); "Piuma
+        Cadente" (Reazione) mostra ora solo "Reazione", non più il
+        grilletto per esteso. Console pulita in ogni prova. `?v=112`.
+      Restano da valutare: Identità.
 
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
 > `js/create.js` (`window.AppCreate`, macchina a stati dei 6 passi, corpi

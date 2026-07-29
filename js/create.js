@@ -1937,14 +1937,23 @@
 
   /* ---------- passo finale: Sottoclasse e Incantesimi (b2.5) ---------- */
 
-  // Selettore a chip di `count` incantesimi tra `spells` (voci del catalogo del
-  // manuale), che scrive gli id scelti in draft[draftKey]. Stessa meccanica dei
-  // chip competenza (cap a count, contatore, stato disabilitato al tetto);
-  // scarta le selezioni non più valide se la lista cambia (cambio classe).
-  // `onChange` (opzionale) è richiamato dopo ogni click, oltre al refresh
-  // interno: serve al background Personalizzato, dove una scelta qui dentro
-  // fa comparire altra UI sotto (es. il blocco aumenti caratteristica dopo la
-  // terza caratteristica scelta).
+  // Selettore di `count` elementi tra `spells`, che scrive gli id scelti in
+  // draft[draftKey] (cap al tetto, contatore, stato disabilitato); scarta le
+  // selezioni non più valide se la lista cambia (cambio classe). `onChange`
+  // (opzionale) è richiamato dopo ogni click, oltre al refresh interno: serve
+  // al background Personalizzato, dove una scelta qui dentro fa comparire
+  // altra UI sotto (es. il blocco aumenti caratteristica dopo la terza
+  // caratteristica scelta).
+  //
+  // Righe con descrizione a comparsa invece di chip piatte (restyling
+  // 2026-07-29, alternativa C tra 3 con preview) quando gli elementi sono
+  // incantesimi veri, riconosciuti dal campo `desc` (assente per
+  // caratteristiche/competenze/lingue, che restano chip semplici): il nome
+  // di un incantesimo da solo spesso non basta a decidere ("Sussurri
+  // Dissonanti" non dice cosa fa), si tocca la riga per leggerlo prima di
+  // spuntarlo — la spunta è un elemento separato apposta, per poter leggere
+  // senza scegliere. Stesso meccanismo a righe già approvato per il
+  // Background (bg-row/bg-row-body).
   function buildSpellPicker(container, title, spells, count, draftKey, onChange) {
     var validIds = spells.map(function (s) { return s.id; });
     draft[draftKey] = (draft[draftKey] || []).filter(function (id) {
@@ -1954,47 +1963,105 @@
     container.appendChild(el('div', 'edit-section-label', title));
     var counterEl = el('div', 'create-points-counter');
     container.appendChild(counterEl);
-    var chipRow = el('div', 'chip-row');
-    container.appendChild(chipRow);
 
-    var chipEls = {};
+    var controls = {}; // id -> { setOn(bool), setDisabled(bool) }
+    var disabledIds = {}; // id -> bool: le righe non sono <button>, il blocco è manuale
 
     function refresh() {
       var n = draft[draftKey].length;
       var atCap = n >= count;
       counterEl.textContent = n + ' / ' + count;
       spells.forEach(function (s) {
-        var chip = chipEls[s.id];
         var isOn = draft[draftKey].indexOf(s.id) !== -1;
-        chip.classList.toggle('on', isOn);
         var disable = atCap && !isOn;
-        chip.disabled = disable;
-        chip.classList.toggle('is-disabled', disable);
+        controls[s.id].setOn(isOn);
+        controls[s.id].setDisabled(disable);
+        disabledIds[s.id] = disable;
       });
       updateNav();
     }
 
-    spells.forEach(function (s) {
-      var chip = el('button', 'chip', s.name);
-      chip.type = 'button';
-      chip.addEventListener('click', function () {
-        var idx = draft[draftKey].indexOf(s.id);
-        if (idx !== -1) {
-          draft[draftKey].splice(idx, 1);
-        } else if (draft[draftKey].length < count) {
-          draft[draftKey].push(s.id);
-        }
-        refresh();
-        // Solo sul click, non sul refresh iniziale qui sotto: onChange rifà
-        // renderDetail(), che ricostruisce anche questo stesso picker — se
-        // scattasse anche al primo refresh() andrebbe in ricorsione infinita.
-        if (onChange) {
-          onChange();
-        }
+    function toggle(id) {
+      if (disabledIds[id]) {
+        return;
+      }
+      var idx = draft[draftKey].indexOf(id);
+      if (idx !== -1) {
+        draft[draftKey].splice(idx, 1);
+      } else if (draft[draftKey].length < count) {
+        draft[draftKey].push(id);
+      }
+      refresh();
+      // Solo sul click, non sul refresh iniziale qui sotto: onChange rifà
+      // renderDetail(), che ricostruisce anche questo stesso picker — se
+      // scattasse anche al primo refresh() andrebbe in ricorsione infinita.
+      if (onChange) {
+        onChange();
+      }
+    }
+
+    var isSpellList = spells.length > 0 && !!spells[0].desc;
+
+    if (isSpellList) {
+      var list = el('div', 'spell-list');
+      container.appendChild(list);
+
+      spells.forEach(function (s) {
+        var row = el('div', 'spell-row');
+        var head = el('div', 'spell-row-head');
+
+        var nameWrap = el('span', 'spell-row-name-wrap');
+        var check = el('span', 'spell-row-check');
+        nameWrap.appendChild(check);
+        nameWrap.appendChild(el('span', 'spell-row-name', s.name));
+        head.appendChild(nameWrap);
+
+        var metaWrap = el('span', 'spell-row-meta-wrap');
+        // Solo il tempo di lancio (es. "Azione", "Reazione"): il primo
+        // segmento di meta a volte include tra parentesi il grilletto della
+        // Reazione (es. "Reazione (a una caduta...)"), troppo lungo per la
+        // riga — si taglia anche lì, non solo al primo "·".
+        metaWrap.appendChild(el('span', 'spell-row-meta',
+          (s.meta || '').split('·')[0].split('(')[0].trim()));
+        metaWrap.appendChild(el('span', 'spell-row-chevron', '▼'));
+        head.appendChild(metaWrap);
+
+        row.appendChild(head);
+        row.appendChild(el('div', 'spell-row-desc', s.desc));
+        list.appendChild(row);
+
+        head.addEventListener('click', function () {
+          row.classList.toggle('expanded');
+        });
+        check.addEventListener('click', function (e) {
+          e.stopPropagation(); // non deve anche aprire/chiudere la riga
+          toggle(s.id);
+        });
+
+        controls[s.id] = {
+          setOn: function (isOn) { row.classList.toggle('on', isOn); },
+          setDisabled: function (isDisabled) { row.classList.toggle('is-disabled', isDisabled); }
+        };
       });
-      chipEls[s.id] = chip;
-      chipRow.appendChild(chip);
-    });
+    } else {
+      var chipRow = el('div', 'chip-row');
+      container.appendChild(chipRow);
+
+      spells.forEach(function (s) {
+        var chip = el('button', 'chip', s.name);
+        chip.type = 'button';
+        chip.addEventListener('click', function () { toggle(s.id); });
+        chipRow.appendChild(chip);
+
+        controls[s.id] = {
+          setOn: function (isOn) { chip.classList.toggle('on', isOn); },
+          setDisabled: function (isDisabled) {
+            chip.disabled = isDisabled;
+            chip.classList.toggle('is-disabled', isDisabled);
+          }
+        };
+      });
+    }
 
     refresh();
   }
