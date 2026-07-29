@@ -1639,27 +1639,35 @@
     var klass = window.MANUAL_55.classes[draft.classId] || {};
 
     // Riga di sola lettura: Tiri Salvezza fissi della classe (non si
-    // scelgono in questo passo, sono mostrati solo per riferimento).
+    // scelgono in questo passo, sono mostrati solo per riferimento). Badge
+    // invece di testo piatto (restyling 2026-07-29), coerenti con le chip
+    // sotto.
     var savesLabels = (klass.saves || []).map(function (k) { return ABILITY_LABELS[k]; });
-    container.appendChild(el('div', 'create-saves-line',
-      'Tiri Salvezza (dalla classe): ' + savesLabels.join(', ')));
+    container.appendChild(el('div', 'competenze-ro-label', 'Tiri Salvezza (dalla classe)'));
+    var savesRow = el('div', 'competenze-ro-row');
+    savesLabels.forEach(function (l) { savesRow.appendChild(el('span', 'competenze-ro-badge', l)); });
+    container.appendChild(savesRow);
 
     var skillsDef = classSkillsFor(draft.classId);
     var allSkills = (window.AppEngine && window.AppEngine.SKILLS) || [];
     var fromBg = bgSkills();
 
-    function labelOf(id) {
-      var s = allSkills.filter(function (x) { return x.id === id; })[0];
-
-      return s ? s.label : id;
+    function skillOf(id) {
+      return allSkills.filter(function (x) { return x.id === id; })[0];
     }
 
     /* Competenze già arrivate dal background: il PHB dice che non si prende
        due volte la stessa, quindi spariscono dalla lista della classe (e il
-       numero da scegliere non cambia: si sceglie fra le rimanenti). */
+       numero da scegliere non cambia: si sceglie fra le rimanenti). Badge
+       come i Tiri Salvezza sopra. */
     if (fromBg.length) {
-      container.appendChild(el('div', 'create-saves-line',
-        'Dal background: ' + fromBg.map(labelOf).join(', ') + ' — già tue, non si ripetono qui sotto.'));
+      container.appendChild(el('div', 'competenze-ro-label', 'Dal background (già tue)'));
+      var bgRow = el('div', 'competenze-ro-row');
+      fromBg.forEach(function (id) {
+        var s = skillOf(id);
+        bgRow.appendChild(el('span', 'competenze-ro-badge', s ? s.label : id));
+      });
+      container.appendChild(bgRow);
     }
 
     var disponibili = skillsDef.from.filter(function (id) {
@@ -1676,9 +1684,6 @@
 
     var counterEl = el('div', 'create-points-counter');
     container.appendChild(counterEl);
-
-    var chipRow = el('div', 'chip-row');
-    container.appendChild(chipRow);
 
     var chipEls = {};
 
@@ -1698,8 +1703,8 @@
       updateNav();
     }
 
-    disponibili.forEach(function (id) {
-      var match = allSkills.filter(function (s) { return s.id === id; })[0];
+    function buildChip(id) {
+      var match = skillOf(id);
       var chip = el('button', 'chip', match ? match.label : id);
       chip.type = 'button';
 
@@ -1714,7 +1719,29 @@
       });
 
       chipEls[id] = chip;
-      chipRow.appendChild(chip);
+
+      return chip;
+    }
+
+    /* Raggruppate per caratteristica governante (restyling 2026-07-29,
+       alternativa B tra 3 con preview): con poche competenze rimanenti
+       (es. Paladino) sono 2-3 gruppi minuscoli, ma con classi che scelgono
+       fra tutte e 18 (es. Bardo) aiuta davvero a orientarsi invece di
+       scorrere una fila unica lunghissima. Dato reale (skill.abil), nessuna
+       competenza inventata: solo raggruppata. */
+    var byAbil = {};
+    disponibili.forEach(function (id) {
+      var s = skillOf(id);
+      var abil = s ? s.abil : '?';
+      (byAbil[abil] = byAbil[abil] || []).push(id);
+    });
+    ABILITY_ORDER.filter(function (k) { return byAbil[k]; }).forEach(function (k) {
+      var group = el('div', 'competenze-group');
+      group.appendChild(el('div', 'competenze-group-head', ABILITY_LABELS[k]));
+      var row = el('div', 'chip-row');
+      byAbil[k].forEach(function (id) { row.appendChild(buildChip(id)); });
+      group.appendChild(row);
+      container.appendChild(group);
     });
 
     refresh();

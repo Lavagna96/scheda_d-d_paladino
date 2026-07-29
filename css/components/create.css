@@ -528,17 +528,55 @@ body.in-create .dashboard-view {
   cursor: pointer;
 }
 
-/* ---------- passo Competenze (sotto-step b2.3) ----------
+/* ---------- passo Competenze (sotto-step b2.3, restyling 2026-07-29) ----------
    Titolo "Scegli N competenze" e contatore riusano .edit-section-label e
    .create-points-counter già definite sopra; le chip competenza riusano
-   .chip/.chip-row (css/components/edit-sheet.css). Restano da aggiungere
-   solo la riga di sola lettura dei Tiri Salvezza e lo stato disabilitato
-   dei chip quando si raggiunge il numero di competenze da scegliere. */
+   .chip/.chip-row (css/components/edit-sheet.css). Tiri Salvezza e
+   competenze dal background sono badge di sola lettura (coerenti con le
+   chip sotto, non più testo piatto); le competenze rimanenti sono
+   raggruppate per caratteristica governante (alternativa B tra 3 con
+   preview) invece di un'unica fila lunga. */
 
 .create-saves-line {
   margin: 0 0 var(--space-3);
   font-size: 13px;
   color: var(--text-secondary);
+}
+
+.competenze-ro-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 6px 2px;
+}
+
+.competenze-ro-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.competenze-ro-badge {
+  font-size: 12px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-gold-soft);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  background: var(--bg-elevated);
+}
+
+.competenze-group {
+  margin-bottom: var(--space-4);
+}
+
+.competenze-group-head {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-2);
 }
 
 .chip:disabled,

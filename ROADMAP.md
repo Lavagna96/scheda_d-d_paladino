@@ -681,7 +681,23 @@ invariato e fa da test di non-regressione a ogni passo.
         parsing corretto anche coi primaryAbility multipli ("DES e SAG" →
         entrambe), stepper Point-buy invariato (contatore 0→1 dopo un
         click), console pulita. `?v=108`.
-      Restano da valutare uno alla volta: Competenze, Equipaggiamento,
+      - **Competenze** — alternativa **B** ("raggruppate per caratteristica")
+        tra 3 con preview: Tiri Salvezza e competenze dal background
+        diventano badge di sola lettura (coerenti con le chip, non più testo
+        piatto); le competenze rimanenti si dividono in mini-gruppi per
+        caratteristica governante (dato reale `skill.abil`, nessuna
+        competenza inventata). Poco visibile col Paladino (2-3 gruppi
+        minuscoli), ma decisivo col Bardo (le 18 competenze del gioco,
+        nessuna lista ristretta) — verificato **entrambi i casi** nella
+        preview prima di scegliere. Nuove `.competenze-ro-label/-row/-badge`
+        e `.competenze-group/-head` in create.css; `chipEls` resta piatto
+        (una sola mappa id→chip attraverso tutti i gruppi), cap/disabilitazione
+        cross-gruppo invariati. Verificato: Paladino 2/2 con Religione+Medicina
+        disabilita le altre 2 nei rispettivi gruppi; passaggio a Bardo (18
+        competenze su 6 gruppi, Atletica/Intimidire dal background escluse)
+        conserva le selezioni ancora valide (2/3), console pulita in ogni
+        prova. `?v=109`.
+      Restano da valutare uno alla volta: Equipaggiamento,
       Sottoclasse/Incantesimi, Identità.
 
 > *Avanzamento 5.B:* **b1 (shell vista + navigazione) FATTO (2026-07-23).** Nuovi
