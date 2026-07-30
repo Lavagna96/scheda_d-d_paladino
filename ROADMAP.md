@@ -14,9 +14,9 @@
   GitHub Pages. L'intera visione originale (login, dashboard multi-personaggio,
   editing, oggetti magici, level-up guidato per il Paladino) è realizzata e
   funzionante. Login e Face ID collaudati da Andrea su iPhone reale.
-  **Fase 5 in corso, Blocco 5.C (le classi una alla volta):** 10 classi su 11
-  complete (Barbaro, Guerriero, Ladro, Monaco, Ranger, Chierico, Druido,
-  Bardo, Stregone, Mago) — resta solo **Warlock**.
+  **Fase 5, Blocco 5.C COMPLETO: tutte e 11 le classi** (Barbaro, Guerriero,
+  Ladro, Monaco, Ranger, Chierico, Druido, Bardo, Stregone, Mago, Warlock)
+  hanno privilegi 1→20, almeno 1 sottoclasse, level-up e creazione da zero.
   Il **restyling visivo del wizard di creazione** (tutti e 8 i passi: Specie,
   Classe, Background, Punteggi, Competenze, Equipaggiamento,
   Sottoclasse/Incantesimi, Identità), dal commit `994a181` (`?v=105`) al
@@ -24,11 +24,13 @@
   DEPLOYATO** (verificato il 2026-07-30: `origin/main` allineato a `HEAD`,
   sito live serve `?v=114` e contiene `buildSegmentedRow` — la roadmap non
   era stata aggiornata dopo il deploy avvenuto a fine sessione 2026-07-29).
-- **Prossimo passo:** Stregone committato (`3ef2f45`); Mago implementato e
-  verificato in locale (`?v=116`, vedi voce 10 del Blocco 5.C più sotto) —
-  **ancora da committare e deployare**, in attesa di autorizzazione. Dopo il
-  deploy, chiudere il Blocco 5.C con **Warlock** (11ª e ultima classe, slot
-  Patto già in tabella + Invocazioni Occulte + Suppliche Mistiche + Patto).
+- **Prossimo passo:** Stregone (`3ef2f45`) e Mago (`c59b42d`) committati e
+  **deployati** (verificato il 2026-07-30: run Pages verde, sito live su
+  `?v=116`). Warlock implementato e verificato in locale (`?v=117`, vedi voce
+  11 del Blocco 5.C più sotto) — **ancora da committare e deployare**, in
+  attesa di autorizzazione. Con Warlock si chiude il Blocco 5.C: da scegliere
+  dopo il deploy, senza fretta — sottoclassi mancanti di una classe a scelta,
+  oppure i collaudi cloud mai confermati sotto.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1466,7 +1468,72 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
       Tharion (Paladino) verificato invariato dopo ogni prova (CA 20, CD 15,
       PF 60, Imposizione 35). Console pulita in ogni prova. Cache busting
       `?v=116`.
-11. [ ] **Warlock** (pact) — slot pact (già in tabella), Invocazioni, Suppliche, Patto.
+11. [x] **Warlock** (pact) — slot pact (già in tabella), Invocazioni, Suppliche, Patto.
+    → **Fatto (2026-07-30, manuale `version` 38→39)**: privilegi 1→20 dal PDF
+    (p.152-156), sottoclasse **Patto del Grande Antico** (p.166-167 — la più
+    semplice delle 4: Fatato/Celestiale/Immondo hanno tutte un privilegio al
+    3° scalato sul modificatore di Carisma — Passi del Fatato, Luce
+    Guaritrice, Fortuna del Reietto — che richiederebbe una risorsa di
+    SOTTOCLASSE, non ancora supportata dal motore, che ha solo risorse di
+    classe: aggiungerla lì varrebbe per qualunque patrono, sbagliato, stesso
+    tipo di svista già presente e non corretta per l'Arma Sacra del Paladino
+    — segnalata a parte, fuori scope qui. Grande Antico è invece tutto
+    narrativo, stesso trattamento di Divinatore/Aberrante), equipaggiamento
+    iniziale (Cuoio + Falcetto + 2 Pugnali + Focus Arcano + Libro + Kit dello
+    studioso, oppure 100 MO), competenze di classe in `CLASS_SKILLS`.
+    - **Bug vero trovato e chiuso, non solo del Warlock**: gli slot Patto
+      Magico non venivano proprio calcolati. `engine.js` leggeva sempre
+      `manual.slotTables[klass.casterType]`, ma per `casterType:'pact'` quella
+      chiave non esiste — esistono due tabelle piatte a parte (`pactSlots`,
+      `pactSlotLevel`, già nei dati da prima, mai lette da nessuna parte del
+      codice). Un Warlock aveva quindi zero slot e zero card "Slot
+      Incantesimi" a Grimorio. Corretto con un ramo dedicato che costruisce
+      un array sparso (un solo indice valorizzato, dato che il Patto ha
+      SEMPRE un unico livello di slot condiviso) — le card irrilevanti
+      restano nascoste da sole, stesso meccanismo generico già in uso.
+    - **Meccanica nuova: Invocazioni Occulte**. La tabella `invocations` del
+      manuale è un TOTALE per livello (1,3,3,3,5,5,6...), non "nuove per
+      livello": riscritta come `choicePoints.invocations` nella stessa forma
+      {level,count} di Competenza/Metamagia (differenze: +1 al 1°, +2 al 2°,
+      +2 al 5°, +1 ciascuno a 7/9/12/15/18 = 10 totali al 20°). Nuovo
+      catalogo top-level `manual.invocations`: 14 voci curate (su ~30 nel
+      PHB — stesso principio dei 17 Talenti iniziali), prerequisiti come
+      testo informativo non validato (stesso trattamento dei prerequisiti
+      dei Talenti). Nuova `buildInvocationSection()` in `levelup.js`, gemella
+      di Metamagia; **in più**, a differenza di Competenza/Metamagia,
+      l'Invocazione parte già al 1° livello — serviva anche un picker nel
+      wizard di CREAZIONE (mai servito prima): nuovo `buildInvocationPicker()`
+      + `invocationEntryFor()` in `create.js`, stesso `buildSpellPicker`
+      condiviso (righe espandibili, essendoci `desc`). Nuovo campo
+      `character.invocationIds` (default `[]` in `BASE_CHARACTER`).
+    - **Contatto col Patrono**: `classResources` di tipo `kind:'uses'` dal 9°
+      livello, stesso principio del Metabolismo Sbalorditivo del Monaco.
+    - **Verifica end-to-end**: creazione di un Warlock Umano/Ciarlatano da
+      zero nel wizard reale (Punteggi: "Attacca con Carisma · TS: Saggezza,
+      Carisma"; Competenze: 7 abilità raggruppate, Inganno e Rapidità di Mano
+      escluse dal background; Equipaggiamento: card A col Kit del Warlock,
+      Cuoio + Falcetto; Sottoclasse/Incantesimi: "Invocazioni Occulte —
+      scegline 1" PRIMA di trucchetti/preparati, 14 righe espandibili, Patto
+      della Lama scelto con la descrizione reale visibile). Personaggio
+      generato: PF 10 = 1d8+COS, grimorio 2 trucchetti + 2 preparati;
+      **Grimorio→Slot Incantesimi mostra UNA SOLA card "Slot 1° livello —
+      1/1"** (prova diretta che il bug degli slot Patto è risolto: prima
+      sarebbe stata vuota). Level-up 1→2 simulato: guadagni "PF 10→17", "Slot
+      Incantesimi 1→2", sezione "Invocazioni Occulte — scegline 2" con le 13
+      rimanenti (Patto della Lama esclusa, già posseduta), Esplosione
+      Agonizzante + Vista del Diavolo scelte e salvate in `invocationIds`.
+      Tharion (Paladino) verificato invariato dopo ogni prova (CA 20, CD 15,
+      PF 60, Imposizione 35, slot [4,3] — il ramo 'pact' nuovo non lo tocca,
+      lui resta su 'half'). Console pulita in ogni prova. Cache busting
+      `?v=117`.
+    **Con questo, tutte e 11 le classi del Blocco 5.C sono complete: la
+    Fase 5 ha ora tutte le classi giocabili a livello di scheda, level-up e
+    creazione da zero (ognuna con almeno 1 sottoclasse). Restano da
+    completare, in futuro e senza fretta: le sottoclassi mancanti di ogni
+    classe (Paladino e Barbaro sono già a 4/4; le altre 9 classi hanno solo
+    la prima sottoclasse modellata), e i meccanismi di sottoclasse rimandati
+    per limiti del motore attuale (risorse scalate su una caratteristica ma
+    specifiche di UNA sola sottoclasse, non dell'intera classe).**
 
 **Sequenza dei blocchi:** 5.A + Barbaro insieme → 5.B creazione → poi 5.C dalla 2 alla 11.
 

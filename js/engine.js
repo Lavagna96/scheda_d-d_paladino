@@ -265,7 +265,25 @@
       }
     });
 
-    var slots = (manual.slotTables[klass.casterType] || [])[ch.level] || [];
+    /* Slot da incantatore: full/half sono tabelle per livello con un numero
+       di slot per OGNI livello di incantesimo (colonne 1..9). Il Patto
+       Magico del Warlock è diverso — tutti gli slot condividono lo STESSO
+       livello (`pactSlotLevel`), che sale col personaggio mentre il numero
+       di slot (`pactSlots`) resta basso: niente riga in `slotTables` per
+       'pact', due tabelle piatte a parte. Uso un array sparso (un solo
+       indice valorizzato) così le card sl1..sl9 pertinenti restano
+       generiche: resta vuoto agli indici non usati, `forEach` li salta. */
+    var slots;
+    if (klass.casterType === 'pact') {
+      var pactCount = (manual.slotTables.pactSlots || [])[ch.level] || 0;
+      var pactLevel = (manual.slotTables.pactSlotLevel || [])[ch.level] || 0;
+      slots = [];
+      if (pactCount > 0 && pactLevel > 0) {
+        slots[pactLevel - 1] = pactCount;
+      }
+    } else {
+      slots = (manual.slotTables[klass.casterType] || [])[ch.level] || [];
+    }
 
     // Tipo di danno del Soffio/Resistenza: dall'ascendenza draconica scelta
     // alla creazione (js/create.js); 'fuoco' come ripiego per personaggi

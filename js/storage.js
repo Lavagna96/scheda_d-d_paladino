@@ -62,6 +62,8 @@
     feats: [],
     // Opzioni di Metamagia conosciute (Stregone): [id, ...] — id da manual.metamagic.
     metamagicIds: [],
+    // Invocazioni Occulte conosciute (Warlock): [id, ...] — id da manual.invocations.
+    invocationIds: [],
     levelChoices: {}
   };
 

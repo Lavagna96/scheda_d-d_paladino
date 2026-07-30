@@ -97,6 +97,8 @@
     fightingStyleId: null,
     // Competenza: solo per le classi che la danno al livello 1 (Ladro).
     expertiseSkills: [],
+    // Invocazioni Occulte: solo per le classi che le danno al livello 1 (Warlock).
+    invocationIds: [],
     // Identità (passo finale): allineamento su due assi e le 2 lingue scelte
     // oltre al Comune (già dato di default, non tracciato qui).
     alignmentLaw: null, alignmentMorality: null, languages: []
@@ -204,7 +206,8 @@
     monaco: { count: 2, from: ['acrobazia', 'atletica', 'storia', 'intuizione', 'religione', 'furtivita'] },
     paladino: { count: 2, from: ['atletica', 'intuizione', 'intimidire', 'medicina', 'persuasione', 'religione'] },
     ranger: { count: 3, from: ['addestrare-animali', 'atletica', 'intuizione', 'indagare', 'natura', 'percezione', 'furtivita', 'sopravvivenza'] },
-    stregone: { count: 2, from: ['arcano', 'inganno', 'intuizione', 'intimidire', 'persuasione', 'religione'] }
+    stregone: { count: 2, from: ['arcano', 'inganno', 'intuizione', 'intimidire', 'persuasione', 'religione'] },
+    warlock: { count: 2, from: ['arcano', 'inganno', 'storia', 'intimidire', 'indagare', 'natura', 'religione'] }
   };
 
   // Competenze disponibili per una classe: usa CLASS_SKILLS se già
@@ -479,6 +482,19 @@
     return found;
   }
 
+  // Voce di choicePoints.invocations per un dato livello (Warlock, stessa
+  // forma {level,count} di Competenza): al 1° livello ne dà sempre 1.
+  function invocationEntryFor(cp, level) {
+    var found = null;
+    ((cp && cp.invocations) || []).forEach(function (e) {
+      if (e.level === level) {
+        found = e;
+      }
+    });
+
+    return found;
+  }
+
   function finaleValid() {
     var klass = (window.MANUAL_55 && window.MANUAL_55.classes[draft.classId]) || {};
     var cp = klass.choicePoints || {};
@@ -488,8 +504,11 @@
     // Competenza (Ladro, Ranger): stesso discorso, solo se la classe la dà al 1°.
     var expertiseEntry = expertiseEntryFor(cp, CREATE_LEVEL);
     var expertiseOk = !expertiseEntry || (draft.expertiseSkills || []).length === expertiseEntry.count;
+    // Invocazioni Occulte (Warlock): sempre 1 al 1° livello.
+    var invocationEntry = invocationEntryFor(cp, CREATE_LEVEL);
+    var invocationOk = !invocationEntry || (draft.invocationIds || []).length === invocationEntry.count;
     if (!klass.casterType || klass.casterType === 'none') {
-      return styleOk && expertiseOk;
+      return styleOk && expertiseOk && invocationOk;
     }
     var needCantrips = Math.min(
       (klass.cantripsByLevel && klass.cantripsByLevel[CREATE_LEVEL]) || 0,
@@ -500,7 +519,7 @@
       classSpellsAt(draft.classId, 1).length
     );
 
-    return styleOk && expertiseOk && (draft.cantrips || []).length === needCantrips &&
+    return styleOk && expertiseOk && invocationOk && (draft.cantrips || []).length === needCantrips &&
            (draft.preparedSpells || []).length === needPrepared;
   }
 
@@ -2107,6 +2126,19 @@
     buildSpellPicker(container, 'Competenza — scegline ' + count, options, count, 'expertiseSkills');
   }
 
+  // Chip/righe di Invocazione Occulta (Warlock, 1 al 1° livello): il
+  // catalogo ha `desc`, quindi buildSpellPicker le mostra come righe
+  // espandibili (stesso trattamento degli incantesimi), non chip piatte.
+  function buildInvocationPicker(container, count) {
+    var manualInvocations = window.MANUAL_55.invocations || {};
+    var options = Object.keys(manualInvocations).map(function (id) {
+      var inv = manualInvocations[id];
+
+      return { id: id, name: inv.name, desc: (inv.prereq ? inv.prereq + ' — ' : '') + inv.desc };
+    });
+    buildSpellPicker(container, 'Invocazioni Occulte — scegline ' + count, options, count, 'invocationIds');
+  }
+
   function renderFinale(container) {
     var klass = window.MANUAL_55.classes[draft.classId] || {};
 
@@ -2120,6 +2152,10 @@
     var expertiseEntry = expertiseEntryFor(klass.choicePoints, CREATE_LEVEL);
     if (expertiseEntry) {
       buildExpertisePicker(container, expertiseEntry.count);
+    }
+    var invocationEntry = invocationEntryFor(klass.choicePoints, CREATE_LEVEL);
+    if (invocationEntry) {
+      buildInvocationPicker(container, invocationEntry.count);
     }
 
     var isCaster = klass.casterType && klass.casterType !== 'none';
@@ -2400,6 +2436,9 @@
       // Competenza (Ladro, Ranger): solo se la classe la dà al livello 1.
       expertiseSkills: expertiseEntryFor(klass.choicePoints, CREATE_LEVEL)
         ? (draft.expertiseSkills || []).slice() : [],
+      // Invocazioni Occulte (Warlock): solo se la classe le dà al livello 1.
+      invocationIds: invocationEntryFor(klass.choicePoints, CREATE_LEVEL)
+        ? (draft.invocationIds || []).slice() : [],
       fightingStyle: ((klass.choicePoints || {}).fightingStyle === CREATE_LEVEL && draft.fightingStyleId) || 'nessuno',
       armor: armor,
       // Abilità d'attacco (Blocco 5.A.3, letta da js/engine.js): Accurata →
@@ -2676,7 +2715,7 @@
       customSkills: [], customKitBgId: null,
       equip: null, equipForClass: null, masteries: [],
       cantrips: [], preparedSpells: [],
-      fightingStyleId: null, expertiseSkills: [],
+      fightingStyleId: null, expertiseSkills: [], invocationIds: [],
       alignmentLaw: null, alignmentMorality: null, languages: []
     };
     document.body.classList.remove('in-dashboard');

@@ -102,6 +102,14 @@
     var needsMetamagic = !!metamagicEntry;
     var metamagicCount = metamagicEntry ? metamagicEntry.count : 0;
 
+    // Invocazioni Occulte (Warlock): stessa forma {level,count}. Il livello 1
+    // è gestito dal wizard di creazione (create.js), non arriva mai qui —
+    // il level-up parte sempre da nextLevel >= 2.
+    var invocationEntry = null;
+    (cp.invocations || []).forEach(function (e) { if (e.level === nextLevel) { invocationEntry = e; } });
+    var needsInvocation = !!invocationEntry;
+    var invocationCount = invocationEntry ? invocationEntry.count : 0;
+
     /* bozza di scelte correnti (non ancora applicata allo stato) */
     var choice = {
       mode: null, // 'asi' | 'feat'
@@ -109,7 +117,8 @@
       featId: null,
       styleId: character.fightingStyle || 'nessuno',
       expertiseIds: [],
-      metamagicIds: []
+      metamagicIds: [],
+      invocationIds: []
     };
     var autoSubclassId = null;
     var autoEpicBoonId = null;
@@ -296,6 +305,9 @@
         ok = false;
       }
       if (needsMetamagic && choice.metamagicIds.length !== metamagicCount) {
+        ok = false;
+      }
+      if (needsInvocation && choice.invocationIds.length !== invocationCount) {
         ok = false;
       }
       confirmBtn.disabled = !ok;
@@ -548,6 +560,52 @@
       return wrap;
     }
 
+    /* ---------- sezione Invocazioni Occulte (Warlock; quante dipende da invocationCount) ---------- */
+
+    function buildInvocationSection() {
+      var wrap = el('div');
+      wrap.appendChild(el('div', 'edit-section-label', 'Invocazioni Occulte — scegline ' + invocationCount));
+      var already = character.invocationIds || [];
+      var manualInvocations = manual.invocations || {};
+      var eligible = Object.keys(manualInvocations).filter(function (id) {
+        return already.indexOf(id) === -1;
+      });
+      var list = el('div', 'levelup-feat-list');
+      var rowEls = {};
+
+      eligible.forEach(function (id) {
+        var inv = manualInvocations[id];
+        var row = el('div', 'levelup-feat-row');
+        row.appendChild(el('div', 'levelup-feat-name', inv.name));
+        if (inv.prereq) {
+          row.appendChild(el('div', 'levelup-feat-prereq', inv.prereq));
+        }
+        row.appendChild(el('div', 'levelup-feat-desc', truncate(inv.desc, 100)));
+
+        row.addEventListener('click', function () {
+          var idx = choice.invocationIds.indexOf(id);
+          if (idx !== -1) {
+            choice.invocationIds.splice(idx, 1);
+          } else if (choice.invocationIds.length < invocationCount) {
+            choice.invocationIds.push(id);
+          }
+          Object.keys(rowEls).forEach(function (rowId) {
+            var isOn = choice.invocationIds.indexOf(rowId) !== -1;
+            rowEls[rowId].classList.toggle('on', isOn);
+            var disable = choice.invocationIds.length >= invocationCount && !isOn;
+            rowEls[rowId].classList.toggle('is-disabled', disable);
+          });
+          updateConfirmState();
+        });
+
+        rowEls[id] = row;
+        list.appendChild(row);
+      });
+      wrap.appendChild(list);
+
+      return wrap;
+    }
+
     /* ---------- righe di sola lettura (1 sola opzione disponibile oggi) ---------- */
 
     /* Con una sola sottoclasse la si assegna da sola (riga di sola lettura);
@@ -668,6 +726,12 @@
         ch.levelChoices[key].metamagicIds = choice.metamagicIds.slice();
       }
 
+      if (needsInvocation) {
+        ch.invocationIds = (ch.invocationIds || []).concat(choice.invocationIds);
+        ch.levelChoices[key] = ch.levelChoices[key] || {};
+        ch.levelChoices[key].invocationIds = choice.invocationIds.slice();
+      }
+
       // Con più di una sottoclasse vince la scelta fatta nel picker; con una
       // sola resta l'assegnazione automatica di sempre.
       var chosenSubclassId = choice.subclassId || autoSubclassId;
@@ -746,6 +810,10 @@
 
     if (needsMetamagic) {
       bodyEl.appendChild(buildMetamagicSection());
+    }
+
+    if (needsInvocation) {
+      bodyEl.appendChild(buildInvocationSection());
     }
 
     if (needsSubclass) {

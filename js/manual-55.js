@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 38,
+  version: 39,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -1765,7 +1765,157 @@ window.MANUAL_55 = {
       invocations: [0, 1, 3, 3, 3, 5, 5, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10],
       cantripsByLevel: [0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       preparedByLevel: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15],
-      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+      // Niente Maestria nelle Armi (nessuna colonna dedicata): solo armi
+      // semplici. Armor Training del PHB è "Light armor" — non modellato
+      // come restrizione (l'editor equipaggiamento non filtra per classe
+      // per nessuna classe finora), solo il default del pacchetto A.
+      weaponProf: ['sem'],
+      startingEquipment: {
+        a: {
+          label: 'Kit del warlock',
+          armorId: 'cuoio', shield: false, weaponId: 'falcetto',
+          extra: [
+            { name: 'Pugnale', qty: 2, weaponId: 'pugnale' },
+            { name: 'Focus Arcano (globo)', qty: 1, weight: 3 },
+            { name: 'Libro (conoscenze occulte)', qty: 1, weight: 5, desc: 'Contiene i tuoi appunti sui segreti strappati al tuo patrono.' },
+            { name: 'Kit dello studioso', qty: 1, weight: 22, desc: 'Zaino, libro, inchiostro, penna, lampada, 10 fiaschette d\'olio, 10 fogli di pergamena, acciarino.' }
+          ],
+          coins: { mo: 15 }
+        },
+        b: { label: '100 monete d\'oro', coins: { mo: 100 } }
+      },
+      // Contatto col Patrono: 1 uso dal 9° livello, stesso principio del
+      // Metabolismo Sbalorditivo del Monaco — nessun codice nuovo nel motore.
+      classResources: {
+        contactPatron: { name: 'Contatto col Patrono', kind: 'uses', max: 1, from: 9, resetOn: 'long' }
+      },
+      choicePoints: {
+        subclass: 3, subclassFeatureLevels: [3, 6, 10, 14],
+        asi: [4, 8, 12, 16], epicBoon: 19,
+        // Invocazioni Occulte: la tabella `invocations` è un TOTALE per
+        // livello (non "nuove per livello" come Metamagia/Competenza), quindi
+        // qui la riscrivo come differenze — stessa forma {level,count} già
+        // usata da Espero/Metamagia, il picker non deve sapere la differenza.
+        // 1(+1) 2(+2) 5(+2) 7(+1) 9(+1) 12(+1) 15(+1) 18(+1) = 10 totali al 20°.
+        invocations: [
+          { level: 1, count: 1 }, { level: 2, count: 2 }, { level: 5, count: 2 },
+          { level: 7, count: 1 }, { level: 9, count: 1 }, { level: 12, count: 1 },
+          { level: 15, count: 1 }, { level: 18, count: 1 }
+        ]
+      },
+      /* Privilegi 1→20 (PHB 2024 p.152-156 del PDF): riassunti originali in
+         italiano. trait:false = scelta gestita altrove (sottoclasse/ASI/Dono
+         Epico dal level-up, Invocazioni dal picker dedicato). Ai livelli
+         5/7/18 il PHB non ha un privilegio nuovo, solo i numeri delle
+         tabelle (Invocazioni/Trucchetti/Preparati) che salgono da soli —
+         nessuna voce qui. */
+      levelFeatures: {
+        1: [
+          { name: 'Invocazioni Occulte', trait: false, desc: 'Impari un\'Invocazione Occulta a tua scelta dall\'elenco a parte. Altre se ne aggiungono ai livelli indicati nella tabella e puoi sempre sostituirne una salendo di livello da warlock (non se è prerequisito di un\'altra invocazione che hai).' },
+          { name: 'Magia del Patto', desc: 'Il Carisma è la tua caratteristica da incantatore. Conosci 2 trucchetti da warlock e prepari 2 incantesimi di 1° livello o superiore, ma tutti i tuoi slot sono sempre dello stesso livello (indicato nella colonna Livello Slot): pochi, ma sempre al livello più alto disponibile. Recuperi tutti gli slot spesi con un riposo breve o lungo. Puoi usare un Focus Arcano come focus.' }
+        ],
+        2: [
+          { name: 'Astuzia Magica', desc: 'Puoi eseguire un rito esoterico per 1 minuto: al termine, recuperi slot di Magia del Patto già spesi, non più della metà del tuo massimo (arrotondato per eccesso). Puoi usare questo privilegio una sola volta tra un riposo lungo e l\'altro.' }
+        ],
+        3: [
+          { name: 'Sottoclasse del Warlock', trait: false, desc: 'Scegli un patrono (Fatato, Celestiale, Immondo o Grande Antico). Ottieni i suoi privilegi al tuo livello da warlock o inferiore.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        6: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio del tuo patrono.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        9: [
+          { name: 'Contatto col Patrono', desc: 'Hai sempre preparato Contattare Altro Piano e puoi lanciarlo senza spendere uno slot per contattare il tuo patrono, riuscendo automaticamente al TS dell\'incantesimo. Puoi farlo una sola volta tra un riposo lungo e l\'altro.' }
+        ],
+        10: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio del tuo patrono.' }
+        ],
+        11: [
+          { name: 'Arcano Mistico (6° livello)', desc: 'Il tuo patrono ti svela un arcano: scegli un incantesimo da warlock di 6° livello. Puoi lanciarlo una volta senza spendere uno slot; serve un riposo lungo per rifarlo. Puoi sostituirlo con un altro dello stesso livello salendo di livello da warlock.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        13: [
+          { name: 'Arcano Mistico (7° livello)', desc: 'Come l\'Arcano Mistico del 11° livello, ma con un incantesimo di 7° livello.' }
+        ],
+        14: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio del tuo patrono.' }
+        ],
+        15: [
+          { name: 'Arcano Mistico (8° livello)', desc: 'Come l\'Arcano Mistico precedente, ma con un incantesimo di 8° livello.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        17: [
+          { name: 'Arcano Mistico (9° livello)', desc: 'Come l\'Arcano Mistico precedente, ma con un incantesimo di 9° livello. Recuperi tutti gli usi di Arcano Mistico al riposo lungo.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono del Destino) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Maestro Occulto', desc: 'Quando usi Astuzia Magica, recuperi TUTTI gli slot di Magia del Patto spesi, non solo la metà.' }
+        ]
+      },
+      /* Sottoclassi del Warlock: per ora Patto del Grande Antico come dati
+         (PHB 2024, p.166-167 del PDF, la più semplice delle 4 — Fatato,
+         Celestiale e Immondo hanno tutte un privilegio al 3° livello scalato
+         sul modificatore di Carisma (Passi del Fatato, Luce Guaritrice,
+         Fortuna del Reietto) che richiederebbe una risorsa specifica di
+         SOTTOCLASSE — meccanica che il motore non supporta ancora (solo
+         risorse di CLASSE in classResources/CLASS_BONUSES: aggiungerla lì
+         varrebbe per qualunque patrono, sbagliato). Grande Antico invece è
+         tutto narrativo (telepatia, cambio tipo di danno, incantesimi
+         sempre preparati) — stesso trattamento di Divinatore/Aberrante. */
+      subclasses: {
+        'grande-antico': {
+          name: 'Patto del Grande Antico',
+          tenets: 'Hai legato la tua magia a un essere alieno e incomprensibile, sepolto oltre i confini della realtà conosciuta.',
+          spellsByLevel: {
+            3: [
+              { id: 'individuazione-dei-pensieri', name: 'Individuazione dei Pensieri' },
+              { id: 'sussurri-dissonanti', name: 'Sussurri Dissonanti' },
+              { id: 'forza-fantasmatica', name: 'Forza Fantasmatica' },
+              { id: 'risata-orrenda-di-tasha', name: 'Risata Orrenda di Tasha' }
+            ],
+            5: [
+              { id: 'chiaroveggenza', name: 'Chiaroveggenza' },
+              { id: 'fame-di-hadar', name: 'Fame di Hadar' }
+            ],
+            7: [
+              { id: 'confusione', name: 'Confusione' },
+              { id: 'evocare-aberrazione', name: 'Evocare Aberrazione' }
+            ],
+            9: [
+              { id: 'modificare-memoria', name: 'Modificare Memoria' },
+              { id: 'telecinesi', name: 'Telecinesi' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Mente Risvegliata', desc: 'Azione bonus: scegli una creatura che vedi entro 9 m. Per un numero di minuti pari al tuo livello da warlock potete comunicare telepaticamente entro un raggio in miglia pari al tuo modificatore di Carisma (minimo 1), purché entrambi conosciate mentalmente una lingua in comune.' },
+              { name: 'Incantesimi Psichici', desc: 'Quando lanci un incantesimo da warlock che infligge danni, puoi cambiarne il tipo in Psichico. Inoltre, se l\'incantesimo è di Incantamento o Illusione, puoi lanciarlo senza componenti Verbali né Somatiche.' }
+            ],
+            6: [
+              { name: 'Combattente Chiaroveggente', desc: 'Quando formi un legame telepatico con Mente Risvegliata, puoi forzare quella creatura a un TS di Saggezza (CD dei tuoi incantesimi): se fallisce, ha svantaggio ad attaccarti e tu hai vantaggio ad attaccarla per la durata del legame. Una volta usato, serve un riposo breve o lungo per riusarlo, oppure puoi spendere uno slot di Magia del Patto (nessuna azione) per ripristinarlo.' }
+            ],
+            10: [
+              { name: 'Maledizione Occulta', desc: 'Hai sempre preparato Maledizione. Quando la lanci e scegli la caratteristica del bersaglio, quella creatura ha anche svantaggio ai TS di quella caratteristica per la durata dell\'incantesimo.' },
+              { name: 'Scudo del Pensiero', desc: 'I tuoi pensieri non possono essere letti con la telepatia o mezzi simili a meno che tu non lo permetta. Hai anche resistenza ai danni Psichici, e quando una creatura ti infligge danni Psichici subisce essa stessa la stessa quantità di danno.' }
+            ],
+            14: [
+              { name: 'Progenie Asservita', desc: 'Quando lanci Evocare Aberrazione, puoi renderlo privo del bisogno di Concentrazione: la durata diventa 1 minuto e l\'Aberrazione evocata ottiene PF temporanei pari al tuo livello da warlock più il modificatore di Carisma. Inoltre, la prima volta ogni turno che colpisce una creatura sotto l\'effetto della tua Maledizione, infligge danni Psichici extra pari al danno bonus di quell\'incantesimo.' }
+            ]
+          }
+        }
+      }
     }
   },
 
@@ -4030,6 +4180,73 @@ window.MANUAL_55 = {
     'incantesimo-gemellato': {
       name: 'Incantesimo Gemellato', cost: '1 Punto Stregoneria',
       desc: 'Se l\'incantesimo può colpire una sola creatura e potrebbe colpirne un\'altra con uno slot di livello superiore, spendi 1 Punto Stregoneria per aumentarne di 1 il livello effettivo e colpire un secondo bersaglio con lo stesso incantesimo.'
+    }
+  },
+
+  /* Invocazioni Occulte del Warlock (Blocco 5.C, step Warlock, PHB 2024
+     p.153-156 del PDF): catalogo top-level come `feats`/`metamagic`, scelto
+     dal nuovo picker generico in js/levelup.js (choicePoints.invocations,
+     stessa forma {level,count}). Selezione curata di 14 (su circa 30 nel
+     PHB — stesso principio dei 17 Talenti iniziali, "catalogo estendibile"):
+     i prerequisiti sono testo informativo, non validati dal picker (stesso
+     trattamento già in uso per i prerequisiti dei Talenti). Riassunti
+     originali in italiano, nomi tradotti liberamente. */
+  invocations: {
+    'esplosione-agonizzante': {
+      name: 'Esplosione Agonizzante', prereq: 'Livello 2+, un trucchetto da warlock che infligge danni',
+      desc: 'Scegli uno dei tuoi trucchetti da warlock che infligge danni: aggiungi il tuo modificatore di Carisma ai tiri per i danni di quel trucchetto.'
+    },
+    'armatura-delle-ombre': {
+      name: 'Armatura delle Ombre',
+      desc: 'Puoi lanciare Armatura del Mago su te stesso senza spendere uno slot incantesimo.'
+    },
+    'vista-del-diavolo': {
+      name: 'Vista del Diavolo', prereq: 'Livello 2+',
+      desc: 'Vedi normalmente nella Luce Fioca e nell\'Oscurità, magica o non, entro 36 m da te.'
+    },
+    'mente-occulta': {
+      name: 'Mente Occulta',
+      desc: 'Hai vantaggio ai tiri salvezza di Costituzione per mantenere la concentrazione su un incantesimo.'
+    },
+    'vigore-infernale': {
+      name: 'Vigore Infernale', prereq: 'Livello 2+',
+      desc: 'Puoi lanciare Falsa Vita su te stesso senza spendere uno slot incantesimo, ottenendo sempre il massimo dei PF temporanei possibile dal dado.'
+    },
+    'maschera-dai-mille-volti': {
+      name: 'Maschera dai Mille Volti',
+      desc: 'Puoi lanciare Traveste te Stesso senza spendere uno slot incantesimo.'
+    },
+    'visioni-nebbiose': {
+      name: 'Visioni Nebbiose', prereq: 'Livello 2+',
+      desc: 'Puoi lanciare Immagine Silente senza spendere uno slot incantesimo.'
+    },
+    'patto-della-lama': {
+      name: 'Patto della Lama',
+      desc: 'Come azione bonus, evochi nella tua mano un\'arma da mischia Semplice o Marziale a tua scelta con cui crei un legame (oppure crei un legame con un\'arma magica che tocchi): finché dura il legame, sei competente con essa e puoi usarla come Focus per gli incantesimi; puoi usare il Carisma al posto di Forza o Destrezza per colpire e per i danni, e puoi farle infliggere danni Necrotici, Psichici o Radiosi al posto del tipo normale.'
+    },
+    'patto-della-catena': {
+      name: 'Patto della Catena',
+      desc: 'Impari l\'incantesimo Trova Famiglio e puoi lanciarlo come azione magica senza spendere uno slot, scegliendo anche fra alcune forme speciali oltre a quelle normali. Inoltre, quando compi l\'azione di Attacco, puoi rinunciare a uno dei tuoi attacchi per far attaccare il famiglio con la sua reazione.'
+    },
+    'patto-del-tomo': {
+      name: 'Patto del Tomo',
+      desc: 'Al termine di un riposo breve o lungo, evochi un Libro delle Ombre: scegli 3 trucchetti e 2 incantesimi di 1° livello con il descrittore Rituale da qualunque lista di classe (non già preparati altrove). Finché tieni il libro con te, li hai sempre preparati e contano come incantesimi da warlock; puoi usare il libro come Focus.'
+    },
+    'esplosione-repellente': {
+      name: 'Esplosione Repellente', prereq: 'Livello 2+, un trucchetto da warlock con tiro per colpire',
+      desc: 'Scegli uno dei tuoi trucchetti da warlock che richiede un tiro per colpire: quando colpisci una creatura Grande o più piccola, puoi spingerla fino a 3 m in linea retta lontano da te.'
+    },
+    'lama-assetata': {
+      name: 'Lama Assetata', prereq: 'Livello 5+, Invocazione Patto della Lama',
+      desc: 'Ottieni l\'Attacco Extra, ma solo con l\'arma del tuo Patto della Lama: puoi attaccare due volte, invece di una, quando compi l\'azione di Attacco con quell\'arma.'
+    },
+    'sguardo-delle-due-menti': {
+      name: 'Sguardo delle Due Menti', prereq: 'Livello 5+',
+      desc: 'Azione bonus: tocchi una creatura consenziente e percepisci attraverso i suoi sensi fino alla fine del tuo prossimo turno; puoi mantenere il collegamento con un\'altra azione bonus nei turni successivi, finché restate sullo stesso piano di esistenza.'
+    },
+    'vista-della-strega': {
+      name: 'Vista della Strega', prereq: 'Livello 15+',
+      desc: 'Ottieni Vista Autentica con una portata di 9 m.'
     }
   }
 };
