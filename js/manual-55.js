@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 40,
+  version: 41,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -863,6 +863,17 @@ window.MANUAL_55 = {
         },
         b: { label: '100 monete d\'oro', coins: { mo: 100 } }
       },
+      // Dadi di Energia Psionica dello Spadanima: risorsa di SOTTOCLASSE
+      // (filtro già introdotto per il Guerriero), stessa tabella del
+      // Combattente Psionico — coincidenza del PHB, non duplicazione: sono
+      // due classi diverse, ognuna con la propria copia dei dati.
+      classResources: {
+        psionicEnergy: {
+          name: 'Dadi di Energia Psionica', kind: 'uses', subclass: 'spadanima', resetOn: 'short',
+          byLevel: [0, 0, 0, 4, 4, 6, 6, 6, 6, 8, 8, 8, 8, 10, 10, 10, 10, 12, 12, 12, 12],
+          dieByLevel: [null, null, null, 'd6', 'd6', 'd8', 'd8', 'd8', 'd8', 'd8', 'd8', 'd10', 'd10', 'd10', 'd10', 'd10', 'd10', 'd12', 'd12', 'd12', 'd12']
+        }
+      },
       choicePoints: {
         subclass: 3, subclassFeatureLevels: [3, 9, 13, 17],
         asi: [4, 8, 10, 12, 16], epicBoon: 19,
@@ -942,10 +953,11 @@ window.MANUAL_55 = {
           { name: 'Colpo di Fortuna', desc: 'Se fallisci una Prova del d20, puoi trasformare il tiro in un 20. Dopo l\'uso serve un riposo breve o lungo per riusarlo.' }
         ]
       },
-      /* Sottoclassi del Ladro: per ora solo Ladro Esperto (PHB p.136, la più
-         semplice delle quattro — nessuna risorsa dedicata). Assassino,
-         Spadanima e Truffatore Arcano si aggiungono in seguito, stesso
-         trattamento già dato alle altre classi. */
+      /* Sottoclassi del Ladro: Ladro Esperto (PHB p.136), Assassino (p.134) e
+         Spadanima (p.135) — resta **Truffatore Arcano** (p.132), rimandato
+         come il Cavaliere Occulto del Guerriero: incantatore legato alla
+         SOTTOCLASSE con lista incantesimi del Mago, architettura non ancora
+         supportata dal motore. */
       subclasses: {
         esperto: {
           name: 'Ladro Esperto',
@@ -963,6 +975,44 @@ window.MANUAL_55 = {
             ],
             17: [
               { name: 'Riflessi da Ladro', desc: 'Nel primo round di ogni combattimento agisci due volte: un turno alla tua Iniziativa normale, l\'altro all\'Iniziativa meno 10.' }
+            ]
+          }
+        },
+        assassino: {
+          name: 'Assassino',
+          tenets: 'Pratica la cupa arte della morte con discrezione e precisione chirurgica.',
+          features: {
+            3: [
+              { name: 'Assassinio', desc: 'Hai vantaggio ai tiri di iniziativa. Inoltre, durante il primo round di ogni combattimento hai vantaggio ai tiri per colpire contro ogni creatura che non ha ancora agito quel round; se il tuo Attacco Furtivo colpisce un bersaglio in quel round, infligge danni extra (dello stesso tipo dell\'arma) pari al tuo livello da ladro.' },
+              { name: 'Strumenti dell\'Assassino', desc: 'Ottieni un Kit da travestimento e un Kit da avvelenatore, con relativa competenza.' }
+            ],
+            9: [
+              { name: 'Competenza da Infiltrazione', desc: 'Imitazione Magistrale: dopo almeno un\'ora di studio, imiti perfettamente il modo di parlare o la calligrafia di una persona (o entrambi). Mira Vagante: la tua velocità non si azzera più usando Mira Ferma.' }
+            ],
+            13: [
+              { name: 'Armi Avvelenate', desc: 'Quando usi l\'effetto Veleno del Colpo Scaltro, il bersaglio che fallisce il TS subisce anche 2d6 danni da Veleno — un danno che ignora la resistenza al Veleno.' }
+            ],
+            17: [
+              { name: 'Colpo Mortale', desc: 'Se colpisci con il tuo Attacco Furtivo nel primo round di un combattimento, il bersaglio supera un TS di Costituzione (CD 8 + il tuo modificatore di Destrezza + il bonus di competenza) o subisce danno raddoppiato da quell\'attacco.' }
+            ]
+          }
+        },
+        spadanima: {
+          name: 'Spadanima',
+          tenets: 'Colpisce con la mente, tagliando ostacoli fisici e psichici.',
+          features: {
+            3: [
+              { name: 'Potere Psionico', desc: 'Ottieni i Dadi di Energia Psionica (vedi Risorse), che alimentano due poteri. Astuzia Rafforzata dalla Psiche: se fallisci una prova di abilità o strumento in cui sei competente, tiri un dado e lo sommi alla prova, trasformandola magari in un successo (consumato solo se il nuovo tiro riesce; la prima volta dopo un riposo lungo è gratuita). Sussurri Psichici: come azione magica, stabilisci un legame telepatico con creature a tua scelta (fino al tuo bonus di competenza), per un numero di ore pari al risultato di un dado.' },
+              { name: 'Lame Psichiche', desc: 'Quando compi l\'azione di Attacco o un attacco di opportunità, puoi manifestare in una mano libera una Lama Psichica e attaccare con essa: arma semplice da mischia, 1d6 danni Psichici + il modificatore usato per colpire, proprietà Accurata e Lanciabile (18/36 m), maestria Vex gratuita (non conta nel numero di proprietà usabili). Svanisce subito dopo l\'attacco. Se l\'altra mano è libera, puoi attaccare con una seconda lama (1d4) come azione bonus.' }
+            ],
+            9: [
+              { name: 'Lame dell\'Anima', desc: 'Colpo che Cerca: se manchi con una Lama Psichica, tiri un Dado di Energia Psionica e lo sommi al tiro per colpire, magari trasformandolo in un successo. Teletrasporto Psichico: come azione bonus, manifesti una lama, spendi un dado e la lanci fino a 3 m per ogni punto del risultato in uno spazio libero che vedi, poi ti teletrasporti lì e la lama svanisce.' }
+            ],
+            13: [
+              { name: 'Velo Psichico', desc: 'Come azione magica, ottieni la condizione Invisibile per 1 ora o finché non la termini (nessuna azione); l\'invisibilità finisce prima se infliggi danno o forzi un TS. Una volta per riposo lungo, oppure spendendo un Dado di Energia Psionica per ripristinarne l\'uso.' }
+            ],
+            17: [
+              { name: 'Frantumare la Mente', desc: 'Quando infliggi danno da Attacco Furtivo con una Lama Psichica, il bersaglio supera un TS di Saggezza (CD 8 + il tuo modificatore di Destrezza + il bonus di competenza) o ha la condizione Stordito per 1 minuto, ripetendo il TS alla fine di ogni suo turno. Una volta per riposo lungo, oppure spendendo tre Dadi di Energia Psionica per ripristinarne l\'uso.' }
             ]
           }
         }

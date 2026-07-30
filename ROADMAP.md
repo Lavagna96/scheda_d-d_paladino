@@ -26,15 +26,18 @@
   era stata aggiornata dopo il deploy avvenuto a fine sessione 2026-07-29).
 - **Prossimo passo:** Stregone, Mago e Warlock committati e **deployati**
   (verificato il 2026-07-30: run Pages verde, sito live su `?v=117`, tutte e
-  11 le classi presenti). **Sottoclassi mancanti avviate** (richiesta di
-  Andrea dopo il Blocco 5.C): Guerriero fatto 2 di 3 (Maestro di Battaglia,
-  Combattente Psionico — vedi voce 2 del Blocco 5.C più sotto), verificato in
-  locale (`?v=118`) — **ancora da committare e deployare**. Resta **Cavaliere
-  Occulto**, rimandato: richiede un'architettura nuova (incantatore legato
-  alla sottoclasse, non alla classe, con una tabella di slot dedicata e la
-  lista incantesimi del Mago) — da discutere con Andrea prima di procedere,
-  probabilmente un passo a parte piuttosto che infilato nel Guerriero.
-  Restano poi le altre 8 classi con sottoclasse incompleta, e i collaudi
+  11 le classi presenti). **Sottoclassi mancanti in corso** (richiesta di
+  Andrea dopo il Blocco 5.C): Guerriero (2/3, commit `bc9fcc9`) e Ladro (2/3,
+  vedi voce 3 del Blocco 5.C più sotto) fatti, verificati in locale
+  (`?v=119`) — **ancora da committare e deployare**. Due sottoclassi restano
+  rimandate per lo stesso motivo (Cavaliere Occulto del Guerriero, Truffatore
+  Arcano del Ladro): richiedono un incantatore legato alla SOTTOCLASSE con la
+  lista incantesimi del Mago — architettura non ancora supportata, da
+  discutere con Andrea prima di procedere. **Bug scoperto strada facendo e
+  già corretto** (in una sessione separata, spawnata da qui): Arma Sacra del
+  Paladino si applicava a qualunque sottoclasse invece che alla sola
+  Devozione (commit `dc7fe27`) — vedi "Debiti aperti" più sotto.
+  Restano poi le altre 7 classi con sottoclasse incompleta, e i collaudi
   cloud mai confermati sotto.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
@@ -1191,6 +1194,23 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      le altre 14 sotto, tutte le 18 presenti); un Ladro di prova con Espero su
      Furtività e Rapidità di Mano mostra il doppio pallino e +10 invece di
      +7/+3 sulle altre competenti. Console pulita in ogni prova.
+   → **Sottoclassi mancanti, 2 di 3 fatte (2026-07-30, manuale `version`
+     40→41)**: **Assassino** (p.134 del PDF) e **Spadanima** (p.135)
+     aggiunte — resta **Truffatore Arcano** (p.132), rimandato come il
+     Cavaliere Occulto del Guerriero: incantatore legato alla SOTTOCLASSE con
+     lista incantesimi del Mago, stessa architettura non ancora supportata.
+     Assassino è tutto narrativo (nessuna risorsa dedicata). Spadanima ha i
+     **Dadi di Energia Psionica** (stessa tabella del Combattente Psionico
+     del Guerriero: 4d6 al 3°→6d8 al 5°→8d8 al 9°→8d10 all'11°→10d10 al
+     13°→12d12 al 17° — coincidenza del PHB, non duplicazione: sono due
+     classi diverse, ognuna con la propria copia dei dati), col filtro
+     `subclass` già introdotto per il Guerriero (nessun codice nuovo nel
+     motore, solo dati). Verificato: Ladro iniettato a livello 2, level-up a
+     3 con scelta fra le 3 sottoclassi (Truffatore Arcano assente dalla
+     lista); scegliendo Spadanima compare "Dadi di Energia Psionica" a
+     Risorse col dado giusto per livello; scegliendo Assassino nessuna
+     risorsa indesiderata. Tharion (Paladino) e Guerriero (Blocco 5.C
+     precedente) verificati invariati. Console pulita. Cache busting `?v=119`.
 4. [x] **Monaco** (no caster) — Punti Focus, Arti Marziali, Difesa Senz'Armatura (SAG).
    → **Fatto (2026-07-28, `?v=92`, manuale `version` 31→32)**: privilegi 1→20
    dal PDF (p.100-103), sottoclasse **Guerriero della Mano Aperta** (p.106,
@@ -1762,6 +1782,17 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
       invariati); un Barbaro (nessuna risorsa `pool`) deriva senza errori e
       senza righe spurie (`poolMax` resta `hp`/`steedhp`/`tempHp`). Cache
       busting `?v=104`.
+- [x] ~~**Arma Sacra del Paladino trapelava a tutte le sottoclassi**~~ — FATTO
+      (2026-07-30, commit `dc7fe27`, sessione spawnata da qui con
+      `spawn_task`). Trovato mentre si aggiungeva il filtro `subclass` per le
+      risorse di sottoclasse del Guerriero (Blocco 5.C): `CLASS_BONUSES.
+      paladino.sacredWeapon` in `engine.js` non aveva mai controllato
+      `character.subclassId`, quindi un Paladino con Gloria/Antichi/Vendetta
+      vedeva comunque la nota "Con Arma Sacra: +N al colpire..." pur non
+      avendo quel privilegio (solo Devozione lo dà). Corretto con lo stesso
+      principio del filtro `subclass` di `classResources`: `sacredWeapon` ora
+      ha `subclass: 'devozione'` e `derive()` lo azzera se non combacia.
+      Tharion (Devozione) verificato invariato.
 
 ## Bug risolti
 
