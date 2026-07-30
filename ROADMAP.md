@@ -9,35 +9,32 @@
 
 ## Dove siamo
 
-- **Ultimo aggiornamento:** 2026-07-29
+- **Ultimo aggiornamento:** 2026-07-30
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
   GitHub Pages. L'intera visione originale (login, dashboard multi-personaggio,
   editing, oggetti magici, level-up guidato per il Paladino) è realizzata e
   funzionante. Login e Face ID collaudati da Andrea su iPhone reale.
-  **Fase 5 in corso, Blocco 5.C (le classi una alla volta):** 8 classi su 11
+  **Fase 5 in corso, Blocco 5.C (le classi una alla volta):** 9 classi su 11
   complete (Barbaro, Guerriero, Ladro, Monaco, Ranger, Chierico, Druido,
-  Bardo) — restano **Stregone, Mago, Warlock**.
-- **Prossimo passo:** sessione del 2026-07-29 quasi interamente dedicata a un
-  **restyling visivo del wizard di creazione**, fuori sequenza rispetto al
-  Blocco 5.C su richiesta di Andrea (vedi "Avanzamento 5.B" più sotto per il
-  dettaglio passo per passo, ognuno con 3 alternative discusse con preview
-  prima di implementare, come da regola CLAUDE.md): **tutti e 8 i passi**
-  (Specie, Classe, Background, Punteggi, Competenze, Equipaggiamento,
-  Sottoclasse/Incantesimi, Identità) sono stati rivisti e migliorati, dal
-  commit `994a181` (Specie, `?v=105`) al commit più recente (Identità a
-  scorrimento, `?v=114`) — **ancora da deployare**, in coda insieme a:
-  - `77aef7a`/`221081a`/`fd18699` — ascendenza/retaggio specie, background
-    Personalizzato + passo Identità, dashboard swipe-to-delete/vista a
-    righe (già deployati e testati da Andrea, v=103).
-  - `88e8b16` — generalizzazione `renderGains()`/`poolMax` (via l'hardcode
-    `classId==='paladino'`), `?v=104`.
-  **Prossimo lavoro da scegliere dopo il deploy:** riprendere il Blocco 5.C
-  con **Stregone** (9° classe, Punti Stregoneria + Metamagia), oppure i
-  collaudi cloud mai confermati sotto.
-  Restano in coda due collaudi cloud mai confermati: sync multi-device tra
-  due dispositivi con lo stesso account, e la verifica nella console Firebase che
-  `manuals/5.5/feats` sia arrivato su Firestore (step 4.4, dopo un deploy — il
-  sync fallisce in silenzio se la regola non è deployata).
+  Bardo, Stregone) — restano **Mago, Warlock**.
+  Il **restyling visivo del wizard di creazione** (tutti e 8 i passi: Specie,
+  Classe, Background, Punteggi, Competenze, Equipaggiamento,
+  Sottoclasse/Incantesimi, Identità), dal commit `994a181` (`?v=105`) al
+  commit `0b3b595` (Identità a scorrimento, `?v=114`), **è confermato
+  DEPLOYATO** (verificato il 2026-07-30: `origin/main` allineato a `HEAD`,
+  sito live serve `?v=114` e contiene `buildSegmentedRow` — la roadmap non
+  era stata aggiornata dopo il deploy avvenuto a fine sessione 2026-07-29).
+- **Prossimo passo:** Stregone implementato e verificato in locale
+  (`?v=115`, vedi voce 9 del Blocco 5.C più sotto) — **ancora da committare e
+  deployare**, in attesa di autorizzazione. Dopo il deploy, riprendere il
+  Blocco 5.C con **Mago** (10ª classe, libro degli incantesimi + Recupero
+  Arcano + Tradizione Arcana) o **Warlock** (11ª e ultima, slot Patto già in
+  tabella + Invocazioni + Suppliche + Patto).
+  Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
+  automatizzabili da sessione): sync multi-device tra due dispositivi con lo
+  stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
+  sia arrivato su Firestore (step 4.4 — il sync fallisce in silenzio se la
+  regola non è deployata).
 
 ---
 
@@ -1380,7 +1377,48 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      risorse confermato. Tharion (Paladino) verificato invariato dopo ogni
      prova (CA 20, PF 60, CD 15, Aura +3, +8 all'arma). Console pulita in
      ogni prova.
-9. [ ] **Stregone** (full) — Punti Stregoneria, Metamagia.
+9. [x] **Stregone** (full) — Punti Stregoneria, Metamagia.
+   → **Fatto (2026-07-30, manuale `version` 36→37)**: privilegi 1→20 dal PDF
+   (p.138-141), sottoclasse **Stregoneria Aberrante** (p.144, la più semplice
+   delle 4 — Meccanica/Draconica/Magia Selvaggia in seguito: Draconica
+   richiederebbe CA senz'armatura e PF max per-livello a scala di sottoclasse,
+   non solo di classe, Magia Selvaggia una tabella d100), equipaggiamento
+   iniziale (Lancia + 2 Pugnali + Focus Arcano + Kit dell'esploratore
+   sotterraneo, oppure 50 MO), competenze di classe in `CLASS_SKILLS`
+   (create.js).
+   - **Punti Stregoneria e Magia Innata**: entrambi `classResources` di tipo
+     `kind:'uses'` — stessa idea dei Punti Focus del Monaco (un pool speso in
+     quantità variabile, click-decremento a 1 comunque corretto). Zero codice
+     nuovo nel motore: la tabella `sorceryPoints` esisteva già nei dati base
+     della classe (verificata contro il PDF, combacia cifra per cifra).
+   - **Meccanica nuova: Metamagia**. Prima non esisteva un modo per
+     rappresentare "scegli N opzioni da un catalogo, ai livelli 2/10/17".
+     Nuovo catalogo top-level `manual.metamagic` (10 opzioni, PHB p.141-142,
+     nomi tradotti liberamente) + `choicePoints.metamagic` nella stessa forma
+     `{level,count}` già usata da Competenza (Ladro/Bardo/Ranger). Nuova
+     sezione `buildMetamagicSection()` in `levelup.js`, gemella di
+     `buildExpertiseSection()` (righe cliccabili come i talenti, cap a
+     `count`, disabilitazione cross-opzione): nessuna astrazione nuova,
+     stesso pattern già collaudato. Nuovo campo `character.metamagicIds`
+     (default `[]` in `BASE_CHARACTER`, storage.js).
+   - **Verifica end-to-end**: creazione di un Stregone Umano/Soldato da zero
+     nel wizard reale (Punteggi: riga "Attacca con Carisma · TS: Costituzione,
+     Carisma" corretta; Competenze: Arcano/Inganno/Intuizione/Intimidire/
+     Persuasione/Religione raggruppate per caratteristica governante, Atletica
+     e Intimidire escluse perché già dal background; Equipaggiamento: card A
+     col Kit dello Stregone, nessun picker di Maestria — corretto, la classe
+     non ce l'ha; Incantesimi: "Trucchetti (scegline 4)" + "Incantesimi
+     preparati di 1° livello (scegline 2)", nota "la sottoclasse si sceglie al
+     livello 3"). Personaggio generato: PF 9 = 1d6+COS, "Senza armatura" in
+     CA, nessuna card Punti Stregoneria a Risorse (0 finché non si arriva al
+     2° livello — corretto). Level-up 1→2 simulato: guadagni "PF 9→16",
+     "Punti Stregoneria 0→2", "Slot Incantesimi 2→3", "Incantesimi Preparati
+     2→4", sezione "Metamagia — scegline 2" con le 10 opzioni, scelte
+     Incantesimo Sottile + Gemellato applicate e salvate in `metamagicIds`/
+     `levelChoices`, card "Punti Stregoneria 2/2" comparsa da sola a Risorse
+     accanto a "Magia Innata 2/2". Tharion (Paladino) verificato invariato
+     dopo ogni prova (CA 20, CD 15, PF 60, Imposizione 35, TS CAR +9).
+     Console pulita in ogni prova. Cache busting `?v=115`.
 10. [ ] **Mago** (full) — libro incantesimi, Recupero Arcano, Tradizione.
 11. [ ] **Warlock** (pact) — slot pact (già in tabella), Invocazioni, Suppliche, Patto.
 

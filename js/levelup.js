@@ -95,13 +95,21 @@
     var needsExpertise = !!expertiseEntry;
     var expertiseCount = expertiseEntry ? expertiseEntry.count : 0;
 
+    // Metamagia (Stregone): stessa forma {level,count} di Competenza — quante
+    // opzioni nuove a questo livello (2 al 2°, 2 al 10°, 2 al 17°).
+    var metamagicEntry = null;
+    (cp.metamagic || []).forEach(function (e) { if (e.level === nextLevel) { metamagicEntry = e; } });
+    var needsMetamagic = !!metamagicEntry;
+    var metamagicCount = metamagicEntry ? metamagicEntry.count : 0;
+
     /* bozza di scelte correnti (non ancora applicata allo stato) */
     var choice = {
       mode: null, // 'asi' | 'feat'
       pendingDeltas: { FOR: 0, DES: 0, COS: 0, INT: 0, SAG: 0, CAR: 0 },
       featId: null,
       styleId: character.fightingStyle || 'nessuno',
-      expertiseIds: []
+      expertiseIds: [],
+      metamagicIds: []
     };
     var autoSubclassId = null;
     var autoEpicBoonId = null;
@@ -285,6 +293,9 @@
         ok = false;
       }
       if (needsExpertise && choice.expertiseIds.length !== expertiseCount) {
+        ok = false;
+      }
+      if (needsMetamagic && choice.metamagicIds.length !== metamagicCount) {
         ok = false;
       }
       confirmBtn.disabled = !ok;
@@ -491,6 +502,52 @@
       return wrap;
     }
 
+    /* ---------- sezione Metamagia (Stregone; quante dipende da metamagicCount) ---------- */
+
+    function buildMetamagicSection() {
+      var wrap = el('div');
+      wrap.appendChild(el('div', 'edit-section-label', 'Metamagia — scegline ' + metamagicCount));
+      var already = character.metamagicIds || [];
+      var manualMetamagic = manual.metamagic || {};
+      var eligible = Object.keys(manualMetamagic).filter(function (id) {
+        return already.indexOf(id) === -1;
+      });
+      var list = el('div', 'levelup-feat-list');
+      var rowEls = {};
+
+      eligible.forEach(function (id) {
+        var m = manualMetamagic[id];
+        var row = el('div', 'levelup-feat-row');
+        row.appendChild(el('div', 'levelup-feat-name', m.name));
+        if (m.cost) {
+          row.appendChild(el('div', 'levelup-feat-prereq', m.cost));
+        }
+        row.appendChild(el('div', 'levelup-feat-desc', truncate(m.desc, 100)));
+
+        row.addEventListener('click', function () {
+          var idx = choice.metamagicIds.indexOf(id);
+          if (idx !== -1) {
+            choice.metamagicIds.splice(idx, 1);
+          } else if (choice.metamagicIds.length < metamagicCount) {
+            choice.metamagicIds.push(id);
+          }
+          Object.keys(rowEls).forEach(function (rowId) {
+            var isOn = choice.metamagicIds.indexOf(rowId) !== -1;
+            rowEls[rowId].classList.toggle('on', isOn);
+            var disable = choice.metamagicIds.length >= metamagicCount && !isOn;
+            rowEls[rowId].classList.toggle('is-disabled', disable);
+          });
+          updateConfirmState();
+        });
+
+        rowEls[id] = row;
+        list.appendChild(row);
+      });
+      wrap.appendChild(list);
+
+      return wrap;
+    }
+
     /* ---------- righe di sola lettura (1 sola opzione disponibile oggi) ---------- */
 
     /* Con una sola sottoclasse la si assegna da sola (riga di sola lettura);
@@ -605,6 +662,12 @@
         ch.levelChoices[key].expertiseSkills = choice.expertiseIds.slice();
       }
 
+      if (needsMetamagic) {
+        ch.metamagicIds = (ch.metamagicIds || []).concat(choice.metamagicIds);
+        ch.levelChoices[key] = ch.levelChoices[key] || {};
+        ch.levelChoices[key].metamagicIds = choice.metamagicIds.slice();
+      }
+
       // Con più di una sottoclasse vince la scelta fatta nel picker; con una
       // sola resta l'assegnazione automatica di sempre.
       var chosenSubclassId = choice.subclassId || autoSubclassId;
@@ -679,6 +742,10 @@
 
     if (needsExpertise) {
       bodyEl.appendChild(buildExpertiseSection());
+    }
+
+    if (needsMetamagic) {
+      bodyEl.appendChild(buildMetamagicSection());
     }
 
     if (needsSubclass) {

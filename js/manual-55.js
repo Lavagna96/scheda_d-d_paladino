@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 36,
+  version: 37,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -1496,7 +1496,148 @@ window.MANUAL_55 = {
       sorceryPoints: [0, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
       cantripsByLevel: [0, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
       preparedByLevel: [0, 2, 4, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22],
-      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9]
+      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9],
+      // Niente Maestria nelle Armi (nessuna colonna dedicata, come Bardo/
+      // Chierico/Druido): solo armi semplici.
+      weaponProf: ['sem'],
+      startingEquipment: {
+        a: {
+          label: 'Kit dello stregone',
+          armorId: '', shield: false, weaponId: 'lancia',
+          extra: [
+            { name: 'Pugnale', qty: 2, weaponId: 'pugnale' },
+            { name: 'Focus Arcano (cristallo)', qty: 1, weight: 1, desc: 'Funge da focus per gli incantesimi da stregone.' },
+            { name: 'Kit dell\'esploratore sotterraneo', qty: 1, weight: 55, desc: 'Zaino, tagliole, piede di porco, 2 fiaschette d\'olio, razioni per 10 giorni, corda, acciarino, 10 torce, otre.' }
+          ],
+          coins: { mo: 28 }
+        },
+        b: { label: '50 monete d\'oro', coins: { mo: 50 } }
+      },
+      // Punti Stregoneria e Magia Innata (Blocco 5.C, step Stregone): entrambi
+      // 'uses' generici, stesso principio di Furia/Punti Focus — nessun
+      // codice nuovo nel motore. I Punti Stregoneria si spendono in quantità
+      // variabile (creare slot, Metamagia): come i Punti Focus del Monaco,
+      // il click-decremento a 1 dell'interfaccia resta comunque corretto,
+      // il giocatore clicca N volte per spendere N punti.
+      classResources: {
+        sorcery: { name: 'Punti Stregoneria', kind: 'uses', byLevelRef: 'sorceryPoints', resetOn: 'long' },
+        innateSorcery: { name: 'Magia Innata', kind: 'uses', max: 2, resetOn: 'long' }
+      },
+      choicePoints: {
+        subclass: 3, subclassFeatureLevels: [3, 6, 14, 18],
+        asi: [4, 8, 12, 16], epicBoon: 19,
+        // Metamagia: 2 opzioni al 2° livello, altre 2 al 10° e al 17° —
+        // stessa forma {level,count} già usata da Competenza (Ladro/Bardo/
+        // Ranger), nuovo picker generico in js/levelup.js.
+        metamagic: [{ level: 2, count: 2 }, { level: 10, count: 2 }, { level: 17, count: 2 }]
+      },
+      /* Privilegi 1→20 (PHB 2024 p.138-141 del PDF): riassunti originali in
+         italiano. trait:false = scelta gestita altrove (sottoclasse/ASI/Dono
+         Epico dal level-up, Metamagia dal picker dedicato). Ai livelli
+         9/11/13/15 il PHB non ha un privilegio nuovo, solo i numeri delle
+         tabelle (Punti Stregoneria/Preparati/slot) che salgono da soli —
+         nessuna voce qui. */
+      levelFeatures: {
+        1: [
+          { name: 'Incantesimi', desc: 'Il Carisma è la tua caratteristica da incantatore: conosci 4 trucchetti da stregone e prepari 2 incantesimi di 1° livello o superiore. Il numero di trucchetti e preparati cresce col livello; puoi sostituirne uno ogni volta che sali di livello da stregone. Puoi usare un Focus Arcano come focus per i tuoi incantesimi.' },
+          { name: 'Magia Innata', desc: 'Come azione bonus, per 1 minuto la CD dei tuoi incantesimi da stregone aumenta di 1 e hai vantaggio ai tiri per colpire con essi. Puoi usarla due volte; recuperi tutti gli usi al riposo lungo.' }
+        ],
+        2: [
+          { name: 'Fonte di Magia', desc: 'Ottieni i Punti Stregoneria (vedi Risorse). Puoi spenderli per creare uno slot incantesimo (azione bonus: 2 punti per uno slot di 1°, 3 per il 2°, 5 per il 3°, 6 per il 4°, 7 per il 5°, mai oltre il 5°; lo slot svanisce al riposo lungo) oppure convertire uno slot inutilizzato in Punti Stregoneria pari al suo livello (nessuna azione).' },
+          { name: 'Metamagia', trait: false, desc: 'Scegli due opzioni di Metamagia: le usi spendendo Punti Stregoneria per modificare gli incantesimi che lanci (una sola per incantesimo, salvo indicazione diversa). Puoi sostituirne una ogni volta che sali di livello da stregone.' }
+        ],
+        3: [
+          { name: 'Sottoclasse dello Stregone', trait: false, desc: 'Scegli un\'origine (Stregoneria Aberrante, Meccanica, Draconica o della Magia Selvaggia). Ottieni i suoi privilegi al tuo livello da stregone o inferiore.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        5: [
+          { name: 'Restauro Stregonesco', desc: 'Al termine di un riposo breve, recuperi Punti Stregoneria già spesi fino a un numero pari alla metà del tuo livello da stregone (arrotondato per difetto). Puoi usare questo privilegio una sola volta tra un riposo lungo e l\'altro.' }
+        ],
+        6: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio della tua origine.' }
+        ],
+        7: [
+          { name: 'Stregoneria Incarnata', desc: 'Se hai esaurito gli usi di Magia Innata, puoi comunque attivarla spendendo 2 Punti Stregoneria. Inoltre, mentre è attiva, puoi applicare fino a due opzioni di Metamagia sullo stesso incantesimo.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        10: [
+          { name: 'Metamagia', trait: false, desc: 'Ottieni altre due opzioni di Metamagia a tua scelta.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        14: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio della tua origine.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        17: [
+          { name: 'Metamagia', trait: false, desc: 'Ottieni altre due opzioni di Metamagia, per un totale di sei.' }
+        ],
+        18: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni l\'ultimo privilegio della tua origine.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono del Viaggio Dimensionale) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Apoteosi Arcana', desc: 'Mentre Magia Innata è attiva, puoi usare un\'opzione di Metamagia su ciascuno dei tuoi turni senza spendere Punti Stregoneria.' }
+        ]
+      },
+      /* Sottoclassi dello Stregone: per ora Stregoneria Aberrante come dati
+         (PHB 2024, p.144 del PDF, la più semplice delle 4 — nessuna nuova
+         meccanica nel motore, solo prosa e incantesimi sempre preparati come
+         i giuramenti del Paladino); Meccanica/Draconica/Magia Selvaggia in
+         seguito. Lo Stregone non ha Maestria nelle Armi né stile di
+         combattimento. */
+      subclasses: {
+        aberrante: {
+          name: 'Stregoneria Aberrante',
+          tenets: 'Un\'influenza aliena ha toccato la tua mente, donandoti poteri psionici.',
+          spellsByLevel: {
+            3: [
+              { id: 'braccia-di-hadar', name: 'Braccia di Hadar' },
+              { id: 'placare-le-emozioni', name: 'Placare le Emozioni' },
+              { id: 'individuazione-dei-pensieri', name: 'Individuazione dei Pensieri' },
+              { id: 'sussurri-dissonanti', name: 'Sussurri Dissonanti' },
+              { id: 'scheggia-mentale', name: 'Scheggia Mentale' }
+            ],
+            5: [
+              { id: 'fame-di-hadar', name: 'Fame di Hadar' },
+              { id: 'inviare', name: 'Inviare' }
+            ],
+            7: [
+              { id: 'tentacoli-neri-di-evard', name: 'Tentacoli Neri di Evard' },
+              { id: 'evocare-aberrazione', name: 'Evocare Aberrazione' }
+            ],
+            9: [
+              { id: 'legame-telepatico-di-rary', name: 'Legame Telepatico di Rary' },
+              { id: 'telecinesi', name: 'Telecinesi' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Incantesimi Psionici', desc: 'Quando raggiungi i livelli da stregone indicati, hai sempre preparati gli incantesimi elencati (non contano nel numero di incantesimi preparabili).' },
+              { name: 'Favella Telepatica', desc: 'Come azione bonus, scegli una creatura che vedi entro 9 m: per un numero di minuti pari al tuo livello da stregone potete comunicare telepaticamente entro un raggio in miglia pari al tuo modificatore di Carisma (minimo 1), purché entrambi conosciate mentalmente una lingua in comune.' }
+            ],
+            6: [
+              { name: 'Stregoneria Psionica', desc: 'Puoi lanciare un incantesimo del privilegio Incantesimi Psionici spendendo Punti Stregoneria pari al suo livello invece di uno slot: in tal caso non richiede componenti Verbali né Somatiche, e Materiali solo se consumati o con un costo indicato.' },
+              { name: 'Difese Psichiche', desc: 'Hai resistenza ai danni Psichici e vantaggio ai TS per evitare o terminare le condizioni Affascinato e Spaventato.' }
+            ],
+            14: [
+              { name: 'Rivelazione nella Carne', desc: 'Come azione bonus, spendi 1 o più Punti Stregoneria per alterare il tuo corpo per 10 minuti: per ogni punto speso scegli un beneficio (velocità di nuoto doppia e respirazione acquatica; velocità di volo pari alla tua e planata; scorgere l\'Invisibile entro 18 m; muoverti attraverso spazi larghi 2,5 cm e liberarti da restrizioni non magiche o dalla condizione Afferrato spendendo 1,5 m di movimento).' }
+            ],
+            18: [
+              { name: 'Implosione Deformante', desc: 'Come azione magica, ti teletrasporti in uno spazio libero a vista entro 36 m: ogni creatura entro 9 m dallo spazio lasciato fa un TS di Forza o subisce 3d10 danni da Forza ed è trascinata verso quello spazio (metà danni con successo). Una volta usato serve un riposo lungo per riusarlo, oppure spendi 5 Punti Stregoneria (nessuna azione) per ripristinarlo.' }
+            ]
+          }
+        }
+      }
     },
     warlock: {
       name: 'Warlock', hitDie: 'd8', primaryAbility: 'CAR', saves: ['SAG', 'CAR'],
@@ -3721,6 +3862,54 @@ window.MANUAL_55 = {
     'dono-vista-autentica': {
       name: 'Dono della Vista Autentica', category: 'dono-epico', prereq: 'Livello 19+',
       desc: 'Aumenti un punteggio di caratteristica a scelta di 1 (fino a un massimo di 30). Ottieni Vista Autentica con una portata di 18 m.'
+    }
+  },
+
+  /* Opzioni di Metamagia dello Stregone (Blocco 5.C, step Stregone, PHB 2024
+     p.141-142 del PDF): catalogo top-level come `feats`, scelto dal nuovo
+     picker generico in js/levelup.js (choicePoints.metamagic, stessa forma
+     {level,count} di Competenza). Riassunti originali in italiano, nomi delle
+     opzioni tradotti liberamente (nessuna fonte italiana ufficiale). */
+  metamagic: {
+    'incantesimo-accurato': {
+      name: 'Incantesimo Accurato', cost: '1 Punto Stregoneria',
+      desc: 'Quando lanci un incantesimo che impone un tiro salvezza a più creature, spendi 1 Punto Stregoneria e scegline un numero pari al tuo modificatore di Carisma (minimo 1): quelle creature superano automaticamente il tiro salvezza e non subiscono danni se normalmente ne prenderebbero la metà con un successo.'
+    },
+    'incantesimo-distante': {
+      name: 'Incantesimo Distante', cost: '1 Punto Stregoneria',
+      desc: 'Se l\'incantesimo ha una gittata di almeno 1,5 m, spendi 1 Punto Stregoneria per raddoppiarla; se ha gittata Contatto, puoi invece portarla a 9 m.'
+    },
+    'incantesimo-potenziato': {
+      name: 'Incantesimo Potenziato', cost: '1 Punto Stregoneria',
+      desc: 'Quando tiri i danni di un incantesimo, spendi 1 Punto Stregoneria per ritirare un numero di dadi pari al tuo modificatore di Carisma (minimo 1) e tieni i nuovi risultati. Puoi usarlo anche insieme a un\'altra opzione di Metamagia già usata sullo stesso incantesimo.'
+    },
+    'incantesimo-esteso': {
+      name: 'Incantesimo Esteso', cost: '1 Punto Stregoneria',
+      desc: 'Se l\'incantesimo dura almeno 1 minuto, spendi 1 Punto Stregoneria per raddoppiarne la durata (fino a 24 ore). Se richiede Concentrazione, hai vantaggio ai tiri salvezza per mantenerla.'
+    },
+    'incantesimo-amplificato': {
+      name: 'Incantesimo Amplificato', cost: '2 Punti Stregoneria',
+      desc: 'Quando lanci un incantesimo che impone un tiro salvezza, spendi 2 Punti Stregoneria per dare svantaggio a un bersaglio nel tiro salvezza contro quell\'incantesimo.'
+    },
+    'incantesimo-accelerato': {
+      name: 'Incantesimo Accelerato', cost: '2 Punti Stregoneria',
+      desc: 'Se il tempo di lancio è un\'azione, spendi 2 Punti Stregoneria per lanciarlo come azione bonus. Non puoi farlo se hai già lanciato un incantesimo di 1° livello o superiore in questo turno, né potrai lanciarne un altro dopo su questo stesso turno.'
+    },
+    'incantesimo-cercante': {
+      name: 'Incantesimo Cercante', cost: '1 Punto Stregoneria',
+      desc: 'Se un tiro per colpire dell\'incantesimo fallisce, spendi 1 Punto Stregoneria per ritirare il d20 e tieni il nuovo risultato. Puoi usarlo anche se hai già usato un\'altra opzione di Metamagia sullo stesso incantesimo.'
+    },
+    'incantesimo-sottile': {
+      name: 'Incantesimo Sottile', cost: '1 Punto Stregoneria',
+      desc: 'Spendi 1 Punto Stregoneria per lanciare l\'incantesimo senza componenti Verbali o Somatiche, e senza componenti Materiali salvo quelle consumate dall\'incantesimo o con un costo indicato.'
+    },
+    'incantesimo-trasmutato': {
+      name: 'Incantesimo Trasmutato', cost: '1 Punto Stregoneria',
+      desc: 'Se l\'incantesimo infligge danni Acido, Freddo, Fuoco, Fulmine, Veleno o Tuono, spendi 1 Punto Stregoneria per cambiarne il tipo con uno degli altri cinque.'
+    },
+    'incantesimo-gemellato': {
+      name: 'Incantesimo Gemellato', cost: '1 Punto Stregoneria',
+      desc: 'Se l\'incantesimo può colpire una sola creatura e potrebbe colpirne un\'altra con uno slot di livello superiore, spendi 1 Punto Stregoneria per aumentarne di 1 il livello effettivo e colpire un secondo bersaglio con lo stesso incantesimo.'
     }
   }
 };

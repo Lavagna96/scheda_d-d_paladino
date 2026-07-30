@@ -60,6 +60,8 @@
     extraResources: [],
     items: [],
     feats: [],
+    // Opzioni di Metamagia conosciute (Stregone): [id, ...] — id da manual.metamagic.
+    metamagicIds: [],
     levelChoices: {}
   };
 

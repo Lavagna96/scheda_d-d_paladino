@@ -202,7 +202,8 @@
     ladro: { count: 4, from: ['acrobazia', 'atletica', 'inganno', 'intuizione', 'intimidire', 'indagare', 'percezione', 'persuasione', 'rapidita-di-mano', 'furtivita'] },
     monaco: { count: 2, from: ['acrobazia', 'atletica', 'storia', 'intuizione', 'religione', 'furtivita'] },
     paladino: { count: 2, from: ['atletica', 'intuizione', 'intimidire', 'medicina', 'persuasione', 'religione'] },
-    ranger: { count: 3, from: ['addestrare-animali', 'atletica', 'intuizione', 'indagare', 'natura', 'percezione', 'furtivita', 'sopravvivenza'] }
+    ranger: { count: 3, from: ['addestrare-animali', 'atletica', 'intuizione', 'indagare', 'natura', 'percezione', 'furtivita', 'sopravvivenza'] },
+    stregone: { count: 2, from: ['arcano', 'inganno', 'intuizione', 'intimidire', 'persuasione', 'religione'] }
   };
 
   // Competenze disponibili per una classe: usa CLASS_SKILLS se già
