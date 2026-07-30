@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 39,
+  version: 40,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -647,13 +647,40 @@ window.MANUAL_55 = {
       classResources: {
         secondwind: { name: 'Recuperare Energie', kind: 'uses', byLevelRef: 'secondWind', resetOn: 'short' },
         actionsurge: { name: 'Azione Impetuosa', kind: 'uses', byLevelRef: 'actionSurgeUses', resetOn: 'short' },
-        indomitable: { name: 'Indomabile', kind: 'uses', byLevelRef: 'indomitableUses', resetOn: 'long' }
+        indomitable: { name: 'Indomabile', kind: 'uses', byLevelRef: 'indomitableUses', resetOn: 'long' },
+        // Dadi Superiorità (Maestro di Battaglia) e Dadi di Energia Psionica
+        // (Combattente Psionico): risorse di SOTTOCLASSE (`subclass`, Blocco
+        // 5.C step Guerriero — nuovo filtro in engine.js, altrimenti
+        // trapelerebbero anche a Campione/Cavaliere Occulto). dieByLevel =
+        // il dado del singolo uso cresce col livello (generico, letto da
+        // engine.js per il testo della card).
+        superiority: {
+          name: 'Dadi Superiorità', kind: 'uses', subclass: 'maestro-di-battaglia', resetOn: 'short',
+          byLevel: [0, 0, 0, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6],
+          dieByLevel: [null, null, null, 'd8', 'd8', 'd8', 'd8', 'd8', 'd8', 'd8', 'd10', 'd10', 'd10', 'd10', 'd10', 'd10', 'd10', 'd12', 'd12', 'd12', 'd12']
+        },
+        psionicEnergy: {
+          name: 'Dadi di Energia Psionica', kind: 'uses', subclass: 'combattente-psionico', resetOn: 'short',
+          byLevel: [0, 0, 0, 4, 4, 6, 6, 6, 6, 8, 8, 8, 8, 10, 10, 10, 10, 12, 12, 12, 12],
+          dieByLevel: [null, null, null, 'd6', 'd6', 'd8', 'd8', 'd8', 'd8', 'd8', 'd8', 'd10', 'd10', 'd10', 'd10', 'd10', 'd10', 'd12', 'd12', 'd12', 'd12']
+        }
       },
       choicePoints: {
         fightingStyle: 1,
         subclass: 3, subclassFeatureLevels: [3, 7, 10, 15, 18],
         asi: [4, 6, 8, 12, 14, 16],
-        epicBoon: 19
+        epicBoon: 19,
+        // Manovre (Maestro di Battaglia): 3 al 3°, +2 al 7°/10°/15° (9 totali
+        // al 15°) — stessa forma {level,count} di Competenza/Metamagia/
+        // Invocazioni più un `subclass` (di SOTTOCLASSE, non di classe: un
+        // Campione/Cavaliere Occulto/Combattente Psionico non le vede mai),
+        // nuovo picker in js/levelup.js.
+        maneuvers: [
+          { level: 3, count: 3, subclass: 'maestro-di-battaglia' },
+          { level: 7, count: 2, subclass: 'maestro-di-battaglia' },
+          { level: 10, count: 2, subclass: 'maestro-di-battaglia' },
+          { level: 15, count: 2, subclass: 'maestro-di-battaglia' }
+        ]
       },
       /* Privilegi 1→20 (PHB 2024 p.90-91 del PDF): riassunti originali in
          italiano. trait:false = scelta gestita altrove (Stile di Combattimento
@@ -752,6 +779,57 @@ window.MANUAL_55 = {
             ],
             18: [
               { name: 'Sopravvissuto', desc: 'Hai vantaggio ai tiri salvezza contro la morte, e se ottieni 18-20 su uno di essi ne hai il beneficio come se fosse un 20 naturale. Inoltre, a inizio di ogni tuo turno recuperi 5 + il tuo modificatore di Costituzione PF se sei Sanguinante e hai almeno 1 PF.' }
+            ]
+          }
+        },
+        /* Maestro di Battaglia e Combattente Psionico (PHB 2024, p.93 e
+           p.98-99 del PDF): completano 3 delle 4 specializzazioni del
+           Guerriero — resta Cavaliere Occulto, rimandato perché richiede un
+           incantatore legato alla SOTTOCLASSE (non alla classe, che qui è
+           'none') con una propria lista di slot (un "terzo" di incantatore,
+           diverso da full/half/pact) e una lista incantesimi presa dal Mago
+           invece che dalla propria classe — architettura non ancora
+           supportata, da affrontare a parte. */
+        'maestro-di-battaglia': {
+          name: 'Maestro di Battaglia',
+          tenets: 'Studia l\'arte della battaglia e tramanda tecniche marziali sofisticate.',
+          features: {
+            3: [
+              { name: 'Superiorità in Combattimento', desc: 'Impari 3 manovre a tua scelta (vedi elenco a parte), alimentate dai Dadi Superiorità (vedi Risorse): puoi usarne una sola per attacco. Ne impari altre due ai livelli 7, 10 e 15, e ogni volta puoi anche sostituirne una che già conosci. Se una manovra richiede un TS, la CD è 8 + il tuo bonus di competenza + il tuo modificatore di Forza o Destrezza (a scelta).' },
+              { name: 'Studente di Guerra', desc: 'Ottieni competenza in un tipo di Strumenti da Artigiano a tua scelta e in un\'abilità a scelta fra quelle disponibili al Guerriero al 1° livello.' }
+            ],
+            7: [
+              { name: 'Conosci il Nemico', desc: 'Come azione bonus, scopri se una creatura che vedi entro 9 m ha Immunità, Resistenze o Vulnerabilità e quali sono. Una volta per riposo lungo; puoi ripristinarne l\'uso spendendo un Dado Superiorità (nessuna azione).' }
+            ],
+            10: [
+              { name: 'Superiorità in Combattimento Migliorata', desc: 'Il tuo Dado Superiorità diventa un d10.' }
+            ],
+            15: [
+              { name: 'Instancabile', desc: 'Una volta per turno, quando usi una manovra, puoi tirare 1d8 e usare il risultato al posto di spendere un Dado Superiorità.' }
+            ],
+            18: [
+              { name: 'Superiorità in Combattimento Suprema', desc: 'Il tuo Dado Superiorità diventa un d12.' }
+            ]
+          }
+        },
+        'combattente-psionico': {
+          name: 'Combattente Psionico',
+          tenets: 'Risveglia il potere della mente per potenziare il proprio vigore fisico.',
+          features: {
+            3: [
+              { name: 'Potere Psionico', desc: 'Ottieni i Dadi di Energia Psionica (vedi Risorse), che alimentano tre poteri. Campo Protettivo: reazione quando tu o un\'altra creatura che vedi entro 9 m subite danni, spendi un dado e riduci il danno del risultato più il tuo modificatore di Intelligenza (minimo 1). Colpo Psionico: una volta per turno, subito dopo aver colpito con un\'arma infliggendole danno, spendi un dado per infliggere danni da Forza extra pari al risultato più il modificatore di Intelligenza. Movimento Telecinetico: come azione magica, sposti un oggetto libero Grande o più piccolo o una creatura consenziente fino a 9 m entro 9 m da te; una volta per riposo breve o lungo, oppure spendendo un dado (nessuna azione) per ripristinarne l\'uso.' }
+            ],
+            7: [
+              { name: 'Esperto Telecinetico', desc: 'Balzo Psi-Potenziato: come azione bonus, ottieni una velocità di volo pari al doppio della tua fino alla fine del turno; una volta per riposo breve o lungo, oppure spendendo un Dado di Energia Psionica per ripristinarne l\'uso. Spinta Telecinetica: quando infliggi danno con Colpo Psionico, il bersaglio fa un TS di Forza (CD 8 + modificatore di Intelligenza + bonus di competenza) o cade Prono oppure viene spostato fino a 3 m in orizzontale, a tua scelta.' }
+            ],
+            10: [
+              { name: 'Mente Protetta', desc: 'Hai resistenza ai danni Psichici. Inoltre, se inizi il turno Affascinato o Spaventato, puoi spendere un Dado di Energia Psionica (nessuna azione) per porre fine a ogni effetto su di te che applica quelle condizioni.' }
+            ],
+            15: [
+              { name: 'Baluardo di Forza', desc: 'Come azione bonus, scegli creature (te compreso) entro 9 m, fino a un numero pari al tuo modificatore di Intelligenza (minimo 1): hanno Copertura Parziale per 1 minuto o finché non sei Incapacitato. Una volta per riposo lungo, oppure spendendo un Dado di Energia Psionica per ripristinarne l\'uso.' }
+            ],
+            18: [
+              { name: 'Maestro Telecinetico', desc: 'Hai sempre preparato Telecinesi e puoi lanciarlo senza slot né componenti (Intelligenza come caratteristica da incantatore per esso); mentre lo mantieni in concentrazione, incluso il turno in cui lo lanci, puoi attaccare con un\'arma come azione bonus. Una volta lanciato così, serve un riposo lungo per rifarlo, a meno di spendere un Dado di Energia Psionica per ripristinarne l\'uso.' }
             ]
           }
         }
@@ -4247,6 +4325,99 @@ window.MANUAL_55 = {
     'vista-della-strega': {
       name: 'Vista della Strega', prereq: 'Livello 15+',
       desc: 'Ottieni Vista Autentica con una portata di 9 m.'
+    }
+  },
+
+  /* Manovre del Maestro di Battaglia (Guerriero, sottoclassi mancanti — PHB
+     2024 p.93-95 del PDF): catalogo top-level come `feats`/`metamagic`,
+     scelto dal picker generico in js/levelup.js (choicePoints.maneuvers,
+     stessa forma {level,count}). Tutte e 20 le manovre del PHB (a differenza
+     di Metamagia/Invocazioni non è una selezione curata: la lista del
+     Maestro di Battaglia è già di per sé completa e gestibile). Ogni manovra
+     costa 1 Dado Superiorità, sommato di norma ai danni dell'attacco che la
+     attiva — il costo non è ripetuto in ogni riassunto, resta implicito
+     salvo eccezioni (Tattiche = prova, non danno). Riassunti originali in
+     italiano. */
+  maneuvers: {
+    imboscata: {
+      name: 'Imboscata',
+      desc: 'Quando fai una prova di Destrezza (Furtività) o un tiro di iniziativa, spendi un Dado Superiorità e sommalo al tiro (a meno che tu non sia Incapacitato).'
+    },
+    'scambio-di-posizione': {
+      name: 'Scambio di Posizione',
+      desc: 'Entro 1,5 m da una creatura consenziente (non Incapacitata) nel tuo turno, spendi un Dado Superiorità e scambia posto con essa spendendo almeno 1,5 m di movimento, senza provocare attacchi di opportunità; tu o lei ottenete un bonus alla CA pari al risultato del dado fino all\'inizio del tuo prossimo turno.'
+    },
+    'colpo-del-comandante': {
+      name: 'Colpo del Comandante',
+      desc: 'Quando compi l\'azione di Attacco, rinuncia a uno dei tuoi attacchi e spendi un Dado Superiorità: un alleato consenziente che ti vede o sente può usare la sua reazione per attaccare con un\'arma o un colpo senz\'armi, sommando il dado ai danni se colpisce.'
+    },
+    'presenza-autorevole': {
+      name: 'Presenza Autorevole',
+      desc: 'Quando fai una prova di Carisma (Intimidire, Intrattenere o Persuasione), spendi un Dado Superiorità e sommalo alla prova.'
+    },
+    'attacco-di-disarmo': {
+      name: 'Attacco di Disarmo',
+      desc: 'Quando colpisci una creatura con un attacco, spendi un Dado Superiorità (sommandolo ai danni): la creatura supera un TS di Forza o lascia cadere un oggetto a sua scelta che impugna, nel suo spazio.'
+    },
+    'attacco-distraente': {
+      name: 'Attacco Distraente',
+      desc: 'Quando colpisci una creatura con un attacco, spendi un Dado Superiorità (sommandolo ai danni): il prossimo tiro per colpire contro quel bersaglio da parte di un\'altra creatura ha vantaggio, se effettuato prima dell\'inizio del tuo prossimo turno.'
+    },
+    'gioco-di-gambe-elusivo': {
+      name: 'Gioco di Gambe Elusivo',
+      desc: 'Come azione bonus, spendi un Dado Superiorità e compi l\'azione Disimpegnarti; sommi anche il risultato del dado alla tua CA fino all\'inizio del tuo prossimo turno.'
+    },
+    finta: {
+      name: 'Finta',
+      desc: 'Come azione bonus, spendi un Dado Superiorità per fintare contro una creatura entro 1,5 m: hai vantaggio al tuo prossimo tiro per colpire contro di essa in questo turno, e se colpisci sommi il dado ai danni.'
+    },
+    'attacco-provocante': {
+      name: 'Attacco Provocante',
+      desc: 'Quando colpisci una creatura con un attacco, spendi un Dado Superiorità (sommandolo ai danni): la creatura supera un TS di Saggezza o ha svantaggio ai tiri per colpire contro bersagli diversi da te fino alla fine del tuo prossimo turno.'
+    },
+    'attacco-fulmineo': {
+      name: 'Attacco Fulmineo',
+      desc: 'Come azione bonus, spendi un Dado Superiorità e compi l\'azione Scattare. Se ti muovi almeno 1,5 m in linea retta subito prima di colpire in mischia come parte dell\'azione di Attacco in questo turno, sommi il dado ai danni.'
+    },
+    'attacco-di-manovra': {
+      name: 'Attacco di Manovra',
+      desc: 'Quando colpisci una creatura con un attacco, spendi un Dado Superiorità (sommandolo ai danni) e scegli un alleato consenziente che ti vede o sente: può usare la sua reazione per muoversi fino a metà della sua velocità senza provocare attacchi di opportunità dal bersaglio del tuo attacco.'
+    },
+    'attacco-minaccioso': {
+      name: 'Attacco Minaccioso',
+      desc: 'Quando colpisci una creatura con un attacco, spendi un Dado Superiorità (sommandolo ai danni): la creatura supera un TS di Saggezza o ha la condizione Spaventato fino alla fine del tuo prossimo turno.'
+    },
+    parata: {
+      name: 'Parata',
+      desc: 'Quando un\'altra creatura ti infligge danni con un attacco in mischia, puoi usare una reazione e spendere un Dado Superiorità per ridurre il danno subito del risultato del dado più il tuo modificatore di Forza o Destrezza (a tua scelta).'
+    },
+    'attacco-di-precisione': {
+      name: 'Attacco di Precisione',
+      desc: 'Quando manchi con un tiro per colpire, spendi un Dado Superiorità, tiralo e sommalo al tiro per colpire: potresti trasformarlo in un successo.'
+    },
+    'attacco-sospingente': {
+      name: 'Attacco Sospingente',
+      desc: 'Quando colpisci una creatura con un\'arma o un colpo senz\'armi, spendi un Dado Superiorità (sommandolo ai danni): se il bersaglio è Grande o più piccolo, supera un TS di Forza o viene spinto fino a 4,5 m in linea retta lontano da te.'
+    },
+    incoraggiamento: {
+      name: 'Incoraggiamento',
+      desc: 'Come azione bonus, spendi un Dado Superiorità: un alleato a tua scelta entro 9 m che ti vede o sente ottiene PF temporanei pari al risultato del dado più la metà (per difetto) del tuo livello da guerriero.'
+    },
+    risposta: {
+      name: 'Risposta',
+      desc: 'Quando una creatura ti manca con un attacco in mischia, puoi usare una reazione e spendere un Dado Superiorità per attaccarla in mischia con un\'arma o un colpo senz\'armi: se colpisci, sommi il dado ai danni.'
+    },
+    'attacco-ad-ampio-raggio': {
+      name: 'Attacco ad Ampio Raggio',
+      desc: 'Quando colpisci una creatura in mischia con un\'arma o un colpo senz\'armi, spendi un Dado Superiorità e scegli un\'altra creatura entro 1,5 m dal bersaglio originale e a portata: se il tiro per colpire colpirebbe anche lei, subisce danni (dello stesso tipo) pari al risultato del dado.'
+    },
+    'valutazione-tattica': {
+      name: 'Valutazione Tattica',
+      desc: 'Quando fai una prova di Intelligenza (Storia o Indagare) o di Saggezza (Intuizione), spendi un Dado Superiorità e sommalo alla prova.'
+    },
+    'attacco-di-sgambetto': {
+      name: 'Attacco di Sgambetto',
+      desc: 'Quando colpisci una creatura con un\'arma o un colpo senz\'armi, spendi un Dado Superiorità (sommandolo ai danni): se il bersaglio è Grande o più piccolo, supera un TS di Forza o cade Prono.'
     }
   }
 };

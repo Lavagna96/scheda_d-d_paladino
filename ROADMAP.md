@@ -24,13 +24,18 @@
   DEPLOYATO** (verificato il 2026-07-30: `origin/main` allineato a `HEAD`,
   sito live serve `?v=114` e contiene `buildSegmentedRow` — la roadmap non
   era stata aggiornata dopo il deploy avvenuto a fine sessione 2026-07-29).
-- **Prossimo passo:** Stregone (`3ef2f45`) e Mago (`c59b42d`) committati e
-  **deployati** (verificato il 2026-07-30: run Pages verde, sito live su
-  `?v=116`). Warlock implementato e verificato in locale (`?v=117`, vedi voce
-  11 del Blocco 5.C più sotto) — **ancora da committare e deployare**, in
-  attesa di autorizzazione. Con Warlock si chiude il Blocco 5.C: da scegliere
-  dopo il deploy, senza fretta — sottoclassi mancanti di una classe a scelta,
-  oppure i collaudi cloud mai confermati sotto.
+- **Prossimo passo:** Stregone, Mago e Warlock committati e **deployati**
+  (verificato il 2026-07-30: run Pages verde, sito live su `?v=117`, tutte e
+  11 le classi presenti). **Sottoclassi mancanti avviate** (richiesta di
+  Andrea dopo il Blocco 5.C): Guerriero fatto 2 di 3 (Maestro di Battaglia,
+  Combattente Psionico — vedi voce 2 del Blocco 5.C più sotto), verificato in
+  locale (`?v=118`) — **ancora da committare e deployare**. Resta **Cavaliere
+  Occulto**, rimandato: richiede un'architettura nuova (incantatore legato
+  alla sottoclasse, non alla classe, con una tabella di slot dedicata e la
+  lista incantesimi del Mago) — da discutere con Andrea prima di procedere,
+  probabilmente un passo a parte piuttosto che infilato nel Guerriero.
+  Restano poi le altre 8 classi con sottoclasse incompleta, e i collaudi
+  cloud mai confermati sotto.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1059,6 +1064,53 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      corretti. Tharion (Paladino) verificato invariato dopo ogni modifica
      (CA 20, PF 60, Attacco Extra 2 colpi, Channel Divinity ancora 2/2 dopo
      riposo breve). Console pulita in ogni prova.
+   → **Sottoclassi mancanti, 2 di 3 fatte (2026-07-30, manuale `version`
+     39→40)**: **Maestro di Battaglia** (p.93-95 del PDF) e **Combattente
+     Psionico** (p.98-99) aggiunte — resta **Cavaliere Occulto**, rimandato
+     perché richiede un incantatore legato alla SOTTOCLASSE (non alla classe,
+     che qui è `casterType:'none'`) con una propria tabella di slot (un
+     "terzo" di incantatore, diverso da full/half/pact) e la lista
+     incantesimi del Mago invece che una propria — architettura non ancora
+     supportata dal motore, servirà un passo a parte.
+     - **Bug di fuga tra sottoclasse trovato e chiuso, non solo del
+       Guerriero**: `classResources` viveva solo a livello di CLASSE, mai di
+       sottoclasse — esattamente il difetto già presente (poi corretto il
+       2026-07-30, vedi "Bug risolti") per l'Arma Sacra del Paladino. Qui però
+       diventava concreto subito: i Dadi Superiorità del Maestro di Battaglia
+       sarebbero comparsi anche a un Campione. Aggiunto un filtro `subclass`
+       generico in `engine.js` (una risorsa con quel campo compare solo se
+       `character.subclassId` combacia): **Dadi Superiorità** (Maestro di
+       Battaglia, 4d8→5d8 al 7°→6d8 al 15°, dado d8→d10 al 10°→d12 al 18°) e
+       **Dadi di Energia Psionica** (Combattente Psionico, 4d6 al 3°→6d8 al
+       5°→8d8 al 9°→8d10 all'11°→10d10 al 13°→12d12 al 17°) usano entrambe il
+       filtro. Nuovo `dieByLevel` generico in `engine.js` (il dado del
+       singolo uso cresce col livello, mostrato nella card come "d8 cad." —
+       stesso principio di 'hd', generalizzato).
+     - **Meccanica nuova: Manovre**. Catalogo top-level `manual.maneuvers`
+       (tutte e 20 del PHB — qui non serviva una selezione curata come per
+       Metamagia/Invocazioni, la lista del Maestro di Battaglia è già di per
+       sé completa). `choicePoints.maneuvers` nella stessa forma {level,
+       count} di Competenza/Metamagia/Invocazioni, ma con un `subclass` in
+       più: a differenza di quelle (di CLASSE), le Manovre sono la PRIMA
+       scelta di questo tipo legata a una sottoclasse, e il livello in cui si
+       impara (3°) è lo STESSO in cui si sceglie la sottoclasse nella stessa
+       schermata — quindi il picker non può sapere subito se serve, deve
+       aspettare la scelta. Risolto con un contenitore dinamico
+       (`refreshManeuverSection()` in `levelup.js`, richiamata dal click
+       sulla riga di Sottoclasse) che mostra "Manovre — scegline N" solo se
+       la sottoclasse scelta è Maestro di Battaglia, vuoto per le altre.
+       Nuovo campo `character.maneuverIds`.
+     - **Verifica end-to-end**: Guerriero iniettato a livello 2, level-up
+       simulato a 3 — cliccando "Campione" nessuna sezione Manovre compare;
+       cliccando "Maestro di Battaglia" compare subito "Manovre — scegline
+       3" con le 20 righe, 3 scelte e salvate correttamente; a Risorse
+       compare "Dadi Superiorità — d8 cad. — 4/4"; passando lo stesso
+       personaggio a sottoclasse Combattente Psionico, "Dadi Superiorità"
+       sparisce e compare "Dadi di Energia Psionica — d6 cad. — 4/4" (prova
+       diretta che il filtro `subclass` funziona in entrambe le direzioni).
+       Tharion (Paladino) verificato invariato con `AppEngine.derive` sui
+       dati puri di `config.js` (CA 20, CD 15, PF 60, Imposizione 35).
+       Console pulita in ogni prova. Cache busting `?v=118`.
 3. [x] **Ladro** (no caster) — Attacco Furtivo, Competenza (doppio PB), Elusione.
    → **Fatto (2026-07-28, `?v=89`, manuale `version` 30→31)**: privilegi 1→20
    dal PDF (p.128-130), sottoclasse **Ladro Esperto** (p.136, la più semplice
@@ -1476,8 +1528,8 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
     Guaritrice, Fortuna del Reietto — che richiederebbe una risorsa di
     SOTTOCLASSE, non ancora supportata dal motore, che ha solo risorse di
     classe: aggiungerla lì varrebbe per qualunque patrono, sbagliato, stesso
-    tipo di svista già presente e non corretta per l'Arma Sacra del Paladino
-    — segnalata a parte, fuori scope qui. Grande Antico è invece tutto
+    tipo di svista già presente per l'Arma Sacra del Paladino (poi corretta
+    il 2026-07-30, vedi "Bug risolti") — fuori scope qui. Grande Antico è invece tutto
     narrativo, stesso trattamento di Divinatore/Aberrante), equipaggiamento
     iniziale (Cuoio + Falcetto + 2 Pugnali + Focus Arcano + Libro + Kit dello
     studioso, oppure 100 MO), competenze di classe in `CLASS_SKILLS`.
@@ -1746,6 +1798,26 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
   stesse condizioni del calcolo numerico. Verificato: Tharion (Spada lunga,
   non a due mani) invariato; un test con Arco lungo + Stile Duello perde
   correttamente sia il bonus che la nota dopo il fix. Cache busting `?v=96`.
+
+- 2026-07-30 — **Arma Sacra trapelava a Paladini non-Devozione.** Segnalato
+  da Andrea: era da tempo annotato "segnalato a parte, fuori scope" (vedi
+  Blocco 5.C sulle sottoclassi del Guerriero e nota sul Warlock/patti).
+  `CLASS_BONUSES.paladino.sacredWeapon` in `engine.js` si applicava a
+  QUALSIASI `classId==='paladino'`, ma Arma Sacra è un privilegio esclusivo
+  del Giuramento di Devozione (`manual-55.js`,
+  `classes.paladino.subclasses.devozione`) — un Gloria/Antichi/Vendetta non
+  dovrebbe mai vederlo, eppure la nota "Con Arma Sacra: +N al colpire…" in
+  `stats.js` (`buildAttackNote`) compariva comunque per qualunque paladino
+  con CAR positivo.
+  **Fix**: stesso principio del filtro `subclass` già usato per
+  `classResources` (Blocco 5.C, Dadi Superiorità/Energia Psionica) ma
+  applicato ai `CLASS_BONUSES`: aggiunto `subclass: 'devozione'` alla def di
+  `sacredWeapon`, e in `engine.js` (dove si calcola `sacredWeaponBonus`) il
+  bonus si azzera se `swDef.subclass !== ch.subclassId`. Verificato: Tharion
+  (Devozione) invariato — CA 20, +8/1d8+7, Arma Sacra +3, nota presente; un
+  Paladino di prova con `subclassId: 'gloria'` (clone dello stato via
+  `AppEngine.derive`, senza toccare i dati reali) ha `sacredWeaponBonus: 0` e
+  la nota sparisce. Console pulita.
 
 ## Decisioni prese
 

@@ -110,6 +110,30 @@
     var needsInvocation = !!invocationEntry;
     var invocationCount = invocationEntry ? invocationEntry.count : 0;
 
+    // Manovre (Guerriero, Maestro di Battaglia): stessa forma {level,count},
+    // ma con un `subclass` in più — a differenza di Competenza/Metamagia/
+    // Invocazioni (di CLASSE), le Manovre sono di SOTTOCLASSE: un Campione o
+    // un Cavaliere Occulto non le vedono mai. Il primo livello a cui si
+    // applicano (3°) è anche il livello in cui si sceglie la sottoclasse
+    // nella STESSA schermata, quindi qui non posso saperlo subito se ci sono
+    // più sottoclassi (serve il click sulla riga) — ricalcolato da
+    // maneuverEntryForSubclass() e ridisegnato da refreshManeuverSection()
+    // ogni volta che la sottoclasse scelta cambia.
+    var maneuverContainer = null;
+    var needsManeuver = false;
+    var maneuverCount = 0;
+
+    function maneuverEntryForSubclass(subclassId) {
+      var found = null;
+      (cp.maneuvers || []).forEach(function (e) {
+        if (e.level === nextLevel && e.subclass === subclassId) {
+          found = e;
+        }
+      });
+
+      return found;
+    }
+
     /* bozza di scelte correnti (non ancora applicata allo stato) */
     var choice = {
       mode: null, // 'asi' | 'feat'
@@ -118,7 +142,8 @@
       styleId: character.fightingStyle || 'nessuno',
       expertiseIds: [],
       metamagicIds: [],
-      invocationIds: []
+      invocationIds: [],
+      maneuverIds: []
     };
     var autoSubclassId = null;
     var autoEpicBoonId = null;
@@ -308,6 +333,9 @@
         ok = false;
       }
       if (needsInvocation && choice.invocationIds.length !== invocationCount) {
+        ok = false;
+      }
+      if (needsManeuver && choice.maneuverIds.length !== maneuverCount) {
         ok = false;
       }
       confirmBtn.disabled = !ok;
@@ -606,6 +634,75 @@
       return wrap;
     }
 
+    /* ---------- sezione Manovre (Guerriero; quante dipende da maneuverCount) ---------- */
+
+    function buildManeuverSection() {
+      var wrap = el('div');
+      wrap.appendChild(el('div', 'edit-section-label', 'Manovre — scegline ' + maneuverCount));
+      var already = character.maneuverIds || [];
+      var manualManeuvers = manual.maneuvers || {};
+      var eligible = Object.keys(manualManeuvers).filter(function (id) {
+        return already.indexOf(id) === -1;
+      });
+      var list = el('div', 'levelup-feat-list');
+      var rowEls = {};
+
+      eligible.forEach(function (id) {
+        var mv = manualManeuvers[id];
+        var row = el('div', 'levelup-feat-row');
+        row.appendChild(el('div', 'levelup-feat-name', mv.name));
+        row.appendChild(el('div', 'levelup-feat-desc', truncate(mv.desc, 100)));
+
+        row.addEventListener('click', function () {
+          var idx = choice.maneuverIds.indexOf(id);
+          if (idx !== -1) {
+            choice.maneuverIds.splice(idx, 1);
+          } else if (choice.maneuverIds.length < maneuverCount) {
+            choice.maneuverIds.push(id);
+          }
+          Object.keys(rowEls).forEach(function (rowId) {
+            var isOn = choice.maneuverIds.indexOf(rowId) !== -1;
+            rowEls[rowId].classList.toggle('on', isOn);
+            var disable = choice.maneuverIds.length >= maneuverCount && !isOn;
+            rowEls[rowId].classList.toggle('is-disabled', disable);
+          });
+          updateConfirmState();
+        });
+
+        rowEls[id] = row;
+        list.appendChild(row);
+      });
+      wrap.appendChild(list);
+
+      return wrap;
+    }
+
+    /* Ricalcola la sezione Manovre in base alla sottoclasse EFFETTIVA
+       (scelta nel picker, o già assegnata in automatico, o già presente sul
+       personaggio ai livelli successivi al 3°): l'unico caso davvero
+       dinamico è il 3° livello con più di una sottoclasse, dove la scelta
+       arriva dopo l'apertura del foglio — richiamata dal click sulla riga di
+       Sottoclasse e una volta all'apertura per gli altri casi. */
+    function refreshManeuverSection() {
+      if (!maneuverContainer) {
+        return;
+      }
+      var effectiveSubclassId = choice.subclassId || autoSubclassId || character.subclassId;
+      var entry = maneuverEntryForSubclass(effectiveSubclassId);
+      maneuverContainer.innerHTML = '';
+      if (entry) {
+        needsManeuver = true;
+        maneuverCount = entry.count;
+        choice.maneuverIds = [];
+        maneuverContainer.appendChild(buildManeuverSection());
+      } else {
+        needsManeuver = false;
+        maneuverCount = 0;
+        choice.maneuverIds = [];
+      }
+      updateConfirmState();
+    }
+
     /* ---------- righe di sola lettura (1 sola opzione disponibile oggi) ---------- */
 
     /* Con una sola sottoclasse la si assegna da sola (riga di sola lettura);
@@ -623,6 +720,7 @@
           var sub = klass.subclasses[autoSubclassId];
           wrap.appendChild(el('div', 'levelup-auto-row', 'Sottoclasse: ' + sub.name));
         }
+        refreshManeuverSection();
 
         return wrap;
       }
@@ -640,6 +738,7 @@
 
         row.addEventListener('click', function () {
           choice.subclassId = id;
+          refreshManeuverSection();
           Object.keys(rowEls).forEach(function (otherId) {
             rowEls[otherId].classList.toggle('on', otherId === id);
           });
@@ -732,6 +831,12 @@
         ch.levelChoices[key].invocationIds = choice.invocationIds.slice();
       }
 
+      if (needsManeuver) {
+        ch.maneuverIds = (ch.maneuverIds || []).concat(choice.maneuverIds);
+        ch.levelChoices[key] = ch.levelChoices[key] || {};
+        ch.levelChoices[key].maneuverIds = choice.maneuverIds.slice();
+      }
+
       // Con più di una sottoclasse vince la scelta fatta nel picker; con una
       // sola resta l'assegnazione automatica di sempre.
       var chosenSubclassId = choice.subclassId || autoSubclassId;
@@ -816,8 +921,19 @@
       bodyEl.appendChild(buildInvocationSection());
     }
 
+    // Le Manovre dipendono dalla sottoclasse (solo Maestro di Battaglia):
+    // contenitore creato PRIMA della sezione Sottoclasse (che può chiamare
+    // refreshManeuverSection() da sola nel caso auto-assegnato), riempito/
+    // svuotato da refreshManeuverSection() — richiamata anche dal click
+    // sulla riga di Sottoclasse quando serve una scelta vera.
+    maneuverContainer = el('div');
+
     if (needsSubclass) {
       bodyEl.appendChild(buildSubclassSection());
+    }
+    bodyEl.appendChild(maneuverContainer);
+    if (!needsSubclass) {
+      refreshManeuverSection();
     }
 
     if (needsEpicBoon) {

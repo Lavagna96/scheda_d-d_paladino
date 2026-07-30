@@ -64,6 +64,8 @@
     metamagicIds: [],
     // Invocazioni Occulte conosciute (Warlock): [id, ...] — id da manual.invocations.
     invocationIds: [],
+    // Manovre conosciute (Guerriero, Maestro di Battaglia): [id, ...] — id da manual.maneuvers.
+    maneuverIds: [],
     levelChoices: {}
   };
 

@@ -327,6 +327,15 @@
        i 'pool' (es. Imposizione delle Mani) non sono res-card: vanno in poolMax. */
     Object.keys(classRes).forEach(function (key) {
       var def = classRes[key];
+      // subclass: risorsa specifica di UNA sottoclasse (es. Dadi Superiorità
+      // del Maestro di Battaglia), non dell'intera classe — altrimenti
+      // trapelerebbe anche a Campione/Cavaliere Occulto/Combattente Psionico.
+      // Senza questo filtro andrebbe in classResources solo ciò che vale per
+      // ogni sottoclasse (finora sempre stato così, quindi nessuna voce
+      // esistente lo usa e nessuna regressione).
+      if (def.subclass && def.subclass !== ch.subclassId) {
+        return;
+      }
       if (def.kind === 'uses') {
         var max = resMax(def, ch.level, klass, mods);
         if (max > 0) {
@@ -336,7 +345,12 @@
              legato al Bardo in particolare. */
           var resetOn = (def.resetOnAt && ch.level >= def.resetOnAt.level)
             ? def.resetOnAt.value : def.resetOn;
-          resources.push({ key: key, max: max, name: def.name, resetOn: resetOn });
+          // dieByLevel: il dado del "singolo uso" cresce col livello (es. il
+          // Dado Superiorità del Maestro di Battaglia: d8 → d10 → d12) —
+          // stesso principio di 'hd' (dado ferita + livello), generalizzato.
+          var dieCtx = def.dieByLevel && def.dieByLevel[ch.level];
+          resources.push({ key: key, max: max, name: def.name, resetOn: resetOn,
+            ctx: dieCtx ? dieCtx + ' cad.' : undefined });
         }
       }
     });
