@@ -77,7 +77,7 @@
   var CLASS_BONUSES = {
     paladino: {
       aura: { from: 6, target: 'ts', ability: 'CAR', min: 1 },  // Aura di Protezione
-      sacredWeapon: { ability: 'CAR', min: 1 }                  // Arma Sacra (Devozione)
+      sacredWeapon: { ability: 'CAR', min: 1, subclass: 'devozione' } // Arma Sacra (solo Devozione)
     }
   };
 
@@ -381,6 +381,12 @@
     var duelloOk = ch.fightingStyle === 'duello' && !w.ranged && !w.twoHanded;
     var weaponDmgBonus = mods[wAbil] + modSum(ch, 'danni') + (duelloOk ? 2 : 0);
     var swDef = bonuses.sacredWeapon;
+    // Come il filtro subclass di classResources: un bonus con .subclass vale
+    // solo per QUELLA sottoclasse, altrimenti Arma Sacra trapelerebbe anche a
+    // Gloria/Antichi/Vendetta (privilegio esclusivo di Devozione).
+    if (swDef && swDef.subclass && swDef.subclass !== ch.subclassId) {
+      swDef = null;
+    }
     var sacredWeaponBonus = swDef ? Math.max(swDef.min || 0, mods[swDef.ability]) : 0;
 
     return {
