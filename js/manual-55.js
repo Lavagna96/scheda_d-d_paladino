@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 37,
+  version: 38,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -895,7 +895,127 @@ window.MANUAL_55 = {
       casterType: 'full', spellAbility: 'INT',
       cantripsByLevel: [0, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
       preparedByLevel: [0, 4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 18, 19, 21, 22, 23, 24, 25],
-      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9]
+      slotLevelByLevel: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9],
+      // Niente Maestria nelle Armi (nessuna colonna dedicata, come Bardo/
+      // Chierico/Druido/Stregone): solo armi semplici.
+      weaponProf: ['sem'],
+      startingEquipment: {
+        a: {
+          label: 'Kit del mago',
+          // Il Focus Arcano di partenza del Mago è proprio il Bastone Ferrato
+          // impugnato (PHB: "Arcane Focus (Quarterstaff)"): un solo oggetto,
+          // niente riga doppia in più — stesso principio del Focus Druidico.
+          armorId: '', shield: false, weaponId: 'bastone-ferrato',
+          extra: [
+            { name: 'Pugnale', qty: 2, weaponId: 'pugnale' },
+            { name: 'Veste', qty: 1, weight: 4 },
+            { name: 'Libro degli Incantesimi', qty: 1, weight: 3, desc: 'Contiene i 6 incantesimi di 1° livello scelti alla creazione; nuove pagine si aggiungono salendo di livello da mago.' },
+            { name: 'Kit dello studioso', qty: 1, weight: 22, desc: 'Zaino, libro, inchiostro, penna, lampada, 10 fiaschette d\'olio, 10 fogli di pergamena, acciarino.' }
+          ],
+          coins: { mo: 5 }
+        },
+        b: { label: '55 monete d\'oro', coins: { mo: 55 } }
+      },
+      // Recupero Arcano: 1 uso per riposo lungo, stesso principio del
+      // Metabolismo Sbalorditivo del Monaco — nessun codice nuovo nel motore.
+      classResources: {
+        arcaneRecovery: { name: 'Recupero Arcano', kind: 'uses', max: 1, resetOn: 'long' }
+      },
+      choicePoints: {
+        subclass: 3, subclassFeatureLevels: [3, 6, 10, 14],
+        asi: [4, 8, 12, 16], epicBoon: 19,
+        // Studioso: UNA sola abilità con Competenza al 2° livello (non due
+        // come Ladro/Bardo/Ranger) — stesso picker generico, `count: 1`.
+        // Semplificazione dichiarata: il PHB restringe la scelta a sei
+        // abilità specifiche (Arcano/Storia/Indagare/Medicina/Natura/
+        // Religione, esclude Intuizione anche se è fra le competenze di
+        // classe); il picker qui non applica quella lista ristretta.
+        expertise: [{ level: 2, count: 1 }]
+      },
+      /* Privilegi 1→20 (PHB 2024 p.164-166 del PDF): riassunti originali in
+         italiano. trait:false = scelta gestita altrove (sottoclasse/ASI/Dono
+         Epico dal level-up, Studioso dal picker di Competenza). Ai livelli
+         7/9/11/13/15/17 il PHB non ha un privilegio nuovo, solo i numeri
+         delle tabelle (Trucchetti/Preparati/slot) che salgono da soli —
+         nessuna voce qui. */
+      levelFeatures: {
+        1: [
+          { name: 'Incantesimi', desc: 'L\'Intelligenza è la tua caratteristica da incantatore. Conosci 3 trucchetti da mago; il tuo libro degli incantesimi parte con 6 incantesimi di 1° livello a scelta e ne prepari 4 dal libro (il numero cresce col livello). Puoi sostituire un trucchetto a ogni riposo lungo e aggiungere 2 incantesimi al libro ogni volta che sali di livello da mago. Puoi usare un Focus Arcano o il libro stesso come focus.' },
+          { name: 'Adepto dei Rituali', desc: 'Puoi lanciare come rituale qualunque incantesimo con il descrittore Rituale presente nel tuo libro degli incantesimi, anche senza averlo preparato, purché tu legga dal libro.' },
+          { name: 'Recupero Arcano', desc: 'Al termine di un riposo breve, puoi studiare il libro degli incantesimi per recuperare slot già usati, per un totale di livelli pari alla metà del tuo livello da mago (arrotondato per eccesso), nessuno slot di 6° livello o superiore. Puoi usare questo privilegio una sola volta tra un riposo lungo e l\'altro.' }
+        ],
+        2: [
+          { name: 'Studioso', trait: false, desc: 'Scegli una fra Arcano, Storia, Indagare, Medicina, Natura o Religione (in cui sei già competente): ottieni Competenza (bonus di competenza raddoppiato) in quell\'abilità.' }
+        ],
+        3: [
+          { name: 'Sottoclasse del Mago', trait: false, desc: 'Scegli una tradizione arcana (Abiurazione, Divinazione, Evocazione o Illusione). Ottieni i suoi privilegi al tuo livello da mago o inferiore.' }
+        ],
+        4: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni il talento Aumento di Caratteristica (aumenti un punteggio di 2, oppure due punteggi di 1, fino a un massimo di 20) oppure un altro talento per cui sei idoneo.' }
+        ],
+        5: [
+          { name: 'Memorizzare Incantesimo', desc: 'Al termine di un riposo breve, puoi studiare il libro degli incantesimi e sostituire uno degli incantesimi di 1° livello o superiore che hai preparato con un altro incantesimo del libro dello stesso tipo.' }
+        ],
+        6: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un privilegio della tua tradizione arcana.' }
+        ],
+        8: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        10: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio della tua tradizione arcana.' }
+        ],
+        12: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        14: [
+          { name: 'Privilegio di Sottoclasse', trait: false, desc: 'Ottieni un altro privilegio della tua tradizione arcana.' }
+        ],
+        16: [
+          { name: 'Aumento dei Punteggi di Caratteristica', trait: false, desc: 'Ottieni di nuovo il talento Aumento di Caratteristica oppure un altro talento per cui sei idoneo.' }
+        ],
+        18: [
+          { name: 'Maestria negli Incantesimi', desc: 'Scegli un incantesimo di 1° e uno di 2° livello dal tuo libro con tempo di lancio di un\'azione: li hai sempre preparati e puoi lanciarli al loro livello più basso senza spendere uno slot. Per lanciarli a un livello superiore devi comunque spendere uno slot.' }
+        ],
+        19: [
+          { name: 'Dono Epico', trait: false, desc: 'Ottieni un talento Dono Epico (consigliato: Dono del Richiamo degli Incantesimi) oppure un altro talento per cui sei idoneo.' }
+        ],
+        20: [
+          { name: 'Incantesimi della Firma', desc: 'Scegli due incantesimi di 3° livello dal tuo libro come incantesimi della firma: li hai sempre preparati e puoi lanciare ciascuno una volta al 3° livello senza spendere uno slot (di nuovo dopo un riposo breve o lungo); per lanciarli a un livello superiore devi spendere uno slot.' }
+        ]
+      },
+      /* Sottoclassi del Mago: per ora Tradizione della Divinazione come dati
+         (PHB 2024, p.171 del PDF, la più semplice delle 4 — Abiurazione,
+         Evocazione e Illusione condividono lo stesso privilegio d'apertura
+         "Sapiente" (incantesimi extra scelti liberamente nel libro, non una
+         lista fissa come i giuramenti del Paladino o Stregoneria Aberrante:
+         resta descrittivo, senza tracciamento nello stato, stesso trattamento
+         già dato a privilegi narrativi come la Furia del Barbaro), ma le
+         altre tre aggiungono anche una meccanica propria (Ward di Abiurazione,
+         danno extra di Evocazione, cantrip bonus di Illusione) che richiede
+         lavoro nel motore — rimandate. Divinazione invece è tutta narrativa
+         (Presagio = tiri di dado gestiti al tavolo, non dallo stato). */
+      subclasses: {
+        divinatore: {
+          name: 'Tradizione della Divinazione',
+          tenets: 'Squarcia i veli di spazio, tempo e coscienza per svelare i segreti del multiverso.',
+          features: {
+            3: [
+              { name: 'Sapiente della Divinazione', desc: 'Scegli due incantesimi da mago della scuola di Divinazione, non superiori al 2° livello, e aggiungili gratis al tuo libro degli incantesimi. Inoltre, ogni volta che accedi a un nuovo livello di slot in questa classe, puoi aggiungere gratis al libro un altro incantesimo da mago della scuola di Divinazione di quel livello o inferiore.' },
+              { name: 'Presagio', desc: 'Al termine di un riposo lungo, tira due d20 e annotane i risultati: puoi sostituire con uno di essi qualunque Prova del d20 tua o di una creatura che vedi, decidendo prima di tirare (una sola sostituzione a turno). Ogni risultato annotato si usa una sola volta e quelli non usati si perdono al riposo lungo successivo.' }
+            ],
+            6: [
+              { name: 'Divinazione Esperta', desc: 'Quando lanci un incantesimo di Divinazione con uno slot di 2° livello o superiore, recuperi uno slot già speso di livello inferiore a quello usato (mai di 6° livello o superiore).' }
+            ],
+            10: [
+              { name: 'Il Terzo Occhio', desc: 'Azione bonus: scegli un beneficio finché non inizi un riposo breve o lungo (una sola volta tra un riposo e l\'altro) — Scurovisione fino a 36 m; Comprensione Superiore (leggi qualunque lingua); oppure lanci Scorgere l\'Invisibile senza spendere uno slot.' }
+            ],
+            14: [
+              { name: 'Presagio Maggiore', desc: 'Tiri tre d20, invece di due, per il privilegio Presagio.' }
+            ]
+          }
+        }
+      }
     },
     monaco: {
       name: 'Monaco', hitDie: 'd8', primaryAbility: 'DES e SAG', saves: ['FOR', 'DES'],

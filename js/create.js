@@ -200,6 +200,7 @@
     druido: { count: 2, from: ['arcano', 'addestrare-animali', 'intuizione', 'medicina', 'natura', 'percezione', 'religione', 'sopravvivenza'] },
     guerriero: { count: 2, from: ['acrobazia', 'addestrare-animali', 'atletica', 'storia', 'intuizione', 'intimidire', 'persuasione', 'percezione', 'sopravvivenza'] },
     ladro: { count: 4, from: ['acrobazia', 'atletica', 'inganno', 'intuizione', 'intimidire', 'indagare', 'percezione', 'persuasione', 'rapidita-di-mano', 'furtivita'] },
+    mago: { count: 2, from: ['arcano', 'storia', 'intuizione', 'indagare', 'medicina', 'natura', 'religione'] },
     monaco: { count: 2, from: ['acrobazia', 'atletica', 'storia', 'intuizione', 'religione', 'furtivita'] },
     paladino: { count: 2, from: ['atletica', 'intuizione', 'intimidire', 'medicina', 'persuasione', 'religione'] },
     ranger: { count: 3, from: ['addestrare-animali', 'atletica', 'intuizione', 'indagare', 'natura', 'percezione', 'furtivita', 'sopravvivenza'] },

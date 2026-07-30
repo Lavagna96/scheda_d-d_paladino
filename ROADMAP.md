@@ -14,9 +14,9 @@
   GitHub Pages. L'intera visione originale (login, dashboard multi-personaggio,
   editing, oggetti magici, level-up guidato per il Paladino) è realizzata e
   funzionante. Login e Face ID collaudati da Andrea su iPhone reale.
-  **Fase 5 in corso, Blocco 5.C (le classi una alla volta):** 9 classi su 11
+  **Fase 5 in corso, Blocco 5.C (le classi una alla volta):** 10 classi su 11
   complete (Barbaro, Guerriero, Ladro, Monaco, Ranger, Chierico, Druido,
-  Bardo, Stregone) — restano **Mago, Warlock**.
+  Bardo, Stregone, Mago) — resta solo **Warlock**.
   Il **restyling visivo del wizard di creazione** (tutti e 8 i passi: Specie,
   Classe, Background, Punteggi, Competenze, Equipaggiamento,
   Sottoclasse/Incantesimi, Identità), dal commit `994a181` (`?v=105`) al
@@ -24,12 +24,11 @@
   DEPLOYATO** (verificato il 2026-07-30: `origin/main` allineato a `HEAD`,
   sito live serve `?v=114` e contiene `buildSegmentedRow` — la roadmap non
   era stata aggiornata dopo il deploy avvenuto a fine sessione 2026-07-29).
-- **Prossimo passo:** Stregone implementato e verificato in locale
-  (`?v=115`, vedi voce 9 del Blocco 5.C più sotto) — **ancora da committare e
-  deployare**, in attesa di autorizzazione. Dopo il deploy, riprendere il
-  Blocco 5.C con **Mago** (10ª classe, libro degli incantesimi + Recupero
-  Arcano + Tradizione Arcana) o **Warlock** (11ª e ultima, slot Patto già in
-  tabella + Invocazioni + Suppliche + Patto).
+- **Prossimo passo:** Stregone committato (`3ef2f45`); Mago implementato e
+  verificato in locale (`?v=116`, vedi voce 10 del Blocco 5.C più sotto) —
+  **ancora da committare e deployare**, in attesa di autorizzazione. Dopo il
+  deploy, chiudere il Blocco 5.C con **Warlock** (11ª e ultima classe, slot
+  Patto già in tabella + Invocazioni Occulte + Suppliche Mistiche + Patto).
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1419,7 +1418,54 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      accanto a "Magia Innata 2/2". Tharion (Paladino) verificato invariato
      dopo ogni prova (CA 20, CD 15, PF 60, Imposizione 35, TS CAR +9).
      Console pulita in ogni prova. Cache busting `?v=115`.
-10. [ ] **Mago** (full) — libro incantesimi, Recupero Arcano, Tradizione.
+10. [x] **Mago** (full) — libro incantesimi, Recupero Arcano, Tradizione.
+    → **Fatto (2026-07-30, manuale `version` 37→38)**: privilegi 1→20 dal PDF
+    (p.164-166, dati base già presenti e verificati cifra per cifra —
+    incluso il salto 19→21 negli Incantesimi Preparati al 15°→16°, confermato
+    due volte con estrazioni diverse del PDF), sottoclasse **Tradizione della
+    Divinazione** (p.171 — la più semplice delle 4: Abiurazione, Evocazione e
+    Illusione condividono lo stesso privilegio d'apertura "Sapiente" che
+    aggiunge liberamente incantesimi al libro a ogni nuovo livello di slot,
+    ma le altre tre aggiungono anche una meccanica propria — Ward di HP per
+    l'Abiurazione, danno extra per l'Evocazione, cantrip bonus per
+    l'Illusione — rimandate a quando servirà il motore nuovo; Divinazione è
+    tutta narrativa, incluso Sapiente stesso, trattato come la Furia del
+    Barbaro: descrittivo, non tracciato nello stato), equipaggiamento
+    iniziale (Bastone Ferrato — che è anche il Focus Arcano, un solo oggetto
+    — + 2 Pugnali + Veste + Libro degli Incantesimi + Kit dello studioso,
+    oppure 55 MO), competenze di classe in `CLASS_SKILLS` (create.js).
+    - **Recupero Arcano**: `classResources` di tipo `kind:'uses'`, stesso
+      principio del Metabolismo Sbalorditivo del Monaco — zero codice nuovo.
+    - **Studioso** (Expertise a 1 sola abilità, non 2 come Ladro/Bardo/
+      Ranger): riusa lo `choicePoints.expertise` generico esistente con
+      `count: 1`, nessuna modifica al picker. **Semplificazione dichiarata**:
+      il PHB restringe la scelta a sei abilità specifiche (esclude Intuizione
+      anche se è competenza di classe del Mago); il picker qui non applica
+      quella lista ristretta, stesso genere di scelta già accettato altrove
+      (es. Maestria nelle Armi del Barbaro senza Vex/Rallentare).
+    - **Nessuna meccanica nuova nel motore**: il libro degli incantesimi
+      (spellbook separato dai preparati) non è modellato — il wizard usa lo
+      stesso meccanismo generico "N incantesimi preparati" già in uso per
+      tutte le classi, senza distinguere "conosciuti nel libro" da
+      "preparati". Semplificazione dichiarata, stessa scelta implicita già
+      fatta per ogni altro incantatore finora.
+    - **Verifica end-to-end**: creazione di un Mago Umano/Studioso da zero
+      nel wizard reale (Punteggi: "Attacca con Intelligenza · TS:
+      Intelligenza, Saggezza"; Competenze: Indagare/Storia/Intuizione/
+      Medicina/Natura/Religione raggruppate per caratteristica, Arcano e
+      Storia escluse perché dal background; Equipaggiamento: card A col Kit
+      del Mago, Bastone Ferrato + 2 Pugnali, nessun picker di maestria;
+      Incantesimi: "Trucchetti (scegline 3)" + "Incantesimi preparati di 1°
+      livello (scegline 4)"; picker di Iniziato alla Magia nel Background già
+      pescava dalla lista del Mago). Personaggio generato: PF 7 = 1d6+COS,
+      grimorio con 5 trucchetti (3 scelti + 2 dal talento) e 4 preparati + 1
+      sempre pronto (Allarme, rituale). Level-up 1→2 simulato: guadagni "PF
+      7→12", "Slot Incantesimi 2→3", "Incantesimi Preparati 4→5", sezione
+      "Competenza — scegline 1" con le 4 abilità competenti, Arcano scelto e
+      salvato in `expertiseSkills`, card "Recupero Arcano 1/1" a Risorse.
+      Tharion (Paladino) verificato invariato dopo ogni prova (CA 20, CD 15,
+      PF 60, Imposizione 35). Console pulita in ogni prova. Cache busting
+      `?v=116`.
 11. [ ] **Warlock** (pact) — slot pact (già in tabella), Invocazioni, Suppliche, Patto.
 
 **Sequenza dei blocchi:** 5.A + Barbaro insieme → 5.B creazione → poi 5.C dalla 2 alla 11.
