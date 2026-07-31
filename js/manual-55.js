@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 42,
+  version: 43,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -1687,7 +1687,19 @@ window.MANUAL_55 = {
         // Come Punizione Divina/Evoca Destriero gratis del Paladino: Marchio
         // del Cacciatore lanciabile senza slot, tante volte quante la
         // colonna Nemico Prescelto.
-        huntersMarkFree: { name: 'Marchio del Cacciatore (gratis)', kind: 'uses', byLevelRef: 'favoredEnemy', resetOn: 'long' }
+        huntersMarkFree: { name: 'Marchio del Cacciatore (gratis)', kind: 'uses', byLevelRef: 'favoredEnemy', resetOn: 'long' },
+        // Colpo Terrificante (Cercatore d'Ombre, dal 3°) e Passo Fatato
+        // Libero (Vagabondo Fatato, dal 15°): entrambi scalati sul
+        // modificatore di Saggezza (come l'Ispirazione Bardica), risorsa di
+        // SOTTOCLASSE — stesso filtro già in uso per Guerriero/Ladro.
+        dreadfulStrike: {
+          name: 'Colpo Terrificante', kind: 'uses', subclass: 'cercatore-ombre',
+          abilityMod: 'SAG', min: 1, from: 3, resetOn: 'long'
+        },
+        mistyWanderer: {
+          name: 'Passo Fatato Libero', kind: 'uses', subclass: 'vagabondo-fatato',
+          abilityMod: 'SAG', min: 1, from: 15, resetOn: 'long'
+        }
       },
       choicePoints: {
         fightingStyle: 2,
@@ -1772,11 +1784,18 @@ window.MANUAL_55 = {
           { name: 'Flagello dei Nemici', desc: 'Il dado del danno extra di Marchio del Cacciatore diventa 1d10 invece di 1d6.' }
         ]
       },
-      /* Sottoclassi del Ranger: per ora solo Cacciatore (PHB p.126, la più
-         semplice delle quattro — solo scelte fra coppie di opzioni, nessuna
-         risorsa dedicata). Domatore di Bestie, Vagabondo Fatato e Cercatore
-         d'Ombre si aggiungono in seguito, stesso trattamento già dato alle
-         altre classi. */
+      /* Sottoclassi del Ranger: tutte e 4 fatte (PHB p.122-127). Domatore di
+         Bestie (Compagno Primordiale) resta descrittivo in prosa: è un vero
+         e proprio secondo statblock da tracciare (come il Destriero del
+         Paladino, ma un sistema dedicato per una seconda classe sarebbe un
+         lavoro a parte, non solo dati) — stessa scelta di semplicità già
+         fatta per meccaniche fuori dalla portata di una scheda a personaggio
+         singolo. Vagabondo Fatato e Cercatore d'Ombre invece hanno risorse
+         scalate su Saggezza (Colpo Terrificante, Passo Fatato Libero) e il
+         Cercatore d'Ombre ha anche un bonus di sottoclasse all'Iniziativa
+         (CLASS_BONUSES.ranger.gloomInit in engine.js) — entrambi riusano
+         meccanismi generici già esistenti (resMax con abilityMod+from,
+         filtro subclass), zero nuove astrazioni. */
       subclasses: {
         cacciatore: {
           name: 'Cacciatore',
@@ -1794,6 +1813,76 @@ window.MANUAL_55 = {
             ],
             15: [
               { name: 'Difesa Superiore del Cacciatore', desc: 'Quando subisci danno, puoi usare una reazione per darti Resistenza a quel tipo di danno (e a ogni altro danno dello stesso tipo) fino alla fine del turno corrente.' }
+            ]
+          }
+        },
+        'domatore-di-bestie': {
+          name: 'Domatore di Bestie',
+          tenets: 'Forma un legame mistico con una bestia primordiale.',
+          features: {
+            3: [
+              { name: 'Compagno Primordiale', desc: 'Evochi una bestia primordiale al tuo fianco (statblock Bestia di Terra, di Mare o di Cielo, a scelta): agisce nel tuo turno, ti è amichevole e obbedisce ai tuoi comandi. In combattimento puoi comandarla con un\'azione bonus per farle usare un\'azione del suo statblock (altrimenti si limita a Schivare), oppure rinunciare a un tuo attacco per farle usare l\'azione Colpo della Bestia. Se muore, puoi restituirle la vita toccandola entro un\'ora (azione magica, spendi uno slot) o evocarne una nuova al riposo lungo.' }
+            ],
+            7: [
+              { name: 'Addestramento Eccezionale', desc: 'Con l\'azione bonus di comando puoi anche far Scattare, Disimpegnare, Schivare o Aiutare la bestia. Inoltre, quando colpisce infliggendo danno, può infliggere danno da Forza invece del tipo normale.' }
+            ],
+            11: [
+              { name: 'Furia Bestiale', desc: 'La bestia può usare due volte l\'azione Colpo della Bestia quando gliela comandi. Inoltre, la prima volta ogni turno che colpisce una creatura sotto l\'effetto del tuo Marchio del Cacciatore, infligge anche il danno da Forza extra di quell\'incantesimo.' }
+            ],
+            15: [
+              { name: 'Incantesimi Condivisi', desc: 'Quando lanci un incantesimo su te stesso, puoi farne beneficiare anche la tua bestia se è entro 9 m da te.' }
+            ]
+          }
+        },
+        'vagabondo-fatato': {
+          name: 'Vagabondo Fatato',
+          tenets: 'Porta il riso e il furore del Regno Fatato ovunque tu vada.',
+          spellsByLevel: {
+            3: [{ id: 'ammaliare-persone', name: 'Ammaliare Persone' }],
+            5: [{ id: 'passo-fatato', name: 'Passo Fatato' }],
+            9: [{ id: 'evocare-folletto', name: 'Evocare Folletto' }],
+            13: [{ id: 'porta-dimensionale', name: 'Porta Dimensionale' }],
+            17: [{ id: 'sviare', name: 'Sviare' }]
+          },
+          features: {
+            3: [
+              { name: 'Colpi Terribili', desc: 'Quando colpisci una creatura con un\'arma, puoi infliggerle 1d4 danni Psichici extra (1d6 dal 11° livello), una volta per turno.' },
+              { name: 'Clamore Ultraterreno', desc: 'Ottieni un bonus (il tuo modificatore di Saggezza, minimo +1) alle prove di Carisma, e competenza in una fra Inganno, Intrattenere o Persuasione. Possiedi anche una benedizione fatata minore (scelta o casuale fra sei effetti scenici, es. farfalle illusorie, fiori tra i capelli).' }
+            ],
+            6: [
+              { name: 'Torsione Ammaliante', desc: 'Hai vantaggio ai TS per evitare o terminare Affascinato e Spaventato. Inoltre, quando tu o una creatura che vedi entro 36 m superate uno di quei TS, puoi usare una reazione per forzarne un\'altra entro 36 m a un TS di Saggezza: con un fallimento diventa Affascinata o Spaventata (a scelta) per 1 minuto, ripetendo il TS a ogni suo turno.' }
+            ],
+            11: [
+              { name: 'Rinforzi Fatati', desc: 'Puoi lanciare Evocare Folletto senza componenti materiali, e una volta senza spendere uno slot (di nuovo dopo un riposo lungo); lanciandolo così puoi anche togliergli il bisogno di Concentrazione, ma la durata scende a 1 minuto.' }
+            ],
+            15: [
+              { name: 'Vagabondo Nebbioso', desc: 'Puoi lanciare Passo Fatato senza spendere uno slot, un numero di volte pari al tuo modificatore di Saggezza (minimo 1, vedi Risorse); portando con te, se vuoi, una creatura consenziente entro 1,5 m.' }
+            ]
+          }
+        },
+        'cercatore-ombre': {
+          name: 'Cercatore d\'Ombre',
+          tenets: 'Attinge alla magia del Piano Ombra per colpire chi si annida nel buio.',
+          spellsByLevel: {
+            3: [{ id: 'travisamento', name: 'Travisamento' }],
+            5: [{ id: 'trucco-della-corda', name: 'Trucco della Corda' }],
+            9: [{ id: 'paura', name: 'Paura' }],
+            13: [{ id: 'invisibilita-superiore', name: 'Invisibilità Superiore' }],
+            17: [{ id: 'parvenza', name: 'Parvenza' }]
+          },
+          features: {
+            3: [
+              { name: 'Imboscata Temibile', desc: 'Balzo dell\'Imboscatore: a inizio del tuo primo turno di ogni combattimento, la tua velocità aumenta di 3 m fino alla fine di quel turno. Colpo Terrificante: quando colpisci con un\'arma, puoi infliggere 2d6 danni Psichici extra (vedi Risorse per gli usi), una volta per turno. Bonus di Iniziativa: sommi il tuo modificatore di Saggezza ai tiri di iniziativa.' },
+              { name: 'Vista Ombrosa', desc: 'Ottieni Scurovisione fino a 18 m (aumentata di 18 m se già presente). Inoltre, mentre sei interamente nell\'Oscurità, sei Invisibile alle creature che si affidano alla Scurovisione per vederti in quel buio.' }
+            ],
+            7: [
+              { name: 'Mente di Ferro', desc: 'Ottieni competenza nei TS di Saggezza; se ce l\'hai già, ottieni invece competenza nei TS di Intelligenza o Carisma, a scelta.' }
+            ],
+            11: [
+              { name: 'Raffica del Cacciatore Furtivo', desc: 'Il danno Psichico di Colpo Terrificante sale a 2d8. Inoltre, usando quell\'effetto puoi aggiungere: Colpo Improvviso (un altro attacco con la stessa arma contro una creatura diversa entro 1,5 m dal primo bersaglio e a portata) oppure Paura di Massa (TS Saggezza per il bersaglio e ogni creatura entro 3 m, con un fallimento diventano Spaventate fino all\'inizio del tuo prossimo turno).' }
+            ],
+            15: [
+              { name: 'Schivata Ombrosa', desc: 'Quando una creatura fa un tiro per colpire contro di te, puoi usare una reazione per imporgli svantaggio; che colpisca o manchi, poi ti teletrasporti fino a 9 m in uno spazio libero che vedi.' }
             ]
           }
         }

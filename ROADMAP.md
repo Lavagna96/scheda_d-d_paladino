@@ -24,23 +24,19 @@
   DEPLOYATO** (verificato il 2026-07-30: `origin/main` allineato a `HEAD`,
   sito live serve `?v=114` e contiene `buildSegmentedRow` — la roadmap non
   era stata aggiornata dopo il deploy avvenuto a fine sessione 2026-07-29).
-- **Prossimo passo:** Stregone, Mago e Warlock committati e **deployati**
-  (verificato il 2026-07-30: run Pages verde, sito live su `?v=119`, tutte e
-  11 le classi presenti). **Sottoclassi mancanti in corso** (richiesta di
-  Andrea dopo il Blocco 5.C): Guerriero (2/3, commit `bc9fcc9`), Ladro (2/3,
-  commit `27ecb5d`) e **Monaco (4/4, completo!)** fatti, verificato in locale
-  (`?v=120`) — **ancora da committare e deployare**. Due sottoclassi restano
-  rimandate per lo stesso motivo (Cavaliere Occulto del Guerriero, Truffatore
-  Arcano del Ladro): richiedono un incantatore legato alla SOTTOCLASSE con la
-  lista incantesimi del Mago — architettura non ancora supportata, da
-  discutere con Andrea prima di procedere. **Bug scoperto strada facendo e
-  già corretto** (in una sessione separata, spawnata da qui): Arma Sacra del
-  Paladino si applicava a qualunque sottoclasse invece che alla sola
-  Devozione (commit `dc7fe27`) — vedi "Debiti aperti" più sotto.
-  Restano poi le altre 7 classi con sottoclasse incompleta (Ranger, Chierico,
-  Druido, Bardo, Stregone, Mago, Warlock — quest'ultime 3 con 1 sola
-  sottoclasse modellata ciascuna, appena create), e i collaudi cloud mai
-  confermati sotto.
+- **Prossimo passo:** Stregone, Mago, Warlock, Guerriero (2/3), fix Arma
+  Sacra, Ladro (2/3) e **Monaco (4/4, completo!)** committati e **deployati**
+  (verificato il 2026-07-30: run Pages verde, sito live su `?v=120`, tutte e
+  11 le classi presenti). **Ranger (4/4, completo!)** fatto, verificato in
+  locale (`?v=121`) — **ancora da committare e deployare**. Due sottoclassi
+  restano rimandate per lo stesso motivo (Cavaliere Occulto del Guerriero,
+  Truffatore Arcano del Ladro): richiedono un incantatore legato alla
+  SOTTOCLASSE con la lista incantesimi del Mago — architettura non ancora
+  supportata, da discutere con Andrea prima di procedere.
+  Restano poi le altre 6 classi con sottoclasse incompleta (Chierico, Druido,
+  Bardo, Stregone, Mago, Warlock — quest'ultime 3 con 1 sola sottoclasse
+  modellata ciascuna, appena create), e i collaudi cloud mai confermati
+  sotto.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1333,6 +1329,37 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      incantesimi preparati senza il doppione di Marchio del Cacciatore):
      personaggio creato con tutti i campi corretti. Tharion (Paladino)
      verificato invariato dopo ogni modifica. Console pulita in ogni prova.
+   → **Sottoclassi mancanti, tutte e 3 fatte (2026-07-30, manuale `version`
+     42→43)**: **Domatore di Bestie**, **Vagabondo Fatato** e **Cercatore
+     d'Ombre** (PHB p.122-127) completano le 4 del Ranger insieme a
+     Cacciatore. Domatore di Bestie resta descrittivo in prosa: il Compagno
+     Primordiale è un vero secondo statblock da tracciare (come il Destriero
+     del Paladino, ma un sistema dedicato per una seconda classe è un lavoro
+     a parte) — stessa scelta di semplicità già fatta altrove per meccaniche
+     fuori dalla portata di una scheda a personaggio singolo.
+     - **Meccanica riusata, non nuova**: Colpo Terrificante (Cercatore
+       d'Ombre, dal 3°) e Passo Fatato Libero (Vagabondo Fatato, dal 15°)
+       sono risorse scalate sul modificatore di Saggezza — stesso principio
+       dell'Ispirazione Bardica — ma **con un `from`** (il Passo Fatato
+       Libero non esiste prima del 15°). `resMax()` in `engine.js` non
+       supportava `from` insieme ad `abilityMod` (l'Ispirazione Bardica è
+       attiva dal 1°, non serviva): aggiunto, generico, nessuna regressione
+       per Ispirazione Bardica (nessun `from` = comportamento identico).
+     - **Meccanica nuova nel motore: bonus di sottoclasse all'Iniziativa**.
+       Il Cercatore d'Ombre somma il modificatore di Saggezza ai tiri di
+       iniziativa — il primo bonus di sottoclasse che non è su TS/danni/CA
+       ma sul tiro di iniziativa stesso. Aggiunto `CLASS_BONUSES.ranger.
+       gloomInit` (stesso registry già usato per Arma Sacra/Aura di
+       Protezione) e la riga `initiative` in `derive()` ora lo somma, filtrato
+       per sottoclasse.
+     - **Verifica end-to-end**: Ranger di prova a livello 3 — level-up con
+       le 4 sottoclassi a scelta, scegliendo Cercatore d'Ombre: "Colpo
+       Terrificante 3/3" a Risorse (SAG 16 → mod 3), iniziativa **+6** in
+       header (DES +3 + SAG +3, prima sarebbe stata +3 senza il bonus);
+       Cacciatore (nessun bonus) resta a sola iniziativa da Destrezza, nessuna
+       risorsa spuria. Tharion (Paladino) verificato invariato in tutto,
+       inclusa l'iniziativa (−1, DES 8, il ramo `gloomInit` non lo tocca).
+       Console pulita. Cache busting `?v=121`.
 6. [x] **Chierico** (full) — Incanalare Divinità (campo già esiste), Dominio.
    → **Fatto (2026-07-28, `?v=97`, manuale `version` 33→34)**: prima classe a
    incantatore pieno. Privilegi 1→20 dal PDF (p.68-71), sottoclasse

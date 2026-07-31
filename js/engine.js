@@ -78,6 +78,12 @@
     paladino: {
       aura: { from: 6, target: 'ts', ability: 'CAR', min: 1 },  // Aura di Protezione
       sacredWeapon: { ability: 'CAR', min: 1, subclass: 'devozione' } // Arma Sacra (solo Devozione)
+    },
+    ranger: {
+      // Bonus di Iniziativa del Cercatore d'Ombre (mod Saggezza): il primo
+      // bonus di sottoclasse non su 'ts'/'attacco' ecc. ma sull'iniziativa —
+      // stesso filtro subclass già in uso, letto a parte più sotto.
+      gloomInit: { ability: 'SAG', min: 0, subclass: 'cercatore-ombre' }
     }
   };
 
@@ -135,6 +141,11 @@
     var table = def.byLevel || (def.byLevelRef && klass && klass[def.byLevelRef]);
     if (table) { return table[level] || 0; }
     if (def.abilityMod && mods) {
+      // from: la risorsa scalata da caratteristica può comunque partire da un
+      // certo livello (es. Passo Fatato Libero del Vagabondo Fatato, dal 15°
+      // — a differenza dell'Ispirazione Bardica, sempre attiva dal 1°).
+      if (def.from && level < def.from) { return 0; }
+
       return Math.max(def.min || 0, mods[def.abilityMod] || 0);
     }
     if (typeof def.max === 'number') {
@@ -233,7 +244,12 @@
     var speedBonus = (speedGateOk && klass.speedBonusM) ? (klass.speedBonusM[ch.level] || 0) : 0;
     var speedM = (species.speedM || 9) + speedBonus + (elfLineage ? (elfLineage.speedBonusM || 0) : 0);
 
-    var initiative = mods.DES + modSum(ch, 'iniziativa');
+    // Bonus di sottoclasse all'iniziativa (Cercatore d'Ombre): stesso filtro
+    // subclass già in uso per classResources/sacredWeapon.
+    var initBonusDef = bonuses.gloomInit;
+    var initBonus = (initBonusDef && initBonusDef.subclass === ch.subclassId)
+      ? Math.max(initBonusDef.min || 0, mods[initBonusDef.ability]) : 0;
+    var initiative = mods.DES + modSum(ch, 'iniziativa') + initBonus;
 
     var spellAbility = klass.spellAbility || 'CAR';
     var spellDc = 8 + pb + mods[spellAbility] + modSum(ch, 'cd-inc');
