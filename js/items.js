@@ -43,6 +43,31 @@
     return found || target;
   }
 
+  /* Sensi strutturati (Step 3.9.b, seconda parte): i 4 sensi speciali del
+     PHB 2024. A differenza di resistenze/immunità, qui più oggetti con lo
+     STESSO senso non si sommano — nelle regole un senso non "si accumula",
+     vale il raggio migliore (vedi aggregazione in renderSenses,
+     js/stats.js). Le specie che hanno già Scurovisione la mostrano come
+     tratto testuale (invariato, fuori scope): questa sezione è solo per i
+     sensi che un OGGETTO concede in più. */
+  var SENSE_OPTIONS = [
+    { id: 'scurovisione', label: 'Scurovisione' },
+    { id: 'vista-cieca', label: 'Vista Cieca' },
+    { id: 'vista-vera', label: 'Vista Vera' },
+    { id: 'percezione-tremore', label: 'Percezione del Tremore' }
+  ];
+
+  function senseLabel(type) {
+    var found = null;
+    SENSE_OPTIONS.forEach(function (o) {
+      if (o.id === type) {
+        found = o.label;
+      }
+    });
+
+    return found || type;
+  }
+
   /* Le 5 rarità D&D usate per il badge .relic-rarity (stesso componente delle
      due reliquie storiche: qui solo le varianti aggiuntive per gli oggetti
      creati dall'utente, vedi css/components/treasury.css). */
@@ -113,6 +138,10 @@
 
   function itemImmunitiesOf(item) {
     return item.immunities || [];
+  }
+
+  function itemSensesOf(item) {
+    return item.senses || [];
   }
 
   /* Icone (stesso stile minimale a tratto di js/sheet.js: viewBox 24x24,
@@ -581,6 +610,75 @@
     return section;
   }
 
+  /* ---------- sezione sensi (righe ripetibili: tipo + raggio in metri) ----------
+     Stesso pattern di riga di buildEffectsSection (select + stepper +
+     rimuovi), ma senza il ramo testo libero: qui ha sempre senso un tipo +
+     un numero. Il raggio non ha segno (mai un "−3 m" di Scurovisione), da
+     qui niente window.AppEngine.formatMod, solo il numero. */
+
+  function buildSensesSection(draft) {
+    var section = el('div');
+    section.appendChild(el('div', 'edit-section-label', 'Sensi'));
+    var list = el('div', 'effects-list');
+    section.appendChild(list);
+
+    function renderRows() {
+      list.innerHTML = '';
+      draft.senses.forEach(function (sense, idx) {
+        var row = el('div', 'effect-row');
+
+        var select = buildSelect(SENSE_OPTIONS, sense.type);
+        select.addEventListener('change', function () {
+          sense.type = select.value;
+        });
+        row.appendChild(select);
+
+        var stepper = el('div', 'edit-stepper');
+        var minus = el('button', 'stepper-btn minus', '−');
+        minus.type = 'button';
+        minus.setAttribute('aria-label', 'Diminuisci raggio');
+        var valEl = el('span', 'edit-stat-score', sense.rangeM + ' m');
+        var plus = el('button', 'stepper-btn plus', '+');
+        plus.type = 'button';
+        plus.setAttribute('aria-label', 'Aumenta raggio');
+        minus.addEventListener('click', function () {
+          sense.rangeM = Math.max(1, sense.rangeM - 1);
+          valEl.textContent = sense.rangeM + ' m';
+        });
+        plus.addEventListener('click', function () {
+          sense.rangeM = Math.min(60, sense.rangeM + 1);
+          valEl.textContent = sense.rangeM + ' m';
+        });
+        stepper.appendChild(minus);
+        stepper.appendChild(valEl);
+        stepper.appendChild(plus);
+        row.appendChild(stepper);
+
+        var removeBtn = el('button', 'effect-remove-btn', '✕');
+        removeBtn.type = 'button';
+        removeBtn.setAttribute('aria-label', 'Rimuovi questo senso');
+        removeBtn.addEventListener('click', function () {
+          draft.senses.splice(idx, 1);
+          renderRows();
+        });
+        row.appendChild(removeBtn);
+
+        list.appendChild(row);
+      });
+    }
+    renderRows();
+
+    var addBtn = el('button', 'effect-add-btn', '+ Aggiungi senso');
+    addBtn.type = 'button';
+    addBtn.addEventListener('click', function () {
+      draft.senses.push({ type: SENSE_OPTIONS[0].id, rangeM: 18 });
+      renderRows();
+    });
+    section.appendChild(addBtn);
+
+    return section;
+  }
+
   /* ---------- sezione effetti (righe ripetibili) ---------- */
 
   function buildEffectsSection(draft) {
@@ -748,10 +846,13 @@
       // solo per riscriverlo invariato al salvataggio.
       attuned: itemAttunedOf(existingItem),
       resistances: itemResistancesOf(existingItem).slice(),
-      immunities: itemImmunitiesOf(existingItem).slice()
+      immunities: itemImmunitiesOf(existingItem).slice(),
+      senses: itemSensesOf(existingItem).map(function (s) {
+        return { type: s.type, rangeM: s.rangeM };
+      })
     } : {
       id: null, name: '', desc: '', art: { type: 'preset', value: 'ring' }, rarity: 'non-comune',
-      effects: [], usesMax: 0, requiresAttunement: false, resistances: [], immunities: []
+      effects: [], usesMax: 0, requiresAttunement: false, resistances: [], immunities: [], senses: []
     };
 
     openSheet(isEdit ? 'Modifica reliquia' : 'Nuova reliquia');
@@ -777,6 +878,7 @@
     bodyEl.appendChild(buildArtGrid(draft));
     bodyEl.appendChild(buildRaritySection(draft));
     bodyEl.appendChild(buildResistancesSection(draft));
+    bodyEl.appendChild(buildSensesSection(draft));
     bodyEl.appendChild(buildEffectsSection(draft));
     bodyEl.appendChild(buildUsesSection(draft));
     bodyEl.appendChild(buildAttunementSection(draft));
@@ -813,7 +915,7 @@
               id: draft.id, name: draft.name.trim(), desc: draft.desc,
               art: draft.art, rarity: draft.rarity, effects: draft.effects, usesMax: draft.usesMax,
               requiresAttunement: draft.requiresAttunement, attuned: draft.attuned,
-              resistances: draft.resistances, immunities: draft.immunities
+              resistances: draft.resistances, immunities: draft.immunities, senses: draft.senses
             };
           }
         } else {
@@ -826,7 +928,7 @@
             // ma non è subito attivo/equipaggiato: va sintonizzato a mano dalla
             // lista (gemma sulla testata dell'accordion).
             attuned: !draft.requiresAttunement,
-            resistances: draft.resistances, immunities: draft.immunities
+            resistances: draft.resistances, immunities: draft.immunities, senses: draft.senses
           });
         }
       });

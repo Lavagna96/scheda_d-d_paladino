@@ -163,6 +163,14 @@
   margin-left: 4px;
 }
 
+/* Sensi (Step 3.9.b, seconda parte): stesso componente .rimm-tag, tinta blu
+   per distinguerli a colpo d'occhio da resistenze (verde) e immunità (oro). */
+.rimm-tag.sense {
+  color: var(--hp-temp-bar);
+  border-color: rgba(74, 118, 168, 0.5);
+  background: rgba(74, 118, 168, 0.14);
+}
+
 .skill-group-line {
   flex: 1;
   height: 1px;

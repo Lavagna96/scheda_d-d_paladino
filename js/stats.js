@@ -174,6 +174,54 @@
     card.classList.toggle('hidden', tags.length === 0);
   }
 
+  /* Etichette dei 4 sensi (stessi id di SENSE_OPTIONS in js/items.js — non
+     condivisi tra i due moduli, stesso principio già in uso: buildAttackNote
+     qui sotto legge ch.items direttamente senza passare dagli helper di
+     items.js). */
+  var SENSE_LABELS = {
+    scurovisione: 'Scurovisione', 'vista-cieca': 'Vista Cieca',
+    'vista-vera': 'Vista Vera', 'percezione-tremore': 'Percezione del Tremore'
+  };
+
+  /* Sensi (Step 3.9.b, seconda parte): a differenza di resistenze/immunità
+     un senso non si somma tra oggetti diversi — nelle regole vale il
+     raggio migliore. Qui dedup per tipo, tenendo il raggio massimo e la
+     fonte che lo fornisce. */
+  function renderSenses() {
+    var card = document.getElementById('senses-card');
+    var list = document.getElementById('senses-list');
+    if (!card || !list) {
+      return;
+    }
+    var ch = window.AppStorage.getState().character;
+    var bestByType = {};
+    (ch.items || []).forEach(function (it) {
+      var active = !it.requiresAttunement || it.attuned !== false;
+      if (!active) {
+        return;
+      }
+      (it.senses || []).forEach(function (s) {
+        if (!bestByType[s.type] || s.rangeM > bestByType[s.type].rangeM) {
+          bestByType[s.type] = { rangeM: s.rangeM, source: it.name };
+        }
+      });
+    });
+    list.innerHTML = '';
+    var types = Object.keys(bestByType);
+    types.forEach(function (type) {
+      var best = bestByType[type];
+      var tag = document.createElement('span');
+      tag.className = 'rimm-tag sense';
+      tag.textContent = (SENSE_LABELS[type] || type) + ' ' + best.rangeM + ' m';
+      var src = document.createElement('span');
+      src.className = 'rimm-source';
+      src.textContent = best.source;
+      tag.appendChild(src);
+      list.appendChild(tag);
+    });
+    card.classList.toggle('hidden', types.length === 0);
+  }
+
   /* Icona generica per le risorse di classe generate dinamicamente (che non
      hanno una card statica in index.html), es. la Furia del Barbaro. */
   function classResIcon() {
@@ -401,6 +449,7 @@
     renderSaves(view);
     renderSkills(view);
     renderResistances();
+    renderSenses();
     renderResources(view);
     renderAttacks(view);
     setText('loh-max', view.poolMax.loh);

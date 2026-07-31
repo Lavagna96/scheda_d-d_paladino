@@ -483,8 +483,23 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
           ancora iniziata: tocca la logica di competenze in `stats.js`,
           più delicata perché interagisce con le competenze di classe già
           esistenti.
-    - [ ] **Sensi strutturati** (Scurovisione N m, Vista Cieca...) come
-          statistica dedicata invece che testo — non ancora iniziata.
+    - [x] **Sensi strutturati** (Scurovisione N m, Vista Cieca...) — FATTO
+          (2026-07-31, `?v=132`, fatta prima della competenza extra perché
+          più semplice/meno rischiosa, stesso impianto delle chip appena
+          fatto per resistenze/immunità). Nuovo campo `item.senses` (array
+          di `{ type, rangeM }`), 4 sensi del PHB 2024 (Scurovisione, Vista
+          Cieca, Vista Vera, Percezione del Tremore) in righe ripetibili
+          (select + stepper in metri, stesso pattern della sezione
+          Effetti). **Differenza importante da resistenze/immunità**: un
+          senso non si somma tra oggetti — nelle regole vale il raggio
+          migliore, non tutti insieme — quindi `renderSenses()` in
+          `js/stats.js` fa dedup per tipo tenendo il massimo (e la fonte
+          che lo fornisce), invece di elencare ogni fonte come per le
+          resistenze. Nuova card "Sensi" in Caratteristiche (nascosta se
+          vuota). Verificato con harness: due oggetti con Scurovisione a
+          18 m e 36 m → in card resta solo "Scurovisione 36 m" con la
+          fonte giusta; un terzo oggetto non sintonizzato resta escluso.
+          Nessun errore console.
   - [ ] 3.9.c **In sospeso, da valutare se ha senso**: incantesimi
         lanciabili dall'oggetto integrati col Grimorio (grosso lavoro per
         un caso d'uso raro); cambio del tipo di danno dell'arma; effetti a
