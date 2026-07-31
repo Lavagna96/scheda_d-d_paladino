@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 41,
+  version: 42,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -1258,10 +1258,14 @@ window.MANUAL_55 = {
           { name: 'Corpo e Mente', desc: 'I tuoi punteggi di Destrezza e Saggezza aumentano di 4, fino a un massimo di 25.' }
         ]
       },
-      /* Sottoclassi del Monaco: per ora solo Guerriero della Mano Aperta (PHB
-         p.106, la più semplice delle quattro — nessuna risorsa dedicata oltre
-         ai Punti Focus già tracciati). Misericordia, Ombra ed Elementi si
-         aggiungono in seguito, stesso trattamento già dato alle altre classi. */
+      /* Sottoclassi del Monaco: tutte e 4 fatte (PHB p.104-106) — Misericordia,
+         Ombra ed Elementi si aggiungono a Mano Aperta. Nessuna richiede una
+         risorsa nuova: usano tutte i Punti Focus già tracciati dalla classe
+         (a differenza di Guerriero/Ladro, qui non serviva il filtro
+         `subclass` per classResources). Shadowy Figments/Manipulate Elements
+         (un trucchetto sempre noto, Saggezza come caratteristica) restano
+         descrittivi in prosa: il Monaco non è un incantatore
+         (`casterType:'none'`), non c'è un grimorio a cui agganciarli. */
       subclasses: {
         'mano-aperta': {
           name: 'Guerriero della Mano Aperta',
@@ -1278,6 +1282,63 @@ window.MANUAL_55 = {
             ],
             17: [
               { name: 'Palmo Tremante', desc: 'Quando colpisci con un colpo senz\'armi, puoi spendere 4 Punti Focus per innescare vibrazioni letali nel bersaglio, che durano finché non le fai terminare con un\'azione (o rinunciando a un attacco durante l\'azione di Attacco): il bersaglio deve allora superare un TS di Costituzione o subire 10d12 danni da Forza (metà con un successo).' }
+            ]
+          }
+        },
+        misericordia: {
+          name: 'Guerriero della Misericordia',
+          tenets: 'Manipola le forze della vita e della morte, tra guaritori itineranti e portatori di fine.',
+          features: {
+            3: [
+              { name: 'Mano del Dolore', desc: 'Una volta per turno, quando colpisci con un colpo senz\'armi infliggendo danno, puoi spendere 1 Punto Focus per infliggere danni Necrotici extra pari a un tiro del tuo Dado Arti Marziali più il tuo modificatore di Saggezza.' },
+              { name: 'Mano della Guarigione', desc: 'Come azione magica, spendi 1 Punto Focus per toccare una creatura e ridarle PF pari a un tiro del tuo Dado Arti Marziali più il tuo modificatore di Saggezza. Puoi sostituire uno dei colpi di Raffica di Colpi con questo effetto senza spendere il Punto Focus per la cura.' },
+              { name: 'Strumenti della Misericordia', desc: 'Ottieni competenza in Intuizione e Medicina e con il Kit da Erborista.' }
+            ],
+            6: [
+              { name: 'Tocco del Medico', desc: 'Mano del Dolore dà anche la condizione Avvelenato fino alla fine del tuo prossimo turno. Mano della Guarigione toglie anche una fra Accecato, Assordato, Paralizzato, Avvelenato o Stordito dalla creatura curata.' }
+            ],
+            11: [
+              { name: 'Raffica di Guarigione e Dolore', desc: 'Con Raffica di Colpi puoi sostituire ogni colpo con Mano della Guarigione senza spendere Punti Focus per la cura; inoltre puoi usare Mano del Dolore senza spendere il Punto Focus su un colpo di Raffica di Colpi (resta comunque una volta per turno). Puoi farlo un numero di volte pari al tuo modificatore di Saggezza (minimo 1), tutte recuperate al riposo lungo.' }
+            ],
+            17: [
+              { name: 'Mano della Misericordia Suprema', desc: 'Come azione magica, spendi 5 Punti Focus e tocchi il cadavere di una creatura morta nelle ultime 24 ore: torna in vita con PF pari a 4d10 + il tuo modificatore di Saggezza, guarita da Accecato/Assordato/Paralizzato/Avvelenato/Stordito se ne era affetta. Una volta per riposo lungo.' }
+            ]
+          }
+        },
+        ombra: {
+          name: 'Guerriero dell\'Ombra',
+          tenets: 'Pratica furtività e inganno attingendo al potere del Piano Ombra.',
+          features: {
+            3: [
+              { name: 'Arti dell\'Ombra', desc: 'Oscurità: spendi 1 Punto Focus per lanciare Oscurità senza componenti, vedendoci dentro l\'area; puoi spostarla entro 18 m da te a inizio di ogni tuo turno. Scurovisione: ottieni Scurovisione fino a 18 m (aumentata di 18 m se già presente). Figure d\'Ombra: conosci Illusione Minore, con la Saggezza come caratteristica da incantatore.' }
+            ],
+            6: [
+              { name: 'Passo Ombroso', desc: 'Mentre sei interamente in Luce Fioca o Oscurità, come azione bonus ti teletrasporti fino a 18 m in uno spazio che vedi, anch\'esso in Luce Fioca o Oscurità: hai poi vantaggio al prossimo attacco in mischia entro la fine del turno.' }
+            ],
+            11: [
+              { name: 'Passo Ombroso Migliorato', desc: 'Usando Passo Ombroso puoi spendere 1 Punto Focus per togliere il requisito di partire e arrivare in Luce Fioca o Oscurità, e fare subito dopo un colpo senz\'armi come parte dell\'azione bonus.' }
+            ],
+            17: [
+              { name: 'Manto d\'Ombre', desc: 'Come azione magica, mentre sei interamente in Luce Fioca o Oscurità, spendi 3 Punti Focus per avvolgerti d\'ombre per 1 minuto (finché non sei Incapacitato o finisci il turno in Luce Intensa): ottieni Invisibile, ti muovi attraverso spazi occupati come terreno difficile (rientrando nell\'ultimo spazio libero se finisci il turno lì dentro), e usi Raffica di Colpi senza spendere Punti Focus.' }
+            ]
+          }
+        },
+        elementi: {
+          name: 'Guerriero degli Elementi',
+          tenets: 'Attinge al potere dei Piani Elementali per colpire e dominare il campo di battaglia.',
+          features: {
+            3: [
+              { name: 'Sintonia Elementale', desc: 'A inizio del tuo turno, spendi 1 Punto Focus per infonderti di energia elementale per 10 minuti (finché non sei Incapacitato). Portata: i tuoi colpi senz\'armi hanno 3 m di portata in più. Colpi Elementali: un colpo senz\'armi che va a segno può infliggere danno Acido, Freddo, Fuoco, Fulmine o Tuono invece del tipo normale; se lo fai, il bersaglio fa un TS di Forza o viene spostato fino a 3 m verso o lontano da te.' },
+              { name: 'Manipolare gli Elementi', desc: 'Conosci Elementalismo, con la Saggezza come caratteristica da incantatore.' }
+            ],
+            6: [
+              { name: 'Scoppio Elementale', desc: 'Come azione magica, spendi 2 Punti Focus per far esplodere energia elementale in una Sfera di 6 m di raggio entro 36 m: scegli Acido, Freddo, Fuoco, Fulmine o Tuono. Ogni creatura nella sfera fa un TS di Destrezza, subendo danni pari a tre tiri del tuo Dado Arti Marziali (metà con un successo).' }
+            ],
+            11: [
+              { name: 'Incedere degli Elementi', desc: 'Mentre la tua Sintonia Elementale è attiva, hai anche velocità di volo e di nuoto pari alla tua velocità normale.' }
+            ],
+            17: [
+              { name: 'Massima Espressione Elementale', desc: 'Mentre la tua Sintonia Elementale è attiva: ottieni resistenza a un tipo di danno a scelta fra Acido, Freddo, Fuoco, Fulmine o Tuono (cambiabile a inizio di ogni tuo turno); usando Passo del Vento, la tua velocità aumenta di 6 m fino alla fine del turno e ogni creatura in cui entri entro 1,5 m subisce un tiro del tuo Dado Arti Marziali del tipo scelto (una volta a testa per turno); una volta per turno, un colpo senz\'armi a segno infligge danni extra pari a un tiro del Dado Arti Marziali.' }
             ]
           }
         }

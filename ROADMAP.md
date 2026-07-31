@@ -25,11 +25,11 @@
   sito live serve `?v=114` e contiene `buildSegmentedRow` — la roadmap non
   era stata aggiornata dopo il deploy avvenuto a fine sessione 2026-07-29).
 - **Prossimo passo:** Stregone, Mago e Warlock committati e **deployati**
-  (verificato il 2026-07-30: run Pages verde, sito live su `?v=117`, tutte e
+  (verificato il 2026-07-30: run Pages verde, sito live su `?v=119`, tutte e
   11 le classi presenti). **Sottoclassi mancanti in corso** (richiesta di
-  Andrea dopo il Blocco 5.C): Guerriero (2/3, commit `bc9fcc9`) e Ladro (2/3,
-  vedi voce 3 del Blocco 5.C più sotto) fatti, verificati in locale
-  (`?v=119`) — **ancora da committare e deployare**. Due sottoclassi restano
+  Andrea dopo il Blocco 5.C): Guerriero (2/3, commit `bc9fcc9`), Ladro (2/3,
+  commit `27ecb5d`) e **Monaco (4/4, completo!)** fatti, verificato in locale
+  (`?v=120`) — **ancora da committare e deployare**. Due sottoclassi restano
   rimandate per lo stesso motivo (Cavaliere Occulto del Guerriero, Truffatore
   Arcano del Ladro): richiedono un incantatore legato alla SOTTOCLASSE con la
   lista incantesimi del Mago — architettura non ancora supportata, da
@@ -37,8 +37,10 @@
   già corretto** (in una sessione separata, spawnata da qui): Arma Sacra del
   Paladino si applicava a qualunque sottoclasse invece che alla sola
   Devozione (commit `dc7fe27`) — vedi "Debiti aperti" più sotto.
-  Restano poi le altre 7 classi con sottoclasse incompleta, e i collaudi
-  cloud mai confermati sotto.
+  Restano poi le altre 7 classi con sottoclasse incompleta (Ranger, Chierico,
+  Druido, Bardo, Stregone, Mago, Warlock — quest'ultime 3 con 1 sola
+  sottoclasse modellata ciascuna, appena create), e i collaudi cloud mai
+  confermati sotto.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1256,6 +1258,23 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      Monaco non ha armatura, a differenza di tutte le altre classi finora),
      arma Lancia non agile (corretto, non è Leggera). Tharion (Paladino)
      verificato invariato dopo ogni modifica. Console pulita in ogni prova.
+   → **Sottoclassi mancanti, tutte e 3 fatte in un colpo solo (2026-07-30,
+     manuale `version` 41→42)**: **Guerriero della Misericordia**,
+     **Guerriero dell'Ombra** e **Guerriero degli Elementi** (PHB p.104-106)
+     completano le 4 del Monaco insieme a Mano Aperta. La più semplice delle
+     "quattro rimanenti" viste finora: tutte e tre usano solo i Punti Focus
+     già tracciati dalla classe, **nessun filtro `subclass` per
+     classResources necessario** (a differenza di Guerriero/Ladro) — quindi
+     fatte tutte insieme invece che una alla volta. "Shadowy Figments"
+     (Ombra) e "Manipulate Elements" (Elementi) — un trucchetto sempre noto
+     con Saggezza come caratteristica — restano descrittivi in prosa: il
+     Monaco non è un incantatore, non c'è un grimorio a cui agganciarli.
+     Verificato: Monaco iniettato a livello 2, level-up a 3 con le 4
+     sottoclassi tutte a scelta, scegliendo Ombra la card "Arti dell'Ombra"
+     compare in Tratti (e "Passo Ombroso", privilegio del 6°, correttamente
+     assente a livello 3); Punti Focus identici (6/6 a livello 6) per tutte e
+     4 le sottoclassi, nessuna risorsa spuria. Tharion (Paladino) verificato
+     invariato. Console pulita. Cache busting `?v=120`.
 5. [x] **Ranger** (half-caster) — riusa gli slot half del Paladino; incantesimi noti, Nemico Prescelto.
    → **Fatto (2026-07-28, `?v=94`, manuale `version` 32→33)**: privilegi 1→20
    dal PDF (p.118-120), sottoclasse **Cacciatore** (p.126, la più semplice
