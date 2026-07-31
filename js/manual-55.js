@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 45,
+  version: 46,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -324,13 +324,17 @@ window.MANUAL_55 = {
           { name: 'Parole della Creazione', desc: 'Hai sempre preparati gli incantesimi Parola di Potere: Guarigione e Parola di Potere: Morte. Quando lanci uno dei due, puoi colpire anche una seconda creatura entro 3 m dal primo bersaglio.' }
         ]
       },
-      /* Collegi del Bardo: per ora solo Collegio della Sapienza (PHB p.64, il
-         più semplice dei quattro da modellare — Danza richiederebbe una CA
-         alternativa a due caratteristiche (DES+CAR) mai vista finora, Valore
-         dà Attacco Extra che nel motore è una tabella di classe non
-         condizionabile per sottoclasse, Incanto ha risorse dedicate nuove; la
-         Sapienza invece resta descrittiva, riusando solo Ispirazione Bardica
-         già tracciata). Danza, Incanto e Valore si aggiungono in seguito. */
+      /* Collegi del Bardo: Sapienza, Incanto e Valore fatti (PHB p.62-66).
+         Incanto è descrittivo come la Sapienza (riusa solo Ispirazione
+         Bardica). Valore dà davvero Attacco Extra al 6°: `extraAttacks` qui
+         sotto è letto da `stats.js` in aggiunta alla tabella di classe
+         (nessuna classe Bardo ne ha una propria), stesso principio già usato
+         per generalizzare Guerriero/Barbaro/Paladino/Ranger. Danza resta
+         fuori: dà una CA alternativa a DUE caratteristiche (DES+CAR, mai
+         vista finora — `unarmoredDefense` di classe supporta solo una) e
+         trasforma i Colpi Senz'Armi in un'arma vera e propria (dado
+         Ispirazione + Destrezza al posto del danno normale), una scelta di
+         UX (come mostrarlo nella tabella Attacchi) da discutere con Andrea. */
       subclasses: {
         sapienza: {
           name: 'Collegio della Sapienza',
@@ -345,6 +349,48 @@ window.MANUAL_55 = {
             ],
             14: [
               { name: 'Abilità Impareggiabile', desc: 'Quando fallisci una prova di caratteristica o un tiro per colpire, puoi spendere un uso di Ispirazione Bardica: tiri il dado e lo sommi al risultato, potendo trasformare il fallimento in un successo. Con un fallimento, l\'uso non si consuma.' }
+            ]
+          }
+        },
+        incanto: {
+          name: 'Collegio dell\'Incanto',
+          tenets: 'Intreccia la magia ammaliante delle Fate in canzoni e racconti, tra bellezza e terrore.',
+          spellsByLevel: {
+            3: [
+              { id: 'ammaliare-persone', name: 'Ammaliare Persone' },
+              { id: 'immagine-speculare', name: 'Immagine Speculare' }
+            ],
+            6: [
+              { id: 'comando', name: 'Comando' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Magia Ammaliante', desc: 'Subito dopo aver lanciato un incantesimo di Incantamento o Illusione con uno slot, puoi far fare a una creatura che vedi entro 18 m un TS Saggezza: se fallisce, ha la condizione Affascinato o Spaventata (a tua scelta) per 1 minuto, ripetendo il TS alla fine di ogni suo turno. Puoi usarlo una volta per riposo lungo; puoi ripristinare l\'uso spendendo un uso di Ispirazione Bardica (nessuna azione).' },
+              { name: 'Manto d\'Ispirazione', desc: 'Come azione bonus, spendi un uso di Ispirazione Bardica e tira il dado: un numero di creature a tua scelta entro 18 m pari al tuo modificatore di Carisma (minimo 1) ottiene PF temporanei pari al doppio del numero tirato, e ciascuna può usare la reazione per muoversi fino alla propria velocità senza subire attacchi di opportunità.' }
+            ],
+            6: [
+              { name: 'Manto della Maestà', desc: 'Come azione bonus, lanci Comando senza spendere uno slot e assumi per 1 minuto un aspetto ultraterreno: mentre dura, puoi rilanciarlo come azione bonus senza slot, e le creature Affascinate da te falliscono automaticamente il TS contro il Comando lanciato così. Puoi usarlo una volta per riposo lungo; puoi ripristinare l\'uso spendendo uno slot di 3° livello o superiore (nessuna azione).' }
+            ],
+            14: [
+              { name: 'Maestà Incrollabile', desc: 'Come azione bonus, assumi per 1 minuto (finché non sei Incapacitato) una presenza maestosa: la prima volta in un turno che una creatura ti colpisce con un tiro per colpire, deve superare un TS Carisma o l\'attacco manca invece di colpire. Puoi usarlo una volta per riposo breve o lungo.' }
+            ]
+          }
+        },
+        valore: {
+          name: 'Collegio del Valore',
+          tenets: 'Canta le gesta degli eroi antichi per ispirare nuove generazioni al valore.',
+          extraAttacks: [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+          features: {
+            3: [
+              { name: 'Ispirazione in Combattimento', desc: 'Una creatura che ha un dado Ispirazione Bardica ricevuto da te può usarlo per uno di due effetti. Difesa: quando subisce un attacco, con una reazione tira il dado e lo somma alla propria CA contro quel colpo. Offesa: subito dopo un colpo a segno, tira il dado e lo somma al danno inflitto.' },
+              { name: 'Addestramento Marziale', desc: 'Ottieni competenza con le armi da guerra e addestramento con l\'armatura media e gli scudi. Puoi inoltre usare un\'arma semplice o da guerra come focus per gli incantesimi da bardo.' }
+            ],
+            6: [
+              { name: 'Attacco Extra', desc: 'Puoi attaccare due volte, invece di una, quando prendi l\'azione Attacco nel tuo turno. Puoi anche lanciare, al posto di uno di quei due attacchi, un trucchetto con tempo di lancio di un\'azione.' }
+            ],
+            14: [
+              { name: 'Magia da Battaglia', desc: 'Dopo aver lanciato un incantesimo con tempo di lancio di un\'azione, puoi fare un attacco con un\'arma come azione bonus.' }
             ]
           }
         }

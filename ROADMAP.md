@@ -42,35 +42,52 @@
   Grimorio con tutti gli 8 incantesimi FISSI del dominio, level-up 2→3 con
   le 4 card Dominio e conferma bloccata finché non se ne sceglie una,
   Tharion invariato, console pulita.
-  **Druido ora 3/4** (Luna era già fatto): aggiunti Circolo del Mare e
-  Circolo delle Stelle (PHB p.86-88), manuale `version` 44→45, cache
-  busting `?v=123` — **non ancora committato**. Nessuna risorsa nuova
-  (come i Domini del Chierico): le abilità "X volte pari al modificatore di
-  Saggezza" restano descrittive, riusando Forma Selvatica già tracciata per
-  le trasformazioni (Ira del Mare, Forma Stellare). 5 incantesimi esistenti
-  hanno ricevuto il tag `'druido'` (Raggio di Gelo, Frantumare, Fulmine,
-  Tenere Mostri, Dardo di Guida); nessun incantesimo nuovo nel catalogo.
-  Verificato in locale: Druido Circolo delle Stelle livello 10 con Tratti
-  (Mappa Stellare/Forma Stellare a 3, Presagio Cosmico a 6, Costellazioni
-  Scintillanti a 10, Piena di Stelle a 14 correttamente assente) e Grimorio
-  (Guida/Dardo di Guida FISSI) corretti; level-up 2→3 mostra 3 card
-  (Luna/Mare/Stelle, Terra correttamente assente); Tharion invariato;
-  console pulita.
+  **Druido ora 3/4** (Luna era già fatto), committato in locale (`10ca780`,
+  non ancora deployato): aggiunti Circolo del Mare e Circolo delle Stelle
+  (PHB p.86-88), manuale `version` 44→45, cache busting `?v=123`. Nessuna
+  risorsa nuova (come i Domini del Chierico): le abilità "X volte pari al
+  modificatore di Saggezza" restano descrittive, riusando Forma Selvatica
+  già tracciata per le trasformazioni (Ira del Mare, Forma Stellare). 5
+  incantesimi esistenti hanno ricevuto il tag `'druido'` (Raggio di Gelo,
+  Frantumare, Fulmine, Tenere Mostri, Dardo di Guida); nessun incantesimo
+  nuovo nel catalogo. Verificato in locale: Druido Circolo delle Stelle
+  livello 10 con Tratti e Grimorio corretti, level-up 2→3 con 3 card
+  (Terra correttamente assente), Tharion invariato, console pulita.
   **Circolo della Terra rimandato** (quarto e ultimo del Druido): nel PHB
   richiede una scelta di tipo di terreno (arido/polare/temperato/tropicale)
   da poter cambiare a ogni riposo lungo, con una tabella di incantesimi
   diversa per ciascun tipo — un picker "sotto-scelta dentro la sottoclasse"
   che non esiste ancora nell'app (stessa natura di problema del Cavaliere
-  Occulto/Truffatore Arcano, serve una decisione di design con Andrea prima
-  di modellarlo: dove vive la scelta — sheet, wizard, level-up — e se va
-  davvero ricalcolata a ogni riposo lungo o scelta una volta come una
-  sottoclasse).
+  Occulto/Truffatore Arcano). **Deciso con Andrea (2026-07-31): rimandare**,
+  si continua con le altre classi.
+  **Bardo ora 3/4** (Sapienza era già fatto), **non ancora committato**:
+  aggiunti Collegio dell'Incanto e Collegio del Valore (PHB p.62-66),
+  manuale `version` 45→46, cache busting `?v=124`. Incanto è descrittivo
+  come la Sapienza (riusa solo Ispirazione Bardica, incantesimi sempre
+  preparati Ammaliare Persone/Immagine Speculare al 3° e Comando al 6°,
+  nessuno nuovo nel catalogo). **Valore dà davvero Attacco Extra al 6°**,
+  primo caso di privilegio di sottoclasse (non di classe) che cambia il
+  numero di colpi: `stats.js` ora legge il massimo tra `klass.extraAttacks`
+  e `subclass.extraAttacks` (prima leggeva solo la classe), e `engine.js`
+  espone `subclassId` nella view derivata (mancava, serviva per il lookup).
+  Verificato: un Bardo Valore di livello 6 mostra "Attacco Extra: 2 colpi";
+  **non-regressione doppia** sul cambio di motore condiviso — Tharion
+  (Paladino, niente Attacco Extra) e un Guerriero di livello 11 (3 colpi,
+  dalla sola tabella di classe) invariati; level-up 2→3 mostra le 3 card
+  Collegio (Danza correttamente assente); console pulita in ogni prova.
+  **Collegio della Danza rimandato** (quarto del Bardo): dà una CA
+  alternativa a DUE caratteristiche insieme (10+DES+CAR, mai vista finora —
+  `unarmoredDefense` di classe supporta solo una) e trasforma i Colpi
+  Senz'Armi in un'arma vera (dado Ispirazione + Destrezza al posto del
+  danno normale) — una scelta di UX (come mostrarlo nella tabella Attacchi)
+  da discutere con Andrea, stessa natura di problema di Circolo della
+  Terra/Cavaliere Occulto/Truffatore Arcano.
   Restano da completare: le due sottoclassi rimandate del Guerriero/Ladro
-  (stesso motivo del Cavaliere Occulto/Truffatore Arcano: incantatore legato
-  alla SOTTOCLASSE con lista del Mago), il Circolo della Terra del Druido
-  sopra, e le altre 4 classi con sottoclasse incompleta (Bardo, Stregone,
-  Mago, Warlock — queste ultime 3 con 1 sola sottoclasse modellata
-  ciascuna), oltre ai collaudi cloud sotto.
+  (incantatore legato alla SOTTOCLASSE con lista del Mago), il Circolo
+  della Terra del Druido e il Collegio della Danza del Bardo sopra (tre
+  problemi di architettura/UX distinti, tutti da discutere con Andrea), e
+  le altre 3 classi con sottoclasse incompleta (Stregone, Mago, Warlock —
+  1 sola sottoclasse modellata ciascuna), oltre ai collaudi cloud sotto.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1626,6 +1643,52 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      risorse confermato. Tharion (Paladino) verificato invariato dopo ogni
      prova (CA 20, PF 60, CD 15, Aura +3, +8 all'arma). Console pulita in
      ogni prova.
+   → **Completato con Incanto e Valore (2026-07-31), `?v=124`, manuale
+     `version` 45→46.** Il Bardo ne ha 4 nel PHB (Danza, Incanto, Sapienza,
+     Valore); Sapienza c'era già. Aggiunti ai dati:
+     - **Collegio dell'Incanto** (p.62-63): Magia Ammaliante + Manto
+       d'Ispirazione a 3, Manto della Maestà a 6, Maestà Incrollabile a 14;
+       incantesimi sempre preparati Ammaliare Persone/Immagine Speculare al
+       3° e Comando al 6° (tutti e tre già nel catalogo con `bardo` in
+       `classes`, nessun tag da aggiungere). Descrittivo come la Sapienza:
+       l'idea iniziale che avesse bisogno di "risorse dedicate nuove" era
+       sbagliata — ogni abilità è "1/riposo lungo, ripristinabile spendendo
+       Ispirazione Bardica o uno slot", stessa prosa già usata per
+       Recupero Arcano del Mago, nessuna card nuova.
+     - **Collegio del Valore** (p.65-66): Ispirazione in Combattimento +
+       Addestramento Marziale a 3, **Attacco Extra a 6**, Magia da Battaglia
+       a 14. Nessun incantesimo di dominio (come la Sapienza).
+     **Unico vero cambio al motore di questa sessione**: Attacco Extra dato
+     da una SOTTOCLASSE (non dalla classe) non era mai capitato — la card
+     "Attacco Extra: N colpi" in `stats.js:338` leggeva solo
+     `klass.extraAttacks[livello]`. Ora legge il **massimo** fra
+     `klass.extraAttacks` e il nuovo `subclass.extraAttacks` (`[0×6, 1×15]`
+     per Valore, flat dal 6° in poi, senza ulteriori soglie come
+     Guerriero/Barbaro). Per poterlo leggere serviva anche `subclassId`
+     nella view derivata — mancava del tutto in `engine.js` (l'oggetto
+     restituito da `derive()` aveva solo `classId`), aggiunto come singolo
+     campo. Cambio piccolo ma è la prima volta in questa serie di sessioni
+     che si tocca `stats.js`/`engine.js` invece dei soli dati: **verificato
+     con doppia non-regressione** oltre al test diretto — un Bardo Valore
+     di prova a livello 6 mostra "Attacco Extra: 2 colpi"; Tharion
+     (Paladino, che non ha Attacco Extra) invariato; un Guerriero di prova a
+     livello 11 mostra ancora "3 colpi" (dalla sola tabella di classe, la
+     sottoclasse Guerriero non ne ha una propria) — il `Math.max` non altera
+     nessuna classe che aveva già l'Attacco Extra solo di classe.
+     **Collegio della Danza rimandato** (quarto e ultimo del Bardo): dà CA
+     alternativa a **due** caratteristiche insieme (10+DES+CAR — finora
+     `unarmoredDefense` di classe ne supporta solo una, es. COS per Barbaro)
+     e trasforma i Colpi Senz'Armi in un'arma vera con dado Ispirazione +
+     Destrezza al posto del danno normale: non solo dati, richiede una
+     scelta di UX su come mostrarlo nella tabella Attacchi, da discutere con
+     Andrea (stessa natura di problema di Circolo della Terra/Cavaliere
+     Occulto/Truffatore Arcano — **deciso di rimandare anche questo,
+     2026-07-31**).
+     Verificato in locale: Tratti di un Bardo Collegio del Valore livello 6
+     mostrano Ispirazione in Combattimento/Addestramento Marziale (3°) e
+     Attacco Extra (6°) nell'ordine giusto; level-up 2→3 mostra le 3 card
+     Collegio (Danza correttamente assente); Tharion e un Guerriero di prova
+     invariati come sopra; console pulita in ogni prova.
 9. [x] **Stregone** (full) — Punti Stregoneria, Metamagia.
    → **Fatto (2026-07-30, manuale `version` 36→37)**: privilegi 1→20 dal PDF
    (p.138-141), sottoclasse **Stregoneria Aberrante** (p.144, la più semplice

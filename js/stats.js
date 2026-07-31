@@ -333,9 +333,16 @@
     // "Attacco Extra: N colpi": generico da klass.extraAttacks[livello] (colpi
     // oltre al primo). Il Guerriero arriva a 4 colpi totali, non solo 2 come
     // Paladino/Barbaro, quindi il numero va calcolato invece di un semplice
-    // mostra/nascondi a soglia fissa.
+    // mostra/nascondi a soglia fissa. Alcune sottoclassi (es. Collegio del
+    // Valore del Bardo) danno Attacco Extra da sole anche se la classe base
+    // non ce l'ha: si prende il massimo tra tabella di classe e di sottoclasse.
     var manual = window.MANUAL_55 || { classes: {} };
-    var extraHits = ((manual.classes[view.classId] || {}).extraAttacks || [])[view.level] || 0;
+    var klass = manual.classes[view.classId] || {};
+    var subclass = (klass.subclasses || {})[view.subclassId] || {};
+    var extraHits = Math.max(
+      (klass.extraAttacks || [])[view.level] || 0,
+      (subclass.extraAttacks || [])[view.level] || 0
+    );
     var extraEl = document.getElementById('atk-extra');
     if (extraEl) {
       var totalHits = 1 + extraHits;

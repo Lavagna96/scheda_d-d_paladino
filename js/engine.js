@@ -409,6 +409,7 @@
       name: ch.name,
       level: ch.level,
       classId: ch.classId,
+      subclassId: ch.subclassId,
       className: klass.name || ch.classId,
       classLine: ch.speciesLabel + ' · ' + (klass.name || ch.classId) + ' ' +
                  ch.level + ' · ' + ch.subclassName,
