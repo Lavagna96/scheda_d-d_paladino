@@ -457,13 +457,34 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
         "Vantaggio contro Spaventato, Prono, Spinto" e "Vantaggio ai tiri di
         iniziativa") — bullet indistinguibile da quelli delle due reliquie
         vere. Nessun errore console in nessuno stato provato.
-  - [ ] 3.9.b **Tranche 2 (media)**: sezione dedicata "Resistenze &
-        Immunità" in Caratteristiche con tag strutturati (invece che solo
-        testo libero); competenza extra concessa dall'oggetto (abilità o
-        TS, tocca la logica di competenze in `stats.js`, più delicato
-        perché interagisce con le competenze di classe già esistenti);
-        sensi strutturati (Scurovisione N m, Vista Cieca...) come
-        statistica dedicata invece che testo.
+  - [ ] 3.9.b **Tranche 2 (media)**:
+    - [x] **Resistenze & Immunità con tag strutturati** — FATTO
+          (2026-07-31, `?v=131`, scelta la variante **A** tra 3 alternative
+          con preview — chip preimpostate — invece di tag libero o di un
+          prefisso riconosciuto nel testo libero già esistente, per non
+          rischiare varianti tipo "Fuoco"/"fuoco" che non si aggregano).
+          Nuovi campi `item.resistances`/`item.immunities` (array di
+          stringhe), scelti da due gruppi di chip nella scheda di
+          creazione: "Resistenza a" coi 13 tipi di danno del PHB 2024,
+          "Immunità a" con gli stessi 13 più le 6 condizioni più comuni
+          (una resistenza a una condizione non esiste nelle regole, da qui
+          la lista più corta per le resistenze). Nuova card "Resistenze &
+          Immunità" in Caratteristiche (`index.html`, nascosta se vuota),
+          renderizzata da `renderResistances()` in `js/stats.js`: raccoglie
+          i tag da tutti gli oggetti **attivi** (stesso criterio di
+          sintonizzazione di `modSum`), un tag per fonte con il nome
+          dell'oggetto a fianco, nessun merge tra oggetti diversi.
+          Verificato con harness che carica l'app reale per intero
+          (`config`+`manual-55`+`engine`+`storage`+`stats`+`items.js`) sui
+          dati di default: due oggetti sintonizzati mostrano i loro tag,
+          un terzo oggetto con la stessa resistenza ma **non** sintonizzato
+          resta escluso, come atteso. Nessun errore console.
+    - [ ] **Competenza extra concessa dall'oggetto** (abilità o TS) — non
+          ancora iniziata: tocca la logica di competenze in `stats.js`,
+          più delicata perché interagisce con le competenze di classe già
+          esistenti.
+    - [ ] **Sensi strutturati** (Scurovisione N m, Vista Cieca...) come
+          statistica dedicata invece che testo — non ancora iniziata.
   - [ ] 3.9.c **In sospeso, da valutare se ha senso**: incantesimi
         lanciabili dall'oggetto integrati col Grimorio (grosso lavoro per
         un caso d'uso raro); cambio del tipo di danno dell'arma; effetti a
@@ -2264,6 +2285,15 @@ Della **Fase 5** (da sciogliere al blocco giusto; raccomandazione già annotata)
   effetti servono davvero: i 76 oggetti "non comuni" del compendio
   dungeonedraghi.it/compendio/oggetti-magici, più i due oggetti reali di
   Andrea (Lama Vincolante, Scudo Magico) come caso di prova concreto.
+- 2026-07-31 — **Resistenze & Immunità, come inserirle (3.9.b)**: qui
+  invece il testo libero non bastava (a differenza del "vantaggio" della
+  Tranche 1) perché serve **aggregare** i tag in una card dedicata, e il
+  testo libero non si presta ad essere raggruppato in modo affidabile. 3
+  alternative con preview (A chip preimpostate, B tag libero con
+  suggerimenti, C prefisso riconosciuto tipo "Resistenza:" dentro il testo
+  libero già esistente) — scelta la **A**: zero rischio di varianti
+  ("Fuoco"/"fuoco") che romperebbero l'aggregazione, a costo di un po' di
+  UI in più nella scheda di creazione.
 
 ## Debiti aperti (trovati strada facendo)
 

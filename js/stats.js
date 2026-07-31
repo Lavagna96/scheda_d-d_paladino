@@ -135,6 +135,45 @@
     setText('skill-passive-perception', view.passivePerception);
   }
 
+  /* Resistenze & Immunità (Step 3.9.b): raccolte dagli oggetti custom
+     attivi (stesso criterio di modSum/computeResources in engine.js — un
+     oggetto che richiede sintonizzazione conta solo se sintonizzato). Un
+     tag per fonte, niente merge tra oggetti diversi: la fonte resta
+     leggibile. Card nascosta se non c'è nulla da mostrare. */
+  function renderResistances() {
+    var card = document.getElementById('resistances-card');
+    var list = document.getElementById('resistances-list');
+    if (!card || !list) {
+      return;
+    }
+    var ch = window.AppStorage.getState().character;
+    var tags = [];
+    (ch.items || []).forEach(function (it) {
+      var active = !it.requiresAttunement || it.attuned !== false;
+      if (!active) {
+        return;
+      }
+      (it.resistances || []).forEach(function (r) {
+        tags.push({ label: r, cls: 'res', prefix: 'Resistenza · ', source: it.name });
+      });
+      (it.immunities || []).forEach(function (r) {
+        tags.push({ label: r, cls: 'imm', prefix: 'Immunità · ', source: it.name });
+      });
+    });
+    list.innerHTML = '';
+    tags.forEach(function (t) {
+      var tag = document.createElement('span');
+      tag.className = 'rimm-tag ' + t.cls;
+      tag.textContent = t.prefix + t.label;
+      var src = document.createElement('span');
+      src.className = 'rimm-source';
+      src.textContent = t.source;
+      tag.appendChild(src);
+      list.appendChild(tag);
+    });
+    card.classList.toggle('hidden', tags.length === 0);
+  }
+
   /* Icona generica per le risorse di classe generate dinamicamente (che non
      hanno una card statica in index.html), es. la Furia del Barbaro. */
   function classResIcon() {
@@ -361,6 +400,7 @@
     renderAbilities(view);
     renderSaves(view);
     renderSkills(view);
+    renderResistances();
     renderResources(view);
     renderAttacks(view);
     setText('loh-max', view.poolMax.loh);

@@ -65,6 +65,17 @@
     return found || id;
   }
 
+  /* Resistenze & Immunità (Step 3.9.b): tipi di danno ufficiali (PHB 2024)
+     per "Resistenza a"; gli stessi più le condizioni più comuni per
+     "Immunità a" (un'immunità a una condizione è normale — Spaventato,
+     Paralizzato... — una "resistenza" a una condizione invece no, il PHB
+     non la prevede: da qui la lista più corta per le resistenze). */
+  var DAMAGE_TYPES = [
+    'Contundente', 'Perforante', 'Tagliente', 'Acido', 'Freddo', 'Fuoco',
+    'Forza', 'Fulmine', 'Necrotico', 'Veleno', 'Psichico', 'Radiante', 'Tuono'
+  ];
+  var CONDITIONS = ['Spaventato', 'Affascinato', 'Avvelenato', 'Prono', 'Stordito', 'Paralizzato'];
+
   /* Sintonizzazione (Step 3.6): al massimo 3 oggetti attivi insieme */
   var MAX_ATTUNED = 3;
 
@@ -94,6 +105,14 @@
 
   function itemAttunedOf(item) {
     return item.attuned !== false;
+  }
+
+  function itemResistancesOf(item) {
+    return item.resistances || [];
+  }
+
+  function itemImmunitiesOf(item) {
+    return item.immunities || [];
   }
 
   /* Icone (stesso stile minimale a tratto di js/sheet.js: viewBox 24x24,
@@ -522,6 +541,46 @@
     return wrap;
   }
 
+  /* ---------- sezione resistenze/immunità (Step 3.9.b): chip
+     preimpostate multi-selezionabili, niente testo libero — evita
+     duplicati tipo "Fuoco"/"fuoco" che non si aggregherebbero bene nella
+     card "Resistenze & Immunità" (vedi renderResistances in js/stats.js). ---------- */
+
+  function buildChipToggleGroup(labelText, options, selectedArr, extraOnClass) {
+    var wrap = el('div', 'edit-field');
+    wrap.appendChild(el('span', 'edit-label', labelText));
+    var row = el('div', 'chip-row');
+    options.forEach(function (name) {
+      var on = selectedArr.indexOf(name) !== -1;
+      var chip = el('button', 'chip' + (on ? ' on' + (extraOnClass ? ' ' + extraOnClass : '') : ''), name);
+      chip.type = 'button';
+      chip.addEventListener('click', function () {
+        var idx = selectedArr.indexOf(name);
+        if (idx === -1) {
+          selectedArr.push(name);
+        } else {
+          selectedArr.splice(idx, 1);
+        }
+        chip.classList.toggle('on');
+        if (extraOnClass) {
+          chip.classList.toggle(extraOnClass);
+        }
+      });
+      row.appendChild(chip);
+    });
+    wrap.appendChild(row);
+
+    return wrap;
+  }
+
+  function buildResistancesSection(draft) {
+    var section = el('div');
+    section.appendChild(buildChipToggleGroup('Resistenza a', DAMAGE_TYPES, draft.resistances, 'on-res'));
+    section.appendChild(buildChipToggleGroup('Immunità a', DAMAGE_TYPES.concat(CONDITIONS), draft.immunities));
+
+    return section;
+  }
+
   /* ---------- sezione effetti (righe ripetibili) ---------- */
 
   function buildEffectsSection(draft) {
@@ -687,10 +746,12 @@
       // attuned NON è editabile da questa scheda (si gestisce solo dalla
       // lista, vedi head-gem in renderTraitsList): la bozza lo porta con sé
       // solo per riscriverlo invariato al salvataggio.
-      attuned: itemAttunedOf(existingItem)
+      attuned: itemAttunedOf(existingItem),
+      resistances: itemResistancesOf(existingItem).slice(),
+      immunities: itemImmunitiesOf(existingItem).slice()
     } : {
       id: null, name: '', desc: '', art: { type: 'preset', value: 'ring' }, rarity: 'non-comune',
-      effects: [], usesMax: 0, requiresAttunement: false
+      effects: [], usesMax: 0, requiresAttunement: false, resistances: [], immunities: []
     };
 
     openSheet(isEdit ? 'Modifica reliquia' : 'Nuova reliquia');
@@ -715,6 +776,7 @@
 
     bodyEl.appendChild(buildArtGrid(draft));
     bodyEl.appendChild(buildRaritySection(draft));
+    bodyEl.appendChild(buildResistancesSection(draft));
     bodyEl.appendChild(buildEffectsSection(draft));
     bodyEl.appendChild(buildUsesSection(draft));
     bodyEl.appendChild(buildAttunementSection(draft));
@@ -750,7 +812,8 @@
             character.items[idx] = {
               id: draft.id, name: draft.name.trim(), desc: draft.desc,
               art: draft.art, rarity: draft.rarity, effects: draft.effects, usesMax: draft.usesMax,
-              requiresAttunement: draft.requiresAttunement, attuned: draft.attuned
+              requiresAttunement: draft.requiresAttunement, attuned: draft.attuned,
+              resistances: draft.resistances, immunities: draft.immunities
             };
           }
         } else {
@@ -762,7 +825,8 @@
             // Un oggetto nuovo che richiede sintonizzazione entra in collezione
             // ma non è subito attivo/equipaggiato: va sintonizzato a mano dalla
             // lista (gemma sulla testata dell'accordion).
-            attuned: !draft.requiresAttunement
+            attuned: !draft.requiresAttunement,
+            resistances: draft.resistances, immunities: draft.immunities
           });
         }
       });

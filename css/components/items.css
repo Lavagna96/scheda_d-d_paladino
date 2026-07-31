@@ -8,6 +8,16 @@
  * condividono 1:1 dal redesign 3.6: qui solo le regole davvero nuove.
  */
 
+/* ---------- chip di resistenza/immunità (Step 3.9.b): stesso .chip di
+   edit-sheet.css, solo lo stato "on" cambia colore per gruppo — verde per
+   distinguere a colpo d'occhio "Resistenza a" da "Immunità a" (oro, come
+   il resto del picker). ---------- */
+.chip.on-res {
+  border-color: var(--celest-bright);
+  color: var(--celest-bright);
+  background: rgba(61, 164, 112, 0.12);
+}
+
 /* ---------- medaglione (arte procedurale o foto caricata), vedi
    medallionSvg() in js/items.js ---------- */
 
