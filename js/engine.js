@@ -111,6 +111,12 @@
        additiva dei modifiers "di sistema", ma da un array separato — vedi
        character.items in js/items.js. character.modifiers resta intatto. */
     (ch.items || []).forEach(function (item) {
+      // Sintonizzazione (Step 3.6): un oggetto che la richiede conta i suoi
+      // effetti solo se è effettivamente sintonizzato (fallback per item
+      // vecchi senza questi campi: requiresAttunement assente = false).
+      if (item.requiresAttunement && !item.attuned) {
+        return;
+      }
       (item.effects || []).forEach(function (eff) {
         if (eff.target === target) {
           total += eff.value;
@@ -377,7 +383,9 @@
       resources.push(r);
     });
     (ch.items || []).forEach(function (item) {
-      if (item.usesMax > 0) {
+      // Idem: un oggetto non sintonizzato non genera/consuma usi giornalieri.
+      var attunedOk = !item.requiresAttunement || item.attuned;
+      if (item.usesMax > 0 && attunedOk) {
         resources.push({ key: 'item-' + item.id, max: item.usesMax, name: item.name, ctx: 'usi limitati' });
       }
     });

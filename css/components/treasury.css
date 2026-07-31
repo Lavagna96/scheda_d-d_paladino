@@ -367,6 +367,41 @@
   background: rgba(74, 118, 168, 0.14);
 }
 
+/* Varianti aggiuntive per gli oggetti creati dall'utente (Step 3.6): stessi
+   id di RARITY_OPTIONS in js/items.js, applicate direttamente come classe
+   (class="relic-rarity ${item.rarity}") senza mapping condizionale nel JS.
+   .raro/.leggendario riprendono 1:1 i valori di .rare/.leg qui sopra: stesso
+   significato semantico delle due reliquie storiche, risultato visivo identico. */
+.relic-rarity.comune {
+  color: #9c9690;
+  border-color: rgba(156, 150, 144, 0.5);
+  background: rgba(156, 150, 144, 0.12);
+}
+
+.relic-rarity.non-comune {
+  color: #3d9470;
+  border-color: rgba(61, 148, 112, 0.5);
+  background: rgba(61, 148, 112, 0.12);
+}
+
+.relic-rarity.molto-raro {
+  color: #b48be0;
+  border-color: rgba(180, 139, 224, 0.5);
+  background: rgba(180, 139, 224, 0.14);
+}
+
+.relic-rarity.raro {
+  color: #7fb3e8;
+  border-color: rgba(127, 179, 232, 0.45);
+  background: rgba(74, 118, 168, 0.14);
+}
+
+.relic-rarity.leggendario {
+  color: #e8a33d;
+  border-color: rgba(232, 163, 61, 0.5);
+  background: rgba(232, 163, 61, 0.12);
+}
+
 .relic-type {
   text-align: center;
   font-size: 12px;

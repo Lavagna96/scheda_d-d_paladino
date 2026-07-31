@@ -1,56 +1,158 @@
 /*
- * Reliquie / oggetti magici creati dall'utente (Step 3.5).
+ * Reliquie / oggetti magici creati dall'utente (Step 3.5, redesign 3.6).
  * Riusa il più possibile gli stili già definiti in css/components/edit-sheet.css
- * (.edit-stepper/.stepper-btn/.edit-stat-score/.chip/.save-btn/.edit-field/
- * .edit-label/.edit-select/.edit-input) e in css/components/features.css
- * (.feat-head/.ft/.fd) e css/components/steed.css (.tag): qui solo le regole
- * davvero nuove.
+ * (.edit-stepper/.stepper-btn/.edit-stat-score/.chip/.chip-row/.save-btn/
+ * .edit-field/.edit-label/.edit-select/.edit-input) e la "vetrina reliquie"
+ * hardcoded in css/components/treasury.css (.relic-acc/.relic-card/
+ * .relic-rarity/.relic-effects/...), che le card create dall'utente
+ * condividono 1:1 dal redesign 3.6: qui solo le regole davvero nuove.
  */
 
-/* ---------- card oggetto nei Tratti ---------- */
+/* ---------- medaglione (arte procedurale o foto caricata), vedi
+   medallionSvg() in js/items.js ---------- */
 
-.item-card {
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--border-color);
-  cursor: pointer;
+.medallion {
+  border-radius: 50%;
 }
 
-.item-card:last-child {
-  border-bottom: none;
-}
-
-.item-card .feat-head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-1);
-}
-
-.item-ic {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
+/* piccolo medaglione sulla testata dell'accordion (lista reliquie) */
+.medal-sm {
+  width: 30px;
+  height: 30px;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-gold);
 }
 
-.item-ic svg {
+.medal-sm svg {
   width: 100%;
   height: 100%;
 }
 
-.item-tags {
+/* ---------- gemma di sintonizzazione sulla testata dell'accordion ---------- */
+
+.head-gem {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
 }
 
-.item-tags .tag {
-  background: rgba(201, 164, 67, 0.14);
+.head-gem.on {
+  border-color: var(--accent-gold);
   color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.14);
+  box-shadow: 0 0 8px rgba(201, 164, 67, 0.45);
+}
+
+.head-gem.spacer {
+  visibility: hidden;
+  pointer-events: none;
+  border: none;
+  background: none;
+}
+
+/* ---------- badge di stato sintonizzazione nella card espansa ---------- */
+
+.attune-badge {
+  display: block;
+  width: fit-content;
+  margin: 0 auto var(--space-3);
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.attune-badge.on {
+  color: var(--celest-bright);
+  border-color: rgba(61, 148, 112, 0.5);
+  background: rgba(61, 148, 112, 0.12);
+}
+
+.attune-badge.off {
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ---------- contatore sintonizzazione sopra la lista ---------- */
+
+.attune-counter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-gold-soft);
+  border-radius: var(--radius-md);
+  background: rgba(201, 164, 67, 0.06);
+  font-size: 12px;
+  color: var(--accent-gold);
+}
+
+.attune-counter-label {
+  flex: 1;
+  font-family: var(--font-title);
+  letter-spacing: 0.4px;
+}
+
+.attune-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.attune-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent-gold);
+  background: transparent;
+}
+
+.attune-dot.filled {
+  background: var(--accent-gold);
+  box-shadow: 0 0 6px rgba(201, 164, 67, 0.6);
+}
+
+.attune-counter-count {
+  font-family: var(--font-title);
+  font-weight: 700;
+  color: var(--gold-bright);
+}
+
+/* ---------- card "inattiva" (richiede sintonizzazione ma non è attiva):
+   stesso trattamento smorzato ovunque nella card, gemma esclusa (resta
+   sempre leggibile per poter essere ri-sintonizzata) ---------- */
+
+.relic-acc.dim .relic-acc-head { border-color: var(--border-color); }
+.relic-acc.dim .medal-sm svg,
+.relic-acc.dim .relic-art-big svg { filter: grayscale(.85) opacity(.5); }
+.relic-acc.dim .relic-acc-name,
+.relic-acc.dim .relic-name { color: var(--text-secondary); text-shadow: none; }
+.relic-acc.dim .relic-card { border-color: var(--border-color); }
+.relic-acc.dim .relic-effects li { color: var(--text-secondary); opacity: .7; }
+.relic-acc.dim .relic-effects li::before { color: var(--text-secondary); }
+
+/* Solo le card generate da questo modulo sono cliccabili per modificare
+   (le due reliquie storiche in index.html restano statiche): scoping a
+   #custom-items-list per non aggiungere un cursore ingannevole altrove. */
+#custom-items-list .relic-card {
+  cursor: pointer;
 }
 
 /* ---------- bottone "+ Nuova Reliquia" (segnaposto tratteggiato cliccabile,
@@ -76,38 +178,79 @@
   background: rgba(201, 164, 67, 0.06);
 }
 
-/* ---------- icon-picker (bottom sheet di creazione/modifica) ---------- */
+/* ---------- galleria arte (bottom sheet di creazione/modifica): griglia di
+   medaglioni preimpostati (medallionSvg, vedi js/items.js) + un ultimo tile
+   per caricare una foto propria ---------- */
 
-.icon-pick-row {
-  display: flex;
-  flex-wrap: wrap;
+.art-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-2);
 }
 
-.icon-pick {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  border-radius: var(--radius-sm);
+.art-tile {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  padding: 4px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
-  background: var(--bg-principal);
-  color: var(--text-secondary);
+  background-color: var(--bg-principal);
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 
-.icon-pick svg {
-  width: 20px;
-  height: 20px;
+.art-tile:not(.upload) svg {
+  width: 100%;
+  height: 100%;
 }
 
-.icon-pick.on {
+.art-tile.on {
   border-color: var(--accent-gold);
-  color: var(--accent-gold);
-  background: rgba(201, 164, 67, 0.12);
+  box-shadow: 0 0 0 1px var(--accent-gold);
+}
+
+.art-tile.upload {
+  flex-direction: column;
+  gap: 4px;
+  border-style: dashed;
+  border-color: var(--border-gold-soft);
+  color: var(--text-secondary);
+}
+
+.art-tile-upload-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.art-tile-upload-inner svg {
+  width: 18px;
+  height: 18px;
+}
+
+.art-tile-upload-inner span {
+  font-size: 9px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.art-tile.upload.has-image .art-tile-upload-inner {
+  display: none;
+}
+
+.art-tile-file {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
 
 /* ---------- righe effetto ripetibili ---------- */
