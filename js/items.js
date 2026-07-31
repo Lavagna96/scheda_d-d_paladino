@@ -117,13 +117,208 @@
   }
 
   /* ---------- medaglione (arte procedurale o foto caricata) ----------
-     Stesso trattamento visivo delle arti "hero" di Lama Vincolante/Scudo
-     Magico (glow radiale dorato + anello con gradiente oro) ma generato da
-     un template comune per le 8 icone preimpostate, oppure da una foto
-     caricata dall'utente (art.type === 'image', art.value è una data: URL).
-     id univoci per <svg>: su Safari iOS più oggetti in lista con lo stesso id
-     di gradient/clipPath confliggono tra loro (bug reale, non teorico). */
+     Dal redesign 3.7 le 8 arti preimpostate sono illustrazioni vere e
+     proprie (non più icone a tratto ricolorate), disegnate a mano con la
+     stessa tecnica di Lama Vincolante/Scudo Magico in index.html: glow
+     radiale, gradienti multipli, gemma con riflesso. 'sword' e 'shield'
+     sono ESATTAMENTE gli stessi path/gradienti delle due reliquie storiche
+     (stesso identico risultato visivo, non una variante). Le altre 6 sono
+     originali, con più livelli di dettaglio (sfaccettature, tessuto,
+     venatura del legno...) — vedi PRESET_ART qui sotto. La foto caricata
+     dall'utente (art.type === 'image') resta un semplice ritaglio circolare,
+     invariata. id univoci per <svg>: su Safari iOS più oggetti in lista con
+     lo stesso id di gradient/clipPath confliggono tra loro (bug reale). */
   var medallionUid = 0;
+
+  function presetGold(id) {
+    return '<linearGradient id="gold' + id + '" x1="0%" y1="0%" x2="100%" y2="100%">' +
+      '<stop offset="0%" stop-color="#e8c96a"/><stop offset="50%" stop-color="#c9a443"/>' +
+      '<stop offset="100%" stop-color="#8a6820"/></linearGradient>';
+  }
+
+  var PRESET_ART = {
+    /* Spada: identica a Lama Vincolante (stesso path/gradienti, index.html) */
+    sword: {
+      body: function (id) {
+        return '<circle cx="70" cy="72" r="64" fill="url(#glow' + id + ')"/>' +
+          '<path d="M70 6 L78 24 L76 92 L64 92 L62 24 Z" fill="url(#blade' + id + ')" stroke="#39445a" stroke-width="1" stroke-linejoin="round"/>' +
+          '<path d="M69 26 L71 26 L70.6 88 L69.4 88 Z" fill="rgba(255,255,255,0.5)"/>' +
+          '<path d="M70 36 l3.2 5 -3.2 5 -3.2 -5 Z" fill="#c9a443" opacity="0.9"/>' +
+          '<path d="M70 56 l3.2 5 -3.2 5 -3.2 -5 Z" fill="#c9a443" opacity="0.65"/>' +
+          '<path d="M70 76 l2.6 4 -2.6 4 -2.6 -4 Z" fill="#c9a443" opacity="0.4"/>' +
+          '<path d="M44 92 Q70 83 96 92 L96 100 Q70 91 44 100 Z" fill="url(#gold' + id + ')" stroke="#6b5116" stroke-width="1" stroke-linejoin="round"/>' +
+          '<rect x="65.5" y="99" width="9" height="26" rx="3.5" fill="#4a1420" stroke="#2e0c15" stroke-width="1"/>' +
+          '<path d="M65.5 104 h9 M65.5 110 h9 M65.5 116 h9" stroke="#7a2438" stroke-width="1.4"/>' +
+          '<circle cx="70" cy="132" r="8" fill="url(#gem' + id + ')" stroke="url(#gold' + id + ')" stroke-width="2"/>' +
+          '<ellipse cx="67" cy="129" rx="2.6" ry="1.6" fill="rgba(255,255,255,0.55)" transform="rotate(-24 67 129)"/>';
+      },
+      grad: function (id) {
+        return '<linearGradient id="blade' + id + '" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e8eef5"/><stop offset="45%" stop-color="#aabccf"/><stop offset="100%" stop-color="#5d6f84"/></linearGradient>' +
+          '<radialGradient id="gem' + id + '" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#ff8a9a"/><stop offset="45%" stop-color="#cc2440"/><stop offset="100%" stop-color="#660514"/></radialGradient>' +
+          '<radialGradient id="glow' + id + '" cx="50%" cy="45%" r="52%"><stop offset="0%" stop-color="rgba(201,164,67,0.38)"/><stop offset="65%" stop-color="rgba(201,164,67,0.1)"/><stop offset="100%" stop-color="rgba(201,164,67,0)"/></radialGradient>';
+      }
+    },
+    /* Scudo: identico a Scudo Magico (stesso path/gradienti, index.html) */
+    shield: {
+      body: function (id) {
+        return '<circle cx="70" cy="74" r="64" fill="url(#glow' + id + ')"/>' +
+          '<path d="M70 16 C88 26 104 28 112 26 C112 68 102 106 70 128 C38 106 28 68 28 26 C36 28 52 26 70 16 Z" fill="url(#steel' + id + ')" stroke="url(#gold' + id + ')" stroke-width="3.5" stroke-linejoin="round"/>' +
+          '<path d="M70 26 C84 33 96 35 103 34 C102 66 94 96 70 114 C46 96 38 66 37 34 C44 35 56 33 70 26 Z" fill="none" stroke="rgba(201,164,67,0.35)" stroke-width="1.2"/>' +
+          '<path d="M70 30 L70 110" stroke="rgba(201,164,67,0.4)" stroke-width="2"/>' +
+          '<path d="M70 58 C60 52 50 54 44 48 C50 44 62 44 70 50 C78 44 90 44 96 48 C90 54 80 52 70 58 Z" fill="url(#gold' + id + ')" opacity="0.9"/>' +
+          '<path d="M70 50 l7 10 -7 10 -7 -10 Z" fill="url(#gem' + id + ')" stroke="url(#gold' + id + ')" stroke-width="1.6"/>' +
+          '<circle cx="70" cy="21.5" r="2" fill="url(#gold' + id + ')"/><circle cx="41" cy="30" r="2" fill="url(#gold' + id + ')"/><circle cx="99" cy="30" r="2" fill="url(#gold' + id + ')"/>';
+      },
+      grad: function (id) {
+        return '<linearGradient id="steel' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#39455c"/><stop offset="55%" stop-color="#242e40"/><stop offset="100%" stop-color="#141b28"/></linearGradient>' +
+          '<radialGradient id="gem' + id + '" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#9fd0ff"/><stop offset="45%" stop-color="#3d7ab8"/><stop offset="100%" stop-color="#12304f"/></radialGradient>' +
+          '<radialGradient id="glow' + id + '" cx="50%" cy="45%" r="52%"><stop offset="0%" stop-color="rgba(74,118,168,0.4)"/><stop offset="65%" stop-color="rgba(74,118,168,0.1)"/><stop offset="100%" stop-color="rgba(74,118,168,0)"/></radialGradient>';
+      }
+    },
+    /* Anello: fascia con luce/ombra, gemma sfaccettata con artigli */
+    ring: {
+      body: function (id) {
+        return '<circle cx="70" cy="92" r="60" fill="url(#glow' + id + ')"/>' +
+          '<path d="M40 96 A30 14 0 0 1 100 96" fill="none" stroke="url(#bandBack' + id + ')" stroke-width="10" stroke-linecap="round"/>' +
+          '<path d="M40 98 A30 14 0 0 0 100 98" fill="none" stroke="url(#bandFront' + id + ')" stroke-width="10" stroke-linecap="round"/>' +
+          '<path d="M46 104 A24 10 0 0 0 94 104" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.4"/>' +
+          '<path d="M50 92 l0 6 M58 88 l0 6 M82 88 l0 6 M90 92 l0 6" stroke="#6b5116" stroke-width="1.6" stroke-linecap="round"/>' +
+          '<path d="M62 62 L78 62 L84 74 L70 92 L56 74 Z" fill="url(#pavilion' + id + ')" stroke="url(#gold' + id + ')" stroke-width="1.6" stroke-linejoin="round"/>' +
+          '<path d="M62 62 L78 62 L70 74 Z" fill="url(#table' + id + ')"/>' +
+          '<path d="M62 62 L70 74 L56 74 Z" fill="rgba(0,0,0,0.18)"/>' +
+          '<path d="M78 62 L70 74 L84 74 Z" fill="rgba(255,255,255,0.14)"/>' +
+          '<path d="M70 74 L70 92" stroke="rgba(0,0,0,0.25)" stroke-width="1"/>' +
+          '<path d="M58 60 Q70 50 82 60" fill="none" stroke="url(#gold' + id + ')" stroke-width="2.4" stroke-linecap="round"/>' +
+          '<path d="M55 65 Q48 60 52 52" fill="none" stroke="url(#gold' + id + ')" stroke-width="2.4" stroke-linecap="round"/>' +
+          '<path d="M85 65 Q92 60 88 52" fill="none" stroke="url(#gold' + id + ')" stroke-width="2.4" stroke-linecap="round"/>' +
+          '<ellipse cx="65" cy="66" rx="3" ry="1.6" fill="rgba(255,255,255,0.6)" transform="rotate(-20 65 66)"/>';
+      },
+      grad: function (id) {
+        return '<linearGradient id="bandBack' + id + '" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6b5116"/><stop offset="50%" stop-color="#8a6820"/><stop offset="100%" stop-color="#6b5116"/></linearGradient>' +
+          '<linearGradient id="bandFront' + id + '" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c9a443"/><stop offset="50%" stop-color="#f0d98a"/><stop offset="100%" stop-color="#c9a443"/></linearGradient>' +
+          '<linearGradient id="table' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#eaf5ff"/><stop offset="100%" stop-color="#9fd0ff"/></linearGradient>' +
+          '<linearGradient id="pavilion' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#9fd0ff"/><stop offset="55%" stop-color="#3d7ab8"/><stop offset="100%" stop-color="#12304f"/></linearGradient>' +
+          '<radialGradient id="glow' + id + '" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="rgba(74,118,168,0.35)"/><stop offset="65%" stop-color="rgba(74,118,168,0.09)"/><stop offset="100%" stop-color="rgba(74,118,168,0)"/></radialGradient>';
+      }
+    },
+    /* Amuleto: medaglione tondo inciso con runa a croce, catena a maglie */
+    amulet: {
+      body: function (id) {
+        return '<circle cx="70" cy="78" r="60" fill="url(#glow' + id + ')"/>' +
+          '<path d="M46 24 Q70 44 94 24" fill="none" stroke="url(#gold' + id + ')" stroke-width="3" stroke-linecap="round"/>' +
+          '<circle cx="70" cy="82" r="34" fill="url(#disc' + id + ')" stroke="url(#gold' + id + ')" stroke-width="3"/>' +
+          '<circle cx="70" cy="82" r="34" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="1" stroke-dasharray="2 3"/>' +
+          '<circle cx="70" cy="82" r="27" fill="none" stroke="url(#gold' + id + ')" stroke-width="1.2" opacity="0.6"/>' +
+          '<path d="M70 66 L70 98 M60 74 L80 90 M80 74 L60 90" stroke="url(#gold' + id + ')" stroke-width="3" stroke-linecap="round"/>' +
+          '<circle cx="70" cy="82" r="5" fill="url(#gem' + id + ')" stroke="url(#gold' + id + ')" stroke-width="1.4"/>' +
+          '<ellipse cx="68" cy="80" rx="1.6" ry="1" fill="rgba(255,255,255,0.6)"/>';
+      },
+      grad: function (id) {
+        return '<radialGradient id="disc' + id + '" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#e8ddc8"/><stop offset="55%" stop-color="#a8927a"/><stop offset="100%" stop-color="#5c4c3a"/></radialGradient>' +
+          '<radialGradient id="gem' + id + '" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#8fe8dc"/><stop offset="45%" stop-color="#2a8a7a"/><stop offset="100%" stop-color="#0e332c"/></radialGradient>' +
+          '<radialGradient id="glow' + id + '" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="rgba(42,138,122,0.3)"/><stop offset="65%" stop-color="rgba(42,138,122,0.07)"/><stop offset="100%" stop-color="rgba(42,138,122,0)"/></radialGradient>';
+      }
+    },
+    /* Mantello: cappuccio con bordo di pelliccia, drappeggio, fermaglio ornato */
+    cloak: {
+      body: function (id) {
+        return '<circle cx="70" cy="82" r="64" fill="url(#glow' + id + ')"/>' +
+          '<path d="M54 54 Q24 78 20 132 Q34 126 44 116 Q40 88 54 54 Z" fill="url(#clothBack' + id + ')"/>' +
+          '<path d="M86 54 Q116 78 120 132 Q106 126 96 116 Q100 88 86 54 Z" fill="url(#clothBack' + id + ')"/>' +
+          '<path d="M58 52 Q34 76 30 124 Q50 114 62 98 Z" fill="url(#clothFront' + id + ')" stroke="rgba(0,0,0,0.25)" stroke-width="1"/>' +
+          '<path d="M82 52 Q106 76 110 124 Q90 114 78 98 Z" fill="url(#clothFront' + id + ')" stroke="rgba(0,0,0,0.25)" stroke-width="1"/>' +
+          '<path d="M40 92 Q50 86 58 92 M84 92 Q92 86 100 92 M36 104 Q46 98 54 104 M88 104 Q96 98 104 104" fill="none" stroke="rgba(0,0,0,0.28)" stroke-width="1.4" stroke-linecap="round"/>' +
+          '<path d="M46 54 Q52 48 58 52 Q64 47 70 51 Q76 47 82 52 Q88 48 94 54" fill="none" stroke="url(#fur' + id + ')" stroke-width="5" stroke-linecap="round"/>' +
+          '<circle cx="70" cy="46" r="17" fill="url(#steel' + id + ')" stroke="url(#gold' + id + ')" stroke-width="2.6"/>' +
+          '<circle cx="70" cy="46" r="21" fill="none" stroke="url(#gold' + id + ')" stroke-width="1" opacity="0.5"/>' +
+          '<path d="M70 30 l3.4 7 7.6 1.1 -5.5 5.4 1.3 7.5 -6.8 -3.6 -6.8 3.6 1.3 -7.5 -5.5 -5.4 7.6 -1.1 Z" fill="url(#gold' + id + ')" opacity="0.9"/>' +
+          '<circle cx="70" cy="46" r="7.5" fill="url(#gem' + id + ')" stroke="url(#gold' + id + ')" stroke-width="1.8"/>' +
+          '<ellipse cx="67" cy="43.2" rx="2.3" ry="1.4" fill="rgba(255,255,255,0.55)" transform="rotate(-24 67 43.2)"/>';
+      },
+      grad: function (id) {
+        return '<linearGradient id="clothBack' + id + '" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#2a1620"/><stop offset="100%" stop-color="#150b10"/></linearGradient>' +
+          '<linearGradient id="clothFront' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7a4f60"/><stop offset="55%" stop-color="#4a2c38"/><stop offset="100%" stop-color="#231219"/></linearGradient>' +
+          '<linearGradient id="fur' + id + '" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e8ddc8"/><stop offset="50%" stop-color="#c9bda0"/><stop offset="100%" stop-color="#e8ddc8"/></linearGradient>' +
+          '<linearGradient id="steel' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#39455c"/><stop offset="100%" stop-color="#141b28"/></linearGradient>' +
+          '<radialGradient id="gem' + id + '" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#ffd98a"/><stop offset="45%" stop-color="#d68a2a"/><stop offset="100%" stop-color="#5c3a10"/></radialGradient>' +
+          '<radialGradient id="glow' + id + '" cx="50%" cy="25%" r="52%"><stop offset="0%" stop-color="rgba(214,138,42,0.3)"/><stop offset="65%" stop-color="rgba(214,138,42,0.07)"/><stop offset="100%" stop-color="rgba(214,138,42,0)"/></radialGradient>';
+      }
+    },
+    /* Bacchetta: fusto rastremato con venatura, impugnatura in cuoio, doppia stella */
+    wand: {
+      body: function (id) {
+        return '<circle cx="70" cy="74" r="64" fill="url(#glow' + id + ')"/>' +
+          '<path d="M32 118 L40 122 L100 40 L94 34 Z" fill="url(#wood' + id + ')" stroke="#2e2118" stroke-width="1" stroke-linejoin="round"/>' +
+          '<path d="M42 112 Q48 108 52 100 M50 100 Q56 96 60 88 M58 88 Q64 84 68 76 M66 76 Q72 72 76 64" stroke="rgba(0,0,0,0.3)" stroke-width="1.1" fill="none" stroke-linecap="round"/>' +
+          '<path d="M46 110 Q60 106 68 96" stroke="rgba(255,255,255,0.25)" stroke-width="1" fill="none"/>' +
+          '<path d="M28 124 L44 116 L48 122 L32 130 Z" fill="url(#grip' + id + ')" stroke="#2e2118" stroke-width="1"/>' +
+          '<path d="M32 126 l4 -6 M36 129 l4 -6" stroke="#1a120c" stroke-width="1.2" stroke-linecap="round"/>' +
+          '<circle cx="30" cy="127" r="6.5" fill="url(#gem' + id + ')" stroke="url(#gold' + id + ')" stroke-width="1.8"/>' +
+          '<ellipse cx="27.8" cy="124.8" rx="2" ry="1.2" fill="rgba(255,255,255,0.5)" transform="rotate(-24 27.8 124.8)"/>' +
+          '<path d="M97 37 l5 -16 l5 11 l13 -3.5 l-9 9.5 l9 9.5 l-13 -3.5 l-5 11 l-5 -16 Z" fill="url(#gold' + id + ')" stroke="#6b5116" stroke-width="1" stroke-linejoin="round"/>' +
+          '<path d="M102 21 l2.6 -8 l2.6 5.6 l6.6 -1.8 l-4.6 4.8 l4.6 4.8 l-6.6 -1.8 l-2.6 5.6 l-2.6 -8 Z" fill="#fff" opacity="0.75"/>' +
+          '<circle cx="102" cy="21" r="2.2" fill="#fff" opacity="0.9"/>' +
+          '<circle cx="112" cy="30" r="1.4" fill="url(#gold' + id + ')"/><circle cx="118" cy="16" r="1.1" fill="url(#gold' + id + ')"/>';
+      },
+      grad: function (id) {
+        return '<linearGradient id="wood' + id + '" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#5c4530"/><stop offset="45%" stop-color="#8a6a4a"/><stop offset="100%" stop-color="#b89468"/></linearGradient>' +
+          '<linearGradient id="grip' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4a3220"/><stop offset="100%" stop-color="#2a1c12"/></linearGradient>' +
+          '<radialGradient id="gem' + id + '" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#dcb8ff"/><stop offset="45%" stop-color="#8a5fd6"/><stop offset="100%" stop-color="#3a2159"/></radialGradient>' +
+          '<radialGradient id="glow' + id + '" cx="65%" cy="25%" r="55%"><stop offset="0%" stop-color="rgba(201,164,67,0.35)"/><stop offset="65%" stop-color="rgba(201,164,67,0.09)"/><stop offset="100%" stop-color="rgba(201,164,67,0)"/></radialGradient>';
+      }
+    },
+    /* Pozione: rifrazione del vetro, etichetta, sughero striato, bolle a più livelli */
+    potion: {
+      body: function (id) {
+        return '<circle cx="70" cy="82" r="62" fill="url(#glow' + id + ')"/>' +
+          '<rect x="63" y="14" width="14" height="18" rx="2.5" fill="url(#glass' + id + ')" stroke="url(#gold' + id + ')" stroke-width="1.4"/>' +
+          '<rect x="60" y="7" width="20" height="10" rx="3" fill="url(#cork' + id + ')" stroke="#4a3220" stroke-width="0.8"/>' +
+          '<path d="M62 9 h16 M62 12 h16 M62 15 h16" stroke="rgba(0,0,0,0.25)" stroke-width="0.8"/>' +
+          '<path d="M56 34 L84 34 L99 84 Q99 112 70 114 Q41 112 41 84 Z" fill="url(#glass' + id + ')" stroke="url(#gold' + id + ')" stroke-width="2.2"/>' +
+          '<path d="M48 80 Q48 104 70 106 Q92 104 92 80 L92 86 Q92 108 70 110 Q48 108 48 86 Z" fill="url(#liquid' + id + ')"/>' +
+          '<path d="M50 78 Q50 88 55 92" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none"/>' +
+          '<ellipse cx="70" cy="80" rx="20" ry="4" fill="rgba(255,255,255,0.28)"/>' +
+          '<circle cx="60" cy="92" r="3.4" fill="rgba(255,255,255,0.4)"/><circle cx="78" cy="98" r="2.2" fill="rgba(255,255,255,0.32)"/><circle cx="68" cy="102" r="1.6" fill="rgba(255,255,255,0.28)"/>' +
+          '<ellipse cx="58" cy="50" rx="3.4" ry="12" fill="rgba(255,255,255,0.22)"/>' +
+          '<ellipse cx="86" cy="60" rx="2" ry="9" fill="rgba(255,255,255,0.14)"/>' +
+          '<path d="M84 40 Q92 44 91 52 L86 52 Q87 46 82 43 Z" fill="url(#label' + id + ')" stroke="#6b5116" stroke-width="0.8"/>';
+      },
+      grad: function (id) {
+        return '<linearGradient id="glass' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3a4a44"/><stop offset="55%" stop-color="#202b26"/><stop offset="100%" stop-color="#0e1512"/></linearGradient>' +
+          '<linearGradient id="cork' + id + '" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#c9a26a"/><stop offset="100%" stop-color="#6b5116"/></linearGradient>' +
+          '<linearGradient id="liquid' + id + '" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#c8f5da"/><stop offset="50%" stop-color="#5fcf94"/><stop offset="100%" stop-color="#1f6b48"/></linearGradient>' +
+          '<linearGradient id="label' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e8c96a"/><stop offset="100%" stop-color="#a8842c"/></linearGradient>' +
+          '<radialGradient id="glow' + id + '" cx="50%" cy="55%" r="55%"><stop offset="0%" stop-color="rgba(61,148,112,0.32)"/><stop offset="65%" stop-color="rgba(61,148,112,0.08)"/><stop offset="100%" stop-color="rgba(61,148,112,0)"/></radialGradient>';
+      }
+    },
+    /* Tomo: cuoio consumato, borchie d'angolo, fibbia, alone attorno alla gemma */
+    tome: {
+      body: function (id) {
+        return '<circle cx="70" cy="80" r="64" fill="url(#glow' + id + ')"/>' +
+          '<path d="M40 28 L100 28 Q110 28 110 40 L110 120 Q110 132 100 132 L40 132 Z" fill="url(#cover' + id + ')" stroke="url(#gold' + id + ')" stroke-width="2.6"/>' +
+          '<path d="M55 30 Q90 50 60 130" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="10" opacity="0.6"/>' +
+          '<path d="M100 28 Q110 28 110 40 L110 120 Q110 132 100 132" fill="none" stroke="rgba(245,238,220,0.9)" stroke-width="1.6"/>' +
+          '<path d="M111 34 L111 126 M113.5 38 L113.5 122 M116 42 L116 118" stroke="rgba(230,220,195,0.6)" stroke-width="1"/>' +
+          '<path d="M44 32 L44 128" stroke="url(#gold' + id + ')" stroke-width="5"/>' +
+          '<path d="M40 28 L52 28 L52 40 L40 40 Z" fill="url(#gold' + id + ')" stroke="#6b5116" stroke-width="1"/>' +
+          '<path d="M88 28 L100 28 L100 40 L88 40 Z" fill="url(#gold' + id + ')" stroke="#6b5116" stroke-width="1"/>' +
+          '<path d="M40 120 L52 120 L52 132 L40 132 Z" fill="url(#gold' + id + ')" stroke="#6b5116" stroke-width="1"/>' +
+          '<path d="M88 120 L100 120 L100 132 L88 132 Z" fill="url(#gold' + id + ')" stroke="#6b5116" stroke-width="1"/>' +
+          '<path d="M48 78 L92 62 L92 68 L48 84 Z" fill="url(#strap' + id + ')" opacity="0.92" stroke="#6b5116" stroke-width="0.8"/>' +
+          '<rect x="64" y="66" width="12" height="9" rx="1.5" fill="url(#gold' + id + ')" stroke="#6b5116" stroke-width="1"/>' +
+          '<circle cx="74" cy="78" r="14" fill="url(#gem' + id + ')" stroke="url(#gold' + id + ')" stroke-width="2"/>' +
+          '<circle cx="74" cy="78" r="18" fill="none" stroke="url(#gold' + id + ')" stroke-width="1" opacity="0.55"/>' +
+          '<path d="M74 68 l3 8 8 1 -6 6 1 8 -6 -4 -6 4 1 -8 -6 -6 8 -1 Z" fill="url(#gold' + id + ')" opacity="0.85"/>' +
+          '<ellipse cx="70" cy="73" rx="3" ry="1.8" fill="rgba(255,255,255,0.55)" transform="rotate(-22 70 73)"/>';
+      },
+      grad: function (id) {
+        return '<linearGradient id="cover' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3a2b52"/><stop offset="60%" stop-color="#241a38"/><stop offset="100%" stop-color="#120c1e"/></linearGradient>' +
+          '<linearGradient id="strap' + id + '" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6b5116"/><stop offset="50%" stop-color="#a8842c"/><stop offset="100%" stop-color="#6b5116"/></linearGradient>' +
+          '<radialGradient id="gem' + id + '" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#8fe8dc"/><stop offset="45%" stop-color="#2a8a7a"/><stop offset="100%" stop-color="#0e332c"/></radialGradient>' +
+          '<radialGradient id="glow' + id + '" cx="50%" cy="45%" r="52%"><stop offset="0%" stop-color="rgba(42,138,122,0.3)"/><stop offset="65%" stop-color="rgba(42,138,122,0.07)"/><stop offset="100%" stop-color="rgba(42,138,122,0)"/></radialGradient>';
+      }
+    }
+  };
 
   function medallionSvg(art, size) {
     size = size || 100;
@@ -135,14 +330,10 @@
         '<image href="' + art.value + '" x="10" y="10" width="80" height="80" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip' + id + ')"/>' +
         '<circle cx="50" cy="50" r="40" fill="none" stroke="url(#ring' + id + ')" stroke-width="2.5"/></svg>';
     }
-    var gem = art.value || 'ring';
+    var preset = PRESET_ART[art.value] || PRESET_ART.ring;
 
-    return '<svg class="medallion" viewBox="0 0 100 100" width="' + size + '" height="' + size + '">' +
-      '<defs><radialGradient id="glow' + id + '" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="rgba(201,164,67,0.35)"/><stop offset="70%" stop-color="rgba(201,164,67,0.08)"/><stop offset="100%" stop-color="rgba(201,164,67,0)"/></radialGradient>' +
-      '<linearGradient id="ring' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e8c96a"/><stop offset="50%" stop-color="#c9a443"/><stop offset="100%" stop-color="#8a6820"/></linearGradient></defs>' +
-      '<circle cx="50" cy="50" r="48" fill="url(#glow' + id + ')"/>' +
-      '<circle cx="50" cy="50" r="40" fill="#242220" stroke="url(#ring' + id + ')" stroke-width="2.5"/>' +
-      '<g transform="translate(50 50) scale(2.6) translate(-12 -12)" stroke="#c9a443" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[gem] || ICONS.ring) + '</g></svg>';
+    return '<svg class="medallion" viewBox="0 0 140 150" width="' + size + '" height="' + size + '">' +
+      '<defs>' + presetGold(id) + preset.grad(id) + '</defs>' + preset.body(id) + '</svg>';
   }
 
   var overlay, titleEl, bodyEl;

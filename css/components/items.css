@@ -18,7 +18,7 @@
 /* piccolo medaglione sulla testata dell'accordion (lista reliquie) */
 .medal-sm {
   width: 30px;
-  height: 30px;
+  height: 32px;
   flex: none;
   display: flex;
   align-items: center;
