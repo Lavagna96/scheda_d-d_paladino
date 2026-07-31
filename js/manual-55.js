@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 48,
+  version: 49,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -2401,7 +2401,16 @@ window.MANUAL_55 = {
       // Contatto col Patrono: 1 uso dal 9° livello, stesso principio del
       // Metabolismo Sbalorditivo del Monaco — nessun codice nuovo nel motore.
       classResources: {
-        contactPatron: { name: 'Contatto col Patrono', kind: 'uses', max: 1, from: 9, resetOn: 'long' }
+        contactPatron: { name: 'Contatto col Patrono', kind: 'uses', max: 1, from: 9, resetOn: 'long' },
+        // Luce Guaritrice (Celestiale): risorsa di SOTTOCLASSE, stesso filtro
+        // già usato per Dadi Superiorità/Energia Psionica del Guerriero
+        // (`subclass` in engine.js). Concettualmente è "un dado d6 per
+        // livello+1", ma resta `kind:'uses'` come quelle due — stesso
+        // principio, nessun codice nuovo nel motore.
+        healingLight: {
+          name: 'Luce Guaritrice', kind: 'uses', subclass: 'celestiale', resetOn: 'long',
+          byLevel: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+        }
       },
       choicePoints: {
         subclass: 3, subclassFeatureLevels: [3, 6, 10, 14],
@@ -2477,16 +2486,18 @@ window.MANUAL_55 = {
           { name: 'Maestro Occulto', desc: 'Quando usi Astuzia Magica, recuperi TUTTI gli slot di Magia del Patto spesi, non solo la metà.' }
         ]
       },
-      /* Sottoclassi del Warlock: per ora Patto del Grande Antico come dati
-         (PHB 2024, p.166-167 del PDF, la più semplice delle 4 — Fatato,
-         Celestiale e Immondo hanno tutte un privilegio al 3° livello scalato
-         sul modificatore di Carisma (Passi del Fatato, Luce Guaritrice,
-         Fortuna del Reietto) che richiederebbe una risorsa specifica di
-         SOTTOCLASSE — meccanica che il motore non supporta ancora (solo
-         risorse di CLASSE in classResources/CLASS_BONUSES: aggiungerla lì
-         varrebbe per qualunque patrono, sbagliato). Grande Antico invece è
-         tutto narrativo (telepatia, cambio tipo di danno, incantesimi
-         sempre preparati) — stesso trattamento di Divinatore/Aberrante. */
+      /* Sottoclassi del Warlock: tutti e 4 i patroni fatti (PHB 2024
+         p.157-163). Rivalutata la nota precedente, che dava Fatato/
+         Celestiale/Immondo per bloccati: solo la Luce Guaritrice del
+         Celestiale è un vero pool scalato per LIVELLO (non per modificatore
+         di caratteristica) — modellata comunque come `classResources` di
+         SOTTOCLASSE con `subclass: 'celestiale'`, lo stesso filtro già
+         usato da Dadi Superiorità/Energia Psionica del Guerriero (nessun
+         codice nuovo nel motore, il filtro esisteva già). Passi del Fatato
+         e Fortuna del Reietto (Immondo) sono invece "X volte pari al mod.
+         Carisma, riposo lungo" — lo stesso pattern lasciato descrittivo per
+         ogni altra classe di questa serie di sessioni (Bagliore di Guardia,
+         Ripristinare l'Equilibrio…), nessuna risorsa per loro. */
       subclasses: {
         'grande-antico': {
           name: 'Patto del Grande Antico',
@@ -2525,6 +2536,123 @@ window.MANUAL_55 = {
             ],
             14: [
               { name: 'Progenie Asservita', desc: 'Quando lanci Evocare Aberrazione, puoi renderlo privo del bisogno di Concentrazione: la durata diventa 1 minuto e l\'Aberrazione evocata ottiene PF temporanei pari al tuo livello da warlock più il modificatore di Carisma. Inoltre, la prima volta ogni turno che colpisce una creatura sotto l\'effetto della tua Maledizione, infligge danni Psichici extra pari al danno bonus di quell\'incantesimo.' }
+            ]
+          }
+        },
+        fatato: {
+          name: 'Patto del Fatato',
+          tenets: 'Hai stretto un patto con la potenza capricciosa e imperscrutabile del Regno Fatato.',
+          spellsByLevel: {
+            3: [
+              { id: 'placare-le-emozioni', name: 'Placare le Emozioni' },
+              { id: 'fuoco-fatuo', name: 'Fuoco Fatuo' },
+              { id: 'passo-nella-nebbia', name: 'Passo nella Nebbia' },
+              { id: 'forza-fantasmatica', name: 'Forza Fantasmatica' },
+              { id: 'sonno', name: 'Sonno' }
+            ],
+            5: [
+              { id: 'sfocatura', name: 'Sfocatura' },
+              { id: 'crescita-delle-piante', name: 'Crescita delle Piante' }
+            ],
+            7: [
+              { id: 'dominare-bestia', name: 'Dominare Bestia' },
+              { id: 'invisibilita-superiore', name: 'Invisibilità Superiore' }
+            ],
+            9: [
+              { id: 'dominare-persona', name: 'Dominare Persona' },
+              { id: 'parvenza', name: 'Parvenza' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Passi del Fatato', desc: 'Puoi lanciare Passo nella Nebbia senza spendere uno slot un numero di volte pari al tuo modificatore di Carisma (minimo 1); recuperi tutti gli usi al riposo lungo. Ogni volta che lo lanci, puoi scegliere anche un effetto aggiuntivo: Passo Ristoratore (tu o una creatura entro 3 m dallo spazio di arrivo ottenete 1d10 PF temporanei) oppure Passo Beffardo (le creature entro 1,5 m dallo spazio lasciato fanno un TS di Saggezza o hanno svantaggio ad attaccare chiunque non sia te fino all\'inizio del tuo prossimo turno).' }
+            ],
+            6: [
+              { name: 'Fuga Nebbiosa', desc: 'Puoi lanciare Passo nella Nebbia come reazione quando subisci danno. In più, si aggiungono a Passi del Fatato: Passo Invisibile (sei Invisibile fino all\'inizio del tuo prossimo turno o finché attacchi, infliggi danno o lanci un incantesimo) e Passo Terribile (le creature entro 1,5 m dallo spazio lasciato o da quello di arrivo, a tua scelta, fanno un TS di Saggezza o subiscono 2d10 danni Psichici).' }
+            ],
+            10: [
+              { name: 'Difese Ammalianti', desc: 'Sei immune alla condizione Affascinato. Inoltre, subito dopo che una creatura che vedi ti colpisce con un tiro per colpire, puoi usare la reazione per dimezzare (per difetto) il danno subito e costringerla a un TS di Saggezza contro la tua CD: se fallisce, subisce danni Psichici pari al danno che hai subito. Una volta usato, serve un riposo lungo per riusarlo, a meno che tu non spenda uno slot di Magia del Patto (nessuna azione) per ripristinarlo.' }
+            ],
+            14: [
+              { name: 'Magia Ammaliante', desc: 'Subito dopo aver lanciato un incantesimo di Incantamento o Illusione con un\'azione e uno slot, puoi lanciare Passo nella Nebbia come parte della stessa azione, senza spendere uno slot.' }
+            ]
+          }
+        },
+        celestiale: {
+          name: 'Patto del Celestiale',
+          tenets: 'Hai stretto un patto con i Piani Superiori, i regni della beatitudine eterna.',
+          spellsByLevel: {
+            3: [
+              { id: 'aiuto', name: 'Aiuto' },
+              { id: 'cura-ferite', name: 'Cura Ferite' },
+              { id: 'dardo-di-guida', name: 'Dardo di Guida' },
+              { id: 'ristorare-inferiore', name: 'Ristorare Inferiore' },
+              { id: 'luce', name: 'Luce' },
+              { id: 'fiamma-sacra', name: 'Fiamma Sacra' }
+            ],
+            5: [
+              { id: 'luce-diurna', name: 'Luce Diurna' },
+              { id: 'rivivificare', name: 'Rivivificare' }
+            ],
+            7: [
+              { id: 'guardiano-fede', name: 'Guardiano della Fede' },
+              { id: 'muro-di-fuoco', name: 'Muro di Fuoco' }
+            ],
+            9: [
+              { id: 'ristorare-superiore', name: 'Ristorare Superiore' },
+              { id: 'evoca-celestiale', name: 'Evoca Celestiale' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Luce Guaritrice', desc: 'Hai una riserva di dadi da d6 per alimentare le tue guarigioni (vedi Risorse): il numero di dadi è pari a 1 più il tuo livello da warlock. Come azione bonus, puoi curare te stesso o una creatura che vedi entro 18 m spendendo dadi dalla riserva (al massimo un numero pari al tuo modificatore di Carisma, minimo 1 alla volta): tira i dadi spesi e restituisci PF pari al totale. Recuperi tutti i dadi spesi al riposo lungo.' }
+            ],
+            6: [
+              { name: 'Anima Radiosa', desc: 'Hai resistenza ai danni Radiosi. Una volta per turno, quando un incantesimo che lanci infligge danni Radiosi o da Fuoco, puoi sommare il tuo modificatore di Carisma al danno contro uno dei bersagli dell\'incantesimo.' }
+            ],
+            10: [
+              { name: 'Resilienza Celestiale', desc: 'Ottieni PF temporanei ogni volta che usi Astuzia Magica o finisci un riposo breve o lungo, pari al tuo livello da warlock più il modificatore di Carisma. Puoi anche scegliere fino a cinque creature che vedi in quel momento: ciascuna ottiene PF temporanei pari a metà del tuo livello da warlock più il modificatore di Carisma.' }
+            ],
+            14: [
+              { name: 'Vendetta Ardente', desc: 'Quando tu o un alleato entro 18 m state per fare un tiro salvezza contro la morte, puoi sprigionare energia radiosa: la creatura recupera PF pari a metà dei suoi PF massimi e può terminare su di sé la condizione Prono. Ogni creatura a tua scelta entro 9 m da essa subisce danni Radiosi pari a 2d8 più il tuo modificatore di Carisma ed è Accecata fino alla fine del turno corrente. Una volta per riposo lungo.' }
+            ]
+          }
+        },
+        immondo: {
+          name: 'Patto dell\'Immondo',
+          tenets: 'Hai stretto un patto con i Piani Inferiori, i regni della perdizione.',
+          spellsByLevel: {
+            3: [
+              { id: 'mani-ardenti', name: 'Mani Ardenti' },
+              { id: 'comando', name: 'Comando' },
+              { id: 'raggio-infuocato', name: 'Raggio Infuocato' },
+              { id: 'suggestione', name: 'Suggestione' }
+            ],
+            5: [
+              { id: 'palla-di-fuoco', name: 'Palla di Fuoco' },
+              { id: 'nube-fetida', name: 'Nube Fetida' }
+            ],
+            7: [
+              { id: 'scudo-di-fuoco', name: 'Scudo di Fuoco' },
+              { id: 'muro-di-fuoco', name: 'Muro di Fuoco' }
+            ],
+            9: [
+              { id: 'costrizione', name: 'Costrizione' },
+              { id: 'piaga-di-insetti', name: 'Piaga di Insetti' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Benedizione del Signore Oscuro', desc: 'Quando riduci un nemico a 0 PF, ottieni PF temporanei pari al tuo modificatore di Carisma più il tuo livello da warlock (minimo 1). Ottieni lo stesso beneficio se è qualcun altro a ridurre a 0 PF un nemico entro 3 m da te.' }
+            ],
+            6: [
+              { name: 'Fortuna del Signore Oscuro', desc: 'Quando fai una prova di caratteristica o un tiro salvezza, puoi sommare 1d10 al tiro dopo aver visto il risultato ma prima di applicarne gli effetti. Puoi usarlo un numero di volte pari al tuo modificatore di Carisma (minimo 1), non più di una volta per tiro; recuperi tutti gli usi al riposo lungo.' }
+            ],
+            10: [
+              { name: 'Resilienza Infernale', desc: 'Al termine di ogni riposo breve o lungo, scegli un tipo di danno (tranne Forza): ottieni resistenza a quel tipo di danno finché non ne scegli un altro con questo privilegio.' }
+            ],
+            14: [
+              { name: 'Scaraventare all\'Inferno', desc: 'Una volta per turno, quando colpisci una creatura con un tiro per colpire, puoi provare a trascinarla nei Piani Inferiori: fa un TS di Carisma contro la tua CD o sparisce, subendo 8d10 danni Psichici (se non è un Immondo) e la condizione Incapacitato finché non ritorna al termine del tuo turno successivo. Una volta usato, serve un riposo lungo per riusarlo, a meno che tu non spenda uno slot di Magia del Patto (nessuna azione) per ripristinarlo.' }
             ]
           }
         }
@@ -2689,7 +2817,7 @@ window.MANUAL_55 = {
   spells: [
     /* ===== 1° livello ===== */
     { id: 'dardo-di-guida', name: 'Dardo di Guida', level: 1, school: 'Evocazione',
-      classes: ['chierico', 'druido'],
+      classes: ['chierico', 'druido', 'warlock'],
       meta: 'Azione · 36 m · 1 round · V, S',
       desc: 'Attacco con incantesimo a distanza: 4d6 danni radiosi se colpisci, e il prossimo tiro per colpire contro il bersaglio prima della fine del tuo turno successivo ha vantaggio. +1d6 per ogni slot oltre il 1°.' },
     { id: 'colpo-intrappolante', name: 'Colpo Intrappolante', level: 1, school: 'Convocazione',
@@ -2701,11 +2829,11 @@ window.MANUAL_55 = {
       meta: 'Azione · 9 m · 1 min CONC · V, S, M',
       desc: 'Fino a 3 creature aggiungono 1d4 ai tiri per colpire e ai tiri salvezza finché dura. +1 bersaglio per ogni slot oltre il 1°.' },
     { id: 'comando', name: 'Comando', level: 1, school: 'Incantamento',
-      classes: ['paladino', 'bardo', 'chierico'],
+      classes: ['paladino', 'bardo', 'chierico', 'warlock'],
       meta: 'Azione · 18 m · 1 round · V',
       desc: 'Un nemico che capisca una lingua fa TS Saggezza: se fallisce esegue un comando di una parola per il suo prossimo turno. Comandi tipici: Avanzare, Cadere, Fuggi, Rannicchiati, Vieni. Niente concentrazione. +1 bersaglio per ogni slot oltre il 1°.' },
     { id: 'cura-ferite', name: 'Cura Ferite', level: 1, school: 'Abiurazione',
-      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger'],
+      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'warlock'],
       meta: 'Azione · Tocco · Istantaneo · V, S',
       desc: 'La creatura toccata recupera 2d8 + mod. da incantatore PF. La cura aumenta di 2d8 per ogni slot oltre il 1°.' },
     { id: 'duello-obbligato', name: 'Duello Obbligato', level: 1, school: 'Incantamento',
@@ -2779,7 +2907,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 36 m · 1 min CONC · V, S, M',
       desc: 'Un cilindro di luce fioca (raggio 1,5 m, altezza 12 m) piomba entro gittata: chi vi si trova fa un TS Costituzione, 2d10 danni radiosi se fallisce o metà se riesce (si ripete a chi entra o comincia lì il turno, una volta a testa). Con un\'azione puoi spostare il cilindro fino a 18 m nei turni successivi.' },
     { id: 'aiuto', name: 'Aiuto', level: 2, school: 'Abiurazione',
-      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'stregone'],
+      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'stregone', 'warlock'],
       meta: 'Azione · 9 m · 8 ore · V, S, M',
       desc: 'Fino a 3 creature: i PF massimi e attuali aumentano di 5 per la durata. Con slot superiori, +5 per ogni livello oltre il 2°.' },
     { id: 'arma-magica', name: 'Arma Magica', level: 2, school: 'Trasmutazione',
@@ -2807,7 +2935,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Tocco · 10 giorni · V, S, M · Rituale',
       desc: 'Un cadavere toccato non si decompone e non può diventare Non Morto per la durata. Prolunga il tempo utile per riportarlo in vita.' },
     { id: 'ristorare-inferiore', name: 'Ristorare Inferiore', level: 2, school: 'Abiurazione',
-      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'stregone'],
+      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'stregone', 'warlock'],
       meta: 'Azione bonus · Tocco · Istantaneo · V, S',
       desc: 'Rimuovi dalla creatura toccata una condizione tra: Accecato, Assordato, Paralizzato o Avvelenato.' },
     { id: 'trova-destriero', name: 'Trova Destriero', level: 2, school: 'Evocazione',
@@ -2852,7 +2980,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 36 m · Istantaneo · V, S',
       desc: 'Termina gli incantesimi di 3° livello o inferiore su un bersaglio a scelta. Per ogni incantesimo di livello superiore, prova di caratteristica da incantatore CD 10 + livello dell\'incantesimo.' },
     { id: 'luce-diurna', name: 'Luce Diurna', level: 3, school: 'Evocazione',
-      classes: ['paladino', 'chierico', 'druido', 'ranger', 'stregone'],
+      classes: ['paladino', 'chierico', 'druido', 'ranger', 'stregone', 'warlock'],
       meta: 'Azione · 18 m · 1 ora · V, S',
       desc: 'Sfera di luce intensa di 18 m di raggio (+18 m di luce fioca) da un punto o un oggetto. Dissolve l\'oscurità magica creata da incantesimi di 3° o inferiore.' },
     { id: 'punizione-accecante', name: 'Punizione Accecante', level: 3, school: 'Evocazione',
@@ -2874,7 +3002,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 9 m · 1 min CONC · V, S, M',
       desc: 'Una creatura a vista fa TS Carisma o è trasportata per la durata in un demipiano innocuo (Incapacitata lì dentro); alla fine dell\'incantesimo torna nel suo spazio o nel più vicino libero. Se è una creatura extraplanare e l\'incantesimo dura un minuto intero, non torna: resta bandita nel suo piano d\'origine.' },
     { id: 'guardiano-fede', name: 'Guardiano della Fede', level: 4, school: 'Convocazione',
-      classes: ['chierico'],
+      classes: ['chierico', 'warlock'],
       meta: 'Azione · 9 m · 8 ore · V',
       desc: 'Un guardiano spettrale Grande e invulnerabile occupa uno spazio libero a vista. Il nemico che gli arriva entro 3 m per la prima volta nel turno, o vi comincia il turno, fa un TS Destrezza: 20 danni radiosi se fallisce, metà se riesce. Svanisce dopo aver inflitto 60 danni.' },
     { id: 'aura-purezza', name: 'Aura di Purezza', level: 4, school: 'Abiurazione',
@@ -2933,7 +3061,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Sé · 1 min CONC · V, S, M',
       desc: 'Celestiali, Elementali, Folletti, Immondi e Non Morti hanno svantaggio agli attacchi contro di te. Puoi terminare l\'incantesimo per interrompere una possessione (Spezzare Incantamento) o rimandare la creatura al suo piano (Congedo, TS Carisma).' },
     { id: 'evoca-celestiale', name: 'Evoca Celestiale', level: 5, school: 'Evocazione',
-      classes: ['paladino', 'chierico'],
+      classes: ['paladino', 'chierico', 'warlock'],
       meta: 'Azione · 27 m · 1 ora CONC · V, S, M (400 MO)',
       desc: 'Evochi uno spirito celestiale (forma di vendicatore o difensore) che agisce subito dopo di te e obbedisce ai tuoi ordini. Più potente con slot superiori.' },
     { id: 'geas', name: 'Geas', level: 5, school: 'Incantamento',
@@ -2949,7 +3077,7 @@ window.MANUAL_55 = {
       meta: 'Azione bonus (dopo un colpo in mischia) · Sé · 1 min CONC · V',
       desc: '+5d10 forza al colpo. Se il colpo porta il bersaglio a meno di 50 PF, è esiliato in un semipiano innocuo (Inabile) finché ti concentri; se nativo di un altro piano, non torna.' },
     { id: 'ristorare-superiore', name: 'Ristorare Superiore', level: 5, school: 'Abiurazione',
-      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'stregone'],
+      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'stregone', 'warlock'],
       meta: 'Azione · Tocco · Istantaneo · V, S, M (polvere di diamante da 100 MO, consumata)',
       desc: 'Riduci di 1 il livello di Indebolimento della creatura toccata, oppure termina un effetto tra: Affascinato o Pietrificato, una maledizione (incluso il vincolo con un oggetto maledetto), una riduzione dei PF massimi o di un punteggio di caratteristica.' },
     { id: 'rianimare-morti', name: 'Rianimare Morti', level: 5, school: 'Negromanzia',
@@ -3080,7 +3208,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Tocco · 8 ore · V, S, M (polvere di diamante da 25+ MO, consumata)',
       desc: 'Nascondi un bersaglio toccato (creatura, luogo o oggetto fino a 3 m di lato) dagli incantesimi di divinazione e dagli occhi magici per la durata.' },
     { id: 'crescita-delle-piante', name: 'Crescita delle Piante', level: 3, school: 'Trasmutazione',
-      classes: ['bardo', 'druido', 'ranger'],
+      classes: ['bardo', 'druido', 'ranger', 'warlock'],
       meta: 'Azione (Rigoglio) o 8 ore (Arricchimento) · 45 m · Istantaneo · V, S',
       desc: 'Rigoglio: le piante in una sfera di 30 m di raggio diventano fitte e Terreno Difficile (puoi escludere aree a scelta). Arricchimento: le piante in 800 m di raggio danno il doppio del raccolto per 365 giorni (un solo utilizzo l\'anno per area).' },
     { id: 'protezione-dall-energia', name: 'Protezione dall\'Energia', level: 3, school: 'Abiurazione',
@@ -3114,7 +3242,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Sé (emanazione 3 m) · 10 min CONC · V, S',
       desc: 'Spiriti della natura ti volteggiano attorno nell\'emanazione. Le creature che vi entrano o vi terminano il turno fanno TS Saggezza o subiscono 5d8 forza (metà se superano, una volta a turno). Azione bonus per Disimpegnarti per la durata. +1d8 per ogni slot oltre il 5°.' },
     { id: 'dominare-bestia', name: 'Dominare Bestia', level: 4, school: 'Incantamento',
-      classes: ['druido', 'ranger', 'stregone'],
+      classes: ['druido', 'ranger', 'stregone', 'warlock'],
       meta: 'Azione · 18 m · 1 min CONC · V, S',
       desc: 'Una Bestia fa TS Saggezza (con vantaggio se in combattimento contro di te) o è Affascinata: le impartisci comandi telepatici finché dura. Ripete il TS ogni volta che subisce danno. Con slot di 5° dura 10 minuti, 6° un\'ora, 7°+ otto ore.' },
     { id: 'liberta-di-movimento', name: 'Libertà di Movimento', level: 4, school: 'Abiurazione',
@@ -3535,7 +3663,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 18 m · Istantaneo · V',
       desc: 'Il bersaglio sente una melodia discordante nella mente e fa TS Saggezza, subendo 3d6 psichici (metà se supera) e dovendo usare la reazione, se disponibile, per allontanarsi il più possibile da te lungo il percorso più sicuro. +1d6 per ogni slot oltre il 1°.' },
     { id: 'fuoco-fatuo', name: 'Fuoco Fatuo', level: 1, school: 'Evocazione',
-      classes: ['bardo', 'druido', 'chierico'],
+      classes: ['bardo', 'druido', 'chierico', 'warlock'],
       meta: 'Azione · 18 m · 1 min CONC · V',
       desc: 'Gli oggetti in un cubo di 6 m entro gittata si delineano di luce blu, verde o violetta; le creature nel cubo si delineano se falliscono un TS Destrezza. Finché dura, oggetti e creature delineati emettono luce fioca in 3 m e non beneficiano dell\'Invisibilità; chi li attacca ha vantaggio se li vede.' },
     { id: 'piuma-cadente', name: 'Piuma Cadente', level: 1, school: 'Trasmutazione',
@@ -3555,7 +3683,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 18 m · 10 min CONC · V, S, M (un fiocco di lana)',
       desc: 'Crei l\'immagine puramente visiva (senza suono) di un oggetto, creatura o fenomeno fino a 4,5 m di lato, entro gittata. Puoi spostarla con un\'azione magica alterandone l\'aspetto in movimento; l\'interazione fisica o una prova di Investigare contro la tua CD la smaschera.' },
     { id: 'sonno', name: 'Sonno', level: 1, school: 'Incantamento',
-      classes: ['bardo', 'stregone', 'mago'],
+      classes: ['bardo', 'stregone', 'mago', 'warlock'],
       meta: 'Azione · 18 m · 1 min CONC · V, S, M (un pizzico di sabbia o petali di rosa)',
       desc: 'Le creature scelte in una sfera di 1,5 m entro gittata fanno TS Saggezza o sono Incapaci di Agire fino alla fine del loro prossimo turno, quando ripetono il TS: se falliscono di nuovo sono Incoscienti finché dura. Termina per chi subisce danno o viene scosso. Chi non dorme mai o è immune a Sfinimento supera automaticamente.' },
     { id: 'onda-tonante', name: 'Onda Tonante', level: 1, school: 'Evocazione',
@@ -3568,7 +3696,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 36 m · 1 min · V',
       desc: 'Il bersaglio fa TS Costituzione o è Accecato o Assordato (a tua scelta) finché dura, ripetendo il TS a fine di ogni suo turno per liberarsi. +1 bersaglio per ogni slot oltre il 2°.' },
     { id: 'placare-le-emozioni', name: 'Placare le Emozioni', level: 2, school: 'Incantamento',
-      classes: ['bardo', 'chierico'],
+      classes: ['bardo', 'chierico', 'warlock'],
       meta: 'Azione · 18 m · 1 min CONC · V, S',
       desc: 'Gli Umanoidi in una sfera di 6 m entro gittata fanno TS Carisma o subiscono uno tra due effetti a scelta: immunità ad Affascinato e Spaventato (sopprimendo condizioni già attive), oppure Indifferenza verso creature ostili a scelta (termina se subiscono danno o vedono un alleato colpito).' },
     { id: 'individuazione-dei-pensieri', name: 'Individuazione dei Pensieri', level: 2, school: 'Divinazione',
@@ -3592,7 +3720,7 @@ window.MANUAL_55 = {
       meta: '1 minuto o Rituale · 9 m · Finché non dissolto · V, S, M (polvere di giada, 10+ MO, consumata)',
       desc: 'Impianti in un oggetto un messaggio di massimo 25 parole che viene pronunciato quando si verifica un innesco a tua scelta (visivo o udibile entro 9 m dall\'oggetto): una bocca magica appare e recita il messaggio con la tua voce. Puoi farla sparire dopo un solo utilizzo o farla ripetere ogni volta che l\'innesco si attiva.' },
     { id: 'forza-fantasmatica', name: 'Forza Fantasmatica', level: 2, school: 'Illusione',
-      classes: ['bardo', 'stregone', 'mago'],
+      classes: ['bardo', 'stregone', 'mago', 'warlock'],
       meta: 'Azione · 18 m · 1 min CONC · V, S, M (un fiocco di lana)',
       desc: 'Il bersaglio fa TS Intelligenza o percepisce (da solo) un fenomeno illusorio fino a 3 m di lato con suoni e temperatura, che tratta come reale finché dura; può infliggere fino a 2d8 psichici per turno se rappresenta un pericolo. Una prova di Investigare contro la tua CD (azione di Studio) smaschera l\'illusione e termina l\'incantesimo.' },
     { id: 'vedere-l-invisibile', name: 'Vedere l\'Invisibile', level: 2, school: 'Divinazione',
@@ -3629,7 +3757,7 @@ window.MANUAL_55 = {
       meta: 'Azione bonus · 18 m · Istantaneo · V',
       desc: 'Fino a sei creature scelte entro gittata recuperano 2d4 + il tuo modificatore da incantatore PF. +1d4 per ogni slot oltre il 3°.' },
     { id: 'rivivificare', name: 'Rivivificare', level: 3, school: 'Necromanzia',
-      classes: ['chierico', 'druido', 'paladino', 'ranger'],
+      classes: ['chierico', 'druido', 'paladino', 'ranger', 'warlock'],
       meta: 'Azione · Tocco · Istantaneo · V, S, M (un diamante da 300+ MO, consumato)',
       desc: 'Tocchi una creatura morta da non più di 1 minuto: torna in vita con 1 PF. Non funziona su chi è morto di vecchiaia né ripristina parti del corpo mancanti.' },
     { id: 'inviare', name: 'Inviare', level: 3, school: 'Divinazione',
@@ -3645,13 +3773,13 @@ window.MANUAL_55 = {
       meta: 'Azione · 3 m · 10 minuti · V, S, M (incenso in combustione)',
       desc: 'Doni un simulacro di vita a un cadavere entro gittata, che può rispondere alle tue domande (deve avere una bocca; fallisce se era Non Morto in vita, o se già bersaglio di questo incantesimo negli ultimi 10 giorni).' },
     { id: 'nube-fetida', name: 'Nube Fetida', level: 3, school: 'Convocazione',
-      classes: ['bardo', 'stregone', 'mago'],
+      classes: ['bardo', 'stregone', 'mago', 'warlock'],
       meta: 'Azione · 27 m · 1 min CONC · V, S, M (un uovo marcio)',
       desc: 'Una sfera di 6 m di raggio di gas nauseante e Fortemente Oscurante appare entro gittata, finché dura o finché un vento forte non la disperde. Chi inizia il turno nell\'area fa TS Costituzione o è Avvelenato fino alla fine del turno corrente (non può compiere azioni né azioni bonus mentre lo è).' },
 
     /* ===== Bardo — 4°-9° livello (blocco 2, completa la classe) ===== */
     { id: 'costrizione', name: 'Costrizione', level: 4, school: 'Incantamento',
-      classes: ['bardo'],
+      classes: ['bardo', 'warlock'],
       meta: 'Azione · 9 m · 1 min CONC · V, S',
       desc: 'Le creature scelte entro gittata fanno TS Saggezza o sono Affascinate finché dura.' },
     { id: 'confusione', name: 'Confusione', level: 4, school: 'Incantamento',
@@ -3663,7 +3791,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Sé · 10 min CONC · V, S',
       desc: 'Una luce fredda ti avvolge, emanando luce intensa in 6 m e fioca per altri 6 m. Finché dura hai resistenza ai danni radiosi e i tuoi attacchi in mischia infliggono +2d6 radiosi; con una reazione dopo aver subito danno da una creatura vista entro 18 m, puoi forzarla a un TS Costituzione o essere Accecata fino alla fine del tuo prossimo turno.' },
     { id: 'invisibilita-superiore', name: 'Invisibilità Superiore', level: 4, school: 'Illusione',
-      classes: ['bardo', 'stregone', 'mago'],
+      classes: ['bardo', 'stregone', 'mago', 'warlock'],
       meta: 'Azione · Tocco · 1 min CONC · V, S',
       desc: 'La creatura toccata è Invisibile finché dura, anche continuando ad attaccare o lanciare incantesimi (a differenza dell\'Invisibilità normale).' },
     { id: 'uccisore-fantasmatico', name: 'Uccisore Fantasmatico', level: 4, school: 'Illusione',
@@ -3684,7 +3812,7 @@ window.MANUAL_55 = {
       meta: '8 ore · Tocco · Istantaneo · V, S, M (un\'agata da 1.000+ MO, consumata)',
       desc: 'Doni Intelligenza 10 e la capacità di parlare una lingua che conosci a una Bestia, Pianta o pianta naturale toccata (Int 3 o meno); una pianta naturale diventa una creatura Pianta capace di muoversi. Il bersaglio risvegliato è Affascinato per 30 giorni o finché tu/alleati gli infliggete danno.' },
     { id: 'dominare-persona', name: 'Dominare Persona', level: 5, school: 'Incantamento',
-      classes: ['bardo', 'stregone', 'mago', 'chierico'],
+      classes: ['bardo', 'stregone', 'mago', 'chierico', 'warlock'],
       meta: 'Azione · 18 m · 1 min CONC · V, S',
       desc: 'Un Umanoide fa TS Saggezza (con vantaggio se in combattimento con te) o è Affascinato per la durata; ripete il TS quando subisce danno. Hai un legame telepatico per impartirgli comandi (nessuna azione richiesta); se non ne riceve, agisce proteggendosi. Con slot di 6° dura 10 minuti, 7° un\'ora, 8°+ otto ore.' },
     { id: 'sapienza-leggendaria', name: 'Sapienza Leggendaria', level: 5, school: 'Divinazione',
@@ -3708,7 +3836,7 @@ window.MANUAL_55 = {
       meta: 'Azione o Rituale · 9 m · 1 ora · V, S, M (due uova)',
       desc: 'Fino a otto creature volontarie entro gittata sono collegate telepaticamente tra loro finché dura, potendo comunicare a qualsiasi distanza sullo stesso piano anche senza condividere una lingua (le creature incapaci di comunicare in alcuna lingua non sono interessate).' },
     { id: 'parvenza', name: 'Parvenza', level: 5, school: 'Illusione',
-      classes: ['bardo', 'stregone', 'mago'],
+      classes: ['bardo', 'stregone', 'mago', 'warlock'],
       meta: 'Azione · 9 m · 8 ore · V, S',
       desc: 'Doni un aspetto illusorio alle creature scelte entro gittata (un bersaglio non volontario può tentare un TS Carisma per non essere affetto): puoi renderle più alte o basse di 30 cm, più pesanti o leggere, cambiandone corpo ed equipaggiamento (stessa disposizione base degli arti). Non regge all\'ispezione fisica; una prova di Investigare contro la tua CD (azione di Studio) smaschera il travestimento.' },
     { id: 'presenza-regale-di-yolande', name: 'Presenza Regale di Yolande', level: 5, school: 'Incantamento',
@@ -3810,7 +3938,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Tocco · 1 min CONC · V, S',
       desc: 'La creatura volontaria toccata sceglie un tipo di danno: la prima volta che lo subisce prima della fine dell\'incantesimo, riduce il danno totale di 1d4 (una sola volta per turno).' },
     { id: 'fiamma-sacra', name: 'Fiamma Sacra', level: 0, school: 'Evocazione',
-      classes: ['chierico'],
+      classes: ['chierico', 'warlock'],
       meta: 'Azione · 18 m · Istantaneo · V, S',
       desc: 'Una radianza fiammeggiante scende sul bersaglio, che fa TS Destrezza (senza beneficio da Copertura Parziale o Tre Quarti) o subisce 1d8 radiosi. Il danno sale a 2d8 al livello 5, 3d8 all\'11°, 4d8 al 17°.' },
     { id: 'risparmiare-il-morente', name: 'Risparmiare il Morente', level: 0, school: 'Negromanzia',
@@ -3902,7 +4030,7 @@ window.MANUAL_55 = {
       meta: '24 ore · Tocco · Finché non dissolto · V, S, M (incenso da 1.000+ MO, consumato)',
       desc: 'Consacri un\'area fino a 18 m di raggio con potere sacro o profano: scegli tipi di creature (Aberrazioni, Celestiali, Elementali, Folletti, Immondi o Non Morti) che non possono entrarvi volontariamente né mantenervi il controllo su chi vi si trova, e aggiungi un effetto extra a scelta (luce intensa permanente, oscurità permanente, protezione dal teletrasporto, terrore per certi tipi, o impossibilità di creare Non Morti dai cadaveri sepolti).' },
     { id: 'piaga-di-insetti', name: 'Piaga di Insetti', level: 5, school: 'Convocazione',
-      classes: ['chierico', 'druido', 'stregone'],
+      classes: ['chierico', 'druido', 'stregone', 'warlock'],
       meta: 'Azione · 90 m · 10 min CONC · V, S, M (una locusta)',
       desc: 'Locuste sciamanti riempiono una sfera di 6 m di raggio (Terreno Difficile, Leggermente Oscurante): alla comparsa, e per chiunque vi entri o vi termini il turno, TS Costituzione per 4d10 perforanti (metà se supera, una volta a turno). +1d10 per ogni slot oltre il 5°.' },
 
@@ -4036,7 +4164,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Sé (emanazione 4,5 m) · 10 min CONC · V, S',
       desc: 'Diverso da Evocare Elementale: spiriti elementali ti volteggiano attorno nell\'emanazione. Finché dura, ogni tuo attacco che colpisce una creatura nell\'emanazione infligge 2d8 danni extra a scelta tra acido, freddo, fuoco o fulmine, e il terreno nell\'emanazione è Terreno Difficile per i nemici. +2d8 per ogni slot oltre il 4°.' },
     { id: 'scudo-di-fuoco', name: 'Scudo di Fuoco', level: 4, school: 'Evocazione',
-      classes: ['druido', 'stregone', 'mago', 'chierico'],
+      classes: ['druido', 'stregone', 'mago', 'chierico', 'warlock'],
       meta: 'Azione · Sé · 10 minuti · V, S, M (un po\' di fosforo o una lucciola)',
       desc: 'Fiamme evanescenti ti avvolgono per la durata, emanando luce intensa in 3 m e fioca per altri 3 m. Scegli uno scudo caldo (resistenza al freddo) o uno scudo freddo (resistenza al fuoco). Quando una creatura entro 1,5 m ti colpisce in mischia, lo scudo erompe infliggendole 2d8 fuoco (scudo caldo) o 2d8 freddo (scudo freddo).' },
     { id: 'insetto-gigante', name: 'Insetto Gigante', level: 4, school: 'Convocazione',
@@ -4048,7 +4176,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 90 m · Istantaneo · V, S, M (un guanto)',
       desc: 'Grandine cade in un Cilindro di 6 m di raggio e 12 m di altezza entro gittata: le creature fanno TS Destrezza, subendo 2d10 contundenti e 4d6 freddo se falliscono (metà se superano). La grandine rende il terreno Terreno Difficile fino alla fine del tuo prossimo turno. +1d10 contundenti per ogni slot oltre il 4°.' },
     { id: 'muro-di-fuoco', name: 'Muro di Fuoco', level: 4, school: 'Evocazione',
-      classes: ['druido', 'stregone', 'mago', 'chierico'],
+      classes: ['druido', 'stregone', 'mago', 'chierico', 'warlock'],
       meta: 'Azione · 36 m · 1 min CONC · V, S, M (un pezzetto di carbone)',
       desc: 'Crei un muro di fuoco opaco su una superficie solida entro gittata: fino a 18 m di lunghezza, 6 m di altezza e 30 cm di spessore, oppure ad anello con diametro fino a 6 m. Al comparire, le creature nell\'area fanno TS Destrezza o subiscono 5d8 fuoco (metà se superano). Un lato, scelto da te, infligge 5d8 fuoco a chi finisce il turno entro 3 m di esso o dentro il muro (anche entrandovi per la prima volta in un turno).' },
 
@@ -4140,7 +4268,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 36 m · Istantaneo · V, S',
       desc: 'Scagli una scintilla di fuoco contro una creatura o un oggetto entro gittata: attacco con incantesimo a distanza, 1d10 fuoco se colpisci (l\'oggetto infiammabile non indossato prende fuoco). Il danno sale a 2d10 al 5° livello, 3d10 all\'11°, 4d10 al 17°.' },
     { id: 'luce', name: 'Luce', level: 0, school: 'Evocazione',
-      classes: ['bardo', 'chierico', 'stregone', 'mago'],
+      classes: ['bardo', 'chierico', 'stregone', 'mago', 'warlock'],
       meta: 'Azione · Tocco · 1 ora · V, M (una lucciola o del muschio fosforescente)',
       desc: 'Tocchi un oggetto Grande o più piccolo non indossato né trasportato da altri: finché dura, emana luce intensa in 6 m e fioca per altri 6 m (colore a scelta). Coprirlo con qualcosa di opaco blocca la luce; l\'incantesimo finisce se lo rilanci.' },
     { id: 'raggio-di-gelo', name: 'Raggio di Gelo', level: 0, school: 'Evocazione',
@@ -4156,7 +4284,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 36 m · Istantaneo · V, S',
       desc: 'Scagli energia stregonesca contro una creatura o un oggetto entro gittata: attacco a distanza, 1d8 di un tipo a scelta tra acido, freddo, fuoco, fulmine, veleno, psichico o tuono se colpisci. Se il dado esce 8, puoi tirarne un altro e sommarlo (fino a un numero di d8 aggiuntivi pari al tuo modificatore da incantatore). Il danno base sale a 2d8 al 5° livello, 3d8 all\'11°, 4d8 al 17°.' },
     { id: 'mani-ardenti', name: 'Mani Ardenti', level: 1, school: 'Evocazione',
-      classes: ['stregone', 'mago', 'chierico'],
+      classes: ['stregone', 'mago', 'chierico', 'warlock'],
       meta: 'Azione · Sé · Istantaneo · V, S',
       desc: 'Un sottile lenzuolo di fiamme erompe da te in un Cono di 4,5 m: le creature fanno TS Destrezza o subiscono 3d6 fuoco (metà se superano); gli oggetti infiammabili non indossati prendono fuoco. +1d6 per ogni slot oltre il 1°.' },
     { id: 'sfera-cromatica', name: 'Sfera Cromatica', level: 1, school: 'Evocazione',
@@ -4196,7 +4324,7 @@ window.MANUAL_55 = {
       meta: 'Azione bonus · Sé · Istantaneo · V, S',
       desc: 'Attingi alla tua forza vitale per guarirti: tiri uno o due Dadi Vita non spesi e recuperi PF pari al totale più il modificatore da incantatore; quei dadi vengono spesi. +1 Dado Vita utilizzabile per ogni slot oltre il 2°.' },
     { id: 'sfocatura', name: 'Sfocatura', level: 2, school: 'Illusione',
-      classes: ['stregone', 'mago'],
+      classes: ['stregone', 'mago', 'warlock'],
       meta: 'Azione · Sé · 1 min CONC · V',
       desc: 'Il tuo corpo diventa sfocato: finché dura, ogni creatura ha svantaggio agli attacchi contro di te, a meno che non ti percepisca con Scurovisione Cieca o Vista Vera.' },
     { id: 'soffio-di-drago', name: 'Soffio di Drago', level: 2, school: 'Trasmutazione',
@@ -4208,7 +4336,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 18 m · 10 min CONC · V, S, M (una molla di metallo)',
       desc: 'Una creatura o un oggetto libero a tua scelta entro gittata si solleva verticalmente fino a 6 m e resta sospeso per la durata (fino a 225 kg; una creatura non volontaria può resistere con TS Costituzione). Il bersaglio si muove solo spingendosi o tirandosi contro superfici fisse a portata; puoi cambiarne l\'altezza a comando.' },
     { id: 'raggio-infuocato', name: 'Raggio Infuocato', level: 2, school: 'Evocazione',
-      classes: ['stregone', 'mago', 'chierico'],
+      classes: ['stregone', 'mago', 'chierico', 'warlock'],
       meta: 'Azione · 36 m · Istantaneo · V, S',
       desc: 'Scagli tre raggi fiammeggianti contro uno o più bersagli entro gittata: attacco con incantesimo a distanza per ciascuno, 2d6 fuoco se colpisci. +1 raggio per ogni slot oltre il 2°.' },
     { id: 'ragnatela', name: 'Ragnatela', level: 2, school: 'Convocazione',
@@ -4220,7 +4348,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Sé · 1 minuto · V, S',
       desc: 'Tiri 1d6 a fine di ogni tuo turno per la durata: con 4-6 svanisci dal piano e appari sul Piano Etereo (finché non torni o l\'incantesimo termina), percependo il tuo piano d\'origine in tonalità di grigio entro 18 m; puoi interagire solo con creature sull\'Etereo. Torni all\'inizio del turno successivo o alla fine dell\'incantesimo, in uno spazio libero entro 3 m da dove eri.' },
     { id: 'palla-di-fuoco', name: 'Palla di Fuoco', level: 3, school: 'Evocazione',
-      classes: ['stregone', 'mago', 'chierico'],
+      classes: ['stregone', 'mago', 'chierico', 'warlock'],
       meta: 'Azione · 45 m · Istantaneo · V, S, M (una pallina di guano di pipistrello e zolfo)',
       desc: 'Un lampo scocca da te fino a un punto entro gittata ed esplode in una Sfera di 6 m di raggio: le creature fanno TS Destrezza o subiscono 8d6 fuoco (metà se superano); gli oggetti infiammabili non indossati prendono fuoco. +1d6 per ogni slot oltre il 3°.' },
     { id: 'accelerare', name: 'Accelerare', level: 3, school: 'Trasmutazione',
