@@ -392,6 +392,85 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
         l'attuale "Scudo magico".
       L'oggetto vive nello stato del personaggio (quindi sincronizzato su
       Firestore) e compare tra i Tratti con la sua icona e descrizione.
+- [x] 3.6 **Creazione oggetti spostata dai Tratti alla tab Oggetti di
+      Tesoreria** — FATTO (2026-07-31, commit `24c1024`, `?v=127`). La
+      lista/pulsante "Nuova Reliquia" (prima nei Tratti, senza un vero
+      motivo per starci) ora vive nella tab Oggetti di Tesoreria, che
+      diventa la prima sotto-tab (prima era l'ultima). Solo spostamento di
+      markup + riordino sotto-tab, nessuna logica toccata.
+- [x] 3.7 **Card degli oggetti custom in stile "vetrina reliquie" +
+      sintonizzazione** — FATTO (2026-07-31, commit `81c889e`, `?v=128`,
+      scelto da Andrea tra 3 alternative con preview — vedi Decisioni). Le
+      card create dall'utente condividono ora lo stesso markup di Lama
+      Vincolante/Scudo Magico (`.relic-acc`/`.relic-card`/`.relic-rarity`
+      di `treasury.css`) invece del vecchio stile `.item-card` semplice.
+      Nuovi campi: **rarità** (5 livelli, badge colorato) e **arte** scelta
+      da galleria di medaglioni o foto caricata (ritagliata in cerchio via
+      `FileReader`). Nuova **sintonizzazione**: un oggetto può richiederla
+      (`requiresAttunement`), in tal caso nasce non sintonizzato
+      (`attuned:false`) — arte/nome smorzati, effetti non contati in
+      `modSum`/risorse (`js/engine.js`) finché non lo sintonizzi dalla
+      gemma sulla testata dell'accordion; **massimo 3 sintonizzati insieme**
+      (`MAX_ATTUNED`). Retrocompatibilità con oggetti salvati prima del
+      redesign (fallback `itemArtOf`/`itemRarityOf`/`itemRequiresAttunementOf`/
+      `itemAttunedOf` in `js/items.js`). Verificato con un harness HTML
+      isolato che carica i moduli reali con dati finti (il gate di login
+      impediva il test diretto in app).
+- [x] 3.8 **8 arti preimpostate ridisegnate come illustrazioni vere** —
+      FATTO (2026-07-31, commit `47a8378`, `?v=129`). Le icone piatte a
+      tratto sono sostituite da 8 illustrazioni disegnate a mano nella
+      stessa tecnica di Lama Vincolante/Scudo Magico (glow radiale,
+      gradienti multipli, gemma con riflesso) — `PRESET_ART` in
+      `js/items.js`. Spada e Scudo riusano **esattamente** l'arte delle due
+      reliquie storiche (stessi path/gradienti); le altre 6 (anello,
+      amuleto, mantello, bacchetta, pozione, tomo) sono originali, scelte
+      tra alternative con preview (vedi Decisioni) — amuleto e mantello
+      hanno avuto un secondo giro dopo un riferimento visivo mandato da
+      Andrea (non copiato, solo composizione: cappuccio, drappeggio, fodera
+      visibile, collare lavorato).
+- [ ] 3.9 **Estensione degli effetti che un oggetto custom può modificare**
+      — IN CORSO (avviato 2026-07-31, Tranche 1 fatta lo stesso giorno,
+      Tranche 2 non ancora iniziata). L'app non tira mai i dadi:
+      "vantaggio" è sempre e solo una nota testuale (già vero oggi per
+      Scudo Magico: "Vantaggio ai tiri di iniziativa" è testo nella lista
+      effetti, non un modificatore), non un calcolo — questo abbassa molto
+      la difficoltà reale di gran parte della lista sotto (vedi Decisioni
+      per il dettaglio completo e il confronto col compendio
+      dungeonedraghi.it usato come riferimento). Tre tranche:
+  - [x] 3.9.a **Tranche 1 (facile, priorità alta)** — FATTO (2026-07-31,
+        `?v=130`, non ancora committato/deployato a fine sessione). Nuovo
+        effetto a **testo libero** (`{ text: '...' }` invece di
+        `{ target, value }`) nella scheda di creazione, accanto a quelli
+        numerici — pulsante separato "+ Aggiungi testo libero", riga con un
+        semplice `<input>` al posto di select+stepper; `modSum` lo ignora da
+        solo (non ha `target` da confrontare, nessuna modifica al motore
+        necessaria); righe vuote scartate al salvataggio. Nuovi bersagli
+        numerici **Velocità** (`engine.js`, riga `speedM`) e **Percezione
+        passiva** (`engine.js`, riga `passivePerception`), un rigo ciascuno
+        (`+ modSum(ch, 'velocita'/'pp')`). Verificato con un harness che
+        carica i moduli reali (`config.js`+`manual-55.js`+`engine.js`+
+        `storage.js`+`items.js`) e lo stato di default (Tharion): velocità
+        base 9 m → 12 m con un oggetto di test a +3 sintonizzato; percezione
+        passiva base 13 → 18 con un oggetto di test a +5; **ricreati per
+        prova Lama Vincolante e Scudo Magico** dalla funzionalità (bersagli
+        numerici per i +1 a colpire/danni/incantesimi, testo libero per
+        "Vantaggio contro Spaventato, Prono, Spinto" e "Vantaggio ai tiri di
+        iniziativa") — bullet indistinguibile da quelli delle due reliquie
+        vere. Nessun errore console in nessuno stato provato.
+  - [ ] 3.9.b **Tranche 2 (media)**: sezione dedicata "Resistenze &
+        Immunità" in Caratteristiche con tag strutturati (invece che solo
+        testo libero); competenza extra concessa dall'oggetto (abilità o
+        TS, tocca la logica di competenze in `stats.js`, più delicato
+        perché interagisce con le competenze di classe già esistenti);
+        sensi strutturati (Scurovisione N m, Vista Cieca...) come
+        statistica dedicata invece che testo.
+  - [ ] 3.9.c **In sospeso, da valutare se ha senso**: incantesimi
+        lanciabili dall'oggetto integrati col Grimorio (grosso lavoro per
+        un caso d'uso raro); cambio del tipo di danno dell'arma; effetti a
+        livelli/tier che si sbloccano (il meccanismo di Lama Vincolante);
+        trigger narrativi condizionali ("quando colpisci un nemico
+        Maledetto, danni extra") — probabilmente da lasciare per sempre
+        solo testo descrittivo, non ha senso modellarli uno per uno.
 
 ### Fase 4 — Level up Paladino
 *Il punto 4 della visione, la fase più grande. Dipende dalle Fasi 0 e 3.*
@@ -2145,6 +2224,46 @@ Della **Fase 5** (da sciogliere al blocco giusto; raccomandazione già annotata)
   bastone, pozione, tomo). Usi limitati opzionali → diventano una res-card
   vera nella tab Risorse, esattamente come l'attuale "Scudo magico".
   La Lama Vincolante esistente resta com'è (fuori scope, nessuna migrazione).
+
+## Decisioni prese (step 3.6-3.9)
+
+- 2026-07-31 — **Stile delle card oggetti custom (3.7)**: 3 alternative con
+  preview (A "Card Reliquia" identica a Lama Vincolante/Scudo Magico, B
+  "Galleria" a griglia stile carte da gioco, C "Lista con ritratto" righe
+  compatte) — scelta la **A**, massima coerenza visiva con le due reliquie
+  storiche anche se più ingombrante con tanti oggetti.
+- 2026-07-31 — **UX della sintonizzazione**: 3 varianti interattive con
+  preview (1 pulsante dentro la card espansa, 2 dashboard di 3 slot fissi
+  in cima, 3 gemma sulla testata dell'accordion) — scelta la **3**, la più
+  rapida da toccare; corretto un dettaglio di allineamento segnalato da
+  Andrea (la gemma va comunque riservata come spazio invisibile per gli
+  oggetti che non richiedono sintonizzazione, altrimenti i medaglioni della
+  lista non restano allineati in colonna).
+- 2026-07-31 — **Arte delle 8 icone preimpostate (3.8)**: primo giro con
+  icone a tratto semplice dentro un medaglione generico — Andrea le ha
+  respinte ("icone stilizzate che quasi non si capiscono"), chiedendo la
+  stessa tecnica di Lama Vincolante/Scudo Magico per tutte. Rifatte come
+  illustrazioni vere; per Spada e Scudo confermato di riusare *esattamente*
+  l'arte esistente invece di generarne di nuove. Mantello e Amuleto hanno
+  avuto un terzo giro dopo un'immagine di riferimento mandata da Andrea (un
+  mantello con cappuccio intero, non un semplice fermaglio): tra 3
+  alternative ciascuno, scelte la **B** per entrambi (fermaglio raffinato
+  per il mantello — non il cappuccio intero A, giudicato eccessivo per un
+  oggetto tra tanti — e medaglione runico per l'amuleto).
+- 2026-07-31 — **Perché la Tranche 1 di 3.9 è "facile"**: l'app è una
+  scheda, non un motore di gioco — non tira mai dadi. Effetti come
+  "vantaggio" non richiedono nessun calcolo, solo essere leggibili sulla
+  card: da qui la scelta di aggiungere un effetto a **testo libero** invece
+  di modellare "vantaggio"/"resistenza"/"immunità" come bersagli
+  strutturati con logica dedicata (che servirebbe SOLO a stamparli come
+  testo comunque, dato che nulla nel motore ne fa uso in un tiro). I due
+  nuovi bersagli numerici (Velocità, Percezione passiva) sono stati
+  scelti per la Tranche 1 perché il punto d'aggancio in `engine.js` è già
+  lì, un solo rigo ciascuno (`speedM`/`passivePerception` già calcolati,
+  manca solo la somma `modSum`). Riferimento usato per capire quali
+  effetti servono davvero: i 76 oggetti "non comuni" del compendio
+  dungeonedraghi.it/compendio/oggetti-magici, più i due oggetti reali di
+  Andrea (Lama Vincolante, Scudo Magico) come caso di prova concreto.
 
 ## Debiti aperti (trovati strada facendo)
 

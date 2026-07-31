@@ -7,7 +7,8 @@
  * qui in codice e producono tutti i valori derivati della scheda.
  *
  * Bersagli riconosciuti per i modificatori:
- *   'attacco', 'danni', 'cd-inc', 'att-inc', 'ca', 'iniziativa', 'ts', 'pf-max'
+ *   'attacco', 'danni', 'cd-inc', 'att-inc', 'ca', 'iniziativa', 'ts', 'pf-max',
+ *   'velocita', 'pp' (Percezione passiva — Step 3.9.a)
  *
  * Formule verificate sul PHB 2024 (PDF locale):
  *   mod = ⌊(punteggio − 10) / 2⌋ · competenza = ⌈livello/4⌉ + 1
@@ -117,6 +118,8 @@
       if (item.requiresAttunement && !item.attuned) {
         return;
       }
+      // Effetti a testo libero (Step 3.9.a) non hanno `target`: il confronto
+      // sotto li scarta da solo, nessun controllo esplicito necessario.
       (item.effects || []).forEach(function (eff) {
         if (eff.target === target) {
           total += eff.value;
@@ -202,7 +205,7 @@
         prof: prof, expertise: expertise, total: total, text: fmt(total)
       };
     });
-    var passivePerception = 10 + skills.percezione.total;
+    var passivePerception = 10 + skills.percezione.total + modSum(ch, 'pp');
 
     var armor = armorById((ch.armor || {}).id);
     var hasArmor = !!(ch.armor && ch.armor.id && ch.armor.id !== 'nessuna');
@@ -248,7 +251,8 @@
       ? (!armor || armor.cat !== 'pesante')
       : (!hasArmor && !hasShield);
     var speedBonus = (speedGateOk && klass.speedBonusM) ? (klass.speedBonusM[ch.level] || 0) : 0;
-    var speedM = (species.speedM || 9) + speedBonus + (elfLineage ? (elfLineage.speedBonusM || 0) : 0);
+    var speedM = (species.speedM || 9) + speedBonus + (elfLineage ? (elfLineage.speedBonusM || 0) : 0) +
+      modSum(ch, 'velocita');
 
     // Bonus di sottoclasse all'iniziativa (Cercatore d'Ombre): stesso filtro
     // subclass già in uso per classResources/sacredWeapon.

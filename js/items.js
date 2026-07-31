@@ -15,7 +15,10 @@
    * finché non si preme Salva, chiudere con ✕/tap-fuori scarta tutto.
    */
 
-  /* Etichette per esteso (mai sigle) dei soli 8 effetti supportati dal motore */
+  /* Etichette per esteso (mai sigle) degli effetti numerici supportati dal
+     motore. Velocità e Percezione passiva sono arrivate con lo Step 3.9.a:
+     ganci diretti su una riga di engine.js ciascuna (speedM/passivePerception
+     già calcolati, mancava solo la somma modSum). */
   var EFFECT_OPTIONS = [
     { id: 'attacco', label: 'Colpire con le armi' },
     { id: 'danni', label: 'Danni con le armi' },
@@ -24,7 +27,9 @@
     { id: 'ca', label: 'Classe Armatura' },
     { id: 'ts', label: 'Tiri Salvezza' },
     { id: 'iniziativa', label: 'Iniziativa' },
-    { id: 'pf-max', label: 'Punti Ferita massimi' }
+    { id: 'pf-max', label: 'Punti Ferita massimi' },
+    { id: 'velocita', label: 'Velocità (m)' },
+    { id: 'pp', label: 'Percezione passiva' }
   ];
 
   function effectLabel(target) {
@@ -525,37 +530,58 @@
     var list = el('div', 'effects-list');
     section.appendChild(list);
 
+    /* Un effetto è "a testo libero" (Step 3.9.a) se ha `text` invece di
+       `target`/`value`: nessun calcolo, solo una riga stampata così com'è
+       nella lista effetti della card (stesso posto di "Vantaggio ai tiri di
+       iniziativa" già scritto a mano su Scudo Magico). modSum in engine.js
+       lo ignora da solo, non avendo `target` da confrontare. */
+    function isTextEffect(eff) {
+      return eff.text !== undefined;
+    }
+
     function renderRows() {
       list.innerHTML = '';
       draft.effects.forEach(function (eff, idx) {
         var row = el('div', 'effect-row');
 
-        var select = buildSelect(EFFECT_OPTIONS, eff.target);
-        select.addEventListener('change', function () {
-          eff.target = select.value;
-        });
-        row.appendChild(select);
+        if (isTextEffect(eff)) {
+          var textInput = document.createElement('input');
+          textInput.type = 'text';
+          textInput.className = 'edit-input effect-text-input';
+          textInput.placeholder = 'Es. Vantaggio ai tiri salvezza contro incantesimi';
+          textInput.value = eff.text;
+          textInput.addEventListener('input', function () {
+            eff.text = textInput.value;
+          });
+          row.appendChild(textInput);
+        } else {
+          var select = buildSelect(EFFECT_OPTIONS, eff.target);
+          select.addEventListener('change', function () {
+            eff.target = select.value;
+          });
+          row.appendChild(select);
 
-        var stepper = el('div', 'edit-stepper');
-        var minus = el('button', 'stepper-btn minus', '−');
-        minus.type = 'button';
-        minus.setAttribute('aria-label', 'Diminuisci valore effetto');
-        var valEl = el('span', 'edit-stat-score', window.AppEngine.formatMod(eff.value));
-        var plus = el('button', 'stepper-btn plus', '+');
-        plus.type = 'button';
-        plus.setAttribute('aria-label', 'Aumenta valore effetto');
-        minus.addEventListener('click', function () {
-          eff.value = Math.max(-10, eff.value - 1);
-          valEl.textContent = window.AppEngine.formatMod(eff.value);
-        });
-        plus.addEventListener('click', function () {
-          eff.value = Math.min(10, eff.value + 1);
-          valEl.textContent = window.AppEngine.formatMod(eff.value);
-        });
-        stepper.appendChild(minus);
-        stepper.appendChild(valEl);
-        stepper.appendChild(plus);
-        row.appendChild(stepper);
+          var stepper = el('div', 'edit-stepper');
+          var minus = el('button', 'stepper-btn minus', '−');
+          minus.type = 'button';
+          minus.setAttribute('aria-label', 'Diminuisci valore effetto');
+          var valEl = el('span', 'edit-stat-score', window.AppEngine.formatMod(eff.value));
+          var plus = el('button', 'stepper-btn plus', '+');
+          plus.type = 'button';
+          plus.setAttribute('aria-label', 'Aumenta valore effetto');
+          minus.addEventListener('click', function () {
+            eff.value = Math.max(-10, eff.value - 1);
+            valEl.textContent = window.AppEngine.formatMod(eff.value);
+          });
+          plus.addEventListener('click', function () {
+            eff.value = Math.min(10, eff.value + 1);
+            valEl.textContent = window.AppEngine.formatMod(eff.value);
+          });
+          stepper.appendChild(minus);
+          stepper.appendChild(valEl);
+          stepper.appendChild(plus);
+          row.appendChild(stepper);
+        }
 
         var removeBtn = el('button', 'effect-remove-btn', '✕');
         removeBtn.type = 'button';
@@ -571,13 +597,22 @@
     }
     renderRows();
 
+    var addRow = el('div', 'effect-add-row');
     var addBtn = el('button', 'effect-add-btn', '+ Aggiungi effetto');
     addBtn.type = 'button';
     addBtn.addEventListener('click', function () {
       draft.effects.push({ target: EFFECT_OPTIONS[0].id, value: 1 });
       renderRows();
     });
-    section.appendChild(addBtn);
+    var addTextBtn = el('button', 'effect-add-btn effect-add-text-btn', '+ Aggiungi testo libero');
+    addTextBtn.type = 'button';
+    addTextBtn.addEventListener('click', function () {
+      draft.effects.push({ text: '' });
+      renderRows();
+    });
+    addRow.appendChild(addBtn);
+    addRow.appendChild(addTextBtn);
+    section.appendChild(addRow);
 
     return section;
   }
@@ -645,7 +680,7 @@
       art: itemArtOf(existingItem),
       rarity: itemRarityOf(existingItem),
       effects: (existingItem.effects || []).map(function (e) {
-        return { target: e.target, value: e.value };
+        return e.text !== undefined ? { text: e.text } : { target: e.target, value: e.value };
       }),
       usesMax: existingItem.usesMax || 0,
       requiresAttunement: itemRequiresAttunementOf(existingItem),
@@ -695,6 +730,13 @@
 
         return;
       }
+      // Righe di testo libero lasciate vuote non vanno salvate (diventerebbero
+      // un bullet senza contenuto nella lista effetti della card).
+      draft.effects = draft.effects.filter(function (eff) {
+        return eff.text === undefined || eff.text.trim() !== '';
+      }).map(function (eff) {
+        return eff.text !== undefined ? { text: eff.text.trim() } : eff;
+      });
       commitState(function (character) {
         character.items = character.items || [];
         if (isEdit) {
@@ -867,7 +909,10 @@
       if ((item.effects || []).length) {
         var ul = el('ul', 'relic-effects');
         item.effects.forEach(function (eff) {
-          ul.appendChild(el('li', null, window.AppEngine.formatMod(eff.value) + ' ' + effectLabel(eff.target)));
+          var line = eff.text !== undefined
+            ? eff.text
+            : window.AppEngine.formatMod(eff.value) + ' ' + effectLabel(eff.target);
+          ul.appendChild(el('li', null, line));
         });
         card.appendChild(ul);
       }

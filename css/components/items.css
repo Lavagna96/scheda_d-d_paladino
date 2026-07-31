@@ -273,6 +273,13 @@
   margin-bottom: 0;
 }
 
+/* riga a testo libero (Step 3.9.a): stessa riga, un input al posto di
+   select+stepper — niente calcolo, solo un bullet stampato così com'è */
+.effect-row .effect-text-input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
 .effect-remove-btn {
   width: 34px;
   height: 34px;
@@ -290,10 +297,17 @@
   flex-shrink: 0;
 }
 
+.effect-add-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
 .effect-add-btn {
+  flex: 1;
   width: 100%;
   padding: 10px;
-  margin-bottom: var(--space-3);
+  margin-bottom: 0;
   border: 1px dashed var(--border-gold-soft);
   border-radius: var(--radius-md);
   background: transparent;
