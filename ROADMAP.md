@@ -9,7 +9,7 @@
 
 ## Dove siamo
 
-- **Ultimo aggiornamento:** 2026-07-30
+- **Ultimo aggiornamento:** 2026-07-31
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
   GitHub Pages. L'intera visione originale (login, dashboard multi-personaggio,
   editing, oggetti magici, level-up guidato per il Paladino) è realizzata e
@@ -24,19 +24,31 @@
   DEPLOYATO** (verificato il 2026-07-30: `origin/main` allineato a `HEAD`,
   sito live serve `?v=114` e contiene `buildSegmentedRow` — la roadmap non
   era stata aggiornata dopo il deploy avvenuto a fine sessione 2026-07-29).
-- **Prossimo passo:** Stregone, Mago, Warlock, Guerriero (2/3), fix Arma
-  Sacra, Ladro (2/3) e **Monaco (4/4, completo!)** committati e **deployati**
-  (verificato il 2026-07-30: run Pages verde, sito live su `?v=120`, tutte e
-  11 le classi presenti). **Ranger (4/4, completo!)** fatto, verificato in
-  locale (`?v=121`) — **ancora da committare e deployare**. Due sottoclassi
-  restano rimandate per lo stesso motivo (Cavaliere Occulto del Guerriero,
-  Truffatore Arcano del Ladro): richiedono un incantatore legato alla
-  SOTTOCLASSE con la lista incantesimi del Mago — architettura non ancora
-  supportata, da discutere con Andrea prima di procedere.
-  Restano poi le altre 6 classi con sottoclasse incompleta (Chierico, Druido,
-  Bardo, Stregone, Mago, Warlock — quest'ultime 3 con 1 sola sottoclasse
-  modellata ciascuna, appena create), e i collaudi cloud mai confermati
-  sotto.
+- **Prossimo passo:** Guerriero (2/3), Ladro (2/3), Monaco (4/4) e Ranger
+  (4/4) fatti nelle sessioni precedenti — **verificare se già committati e
+  deployati** prima di continuare (l'ultimo `git log` noto arrivava a
+  `1536078`, sottoclassi Ranger). **Chierico ora 4/4 (completo!)**: aggiunti
+  Dominio della Luce, Dominio dell'Inganno e Dominio della Guerra (Vita era
+  già fatto) — dati da PHB p.72-76, manuale `version` 43→44, cache busting
+  `?v=122`. Un solo incantesimo nuovo nel catalogo, **Manto del Crociato**
+  (Crusader's Mantle, mancava per il Dominio della Guerra); tutti gli altri
+  20 incantesimi dei tre domini esistevano già nel catalogo (riusati da
+  altre classi) e hanno solo ricevuto il tag `'chierico'` in `classes`
+  (stesso criterio già in uso per Aura di Vita/Guardia della Morte del
+  Dominio della Vita). Verificato in locale: Tratti di un Chierico Dominio
+  della Guerra livello 9 mostrano Colpo Guidato/Sacerdote di Guerra (3°) e
+  Benedizione del Dio della Guerra (6°) nell'ordine giusto; Grimorio mostra
+  tutti gli 8 incantesimi FISSI del dominio (inclusa Manto del Crociato,
+  meta corretta); level-up 2→3 mostra le 4 card Dominio con conferma
+  bloccata finché non se ne sceglie una, PF 17→24 applicati; Tharion
+  (Paladino) invariato; console pulita in ogni prova. **Ancora da
+  committare e deployare.**
+  Restano da completare: le due sottoclasse rimandate (Cavaliere Occulto del
+  Guerriero, Truffatore Arcano del Ladro — richiedono un incantatore legato
+  alla SOTTOCLASSE con la lista del Mago, architettura non ancora
+  supportata, da discutere con Andrea) e le altre 5 classi con sottoclasse
+  incompleta (Druido, Bardo, Stregone, Mago, Warlock — queste ultime 3 con
+  1 sola sottoclasse modellata ciascuna), oltre ai collaudi cloud sotto.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1395,6 +1407,53 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      pulizia): personaggio creato con tutti i campi corretti. Tharion
      (Paladino, che usa `faro-speranza`/`guardiano-fede` nel giuramento di
      Vendetta/Gloria) verificato invariato. Console pulita in ogni prova.
+   → **Completato con gli altri 3 Domini (2026-07-31), `?v=122`, manuale
+     `version` 43→44.** Il Chierico ne ha 4 nel PHB (Vita, Luce, Inganno,
+     Guerra); mancavano gli altri tre. Aggiunti ai dati:
+     - **Dominio della Luce** (p.73-74): Irradiare l'Alba + Bagliore di
+       Guardia a 3, Bagliore di Guardia Migliorato a 6, Corona di Luce a 17;
+       incantesimi Mani Ardenti/Fuoco Fatuo/Raggio Infuocato/Vedere
+       l'Invisibile, Luce Diurna/Palla di Fuoco, Occhio Arcano/Muro di
+       Fuoco, Colonna di Fiamma/Scrutare.
+     - **Dominio dell'Inganno** (p.74-75): Benedizione dell'Ingannatore +
+       Invocare Duplicità a 3, Trasposizione dell'Ingannatore a 6, Duplicità
+       Migliorata a 17; incantesimi Ammaliare Persone/Travisamento/
+       Invisibilità/Passo senza Tracce, Motivo Ipnotico/Non Individuazione,
+       Confusione/Porta Dimensionale, Dominare Persona/Modificare Memoria.
+     - **Dominio della Guerra** (p.75-76): Colpo Guidato + Sacerdote di
+       Guerra a 3, Benedizione del Dio della Guerra a 6, Avatar di Battaglia
+       a 17; incantesimi Dardo di Guida/Arma Magica/Scudo della Fede/Arma
+       Spirituale, Manto del Crociato/Guardiani Spirituali, Scudo di
+       Fuoco/Libertà di Movimento, Tenere Mostri/Colpo del Vento d'Acciaio.
+     Nessuna risorsa nuova in nessuno dei tre: le abilità "X volte pari al
+     modificatore di Saggezza" restano descrittive in prosa, stesso
+     trattamento già dato a Vita (Preservare la Vita) e alle altre classi.
+     **Un solo incantesimo nuovo nel catalogo**: Manto del Crociato
+     (Crusader's Mantle, PHB p.74 — mancava, serviva solo qui), riassunto
+     originale con `classes: ['paladino', 'chierico']` (è anche uno
+     spell di classe del Paladino, non solo un dono del Dominio). Tutti gli
+     altri 20 incantesimi dei tre domini esistevano già nel catalogo
+     (condivisi con Bardo/Stregone/Mago/Druido/Ranger/Warlock/Paladino) e
+     hanno ricevuto solo il tag `'chierico'` aggiunto a `classes`, stesso
+     criterio già usato per Aura di Vita/Guardia della Morte nel Dominio
+     della Vita (un Dominio dà accesso a un incantesimo anche se non è
+     nella lista base del Chierico). **Bug evitato, non introdotto**: prima
+     di aggiungere ogni incantesimo ho controllato il catalogo esistente
+     per nome/descrizione — 5 dei "nuovi" spell previsti (Burning Hands,
+     Scorching Ray, Flame Strike, Disguise Self, Hold Monster) esistevano
+     già sotto traduzioni diverse da quelle attese (Mani Ardenti, Raggio
+     Infuocato, Colonna di Fiamma — quest'ultima già taggata `chierico` da
+     prima —, Travisamento, Tenere Mostri): evitati 5 doppioni.
+     Verificato in locale: Chierico di prova livello 9 Dominio della Guerra
+     — Tratti mostrano Colpo Guidato/Sacerdote di Guerra (liv. 3) e
+     Benedizione del Dio della Guerra (liv. 6) nell'ordine giusto (Avatar di
+     Battaglia liv. 17 correttamente assente); Grimorio mostra tutti gli 8
+     incantesimi del dominio come FISSI nelle rispettive schede di livello,
+     inclusa Manto del Crociato con meta corretta; level-up 2→3 mostra le 4
+     card Dominio (Vita/Luce/Inganno/Guerra) con "Conferma" bloccato finché
+     non se ne sceglie una, scegliendo Guerra applica livello 3 e PF
+     17→24; Tharion (Paladino) verificato invariato (CA 20, PF 60). Console
+     pulita in ogni prova.
 7. [x] **Druido** (full) — Forma Selvatica, Circolo.
    → **Fatto (2026-07-28, `?v=98`, manuale `version` 34→35)**: privilegi 1→20
    dal PDF (p.79-89), sottoclasse **Circolo della Luna** (p.85-86, la più
