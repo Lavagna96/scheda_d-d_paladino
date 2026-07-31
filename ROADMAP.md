@@ -25,30 +25,52 @@
   sito live serve `?v=114` e contiene `buildSegmentedRow` — la roadmap non
   era stata aggiornata dopo il deploy avvenuto a fine sessione 2026-07-29).
 - **Prossimo passo:** Guerriero (2/3), Ladro (2/3), Monaco (4/4) e Ranger
-  (4/4) fatti nelle sessioni precedenti — **verificare se già committati e
-  deployati** prima di continuare (l'ultimo `git log` noto arrivava a
-  `1536078`, sottoclassi Ranger). **Chierico ora 4/4 (completo!)**: aggiunti
-  Dominio della Luce, Dominio dell'Inganno e Dominio della Guerra (Vita era
-  già fatto) — dati da PHB p.72-76, manuale `version` 43→44, cache busting
-  `?v=122`. Un solo incantesimo nuovo nel catalogo, **Manto del Crociato**
-  (Crusader's Mantle, mancava per il Dominio della Guerra); tutti gli altri
-  20 incantesimi dei tre domini esistevano già nel catalogo (riusati da
-  altre classi) e hanno solo ricevuto il tag `'chierico'` in `classes`
-  (stesso criterio già in uso per Aura di Vita/Guardia della Morte del
-  Dominio della Vita). Verificato in locale: Tratti di un Chierico Dominio
-  della Guerra livello 9 mostrano Colpo Guidato/Sacerdote di Guerra (3°) e
-  Benedizione del Dio della Guerra (6°) nell'ordine giusto; Grimorio mostra
-  tutti gli 8 incantesimi FISSI del dominio (inclusa Manto del Crociato,
-  meta corretta); level-up 2→3 mostra le 4 card Dominio con conferma
-  bloccata finché non se ne sceglie una, PF 17→24 applicati; Tharion
-  (Paladino) invariato; console pulita in ogni prova. **Ancora da
-  committare e deployare.**
-  Restano da completare: le due sottoclasse rimandate (Cavaliere Occulto del
-  Guerriero, Truffatore Arcano del Ladro — richiedono un incantatore legato
-  alla SOTTOCLASSE con la lista del Mago, architettura non ancora
-  supportata, da discutere con Andrea) e le altre 5 classi con sottoclasse
-  incompleta (Druido, Bardo, Stregone, Mago, Warlock — queste ultime 3 con
-  1 sola sottoclasse modellata ciascuna), oltre ai collaudi cloud sotto.
+  (4/4) fatti nelle sessioni precedenti risultano tutti **committati**
+  (verificato il 2026-07-31 con `git log`/`git fetch`: `origin/main` arriva
+  fino ad `a1d8ce3`, Monaco — Guerriero/Ladro inclusi — e l'Actions relativo
+  è verde; solo il commit Ranger `1536078` restava locale, mai pushato).
+  **Chierico ora 4/4 (completo!)**, committato in locale (`9df2c17`, non
+  ancora deployato): aggiunti Dominio della Luce, Dominio dell'Inganno e
+  Dominio della Guerra (Vita era già fatto) — dati da PHB p.72-76, manuale
+  `version` 43→44, cache busting `?v=122`. Un solo incantesimo nuovo nel
+  catalogo, **Manto del Crociato** (Crusader's Mantle, mancava per il
+  Dominio della Guerra); tutti gli altri 20 incantesimi dei tre domini
+  esistevano già nel catalogo (riusati da altre classi) e hanno solo
+  ricevuto il tag `'chierico'` in `classes` (stesso criterio già in uso per
+  Aura di Vita/Guardia della Morte del Dominio della Vita). Verificato in
+  locale: Tratti di un Chierico Dominio della Guerra livello 9 corretti,
+  Grimorio con tutti gli 8 incantesimi FISSI del dominio, level-up 2→3 con
+  le 4 card Dominio e conferma bloccata finché non se ne sceglie una,
+  Tharion invariato, console pulita.
+  **Druido ora 3/4** (Luna era già fatto): aggiunti Circolo del Mare e
+  Circolo delle Stelle (PHB p.86-88), manuale `version` 44→45, cache
+  busting `?v=123` — **non ancora committato**. Nessuna risorsa nuova
+  (come i Domini del Chierico): le abilità "X volte pari al modificatore di
+  Saggezza" restano descrittive, riusando Forma Selvatica già tracciata per
+  le trasformazioni (Ira del Mare, Forma Stellare). 5 incantesimi esistenti
+  hanno ricevuto il tag `'druido'` (Raggio di Gelo, Frantumare, Fulmine,
+  Tenere Mostri, Dardo di Guida); nessun incantesimo nuovo nel catalogo.
+  Verificato in locale: Druido Circolo delle Stelle livello 10 con Tratti
+  (Mappa Stellare/Forma Stellare a 3, Presagio Cosmico a 6, Costellazioni
+  Scintillanti a 10, Piena di Stelle a 14 correttamente assente) e Grimorio
+  (Guida/Dardo di Guida FISSI) corretti; level-up 2→3 mostra 3 card
+  (Luna/Mare/Stelle, Terra correttamente assente); Tharion invariato;
+  console pulita.
+  **Circolo della Terra rimandato** (quarto e ultimo del Druido): nel PHB
+  richiede una scelta di tipo di terreno (arido/polare/temperato/tropicale)
+  da poter cambiare a ogni riposo lungo, con una tabella di incantesimi
+  diversa per ciascun tipo — un picker "sotto-scelta dentro la sottoclasse"
+  che non esiste ancora nell'app (stessa natura di problema del Cavaliere
+  Occulto/Truffatore Arcano, serve una decisione di design con Andrea prima
+  di modellarlo: dove vive la scelta — sheet, wizard, level-up — e se va
+  davvero ricalcolata a ogni riposo lungo o scelta una volta come una
+  sottoclasse).
+  Restano da completare: le due sottoclassi rimandate del Guerriero/Ladro
+  (stesso motivo del Cavaliere Occulto/Truffatore Arcano: incantatore legato
+  alla SOTTOCLASSE con lista del Mago), il Circolo della Terra del Druido
+  sopra, e le altre 4 classi con sottoclasse incompleta (Bardo, Stregone,
+  Mago, Warlock — queste ultime 3 con 1 sola sottoclasse modellata
+  ciascuna), oltre ai collaudi cloud sotto.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1496,6 +1518,55 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      Vincolante" nella tab Tratti (`index.html`) è HTML statico, non
      condizionale — compare per QUALUNQUE personaggio, non solo per Tharion.
      Segnalato con `spawn_task` invece di un fix silenzioso fuori scope.
+   → **Completato con Mare e Stelle (2026-07-31), `?v=123`, manuale
+     `version` 44→45.** Il Druido ne ha 4 nel PHB (Terra, Luna, Mare,
+     Stelle); Luna c'era già. Aggiunti ai dati:
+     - **Circolo del Mare** (p.86-87): Ira del Mare a 3 (spende un uso di
+       Forma Selvatica per un'Emanazione di spruzzi oceanici, danno Freddo
+       + spinta), Affinità Acquatica a 6 (Emanazione più grande + velocità
+       di nuoto), Nato dalla Tempesta a 10 (velocità di volo + resistenze
+       mentre attiva), Dono Oceanico a 14 (Emanazione su un alleato);
+       incantesimi Nube di Nebbia/Raffica di Vento/Raggio di Gelo/
+       Frantumare/Onda Tonante, Fulmine/Respirare in Acqua, Controllare
+       Acqua/Tempesta di Ghiaccio, Evocare Elementale/Tenere Mostri.
+     - **Circolo delle Stelle** (p.87-88): Mappa Stellare a 3 (Guida e
+       Dardo di Guida sempre preparati, lanci gratis di Dardo di Guida pari
+       al mod. Saggezza), Forma Stellare a 3 (spende un uso di Forma
+       Selvatica per una forma luminosa con 3 costellazioni a scelta:
+       Arciere/Calice/Drago), Presagio Cosmico a 6 (reazione fausta/infausta
+       pari al mod. Saggezza), Costellazioni Scintillanti a 10 (potenzia le
+       3 costellazioni), Piena di Stelle a 14 (resistenza fisica). Nota: a
+       differenza degli altri circoli, le Stelle non hanno una tabella di
+       incantesimi che sale con il livello — solo i due fissi di Mappa
+       Stellare al 3°, l'unico caso del genere fra tutte le sottoclassi
+       modellate finora.
+     Nessuna risorsa nuova in nessuno dei due, come già per i Domini del
+     Chierico: le abilità "X volte pari al modificatore di Saggezza"
+     restano descrittive in prosa, e le trasformazioni (Ira del Mare, Forma
+     Stellare) riusano semplicemente un uso di Forma Selvatica già
+     tracciata, stesso principio del Passo Lunare/Passo Ombroso di altre
+     sottoclassi. **Nessun incantesimo nuovo nel catalogo**: tutti e 11 gli
+     incantesimi dei due circoli esistevano già (condivisi con
+     Ranger/Stregone/Mago/Bardo/Chierico); 5 di questi (Raggio di Gelo,
+     Frantumare, Fulmine, Tenere Mostri, Dardo di Guida) hanno ricevuto solo
+     il tag `'druido'` aggiunto a `classes`.
+     **Circolo della Terra deliberatamente rimandato**: richiede una scelta
+     di tipo di terreno (arido/polare/temperato/tropicale) ricalcolabile a
+     ogni riposo lungo, con una tabella di incantesimi diversa per tipo — un
+     meccanismo di "sotto-scelta dentro la sottoclasse" che l'app non ha
+     ancora (i tre circoli fatti finora, come i quattro Domini del Chierico,
+     hanno tutti un'unica tabella fissa). Stessa natura di problema del
+     Cavaliere Occulto/Truffatore Arcano rimandati: serve una decisione di
+     design con Andrea (dove vive il picker, se va davvero ricalcolato ogni
+     riposo lungo o scelto una volta) prima di modellarlo.
+     Verificato in locale: Tratti di un Druido Circolo delle Stelle livello
+     10 mostrano Mappa Stellare/Forma Stellare (3°), Presagio Cosmico (6°) e
+     Costellazioni Scintillanti (10°) nell'ordine giusto (Piena di Stelle,
+     14°, correttamente assente); Grimorio mostra Guida e Dardo di Guida
+     FISSI; level-up 2→3 mostra le 3 card Circolo (Luna/Mare/Stelle, Terra
+     correttamente assente) con "Conferma" bloccato finché non se ne
+     sceglie una; Tharion (Paladino) verificato invariato (CA 20, PF 60).
+     Console pulita in ogni prova.
 8. [x] **Bardo** (full) — Ispirazione Bardica, Collegio.
    → **Fatto (2026-07-28, `?v=100`, manuale `version` 35→36)**: privilegi 1→20
    dal PDF (p.59-61), sottoclasse **Collegio della Sapienza** (p.64, il più

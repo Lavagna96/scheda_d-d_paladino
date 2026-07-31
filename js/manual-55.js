@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 44,
+  version: 45,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -671,12 +671,16 @@ window.MANUAL_55 = {
           { name: 'Arcidruido', desc: 'La vitalità della natura ti scorre dentro. Forma Selvatica Perenne: quando tiri Iniziativa senza usi di Forma Selvatica, ne recuperi uno. Mago della Natura: puoi convertire usi di Forma Selvatica in uno slot incantesimo (senza azione), con ogni uso che vale 2 livelli di slot; una sola volta prima di un riposo lungo. Longevità: invecchi molto più lentamente (un anno ogni dieci che passano).' }
         ]
       },
-      /* Circoli del Druido: per ora solo Circolo della Luna (PHB p.85-86, il
-         più semplice dei quattro da modellare — niente scelta di terreno da
-         rifare a ogni riposo lungo come la Terra, niente risorsa nuova come
-         Mare/Stelle: solo incantesimi sempre preparati per livello, stesso
-         trattamento del Dominio della Vita del Chierico). Terra, Mare e
-         Stelle si aggiungono in seguito. */
+      /* Circoli del Druido: Luna, Mare e Stelle fatti (PHB p.85-88) — tutti e
+         tre solo incantesimi sempre preparati + abilità descrittive ("X
+         volte pari al modificatore di Saggezza"), nessuna risorsa nuova
+         oltre a Forma Selvatica già tracciata, stesso trattamento dato ai
+         Domini del Chierico. Circolo della Terra resta fuori: richiede una
+         scelta di tipo di terreno (arido/polare/temperato/tropicale) da
+         poter cambiare a ogni riposo lungo, con incantesimi diversi per
+         tipo — un picker che non esiste ancora nell'app, da discutere con
+         Andrea prima di modellarlo (stessa natura di problema del Cavaliere
+         Occulto/Truffatore Arcano rimandati). */
       subclasses: {
         luna: {
           name: 'Circolo della Luna',
@@ -709,6 +713,70 @@ window.MANUAL_55 = {
             ],
             14: [
               { name: 'Forma Lunare', desc: 'Una volta per turno, quando colpisci con un attacco in Forma Selvatica, puoi infliggere 2d10 danni Radiosi extra. Inoltre, quando usi Passo Lunare puoi teletrasportare con te anche una creatura volontaria entro 3 m.' }
+            ]
+          }
+        },
+        mare: {
+          name: 'Circolo del Mare',
+          tenets: 'Diventa tutt\'uno con le maree e le tempeste, canalizzando la furia dell\'oceano.',
+          spellsByLevel: {
+            3: [
+              { id: 'nube-di-nebbia', name: 'Nube di Nebbia' },
+              { id: 'raffica-di-vento', name: 'Raffica di Vento' },
+              { id: 'raggio-di-gelo', name: 'Raggio di Gelo' },
+              { id: 'frantumare', name: 'Frantumare' },
+              { id: 'onda-tonante', name: 'Onda Tonante' }
+            ],
+            5: [
+              { id: 'fulmine', name: 'Fulmine' },
+              { id: 'respirare-in-acqua', name: 'Respirare in Acqua' }
+            ],
+            7: [
+              { id: 'controllare-acqua', name: 'Controllare Acqua' },
+              { id: 'tempesta-di-ghiaccio', name: 'Tempesta di Ghiaccio' }
+            ],
+            9: [
+              { id: 'evocare-elementale', name: 'Evocare Elementale' },
+              { id: 'tenere-mostri', name: 'Tenere Mostri' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Ira del Mare', desc: 'Come azione bonus, spendi un uso di Forma Selvatica per manifestare per 10 minuti un\'Emanazione di 1,5 m di spruzzi oceanici attorno a te (finché non la dissolvi, la rimanifesti o sei Incapacitato). Quando la manifesti, e poi come azione bonus nei turni successivi, scegli una creatura nell\'Emanazione: fa un TS Costituzione o subisce danni da Freddo (un numero di d6 pari al tuo modificatore di Saggezza, minimo 1) e viene spinta fino a 4,5 m se non più grande di Grande.' }
+            ],
+            6: [
+              { name: 'Affinità Acquatica', desc: 'L\'Emanazione di Ira del Mare cresce a 3 m di raggio. Ottieni inoltre una velocità di nuoto pari alla tua velocità.' }
+            ],
+            10: [
+              { name: 'Nato dalla Tempesta', desc: 'Finché Ira del Mare è attiva, ottieni anche una velocità di volo pari alla tua velocità e resistenza ai danni da Freddo, Fulmine e Tuono.' }
+            ],
+            14: [
+              { name: 'Dono Oceanico', desc: 'Puoi manifestare l\'Emanazione di Ira del Mare attorno a una creatura volontaria entro 18 m invece che su te stesso, che ne usa la tua CD e il tuo modificatore di Saggezza; spendendo due usi di Forma Selvatica puoi averla attorno a entrambi contemporaneamente.' }
+            ]
+          }
+        },
+        stelle: {
+          name: 'Circolo delle Stelle',
+          tenets: 'Insegue i segreti nascosti tra le costellazioni per imbrigliare i poteri del cosmo.',
+          spellsByLevel: {
+            3: [
+              { id: 'guida', name: 'Guida' },
+              { id: 'dardo-di-guida', name: 'Dardo di Guida' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Mappa Stellare', desc: 'Crei una piccola mappa celeste che usi come focus per gli incantesimi da druido: mentre la tieni hai sempre preparati Guida e Dardo di Guida, e puoi lanciare Dardo di Guida senza spendere uno slot un numero di volte pari al tuo modificatore di Saggezza (minimo 1), recuperando tutti gli usi al riposo lungo. Se la perdi, una cerimonia di un\'ora durante un riposo la ricrea.' },
+              { name: 'Forma Stellare', desc: 'Come azione bonus, spendi un uso di Forma Selvatica per assumere per 10 minuti una forma stellare (finché non la dissolvi, la riusi o sei Incapacitato): mantieni le tue statistiche ma emetti Luce Intensa in 3 m e Fioca per altri 3 m, e scegli una costellazione con un beneficio finché dura. Arciere: come azione bonus scagli una freccia luminosa contro una creatura entro 18 m, 1d8 + Saggezza danni Radiosi se colpisci. Calice: quando lanci un incantesimo con uno slot che restituisce PF, tu o un\'altra creatura entro 9 m ne recuperate altri 1d8 + Saggezza. Drago: puoi trattare un tiro di 9 o meno come 10 per prove di Intelligenza, Saggezza o TS di Costituzione per mantenere la concentrazione.' }
+            ],
+            6: [
+              { name: 'Presagio Cosmico', desc: 'Al termine di un riposo lungo, consulti la Mappa Stellare e tiri un dado: fino al prossimo riposo lungo ottieni una reazione speciale, usabile un numero di volte pari al tuo modificatore di Saggezza (minimo 1). Fausto (pari): quando vedi una creatura entro 9 m fare una Prova, tiri 1d6 e lo sommi al risultato. Infausto (dispari): stesso innesco, ma sottrai 1d6 dal risultato.' }
+            ],
+            10: [
+              { name: 'Costellazioni Scintillanti', desc: 'In Forma Stellare, Arciere e Calice salgono a 2d8; mentre Drago è attivo ottieni anche una velocità di volo di 6 m e puoi planare. Puoi inoltre cambiare costellazione all\'inizio di ogni tuo turno.' }
+            ],
+            14: [
+              { name: 'Piena di Stelle', desc: 'In Forma Stellare diventi parzialmente incorporeo, ottenendo resistenza ai danni Contundenti, Perforanti e Taglienti.' }
             ]
           }
         }
@@ -2462,7 +2530,7 @@ window.MANUAL_55 = {
   spells: [
     /* ===== 1° livello ===== */
     { id: 'dardo-di-guida', name: 'Dardo di Guida', level: 1, school: 'Evocazione',
-      classes: ['chierico'],
+      classes: ['chierico', 'druido'],
       meta: 'Azione · 36 m · 1 round · V, S',
       desc: 'Attacco con incantesimo a distanza: 4d6 danni radiosi se colpisci, e il prossimo tiro per colpire contro il bersaglio prima della fine del tuo turno successivo ha vantaggio. +1d6 per ogni slot oltre il 1°.' },
     { id: 'colpo-intrappolante', name: 'Colpo Intrappolante', level: 1, school: 'Convocazione',
@@ -2685,7 +2753,7 @@ window.MANUAL_55 = {
       meta: '10 minuti · Sé · Istantaneo · V, S, M (incenso e strisce d\'avorio, consumati)',
       desc: 'Nomini o descrivi una persona, un luogo o un oggetto famosi: ricevi un riassunto delle informazioni leggendarie che li riguardano, decise dal master.' },
     { id: 'tenere-mostri', name: 'Tenere Mostri', level: 5, school: 'Incantamento',
-      classes: ['bardo', 'stregone', 'warlock', 'mago', 'chierico'],
+      classes: ['bardo', 'stregone', 'warlock', 'mago', 'chierico', 'druido'],
       meta: 'Azione · 27 m · 1 min CONC · V, S, M',
       desc: 'Una creatura a vista fa TS Saggezza o resta Paralizzata finché dura; ripete il TS alla fine di ogni suo turno. +1 bersaglio per ogni slot oltre il 5°.' },
     { id: 'passo-dellalbero', name: 'Passo dell\'Albero', level: 5, school: 'Convocazione',
@@ -3373,7 +3441,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Sé · 1 ora · V, S, M (un pizzico di talco)',
       desc: 'Per la durata vedi le creature e gli oggetti Invisibili come se fossero visibili, e puoi vedere nel Piano Etereo (le cose lì appaiono spettrali).' },
     { id: 'frantumare', name: 'Frantumare', level: 2, school: 'Evocazione',
-      classes: ['bardo', 'stregone', 'mago'],
+      classes: ['bardo', 'stregone', 'mago', 'druido'],
       meta: 'Azione · 18 m · Istantaneo · V, S, M (una scheggia di mica)',
       desc: 'Un rumore fragoroso erompe in una sfera di 3 m entro gittata: le creature fanno TS Costituzione, subendo 3d8 tuono (metà se superano); i Costrutti hanno svantaggio al TS. Colpisce anche oggetti non magici non indossati o trasportati nell\'area. +1d8 per ogni slot oltre il 2°.' },
 
@@ -3917,7 +3985,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Tocco · 1 ora · V, M (una lucciola o del muschio fosforescente)',
       desc: 'Tocchi un oggetto Grande o più piccolo non indossato né trasportato da altri: finché dura, emana luce intensa in 6 m e fioca per altri 6 m (colore a scelta). Coprirlo con qualcosa di opaco blocca la luce; l\'incantesimo finisce se lo rilanci.' },
     { id: 'raggio-di-gelo', name: 'Raggio di Gelo', level: 0, school: 'Evocazione',
-      classes: ['stregone', 'mago'],
+      classes: ['stregone', 'mago', 'druido'],
       meta: 'Azione · 18 m · Istantaneo · V, S',
       desc: 'Un raggio gelido color bianco-blu sfreccia verso una creatura entro gittata: attacco con incantesimo a distanza, 1d8 freddo se colpisci e la sua velocità si riduce di 3 m fino al tuo prossimo turno. Il danno sale a 2d8 al 5° livello, 3d8 all\'11°, 4d8 al 17°.' },
     { id: 'presa-elettrizzante', name: 'Presa Elettrizzante', level: 0, school: 'Evocazione',
@@ -4001,7 +4069,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 9 m · 1 min CONC · V, S, M (una scaglia di radice di liquirizia)',
       desc: 'Una creatura volontaria entro gittata raddoppia la Velocità, ottiene +2 alla CA, vantaggio ai TS di Destrezza e un\'azione aggiuntiva ogni turno (solo Attacco singolo, Scatto, Disimpegno, Nascondersi o Utilizzare). Alla fine dell\'incantesimo il bersaglio è Incapacitato con Velocità 0 fino alla fine del turno successivo.' },
     { id: 'fulmine', name: 'Fulmine', level: 3, school: 'Evocazione',
-      classes: ['stregone', 'mago'],
+      classes: ['stregone', 'mago', 'druido'],
       meta: 'Azione · Sé · Istantaneo · V, S, M (un po\' di pelo e un\'asta di cristallo)',
       desc: 'Una scarica fulminea forma una Linea di 30 m per 1,5 m nella direzione che scegli: le creature nella Linea fanno TS Destrezza o subiscono 8d6 fulmine (metà se superano). +1d6 per ogni slot oltre il 3°.' },
     { id: 'sfera-vetriolica', name: 'Sfera Vetriolica', level: 4, school: 'Evocazione',
