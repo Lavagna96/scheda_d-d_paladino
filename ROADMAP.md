@@ -104,7 +104,7 @@
   stregone, non solo la classe) e la stessa CA a due caratteristiche
   (10+DES+CAR) del Collegio della Danza del Bardo. Stessa natura di
   problema, da discutere con Andrea insieme agli altri.
-  **Mago ora 3/4** (Divinazione era già fatto), **non ancora committato**:
+  **Mago ora 3/4** (Divinazione era già fatto), committato (`32f0e48`):
   aggiunte Tradizione dell'Evocazione e Tradizione dell'Illusione (PHB
   p.171-174), manuale `version` 47→48, cache busting `?v=126`. **Rivalutato
   rispetto alla nota precedente**: "danno extra di Evocazione" e "cantrip
@@ -128,15 +128,54 @@
   lanciando incantesimi di Abiurazione — un tipo di risorsa mai visto
   (non "N usi" ma un pool di PF con assorbimento/rigenerazione), unico vero
   blocco di architettura fra le quattro tradizioni del Mago.
+  **Warlock ora 4/4 (completo!)** (Grande Antico era già fatto), committato
+  (`c0e9202` — da un'altra sessione in parallelo su questa stessa cartella,
+  che ha ripreso fedelmente questo lavoro appena finito di verificare):
+  aggiunti Patto del Fatato, Patto del Celestiale e Patto dell'Immondo (PHB
+  p.157-163), manuale `version` 48→49, cache busting `?v=127`. **Rivalutata
+  la nota precedente** (che
+  dava per bloccati tutti e tre): Passi del Fatato (Fatato) e Fortuna del
+  Signore Oscuro (Immondo) sono "X volte pari al mod. Carisma, riposo
+  lungo" — lo stesso pattern lasciato descrittivo in ogni classe di questa
+  sessione, nessuna risorsa nuova. **Solo Luce Guaritrice (Celestiale)**
+  era un vero pool (dadi da d6, il cui numero scala per LIVELLO — 1+livello
+  — non per modificatore), ma **la soluzione esisteva già nel motore**: il
+  filtro `subclass` su `classResources` (già usato da Dadi Superiorità/
+  Energia Psionica del Guerriero) permette di dichiarare una risorsa che
+  vale solo per una sottoclasse specifica. Aggiunta come `healingLight` nei
+  `classResources` del Warlock con `subclass: 'celestiale'`, stesso
+  `kind:'uses'` con `byLevel` — **zero righe di codice nuove nel motore**.
+  L'errore nella nota precedente era pensare che le risorse di sottoclasse
+  non fossero supportate: lo sono da quando sono stati modellati Maestro di
+  Battaglia/Combattente Psionico del Guerriero, semplicemente non ci si era
+  accorti che si applicava anche qui. 30 incantesimi esistenti hanno
+  ricevuto il tag `'warlock'` (2 ce l'avevano già); nessun incantesimo
+  nuovo nel catalogo. Verificato in locale: Risorse di un Warlock
+  Celestiale livello 9 mostrano "Luce Guaritrice 10/10" (1+9, corretto);
+  Tratti con Luce Guaritrice (3°) e Anima Radiosa (6°) nell'ordine giusto;
+  Grimorio con Cura Ferite/Dardo di Guida FISSI; level-up 2→3 con le 4 card
+  Patto, scelta Celestiale applicata senza errori; **doppia
+  non-regressione**: Tharion invariato e un Guerriero Maestro di Battaglia
+  di prova mostra ancora "Dadi Superiorità 5/5, d8 cad." a livello 7 (il
+  filtro `subclass` non è stato toccato, solo riusato) e "Attacco Extra: 2
+  colpi"; console pulita in ogni prova.
   Restano da completare: le due sottoclassi rimandate del Guerriero/Ladro
   (incantatore legato alla SOTTOCLASSE con lista del Mago), Circolo della
   Terra (Druido), Collegio della Danza (Bardo), Stregoneria Draconica
   (Stregone) e Tradizione dell'Abiurazione (Mago) sopra (cinque problemi di
   architettura/UX distinti — due sono in realtà la STESSA cosa, la CA a due
   caratteristiche, ricorsa in Danza e Draconica: vale la pena risolverla
-  una volta sola per entrambe quando se ne parla con Andrea), e la classe
-  restante con sottoclasse incompleta (Warlock — 1 sola sottoclasse
-  modellata), oltre ai collaudi cloud sotto.
+  una volta sola per entrambe quando se ne parla con Andrea). Con Warlock
+  completo, **tutte e 11 le classi hanno almeno 3 sottoclassi su 4**, e 6 di
+  esse (Paladino, Barbaro, Monaco, Ranger, Chierico, Warlock) sono già a
+  4/4 complete. Oltre ai collaudi cloud sotto.
+  **Nota di sessione (2026-07-31):** un'altra sessione Claude Code stava
+  lavorando in parallelo sulla stessa cartella e ha committato di sua
+  iniziativa sia il lavoro sul Warlock di cui sopra (`c0e9202`, ripreso
+  fedelmente) sia una funzionalità indipendente non tracciata qui
+  (`24c1024 feat(oggetti)`, sposta la creazione reliquie dai Tratti alla
+  tab Oggetti). Locale a 8 commit avanti su `origin/main`, nessuno pushato:
+  da verificare/deployare quando le sessioni in corso saranno concluse.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1966,6 +2005,48 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
       PF 60, Imposizione 35, slot [4,3] — il ramo 'pact' nuovo non lo tocca,
       lui resta su 'half'). Console pulita in ogni prova. Cache busting
       `?v=117`.
+    → **Completato con Fatato, Celestiale e Immondo (2026-07-31), `?v=127`,
+      manuale `version` 48→49 — Warlock ora 4/4, primo patto completo.** La
+      nota precedente dava per bloccati tutti e tre i patroni mancanti per
+      via di un privilegio al 3° scalato sul mod. Carisma; **rivalutando sul
+      PHB effettivo**:
+      - **Patto del Fatato** (p.157-158): Passi del Fatato a 3, Fuga
+        Nebbiosa a 6, Difese Ammalianti a 10, Magia Ammaliante a 14.
+      - **Patto del Celestiale** (p.159-160): Luce Guaritrice a 3, Anima
+        Radiosa a 6, Resilienza Celestiale a 10, Vendetta Ardente a 14.
+      - **Patto dell'Immondo** (p.161-162): Benedizione/Fortuna del Signore
+        Oscuro a 3/6, Resilienza Infernale a 10, Scaraventare all'Inferno
+        a 14.
+      Passi del Fatato e Fortuna del Signore Oscuro sono in realtà "X volte
+      pari al mod. Carisma, riposo lungo" — lo stesso pattern lasciato
+      descrittivo per ogni altra classe di questa serie di sessioni
+      (Bagliore di Guardia del Chierico, Ripristinare l'Equilibrio dello
+      Stregone…): nessuna risorsa nuova, la nota li aveva scambiati per un
+      problema quando non lo erano.
+      **Solo Luce Guaritrice era un vero pool** (dadi da d6 il cui numero
+      scala per LIVELLO — 1+livello — non per modificatore), ma **la
+      soluzione esisteva già nel motore**: `classResources` supporta da
+      tempo un filtro `subclass` (introdotto per Dadi Superiorità/Energia
+      Psionica del Guerriero, Blocco 5.C step Guerriero) che rende una
+      risorsa valida solo per una sottoclasse specifica invece che per
+      l'intera classe. Aggiunta `healingLight` ai `classResources` del
+      Warlock con `subclass: 'celestiale'`, `kind:'uses'` e `byLevel`
+      `[1+livello]` — **zero righe di motore nuove**, la nota precedente
+      semplicemente non si era accorta che il filtro esistesse già (era
+      stato scritto per un'altra classe nella stessa sessione in cui è nata
+      la nota). 30 incantesimi esistenti hanno ricevuto il tag `'warlock'`
+      (2 ce l'avevano già — Passo nella Nebbia e Suggestione); nessun
+      incantesimo nuovo nel catalogo.
+      Verificato in locale: Risorse di un Warlock Celestiale livello 9
+      mostrano "Luce Guaritrice 10/10"; Tratti con Luce Guaritrice (3°) e
+      Anima Radiosa (6°) nell'ordine giusto; Grimorio con Cura Ferite/Dardo
+      di Guida FISSI; level-up 2→3 mostra le 4 card Patto (tutte e quattro,
+      nessuna rimandata per il Warlock), scelta Celestiale applicata senza
+      errori. **Doppia non-regressione** sul riuso del filtro `subclass`:
+      Tharion invariato e un Guerriero Maestro di Battaglia di prova a
+      livello 7 mostra ancora "Dadi Superiorità 5/5, d8 cad." e "Attacco
+      Extra: 2 colpi" — il filtro non è stato toccato, solo riletto da una
+      seconda classe. Console pulita in ogni prova.
     **Con questo, tutte e 11 le classi del Blocco 5.C sono complete: la
     Fase 5 ha ora tutte le classi giocabili a livello di scheda, level-up e
     creazione da zero (ognuna con almeno 1 sottoclasse). Restano da
