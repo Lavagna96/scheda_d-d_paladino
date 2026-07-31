@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 47,
+  version: 48,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -1334,17 +1334,24 @@ window.MANUAL_55 = {
           { name: 'Incantesimi della Firma', desc: 'Scegli due incantesimi di 3° livello dal tuo libro come incantesimi della firma: li hai sempre preparati e puoi lanciare ciascuno una volta al 3° livello senza spendere uno slot (di nuovo dopo un riposo breve o lungo); per lanciarli a un livello superiore devi spendere uno slot.' }
         ]
       },
-      /* Sottoclassi del Mago: per ora Tradizione della Divinazione come dati
-         (PHB 2024, p.171 del PDF, la più semplice delle 4 — Abiurazione,
-         Evocazione e Illusione condividono lo stesso privilegio d'apertura
-         "Sapiente" (incantesimi extra scelti liberamente nel libro, non una
-         lista fissa come i giuramenti del Paladino o Stregoneria Aberrante:
-         resta descrittivo, senza tracciamento nello stato, stesso trattamento
-         già dato a privilegi narrativi come la Furia del Barbaro), ma le
-         altre tre aggiungono anche una meccanica propria (Ward di Abiurazione,
-         danno extra di Evocazione, cantrip bonus di Illusione) che richiede
-         lavoro nel motore — rimandate. Divinazione invece è tutta narrativa
-         (Presagio = tiri di dado gestiti al tavolo, non dallo stato). */
+      /* Sottoclassi del Mago: Divinazione, Evocazione e Illusione fatte (PHB
+         2024 p.171-174). Tutte e tre condividono lo stesso privilegio
+         d'apertura "Sapiente" (incantesimi extra scelti liberamente nel
+         libro dalla propria scuola, non una lista fissa come i giuramenti
+         del Paladino o Stregoneria Aberrante — niente `spellsByLevel`
+         qui, resta descrittivo). Rivalutato rispetto alla nota precedente:
+         "danno extra di Evocazione" (Evocazione Potenziata, +INT a un tiro
+         danni) e "cantrip bonus di Illusione" (Illusioni Migliorate) sono
+         in realtà descrizioni pure — l'app non calcola i danni degli
+         incantesimi come fa per gli attacchi con arma, quindi restano prosa
+         come ogni altro privilegio "aggiungi X al danno"/"impara un
+         trucchetto in più" già visto altrove. **Abiurazione resta fuori**:
+         il Baluardo Arcano è un vero e proprio scudo con PF propri (2×
+         livello + mod. Intelligenza) che assorbe danno al posto tuo e si
+         rigenera lanciando incantesimi di Abiurazione — un tipo di risorsa
+         mai visto (non "N usi", ma un pool di PF con logica di
+         assorbimento/rigenerazione), l'unico vero blocco di architettura
+         fra le quattro tradizioni. */
       subclasses: {
         divinatore: {
           name: 'Tradizione della Divinazione',
@@ -1362,6 +1369,50 @@ window.MANUAL_55 = {
             ],
             14: [
               { name: 'Presagio Maggiore', desc: 'Tiri tre d20, invece di due, per il privilegio Presagio.' }
+            ]
+          }
+        },
+        evocatore: {
+          name: 'Tradizione dell\'Evocazione',
+          tenets: 'Studia la magia che scatena effetti elementali esplosivi: gelo pungente, fiamma ardente, tuono rombante, fulmine crepitante, acido corrosivo.',
+          features: {
+            3: [
+              { name: 'Sapiente dell\'Evocazione', desc: 'Scegli due incantesimi da mago della scuola di Evocazione, non superiori al 2° livello, e aggiungili gratis al tuo libro degli incantesimi. Inoltre, ogni volta che accedi a un nuovo livello di slot in questa classe, puoi aggiungere gratis al libro un altro incantesimo da mago della scuola di Evocazione di quel livello o inferiore.' },
+              { name: 'Trucchetto Potente', desc: 'Quando lanci un trucchetto di danno contro una creatura e manchi il tiro per colpire, o la creatura supera il TS contro di esso, infligge comunque metà del danno del trucchetto (se previsto) ma nessun altro effetto aggiuntivo.' }
+            ],
+            6: [
+              { name: 'Scolpire gli Incantesimi', desc: 'Quando lanci un incantesimo di Evocazione che colpisce altre creature che vedi, puoi scegliere un numero di esse pari a 1 più il livello dell\'incantesimo: quelle creature superano automaticamente il TS contro l\'incantesimo e non subiscono danno se normalmente ne subirebbero metà con un successo.' }
+            ],
+            10: [
+              { name: 'Evocazione Potenziata', desc: 'Ogni volta che lanci un incantesimo da mago della scuola di Evocazione, puoi sommare il tuo modificatore di Intelligenza a uno dei tiri per i danni di quell\'incantesimo.' }
+            ],
+            14: [
+              { name: 'Sovraccarico', desc: 'Quando lanci un incantesimo da mago con uno slot di livello 1-5 che infligge danno, puoi infliggere il danno massimo con quell\'incantesimo nel turno in cui lo lanci. La prima volta che lo fai in un riposo lungo non subisci alcun effetto avverso; ogni volta successiva prima del prossimo riposo lungo, subito dopo aver lanciato l\'incantesimo subisci 2d12 danni Necrotici per livello dello slot (che ignorano resistenza e immunità), con il danno per livello che aumenta di 1d12 a ogni uso ulteriore.' }
+            ]
+          }
+        },
+        illusionista: {
+          name: 'Tradizione dell\'Illusione',
+          tenets: 'Intreccia sottili incantesimi d\'inganno che rendono reale l\'impossibile.',
+          spellsByLevel: {
+            6: [
+              { id: 'evocare-bestia', name: 'Evocare Bestia' },
+              { id: 'evocare-folletto', name: 'Evocare Folletto' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Sapiente dell\'Illusione', desc: 'Scegli due incantesimi da mago della scuola di Illusione, non superiori al 2° livello, e aggiungili gratis al tuo libro degli incantesimi. Inoltre, ogni volta che accedi a un nuovo livello di slot in questa classe, puoi aggiungere gratis al libro un altro incantesimo da mago della scuola di Illusione di quel livello o inferiore.' },
+              { name: 'Illusioni Migliorate', desc: 'Lanci gli incantesimi di Illusione senza componente Verbale, e se hanno una gittata di almeno 3 m la gittata aumenta di 18 m. Conosci inoltre il trucchetto Illusione Minore (se lo conosci già, impari un altro trucchetto da mago a scelta) senza che conti fra i tuoi trucchetti conosciuti; puoi crearne sia il suono sia l\'immagine con un solo lancio e lanciarlo come azione bonus.' }
+            ],
+            6: [
+              { name: 'Creature Fantasmatiche', desc: 'Hai sempre preparati Evocare Bestia ed Evocare Folletto. Quando lanci uno dei due puoi cambiarne la scuola in Illusione, facendo apparire spettrale la creatura evocata: lanciato così senza spendere uno slot, la creatura ha metà dei PF. Una volta lanciato senza slot uno dei due, serve un riposo lungo per rifarlo.' }
+            ],
+            10: [
+              { name: 'Io Illusorio', desc: 'Quando una creatura ti colpisce con un tiro per colpire, puoi usare la reazione per interporre un duplicato illusorio di te stesso fra l\'attaccante e te: l\'attacco manca automaticamente, poi l\'illusione svanisce. Puoi usarlo una volta per riposo breve o lungo; puoi ripristinarlo spendendo uno slot di 2° livello o superiore (nessuna azione).' }
+            ],
+            14: [
+              { name: 'Realtà Illusoria', desc: 'Quando lanci un incantesimo di Illusione con uno slot, puoi scegliere un oggetto inanimato e non magico che fa parte dell\'illusione e renderlo reale (azione bonus nei turni successivi, finché l\'incantesimo dura): resta reale per 1 minuto, durante il quale non può infliggere danni né dare condizioni.' }
             ]
           }
         }
@@ -3003,7 +3054,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 45 m · 10 min CONC · V, S, M (sette spine)',
       desc: 'Il terreno in una sfera di 6 m di raggio si ricopre di spuntoni: diventa Terreno Difficile e chi vi si muove attraverso subisce 2d4 perforanti ogni 1,5 m percorsi. Il terreno appare naturale finché non lo si individua con una prova di Percezione o Sopravvivenza.' },
     { id: 'evocare-bestia', name: 'Evocare Bestia', level: 2, school: 'Convocazione',
-      classes: ['druido', 'ranger'],
+      classes: ['druido', 'ranger', 'mago'],
       meta: 'Azione · 27 m · 1 ora CONC · V, S, M (piuma, ciuffo di pelo e coda di pesce in una ghianda dorata, 200+ MO)',
       desc: 'Evochi uno spirito bestiale (statistiche proprie) scegliendo l\'ambiente Aria, Terra o Mare: combatte al tuo fianco condividendo la tua iniziativa e obbedendo ai tuoi comandi.' },
 

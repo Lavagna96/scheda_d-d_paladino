@@ -83,36 +83,60 @@
   danno normale) — una scelta di UX (come mostrarlo nella tabella Attacchi)
   da discutere con Andrea, stessa natura di problema di Circolo della
   Terra/Cavaliere Occulto/Truffatore Arcano.
-  **Stregone ora 3/4** (Aberrante era già fatto), **non ancora committato**:
-  aggiunte Stregoneria Meccanica e Magia Selvaggia (PHB p.145-148), manuale
-  `version` 46→47, cache busting `?v=125`. Entrambe descrittive, riusano
-  solo Punti Stregoneria/Magia Innata già tracciati: Meccanica ha
-  incantesimi sempre preparati (8, tutti già nel catalogo, solo tag
-  `'stregone'` aggiunto a 8 di essi — Dissolvi Magie ce l'aveva già); Magia
-  Selvaggia **non ha incantesimi di sottoclasse** (come Sapienza/Valore del
-  Bardo) e la sua Tabella di Impennata (d100) è **volutamente non
-  riportata**: il privilegio descrive il meccanismo (tira 1d20 dopo un
-  incantesimo con slot, con un 20 tiri sulla tabella) senza copiare le 100
-  righe, che restano al Master come già oggi per altri dettagli di regia —
-  coerente con la regola di NON riportare testo integrale del manuale.
-  Verificato: Tratti/Grimorio di uno Stregone Meccanica livello 9 corretti,
-  level-up 2→3 con le 3 card (Draconica correttamente assente), Tharion
-  invariato, console pulita.
+  **Stregone ora 3/4** (Aberrante era già fatto), committato in locale
+  (`c879b5a`, non ancora deployato): aggiunte Stregoneria Meccanica e Magia
+  Selvaggia (PHB p.145-148), manuale `version` 46→47, cache busting `?v=125`.
+  Entrambe descrittive, riusano solo Punti Stregoneria/Magia Innata già
+  tracciati: Meccanica ha incantesimi sempre preparati (8, tutti già nel
+  catalogo, solo tag `'stregone'` aggiunto a 8 di essi — Dissolvi Magie ce
+  l'aveva già); Magia Selvaggia **non ha incantesimi di sottoclasse** (come
+  Sapienza/Valore del Bardo) e la sua Tabella di Impennata (d100) è
+  **volutamente non riportata**: il privilegio descrive il meccanismo (tira
+  1d20 dopo un incantesimo con slot, con un 20 tiri sulla tabella) senza
+  copiare le 100 righe, che restano al Master come già oggi per altri
+  dettagli di regia — coerente con la regola di NON riportare testo
+  integrale del manuale. Verificato: Tratti/Grimorio di uno Stregone
+  Meccanica livello 9 corretti, level-up 2→3 con le 3 card (Draconica
+  correttamente assente), Tharion invariato, console pulita.
   **Stregoneria Draconica rimandata** (quarta e ultima dello Stregone):
   Resilienza Draconica dà **due** cose mai viste insieme — PF massimi che
   scalano per LIVELLO DI SOTTOCLASSE (+3 al 3°, poi +1 per ogni livello da
   stregone, non solo la classe) e la stessa CA a due caratteristiche
   (10+DES+CAR) del Collegio della Danza del Bardo. Stessa natura di
   problema, da discutere con Andrea insieme agli altri.
+  **Mago ora 3/4** (Divinazione era già fatto), **non ancora committato**:
+  aggiunte Tradizione dell'Evocazione e Tradizione dell'Illusione (PHB
+  p.171-174), manuale `version` 47→48, cache busting `?v=126`. **Rivalutato
+  rispetto alla nota precedente**: "danno extra di Evocazione" e "cantrip
+  bonus di Illusione" sembravano richiedere lavoro nel motore, ma sono in
+  realtà descrizioni pure — l'app non calcola i danni degli incantesimi
+  (a differenza degli attacchi con arma), quindi restano prosa come ogni
+  altro "+INT a un tiro danni"/"impara un trucchetto in più" già visto. Le
+  due tradizioni condividono con Divinazione il privilegio "Sapiente"
+  (incantesimi scelti liberamente dalla propria scuola, non una lista
+  fissa — niente `spellsByLevel` per questo). **Creature Fantasmatiche**
+  dell'Illusionista (6°) è invece un vero grant fisso (Evocare Bestia +
+  Evocare Folletto sempre preparati): modellato con `spellsByLevel`, stesso
+  trattamento delle altre classi — Evocare Bestia ha ricevuto il tag
+  `'mago'` (Evocare Folletto ce l'aveva già). Verificato: Tratti/Grimorio di
+  un Mago Illusionista livello 10 corretti (entrambi gli incantesimi FISSI
+  ai livelli giusti), level-up 2→3 con le 3 card (Abiurazione correttamente
+  assente), Tharion invariato, console pulita.
+  **Tradizione dell'Abiurazione rimandata** (quarta e ultima del Mago):
+  il Baluardo Arcano è un vero scudo con PF propri (2× livello + mod.
+  Intelligenza) che assorbe danno al posto del personaggio e si rigenera
+  lanciando incantesimi di Abiurazione — un tipo di risorsa mai visto
+  (non "N usi" ma un pool di PF con assorbimento/rigenerazione), unico vero
+  blocco di architettura fra le quattro tradizioni del Mago.
   Restano da completare: le due sottoclassi rimandate del Guerriero/Ladro
   (incantatore legato alla SOTTOCLASSE con lista del Mago), Circolo della
-  Terra (Druido), Collegio della Danza (Bardo) e Stregoneria Draconica
-  (Stregone) sopra (quattro problemi di architettura/UX distinti — due
-  sono in realtà la STESSA cosa, la CA a due caratteristiche, ricorsa due
-  volte: vale la pena risolverla una volta sola per Danza e Draconica
-  insieme quando se ne parla con Andrea), e le altre 2 classi con
-  sottoclasse incompleta (Mago, Warlock — 1 sola sottoclasse modellata
-  ciascuna), oltre ai collaudi cloud sotto.
+  Terra (Druido), Collegio della Danza (Bardo), Stregoneria Draconica
+  (Stregone) e Tradizione dell'Abiurazione (Mago) sopra (cinque problemi di
+  architettura/UX distinti — due sono in realtà la STESSA cosa, la CA a due
+  caratteristiche, ricorsa in Danza e Draconica: vale la pena risolverla
+  una volta sola per entrambe quando se ne parla con Andrea), e la classe
+  restante con sottoclasse incompleta (Warlock — 1 sola sottoclasse
+  modellata), oltre ai collaudi cloud sotto.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1845,6 +1869,45 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
       Tharion (Paladino) verificato invariato dopo ogni prova (CA 20, CD 15,
       PF 60, Imposizione 35). Console pulita in ogni prova. Cache busting
       `?v=116`.
+    → **Completato con Evocazione e Illusione (2026-07-31), `?v=126`,
+      manuale `version` 47→48.** Il Mago ne ha 4 nel PHB (Abiurazione,
+      Divinazione, Evocazione, Illusione); Divinazione c'era già. Aggiunte:
+      - **Tradizione dell'Evocazione** (p.172-173): Sapiente dell'Evocazione
+        + Trucchetto Potente a 3, Scolpire gli Incantesimi a 6, Evocazione
+        Potenziata a 10, Sovraccarico a 14.
+      - **Tradizione dell'Illusione** (p.173-174): Sapiente dell'Illusione +
+        Illusioni Migliorate a 3, Creature Fantasmatiche a 6, Io Illusorio a
+        10, Realtà Illusoria a 14.
+      **Rivalutata la nota precedente** (che le dava per bloccate come
+      l'Abiurazione): "Evocazione Potenziata" (+INT a un tiro danni di un
+      incantesimo di Evocazione) e "Illusioni Migliorate" (trucchetto
+      Illusione Minore extra, gratis) sembravano richiedere lavoro nel
+      motore, ma non è così — l'app non calcola i danni degli incantesimi
+      come fa per gli attacchi con arma (sono testo nella scheda
+      dell'incantesimo, non un numero derivato), quindi questi privilegi
+      restano prosa esattamente come "Incantesimi Potenti" del Dominio della
+      Luce o qualunque altro "+mod. a un tiro"/"impara un trucchetto in
+      più" già modellato. Le due tradizioni condividono con Divinazione il
+      privilegio "Sapiente" (scelta libera dalla propria scuola, non una
+      lista fissa — nessun `spellsByLevel` per quello). **Creature
+      Fantasmatiche dell'Illusionista è invece un vero grant fisso**
+      (Evocare Bestia + Evocare Folletto sempre preparati dal 6°): a
+      differenza del Sapiente, questo è stato modellato con `spellsByLevel`
+      come le altre classi, per coerenza (mostra FISSO nel Grimorio). Tag
+      `'mago'` aggiunto a Evocare Bestia (Evocare Folletto ce l'aveva già).
+      **Tradizione dell'Abiurazione confermata bloccata**: il Baluardo
+      Arcano è un vero scudo con PF propri (2× livello + mod. Intelligenza)
+      che assorbe danno al posto del personaggio e si rigenera lanciando
+      incantesimi di Abiurazione — un tipo di risorsa mai visto (pool di PF
+      con assorbimento/rigenerazione, non "N usi"), l'unico blocco di
+      architettura reale fra le quattro tradizioni.
+      Verificato in locale: Tratti di un Mago Illusionista livello 10
+      mostrano Sapiente dell'Illusione/Illusioni Migliorate (3°), Creature
+      Fantasmatiche (6°) e Io Illusorio (10°) nell'ordine giusto (Realtà
+      Illusoria, 14°, correttamente assente); Grimorio mostra Evocare
+      Bestia (2° liv.) ed Evocare Folletto (3° liv.) FISSI; level-up 2→3
+      mostra le 3 card Tradizione (Abiurazione correttamente assente);
+      Tharion invariato; console pulita in ogni prova.
 11. [x] **Warlock** (pact) — slot pact (già in tabella), Invocazioni, Suppliche, Patto.
     → **Fatto (2026-07-30, manuale `version` 38→39)**: privilegi 1→20 dal PDF
     (p.152-156), sottoclasse **Patto del Grande Antico** (p.166-167 — la più
