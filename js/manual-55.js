@@ -13,7 +13,7 @@
  * quando `version` locale è più nuova di quella remota.
  */
 window.MANUAL_55 = {
-  version: 46,
+  version: 47,
 
   slotTables: {
     /* slot per livello di classe: array di slot per livello incantesimo 1..9 */
@@ -2209,12 +2209,16 @@ window.MANUAL_55 = {
           { name: 'Apoteosi Arcana', desc: 'Mentre Magia Innata è attiva, puoi usare un\'opzione di Metamagia su ciascuno dei tuoi turni senza spendere Punti Stregoneria.' }
         ]
       },
-      /* Sottoclassi dello Stregone: per ora Stregoneria Aberrante come dati
-         (PHB 2024, p.144 del PDF, la più semplice delle 4 — nessuna nuova
-         meccanica nel motore, solo prosa e incantesimi sempre preparati come
-         i giuramenti del Paladino); Meccanica/Draconica/Magia Selvaggia in
-         seguito. Lo Stregone non ha Maestria nelle Armi né stile di
-         combattimento. */
+      /* Sottoclassi dello Stregone: Aberrante, Meccanica e Magia Selvaggia
+         fatte (PHB 2024 p.144-148) — tutte descrittive, riusano solo Punti
+         Stregoneria/Magia Innata già tracciati. Draconica resta fuori:
+         Resilienza Draconica dà +3 PF max al 3° e +1 per ogni livello da
+         stregone successivo (una scala PER-LIVELLO di SOTTOCLASSE sui PF
+         massimi, mai vista finora) E una CA senz'armatura a DUE
+         caratteristiche insieme (10+DES+CAR, stesso problema del Collegio
+         della Danza del Bardo) — due architetture nuove insieme, da
+         discutere con Andrea. Lo Stregone non ha Maestria nelle Armi né
+         stile di combattimento. */
       subclasses: {
         aberrante: {
           name: 'Stregoneria Aberrante',
@@ -2254,6 +2258,64 @@ window.MANUAL_55 = {
             ],
             18: [
               { name: 'Implosione Deformante', desc: 'Come azione magica, ti teletrasporti in uno spazio libero a vista entro 36 m: ogni creatura entro 9 m dallo spazio lasciato fa un TS di Forza o subisce 3d10 danni da Forza ed è trascinata verso quello spazio (metà danni con successo). Una volta usato serve un riposo lungo per riusarlo, oppure spendi 5 Punti Stregoneria (nessuna azione) per ripristinarlo.' }
+            ]
+          }
+        },
+        meccanica: {
+          name: 'Stregoneria Meccanica',
+          tenets: 'Incanala le forze cosmiche dell\'Ordine, in sintonia con l\'efficienza meccanica del piano di Meccanus.',
+          spellsByLevel: {
+            3: [
+              { id: 'aiuto', name: 'Aiuto' },
+              { id: 'allarme', name: 'Allarme' },
+              { id: 'ristorare-inferiore', name: 'Ristorare Inferiore' },
+              { id: 'protezione-mal-bene', name: 'Protezione dal Male e dal Bene' }
+            ],
+            5: [
+              { id: 'dissolvi-magie', name: 'Dissolvi Magie' },
+              { id: 'protezione-dall-energia', name: 'Protezione dall\'Energia' }
+            ],
+            7: [
+              { id: 'liberta-di-movimento', name: 'Libertà di Movimento' },
+              { id: 'evocare-costrutto', name: 'Evocare Costrutto' }
+            ],
+            9: [
+              { id: 'ristorare-superiore', name: 'Ristorare Superiore' },
+              { id: 'muro-di-forza', name: 'Muro di Forza' }
+            ]
+          },
+          features: {
+            3: [
+              { name: 'Ripristinare l\'Equilibrio', desc: 'Quando una creatura che vedi entro 18 m sta per tirare un d20 con vantaggio o svantaggio, puoi usare la reazione per impedire che il tiro sia influenzato da vantaggio o svantaggio. Puoi usarlo un numero di volte pari al tuo modificatore di Carisma (minimo 1), recuperando tutti gli usi al riposo lungo.' },
+              { name: 'Manifestazioni dell\'Ordine', desc: 'Mentre lanci un tuo incantesimo da stregone, la tua connessione con l\'ordine si manifesta con un dettaglio a scelta o casuale: ingranaggi spettrali fluttuanti, lancette d\'orologio negli occhi, pelle con riflessi ottonati, equazioni ed elementi geometrici sovrapposti al corpo, il focus arcano che assume la forma di un meccanismo in miniatura, oppure un ticchettio di ingranaggi udibile a te e a chi è colpito dalla magia.' }
+            ],
+            6: [
+              { name: 'Baluardo della Legge', desc: 'Come azione magica, spendi da 1 a 5 Punti Stregoneria per creare uno scudo scintillante su te stesso o un\'altra creatura entro 9 m: rappresentato da altrettanti d8, quando il bersaglio subisce danno può spenderne alcuni, tirarli e ridurre il danno subito del totale. Dura finché non finisci un riposo lungo o non riusi il privilegio.' }
+            ],
+            14: [
+              { name: 'Trance dell\'Ordine', desc: 'Come azione bonus, entri per 1 minuto in uno stato di calcolo cosmico: i tiri per colpire contro di te non possono avere vantaggio, e su ogni Prova del d20 puoi trattare un risultato di 9 o meno come un 10. Puoi usarlo una volta per riposo lungo; puoi ripristinarlo spendendo 5 Punti Stregoneria (nessuna azione).' }
+            ],
+            18: [
+              { name: 'Cavalcata Meccanica', desc: 'Come azione magica, evochi spiriti dell\'ordine (dall\'aspetto di modroni o altri Costrutti a tua scelta) in un Cubo di 9 m originato da te: intangibili e invulnerabili, prima di svanire curano fino a 100 PF da dividere fra le creature scelte nel cubo, riparano istantaneamente gli oggetti danneggiati al suo interno e dissolvono ogni incantesimo di 6° livello o inferiore su creature e oggetti scelti al suo interno. Puoi usarlo una volta per riposo lungo; puoi ripristinarlo spendendo 7 Punti Stregoneria (nessuna azione).' }
+            ]
+          }
+        },
+        selvaggia: {
+          name: 'Magia Selvaggia',
+          tenets: 'Scatena la magia caotica delle forze primordiali che sottendono l\'ordine della creazione.',
+          features: {
+            3: [
+              { name: 'Impennata di Magia Selvaggia', desc: 'Una volta per turno, subito dopo aver lanciato un incantesimo da stregone con uno slot, puoi tirare 1d20: con un 20 tiri sulla Tabella di Impennata di Magia Selvaggia (d100, consultata dal Master) per un effetto magico casuale. Se l\'effetto è un incantesimo, è troppo selvaggio per essere modificato dalla Metamagia.' },
+              { name: 'Maree del Caos', desc: 'Puoi manipolare il caos per ottenere vantaggio su una Prova del d20 prima di tirare il dado. Dopo l\'uso devi lanciare un incantesimo da stregone con uno slot o finire un riposo lungo prima di poterlo riusare; se lanci l\'incantesimo prima del riposo lungo, tiri automaticamente sulla Tabella di Impennata di Magia Selvaggia.' }
+            ],
+            6: [
+              { name: 'Piegare la Sorte', desc: 'Subito dopo che una creatura che vedi tira il d20 per una Prova, puoi usare la reazione e spendere 1 Punto Stregoneria per tirare 1d4 e applicare il risultato come bonus o penalità (a tua scelta) al tiro.' }
+            ],
+            14: [
+              { name: 'Caos Controllato', desc: 'Ogni volta che tiri sulla Tabella di Impennata di Magia Selvaggia, puoi tirare due volte e scegliere quale dei due risultati usare.' }
+            ],
+            18: [
+              { name: 'Impennata Domata', desc: 'Subito dopo aver lanciato un incantesimo da stregone con uno slot, puoi scegliere un effetto a tua scelta dalla Tabella di Impennata di Magia Selvaggia (tranne l\'ultima riga) invece di tirare, effettuando comunque i tiri richiesti dall\'effetto scelto. Puoi usarlo una volta per riposo lungo.' }
             ]
           }
         }
@@ -2620,7 +2682,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Sé · 10 min CONC · V, S, M · Rituale',
       desc: 'Percepisci la presenza e la posizione di veleni, creature velenose e malattie entro 9 m, e ne identifichi il tipo.' },
     { id: 'protezione-mal-bene', name: 'Protezione dal Male e dal Bene', level: 1, school: 'Abiurazione',
-      classes: ['paladino', 'chierico', 'druido', 'warlock', 'mago'],
+      classes: ['paladino', 'chierico', 'druido', 'warlock', 'mago', 'stregone'],
       meta: 'Azione · Tocco · 10 min CONC · V, S, M (acqua santa, consumata)',
       desc: 'Una creatura volontaria è protetta da Aberrazioni, Celestiali, Elementali, Folletti, Immondi e Non Morti: questi hanno svantaggio ad attaccarla, e lei non può essere posseduta né resa Affascinata o Spaventata da loro (vantaggio ai TS se già soggetta).' },
     { id: 'punizione-ardente', name: 'Punizione Ardente', level: 1, school: 'Evocazione',
@@ -2666,7 +2728,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 36 m · 1 min CONC · V, S, M',
       desc: 'Un cilindro di luce fioca (raggio 1,5 m, altezza 12 m) piomba entro gittata: chi vi si trova fa un TS Costituzione, 2d10 danni radiosi se fallisce o metà se riesce (si ripete a chi entra o comincia lì il turno, una volta a testa). Con un\'azione puoi spostare il cilindro fino a 18 m nei turni successivi.' },
     { id: 'aiuto', name: 'Aiuto', level: 2, school: 'Abiurazione',
-      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger'],
+      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'stregone'],
       meta: 'Azione · 9 m · 8 ore · V, S, M',
       desc: 'Fino a 3 creature: i PF massimi e attuali aumentano di 5 per la durata. Con slot superiori, +5 per ogni livello oltre il 2°.' },
     { id: 'arma-magica', name: 'Arma Magica', level: 2, school: 'Trasmutazione',
@@ -2694,7 +2756,7 @@ window.MANUAL_55 = {
       meta: 'Azione · Tocco · 10 giorni · V, S, M · Rituale',
       desc: 'Un cadavere toccato non si decompone e non può diventare Non Morto per la durata. Prolunga il tempo utile per riportarlo in vita.' },
     { id: 'ristorare-inferiore', name: 'Ristorare Inferiore', level: 2, school: 'Abiurazione',
-      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger'],
+      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'stregone'],
       meta: 'Azione bonus · Tocco · Istantaneo · V, S',
       desc: 'Rimuovi dalla creatura toccata una condizione tra: Accecato, Assordato, Paralizzato o Avvelenato.' },
     { id: 'trova-destriero', name: 'Trova Destriero', level: 2, school: 'Evocazione',
@@ -2836,7 +2898,7 @@ window.MANUAL_55 = {
       meta: 'Azione bonus (dopo un colpo in mischia) · Sé · 1 min CONC · V',
       desc: '+5d10 forza al colpo. Se il colpo porta il bersaglio a meno di 50 PF, è esiliato in un semipiano innocuo (Inabile) finché ti concentri; se nativo di un altro piano, non torna.' },
     { id: 'ristorare-superiore', name: 'Ristorare Superiore', level: 5, school: 'Abiurazione',
-      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger'],
+      classes: ['paladino', 'bardo', 'chierico', 'druido', 'ranger', 'stregone'],
       meta: 'Azione · Tocco · Istantaneo · V, S, M (polvere di diamante da 100 MO, consumata)',
       desc: 'Riduci di 1 il livello di Indebolimento della creatura toccata, oppure termina un effetto tra: Affascinato o Pietrificato, una maledizione (incluso il vincolo con un oggetto maledetto), una riduzione dei PF massimi o di un punteggio di caratteristica.' },
     { id: 'rianimare-morti', name: 'Rianimare Morti', level: 5, school: 'Negromanzia',
@@ -2847,7 +2909,7 @@ window.MANUAL_55 = {
     /* ===== Ranger — incantesimi propri (non condivisi col Paladino) ===== */
     /* 1° livello */
     { id: 'allarme', name: 'Allarme', level: 1, school: 'Abiurazione',
-      classes: ['ranger', 'mago'],
+      classes: ['ranger', 'mago', 'stregone'],
       meta: 'Azione o Rituale · 9 m · 8 ore · V, S, M (una campanella e filo d\'argento)',
       desc: 'Imposti un allarme su una porta, una finestra o un\'area fino a 6 m di lato. Se una creatura non esclusa la tocca o vi entra, scatta un segnale a scelta: udibile (rintocco per 10 secondi entro 18 m) o mentale (ti raggiunge entro 1,6 km e ti sveglia anche se dormi).' },
     { id: 'amicizia-con-gli-animali', name: 'Amicizia con gli Animali', level: 1, school: 'Incantamento',
@@ -3005,7 +3067,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 18 m · 1 min CONC · V, S',
       desc: 'Una Bestia fa TS Saggezza (con vantaggio se in combattimento contro di te) o è Affascinata: le impartisci comandi telepatici finché dura. Ripete il TS ogni volta che subisce danno. Con slot di 5° dura 10 minuti, 6° un\'ora, 7°+ otto ore.' },
     { id: 'liberta-di-movimento', name: 'Libertà di Movimento', level: 4, school: 'Abiurazione',
-      classes: ['bardo', 'chierico', 'druido', 'ranger'],
+      classes: ['bardo', 'chierico', 'druido', 'ranger', 'stregone'],
       meta: 'Azione · Tocco · 1 ora · V, S, M (una cinghia di cuoio)',
       desc: 'La creatura toccata ignora il Terreno Difficile, non può subire riduzioni di velocità né Paralisi/Restrizione da magia, e ottiene velocità di nuoto pari alla sua. Può spendere 1,5 m di movimento per liberarsi automaticamente da manette o Afferramento non magici.' },
     { id: 'vite-afferrante', name: 'Vite Afferrante', level: 4, school: 'Convocazione',
@@ -4229,7 +4291,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 9 m · 1 min CONC · V, S, M (una sfera di vetro)',
       desc: 'Una sfera scintillante racchiude una creatura o un oggetto Grande o più piccolo entro gittata (una creatura non volontaria fa TS Destrezza o resta racchiusa per la durata). Nulla può attraversare la barriera in nessuna direzione, né energia né effetti; la sfera è immune a ogni danno e protegge ciò che contiene da attacchi esterni (e viceversa). È leggera e puoi farla rotolare spingendola dall\'interno o spostarla dall\'esterno. Un incantesimo Disintegrare mirato alla sfera la distrugge senza danneggiare il contenuto.' },
     { id: 'evocare-costrutto', name: 'Evocare Costrutto', level: 4, school: 'Convocazione',
-      classes: ['mago'],
+      classes: ['mago', 'stregone'],
       meta: 'Azione · 27 m · 1 ora CONC · V, S, M (una cassaforte da 400+ MO)',
       desc: 'Evochi lo spirito di un Costrutto (statistiche proprie) scegliendo Argilla, Metallo o Pietra: assomiglia a una statua animata del materiale scelto. Combatte al tuo fianco condividendo la tua iniziativa e obbedendo ai tuoi comandi verbali senza bisogno di azione da parte tua; senza ordini si Disimpegna e si muove per evitare pericoli.' },
     { id: 'passamuro', name: 'Passamuro', level: 5, school: 'Trasmutazione',
@@ -4241,7 +4303,7 @@ window.MANUAL_55 = {
       meta: 'Azione · 18 m · 1 ora CONC · V, S, M (un oggetto con l\'immagine di un drago inciso, da 500+ MO)',
       desc: 'Evochi uno spirito Draconico (statistiche proprie) in uno spazio libero entro gittata: combatte al tuo fianco condividendo la tua iniziativa e obbedendo ai tuoi comandi verbali senza bisogno di azione da parte tua; senza ordini si Disimpegna e si muove per evitare pericoli. Sparisce a 0 PF o alla fine dell\'incantesimo.' },
     { id: 'muro-di-forza', name: 'Muro di Forza', level: 5, school: 'Evocazione',
-      classes: ['mago'],
+      classes: ['mago', 'stregone'],
       meta: 'Azione · 36 m · 10 min CONC · V, S, M (un frammento di vetro)',
       desc: 'Un muro invisibile di forza pura appare in un punto entro gittata, in qualsiasi orientamento (orizzontale, verticale o inclinato, libero o appoggiato). Puoi formarlo a cupola o globo con raggio fino a 3 m, o come dieci pannelli piani di 3x3 m contigui; è spesso 6 mm e dura per la durata. Nulla può attraversarlo fisicamente: è immune a ogni danno, non dissolvibile con Dissolvi Magie (solo Disintegrare lo distrugge all\'istante) e si estende sul Piano Etereo bloccando anche il viaggio etereo.' },
     { id: 'contingenza', name: 'Contingenza', level: 6, school: 'Abiurazione',

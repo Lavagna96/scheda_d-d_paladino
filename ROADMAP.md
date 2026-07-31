@@ -60,21 +60,22 @@
   che non esiste ancora nell'app (stessa natura di problema del Cavaliere
   Occulto/Truffatore Arcano). **Deciso con Andrea (2026-07-31): rimandare**,
   si continua con le altre classi.
-  **Bardo ora 3/4** (Sapienza era già fatto), **non ancora committato**:
-  aggiunti Collegio dell'Incanto e Collegio del Valore (PHB p.62-66),
-  manuale `version` 45→46, cache busting `?v=124`. Incanto è descrittivo
-  come la Sapienza (riusa solo Ispirazione Bardica, incantesimi sempre
-  preparati Ammaliare Persone/Immagine Speculare al 3° e Comando al 6°,
-  nessuno nuovo nel catalogo). **Valore dà davvero Attacco Extra al 6°**,
-  primo caso di privilegio di sottoclasse (non di classe) che cambia il
-  numero di colpi: `stats.js` ora legge il massimo tra `klass.extraAttacks`
-  e `subclass.extraAttacks` (prima leggeva solo la classe), e `engine.js`
-  espone `subclassId` nella view derivata (mancava, serviva per il lookup).
-  Verificato: un Bardo Valore di livello 6 mostra "Attacco Extra: 2 colpi";
-  **non-regressione doppia** sul cambio di motore condiviso — Tharion
-  (Paladino, niente Attacco Extra) e un Guerriero di livello 11 (3 colpi,
-  dalla sola tabella di classe) invariati; level-up 2→3 mostra le 3 card
-  Collegio (Danza correttamente assente); console pulita in ogni prova.
+  **Bardo ora 3/4** (Sapienza era già fatto), committato in locale
+  (`ad48d6f`, non ancora deployato): aggiunti Collegio dell'Incanto e
+  Collegio del Valore (PHB p.62-66), manuale `version` 45→46, cache busting
+  `?v=124`. Incanto è descrittivo come la Sapienza (riusa solo Ispirazione
+  Bardica, incantesimi sempre preparati Ammaliare Persone/Immagine
+  Speculare al 3° e Comando al 6°, nessuno nuovo nel catalogo). **Valore dà
+  davvero Attacco Extra al 6°**, primo caso di privilegio di sottoclasse
+  (non di classe) che cambia il numero di colpi: `stats.js` ora legge il
+  massimo tra `klass.extraAttacks` e `subclass.extraAttacks` (prima leggeva
+  solo la classe), e `engine.js` espone `subclassId` nella view derivata
+  (mancava, serviva per il lookup). Verificato: un Bardo Valore di livello 6
+  mostra "Attacco Extra: 2 colpi"; **non-regressione doppia** sul cambio di
+  motore condiviso — Tharion (Paladino, niente Attacco Extra) e un Guerriero
+  di livello 11 (3 colpi, dalla sola tabella di classe) invariati; level-up
+  2→3 mostra le 3 card Collegio (Danza correttamente assente); console
+  pulita in ogni prova.
   **Collegio della Danza rimandato** (quarto del Bardo): dà una CA
   alternativa a DUE caratteristiche insieme (10+DES+CAR, mai vista finora —
   `unarmoredDefense` di classe supporta solo una) e trasforma i Colpi
@@ -82,12 +83,36 @@
   danno normale) — una scelta di UX (come mostrarlo nella tabella Attacchi)
   da discutere con Andrea, stessa natura di problema di Circolo della
   Terra/Cavaliere Occulto/Truffatore Arcano.
+  **Stregone ora 3/4** (Aberrante era già fatto), **non ancora committato**:
+  aggiunte Stregoneria Meccanica e Magia Selvaggia (PHB p.145-148), manuale
+  `version` 46→47, cache busting `?v=125`. Entrambe descrittive, riusano
+  solo Punti Stregoneria/Magia Innata già tracciati: Meccanica ha
+  incantesimi sempre preparati (8, tutti già nel catalogo, solo tag
+  `'stregone'` aggiunto a 8 di essi — Dissolvi Magie ce l'aveva già); Magia
+  Selvaggia **non ha incantesimi di sottoclasse** (come Sapienza/Valore del
+  Bardo) e la sua Tabella di Impennata (d100) è **volutamente non
+  riportata**: il privilegio descrive il meccanismo (tira 1d20 dopo un
+  incantesimo con slot, con un 20 tiri sulla tabella) senza copiare le 100
+  righe, che restano al Master come già oggi per altri dettagli di regia —
+  coerente con la regola di NON riportare testo integrale del manuale.
+  Verificato: Tratti/Grimorio di uno Stregone Meccanica livello 9 corretti,
+  level-up 2→3 con le 3 card (Draconica correttamente assente), Tharion
+  invariato, console pulita.
+  **Stregoneria Draconica rimandata** (quarta e ultima dello Stregone):
+  Resilienza Draconica dà **due** cose mai viste insieme — PF massimi che
+  scalano per LIVELLO DI SOTTOCLASSE (+3 al 3°, poi +1 per ogni livello da
+  stregone, non solo la classe) e la stessa CA a due caratteristiche
+  (10+DES+CAR) del Collegio della Danza del Bardo. Stessa natura di
+  problema, da discutere con Andrea insieme agli altri.
   Restano da completare: le due sottoclassi rimandate del Guerriero/Ladro
-  (incantatore legato alla SOTTOCLASSE con lista del Mago), il Circolo
-  della Terra del Druido e il Collegio della Danza del Bardo sopra (tre
-  problemi di architettura/UX distinti, tutti da discutere con Andrea), e
-  le altre 3 classi con sottoclasse incompleta (Stregone, Mago, Warlock —
-  1 sola sottoclasse modellata ciascuna), oltre ai collaudi cloud sotto.
+  (incantatore legato alla SOTTOCLASSE con lista del Mago), Circolo della
+  Terra (Druido), Collegio della Danza (Bardo) e Stregoneria Draconica
+  (Stregone) sopra (quattro problemi di architettura/UX distinti — due
+  sono in realtà la STESSA cosa, la CA a due caratteristiche, ricorsa due
+  volte: vale la pena risolverla una volta sola per Danza e Draconica
+  insieme quando se ne parla con Andrea), e le altre 2 classi con
+  sottoclasse incompleta (Mago, Warlock — 1 sola sottoclasse modellata
+  ciascuna), oltre ai collaudi cloud sotto.
   Restano in coda due collaudi cloud mai confermati (richiedono Andrea, non
   automatizzabili da sessione): sync multi-device tra due dispositivi con lo
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
@@ -1731,6 +1756,47 @@ lavoro, l'inventario esatto va verificato sul PDF quando ci si arriva):
      accanto a "Magia Innata 2/2". Tharion (Paladino) verificato invariato
      dopo ogni prova (CA 20, CD 15, PF 60, Imposizione 35, TS CAR +9).
      Console pulita in ogni prova. Cache busting `?v=115`.
+   → **Completato con Meccanica e Magia Selvaggia (2026-07-31), `?v=125`,
+     manuale `version` 46→47.** Lo Stregone ne ha 4 nel PHB (Aberrante,
+     Draconica, Meccanica, Magia Selvaggia); Aberrante c'era già. Aggiunte:
+     - **Stregoneria Meccanica** (p.145-146): Ripristinare l'Equilibrio +
+       Manifestazioni dell'Ordine a 3, Baluardo della Legge a 6, Trance
+       dell'Ordine a 14, Cavalcata Meccanica a 18; incantesimi sempre
+       preparati Aiuto/Allarme/Ristorare Inferiore/Protezione dal Male e dal
+       Bene, Dissolvi Magie/Protezione dall'Energia, Libertà di
+       Movimento/Evocare Costrutto, Ristorare Superiore/Muro di Forza — tutti
+       e 8 già nel catalogo (7 hanno ricevuto solo il tag `'stregone'`,
+       Dissolvi Magie ce l'aveva già).
+     - **Magia Selvaggia** (p.147-148): Impennata di Magia Selvaggia + Maree
+       del Caos a 3, Piegare la Sorte a 6, Caos Controllato a 14, Impennata
+       Domata a 18. **Nessun incantesimo di sottoclasse** (come Sapienza/
+       Valore del Bardo — non tutte le sottoclassi ne hanno uno). **La
+       Tabella di Impennata di Magia Selvaggia (d100) non è stata
+       riportata**: i privilegi descrivono il meccanismo (tira 1d20 dopo
+       un incantesimo lanciato con slot; con un 20, consulta la tabella per
+       un effetto casuale) senza trascrivere le 100 righe — sarebbe stato
+       l'unico punto in tutto il manuale dati a riportare un blocco così
+       ampio di testo originale del PHB, contro la regola del progetto di
+       usare solo riassunti (il Master la consulta dal libro, come già
+       oggi per altri dettagli di regia non modellati).
+     Nessuna risorsa nuova in nessuna delle due: entrambe riusano solo Punti
+     Stregoneria/Magia Innata già tracciati, stesso principio dei Domini del
+     Chierico e dei Circoli del Druido.
+     **Stregoneria Draconica deliberatamente rimandata**: Resilienza
+     Draconica dà PF massimi che aumentano di sottoclasse per livello (+3 al
+     3°, poi +1 per ogni livello da stregone — mai vista, un bonus PF che
+     scala con il livello ma vive nella sottoclasse, non nella classe) E
+     una CA senz'armatura a **due** caratteristiche insieme (10+DES+CAR) —
+     la stessa esatta meccanica già rimandata per il Collegio della Danza
+     del Bardo. Le due ricorrenze della stessa CA a due caratteristiche
+     rendono più sensato risolverla una volta sola quando se ne parla con
+     Andrea, invece che due implementazioni separate.
+     Verificato in locale: Tratti di uno Stregone Meccanica livello 9
+     mostrano Ripristinare l'Equilibrio/Manifestazioni dell'Ordine (3°) e
+     Baluardo della Legge (6°) nell'ordine giusto; Grimorio mostra tutti e 8
+     gli incantesimi FISSI del sottotipo; level-up 2→3 mostra le 3 card
+     Origine (Draconica correttamente assente); Tharion invariato; console
+     pulita in ogni prova.
 10. [x] **Mago** (full) — libro incantesimi, Recupero Arcano, Tradizione.
     → **Fatto (2026-07-30, manuale `version` 37→38)**: privilegi 1→20 dal PDF
     (p.164-166, dati base già presenti e verificati cifra per cifra —
