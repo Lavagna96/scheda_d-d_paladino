@@ -225,6 +225,248 @@
     });
   }
 
+  function isWeaponItem(item) {
+    if (itemKindOf(item) === 'weapon') {
+      return true;
+    }
+    var art = itemArtOf(item);
+
+    return art.type === 'preset' && art.value === 'sword';
+  }
+
+  function itemEffectsActive(item) {
+    return !itemRequiresAttunementOf(item) || itemAttunedOf(item);
+  }
+
+  function weaponById(id) {
+    var found = null;
+    (window.MANUAL_55.weapons || []).forEach(function (w) {
+      if (w.id === id) {
+        found = w;
+      }
+    });
+
+    return found;
+  }
+
+  function profileFromCatalogWeapon(w) {
+    return {
+      weaponId: w.id,
+      name: w.name,
+      die: w.die,
+      type: w.dmg,
+      mastery: w.mastery || '',
+      finesse: (w.props || []).indexOf('Accurata') !== -1,
+      ranged: w.cat.indexOf('dist') !== -1,
+      twoHanded: (w.props || []).indexOf('A due mani') !== -1
+    };
+  }
+
+  function weaponProfileOf(item) {
+    if (item.weaponProfile) {
+      return Object.assign({}, item.weaponProfile);
+    }
+    if (!isWeaponItem(item)) {
+      return null;
+    }
+
+    return {
+      weaponId: '',
+      name: item.name || '',
+      die: '1d8',
+      type: 'tagl.',
+      mastery: '',
+      finesse: false,
+      ranged: false,
+      twoHanded: false
+    };
+  }
+
+  function defaultWeaponProfileFromCharacter() {
+    var w = window.AppStorage.getState().character.weapon || {};
+
+    return {
+      weaponId: '',
+      name: w.name || '',
+      die: w.die || '1d8',
+      type: w.type || '',
+      mastery: w.mastery || '',
+      finesse: !!w.finesse,
+      ranged: !!w.ranged,
+      twoHanded: !!w.twoHanded
+    };
+  }
+
+  function getEquippedWeaponItem(character) {
+    var equipped = null;
+    (character.items || []).forEach(function (it) {
+      if (isWeaponItem(it) && itemEquippedOf(it) && itemEffectsActive(it)) {
+        equipped = it;
+      }
+    });
+
+    return equipped;
+  }
+
+  function activeEquippedWeaponProfile(character) {
+    var item = getEquippedWeaponItem(character);
+    if (!item) {
+      return null;
+    }
+
+    return weaponProfileOf(item);
+  }
+
+  function equipWeaponItem(character, itemId) {
+    (character.items || []).forEach(function (it) {
+      if (!isWeaponItem(it)) {
+        return;
+      }
+      it.equipped = it.id === itemId;
+    });
+  }
+
+  function isWeaponEquipped(item, character) {
+    var active = getEquippedWeaponItem(character);
+
+    return !!(active && active.id === item.id);
+  }
+
+  /* Bonus della Lama Vincolante statica (config + HTML rimossi): togli i
+     modifiers legacy dallo stato salvato così non si sommano alle reliquie
+     create dall'utente in tab Oggetti. */
+  function stripLegacyRelicModifiers(character) {
+    var mods = character.modifiers || [];
+    var next = mods.filter(function (m) {
+      return (m.source || '').indexOf('Lama Vincolante') !== 0;
+    });
+    if (next.length === mods.length) {
+      return false;
+    }
+    character.modifiers = next;
+
+    return true;
+  }
+
+  function normalizeWeaponItems(character) {
+    var changed = false;
+    var weapons = (character.items || []).filter(isWeaponItem);
+    var hasEquipped = weapons.some(itemEquippedOf);
+    (character.items || []).forEach(function (it) {
+      if (!isWeaponItem(it)) {
+        return;
+      }
+      if (itemKindOf(it) !== 'weapon') {
+        it.kind = 'weapon';
+        changed = true;
+      }
+    });
+    if (weapons.length && !hasEquipped) {
+      weapons.forEach(function (it, i) {
+        it.equipped = i === 0;
+      });
+      changed = true;
+    }
+
+    return changed;
+  }
+
+  function defaultShieldAcBonus() {
+    return ((window.MANUAL_55 && window.MANUAL_55.shield) || {}).ac || 2;
+  }
+
+  function isShieldItem(item) {
+    if (itemKindOf(item) === 'shield') {
+      return true;
+    }
+    var art = itemArtOf(item);
+
+    return art.type === 'preset' && art.value === 'shield';
+  }
+
+  function shieldProfileOf(item) {
+    if (item.shieldProfile) {
+      return Object.assign({}, item.shieldProfile);
+    }
+    if (!isShieldItem(item)) {
+      return null;
+    }
+
+    return {
+      name: item.name || '',
+      acBonus: defaultShieldAcBonus()
+    };
+  }
+
+  function defaultShieldProfileFromCharacter() {
+    return {
+      name: '',
+      acBonus: defaultShieldAcBonus()
+    };
+  }
+
+  function getEquippedShieldItem(character) {
+    var equipped = null;
+    (character.items || []).forEach(function (it) {
+      if (isShieldItem(it) && itemEquippedOf(it) && itemEffectsActive(it)) {
+        equipped = it;
+      }
+    });
+
+    return equipped;
+  }
+
+  function activeEquippedShieldBonus(character) {
+    var item = getEquippedShieldItem(character);
+    if (!item) {
+      return null;
+    }
+
+    return shieldProfileOf(item).acBonus;
+  }
+
+  function characterHasEquippedShield(character) {
+    return !!getEquippedShieldItem(character);
+  }
+
+  function equipShieldItem(character, itemId) {
+    (character.items || []).forEach(function (it) {
+      if (!isShieldItem(it)) {
+        return;
+      }
+      it.equipped = it.id === itemId;
+    });
+  }
+
+  function isShieldEquipped(item, character) {
+    var active = getEquippedShieldItem(character);
+
+    return !!(active && active.id === item.id);
+  }
+
+  function normalizeShieldItems(character) {
+    var changed = false;
+    var shields = (character.items || []).filter(isShieldItem);
+    var hasEquipped = shields.some(itemEquippedOf);
+    (character.items || []).forEach(function (it) {
+      if (!isShieldItem(it)) {
+        return;
+      }
+      if (itemKindOf(it) !== 'shield') {
+        it.kind = 'shield';
+        changed = true;
+      }
+    });
+    if (shields.length && !hasEquipped) {
+      shields.forEach(function (it, i) {
+        it.equipped = i === 0;
+      });
+      changed = true;
+    }
+
+    return changed;
+  }
+
   /* Icone (stesso stile minimale a tratto di js/sheet.js: viewBox 24x24,
      stroke corrente, tratto 2). 'sword' e 'shield' sono gli stessi path di
      IC_SWORD/IC_SHIELD in js/sheet.js; le altre 6 sono disegnate ex novo.
@@ -1229,12 +1471,129 @@
     draft.art = { type: 'preset', value: typeId };
     if (typeId === 'bag') {
       draft.kind = 'dimensional-bag';
+    } else if (typeId === 'sword') {
+      draft.kind = 'weapon';
+      if (!draft.weaponProfile) {
+        draft.weaponProfile = defaultWeaponProfileFromCharacter();
+      }
+    } else if (typeId === 'shield') {
+      draft.kind = 'shield';
+      if (!draft.shieldProfile) {
+        draft.shieldProfile = defaultShieldProfileFromCharacter();
+      }
     } else {
       draft.kind = null;
     }
     if (typeId === 'potion' && draft.usesMax <= 0) {
       draft.usesMax = 1;
     }
+  }
+
+  function isWeaponDraft(draft) {
+    return draft.kind === 'weapon' || draftTypeId(draft) === 'sword';
+  }
+
+  function isShieldDraft(draft) {
+    return draft.kind === 'shield' || draftTypeId(draft) === 'shield';
+  }
+
+  function buildShieldProfileSection(draft) {
+    if (!draft.shieldProfile) {
+      draft.shieldProfile = defaultShieldProfileFromCharacter();
+    }
+    var profile = draft.shieldProfile;
+    var section = el('div', 'item-shield-profile');
+    section.appendChild(el('div', 'edit-section-label', 'Scudo in combattimento'));
+
+    var stepper = el('div', 'edit-stepper');
+    var minus = el('button', 'stepper-btn minus', '−');
+    minus.type = 'button';
+    var valEl = el('span', 'edit-stat-score', '+' + profile.acBonus);
+    var plus = el('button', 'stepper-btn plus', '+');
+    plus.type = 'button';
+    minus.addEventListener('click', function () {
+      profile.acBonus = Math.max(0, profile.acBonus - 1);
+      valEl.textContent = '+' + profile.acBonus;
+    });
+    plus.addEventListener('click', function () {
+      profile.acBonus = Math.min(5, profile.acBonus + 1);
+      valEl.textContent = '+' + profile.acBonus;
+    });
+    stepper.appendChild(minus);
+    stepper.appendChild(valEl);
+    stepper.appendChild(plus);
+    section.appendChild(buildField('Bonus CA', stepper, 'item-shield-ac'));
+
+    section.refresh = function () {
+      valEl.textContent = '+' + profile.acBonus;
+    };
+
+    return section;
+  }
+
+  function buildWeaponProfileSection(draft) {
+    if (!draft.weaponProfile) {
+      draft.weaponProfile = defaultWeaponProfileFromCharacter();
+    }
+    var profile = draft.weaponProfile;
+    var section = el('div', 'item-weapon-profile');
+    section.appendChild(el('div', 'edit-section-label', 'Arma in combattimento'));
+
+    var options = [{ id: '', label: 'Personalizzata' }];
+    (window.MANUAL_55.weapons || []).forEach(function (w) {
+      options.push({ id: w.id, label: w.name + ' (' + w.die + ' ' + w.dmg + ')' });
+    });
+    var select = buildSelect(options, profile.weaponId || '', 'item-weapon-select');
+    select.addEventListener('change', function () {
+      var picked = weaponById(select.value);
+      if (picked) {
+        draft.weaponProfile = profileFromCatalogWeapon(picked);
+      } else {
+        profile.weaponId = '';
+      }
+      refresh();
+    });
+    section.appendChild(buildField('Dal manuale', select, 'item-weapon-catalog'));
+
+    var nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'edit-input';
+    nameInput.value = profile.name || '';
+    nameInput.placeholder = 'Nome mostrato in scheda';
+    nameInput.addEventListener('input', function () {
+      profile.name = nameInput.value;
+    });
+    section.appendChild(buildField('Nome', nameInput, 'item-weapon-name'));
+
+    var dieInput = document.createElement('input');
+    dieInput.type = 'text';
+    dieInput.className = 'edit-input';
+    dieInput.value = profile.die || '1d8';
+    dieInput.addEventListener('input', function () {
+      profile.die = dieInput.value;
+    });
+    section.appendChild(buildField('Dado danni', dieInput, 'item-weapon-die'));
+
+    var typeInput = document.createElement('input');
+    typeInput.type = 'text';
+    typeInput.className = 'edit-input';
+    typeInput.value = profile.type || '';
+    typeInput.placeholder = 'tagl., perfor., cont., …';
+    typeInput.addEventListener('input', function () {
+      profile.type = typeInput.value;
+    });
+    section.appendChild(buildField('Tipo di danno', typeInput, 'item-weapon-type'));
+
+    function refresh() {
+      select.value = profile.weaponId || '';
+      nameInput.value = profile.name || '';
+      dieInput.value = profile.die || '1d8';
+      typeInput.value = profile.type || '';
+    }
+
+    section.refresh = refresh;
+
+    return section;
   }
 
   function buildEditorAccordion(title, contentBuilder, opts) {
@@ -1785,8 +2144,22 @@
 
   function refreshEditorTypeUi(draft, ui) {
     var bag = isBagDraft(draft);
+    var weapon = isWeaponDraft(draft);
+    var shield = isShieldDraft(draft);
     if (ui.typeHero && ui.typeHero.refreshHero) {
       ui.typeHero.refreshHero();
+    }
+    if (ui.weaponProfileSection) {
+      ui.weaponProfileSection.classList.toggle('hidden', bag || !weapon);
+      if (ui.weaponProfileSection.refresh) {
+        ui.weaponProfileSection.refresh();
+      }
+    }
+    if (ui.shieldProfileSection) {
+      ui.shieldProfileSection.classList.toggle('hidden', bag || !shield);
+      if (ui.shieldProfileSection.refresh) {
+        ui.shieldProfileSection.refresh();
+      }
     }
     if (ui.effectsPanel) {
       ui.effectsPanel.classList.toggle('hidden', bag);
@@ -1837,12 +2210,14 @@
         return { type: s.type, rangeM: s.rangeM };
       }),
       kind: itemKindOf(existingItem) || (itemArtOf(existingItem).type === 'preset' && itemArtOf(existingItem).value === 'bag'
-        ? 'dimensional-bag' : null),
-      equipped: itemEquippedOf(existingItem)
+        ? 'dimensional-bag' : (isWeaponItem(existingItem) ? 'weapon' : (isShieldItem(existingItem) ? 'shield' : null))),
+      equipped: itemEquippedOf(existingItem),
+      weaponProfile: weaponProfileOf(existingItem),
+      shieldProfile: shieldProfileOf(existingItem)
     } : {
       id: null, name: '', desc: '', art: { type: 'preset', value: 'ring' }, rarity: 'non-comune',
       effects: [], usesMax: 0, requiresAttunement: false, resistances: [], immunities: [], senses: [],
-      kind: null, equipped: false
+      kind: null, equipped: false, weaponProfile: null, shieldProfile: null
     };
 
     openSheet(isEdit ? 'Modifica reliquia' : 'Nuova reliquia');
@@ -1861,6 +2236,12 @@
       refreshEditorTypeUi(draft, ui);
     });
     main.appendChild(ui.typeHero);
+
+    ui.weaponProfileSection = buildWeaponProfileSection(draft);
+    main.appendChild(ui.weaponProfileSection);
+
+    ui.shieldProfileSection = buildShieldProfileSection(draft);
+    main.appendChild(ui.shieldProfileSection);
 
     var nameInput = document.createElement('input');
     nameInput.type = 'text';
@@ -1916,6 +2297,7 @@
       ui.addSelectWrap.classList.add('hidden');
     }
     ui.renderFeatures();
+    refreshEditorTypeUi(draft, ui);
     main.appendChild(ui.addSelectWrap);
     main.appendChild(ui.featuresWrap);
 
@@ -1953,11 +2335,35 @@
       draft.effects = draft.effects.filter(function (eff) {
         return eff.text === undefined || eff.text.trim() !== '';
       }).map(function (eff) {
-        return eff.text !== undefined ? { text: eff.text.trim() } : eff;
+        return eff.text !== undefined ? { text: eff.text.trim() } : { target: eff.target, value: Number(eff.value) || 0 };
       });
+      var attuned = draft.attuned;
+      if (!draft.requiresAttunement) {
+        attuned = true;
+      } else if (isEdit && !itemRequiresAttunementOf(existingItem)) {
+        attuned = false;
+      }
+      var weaponProfile = isWeaponDraft(draft) ? draft.weaponProfile : null;
+      var shieldProfile = isShieldDraft(draft) ? draft.shieldProfile : null;
       commitState(function (character) {
         character.items = character.items || [];
         var itemId = draft.id;
+        var payload = {
+          name: draft.name.trim(),
+          desc: draft.desc,
+          art: draft.art,
+          rarity: draft.rarity,
+          effects: draft.effects,
+          usesMax: draft.usesMax,
+          requiresAttunement: draft.requiresAttunement,
+          attuned: attuned,
+          resistances: draft.resistances,
+          immunities: draft.immunities,
+          senses: draft.senses,
+          kind: draft.kind || null,
+          weaponProfile: weaponProfile,
+          shieldProfile: shieldProfile
+        };
         if (isEdit) {
           var idx = -1;
           character.items.forEach(function (it, i) {
@@ -1966,31 +2372,51 @@
             }
           });
           if (idx !== -1) {
-            character.items[idx] = {
-              id: draft.id, name: draft.name.trim(), desc: draft.desc,
-              art: draft.art, rarity: draft.rarity, effects: draft.effects, usesMax: draft.usesMax,
-              requiresAttunement: draft.requiresAttunement, attuned: draft.attuned,
-              resistances: draft.resistances, immunities: draft.immunities, senses: draft.senses,
-              kind: draft.kind || null, equipped: draft.equipped
-            };
+            character.items[idx] = Object.assign({ id: draft.id, equipped: draft.equipped }, payload);
             itemId = draft.id;
           }
         } else {
           itemId = 'itm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
-          character.items.push({
+          var shouldEquip = false;
+          if (isWeaponDraft(draft) && !getEquippedWeaponItem(character)) {
+            shouldEquip = true;
+          }
+          if (isShieldDraft(draft) && !getEquippedShieldItem(character)) {
+            shouldEquip = true;
+          }
+          character.items.push(Object.assign({
             id: itemId,
-            name: draft.name.trim(), desc: draft.desc,
-            art: draft.art, rarity: draft.rarity, effects: draft.effects, usesMax: draft.usesMax,
-            requiresAttunement: draft.requiresAttunement,
-            attuned: !draft.requiresAttunement,
-            resistances: draft.resistances, immunities: draft.immunities, senses: draft.senses,
-            kind: draft.kind || null, equipped: false
-          });
+            equipped: shouldEquip
+          }, payload));
         }
         if (draft.kind === 'dimensional-bag') {
           equipDimensionalBag(character, itemId);
         }
+        if (isWeaponDraft(draft)) {
+          var savedWeapon = null;
+          character.items.forEach(function (it) {
+            if (it.id === itemId) {
+              savedWeapon = it;
+            }
+          });
+          if (savedWeapon && savedWeapon.equipped) {
+            equipWeaponItem(character, itemId);
+          }
+        }
+        if (isShieldDraft(draft)) {
+          var savedShield = null;
+          character.items.forEach(function (it) {
+            if (it.id === itemId) {
+              savedShield = it;
+            }
+          });
+          if (savedShield && savedShield.equipped) {
+            equipShieldItem(character, itemId);
+          }
+        }
         normalizeDimensionalBags(character);
+        normalizeWeaponItems(character);
+        normalizeShieldItems(character);
       });
       closeSheet();
     });
@@ -2044,7 +2470,11 @@
       var requiresAttunement = itemRequiresAttunementOf(item);
       var attuned = itemAttunedOf(item);
       var isBag = isDimensionalBag(item);
-      var equipped = isBagActive(item, ch);
+      var isWeapon = isWeaponItem(item);
+      var isShield = isShieldItem(item);
+      var equipped = isBag
+        ? isBagActive(item, ch)
+        : (isWeapon ? isWeaponEquipped(item, ch) : (isShield ? isShieldEquipped(item, ch) : false));
 
       var acc = el('div', 'relic-acc' + (requiresAttunement && !attuned ? ' dim' : ''));
 
@@ -2071,6 +2501,44 @@
           });
         });
         head.appendChild(bagBtn);
+      } else if (isWeapon) {
+        var weaponBtn = el('button', 'head-weapon' + (equipped ? ' on' : ''), '⚔');
+        weaponBtn.type = 'button';
+        weaponBtn.setAttribute('aria-label', equipped ? 'Riponi l\'arma' : 'Impugna');
+        weaponBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          commitState(function (character) {
+            if (equipped) {
+              (character.items || []).forEach(function (it) {
+                if (it.id === item.id) {
+                  it.equipped = false;
+                }
+              });
+            } else if (itemEffectsActive(item)) {
+              equipWeaponItem(character, item.id);
+            }
+          });
+        });
+        head.appendChild(weaponBtn);
+      } else if (isShield) {
+        var shieldBtn = el('button', 'head-shield' + (equipped ? ' on' : ''), '🛡');
+        shieldBtn.type = 'button';
+        shieldBtn.setAttribute('aria-label', equipped ? 'Riponi lo scudo' : 'Equipaggia scudo');
+        shieldBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          commitState(function (character) {
+            if (equipped) {
+              (character.items || []).forEach(function (it) {
+                if (it.id === item.id) {
+                  it.equipped = false;
+                }
+              });
+            } else if (itemEffectsActive(item)) {
+              equipShieldItem(character, item.id);
+            }
+          });
+        });
+        head.appendChild(shieldBtn);
       } else if (requiresAttunement) {
         var gem = el('button', 'head-gem' + (attuned ? ' on' : ''), '✦');
         gem.type = 'button';
@@ -2144,6 +2612,22 @@
           equipped ? '✓ Equipaggiata · ' + DIMENSIONAL_BAG_SELF_KG + ' kg sulle spalle' : 'Non equipaggiata'));
         card.appendChild(el('p', 'relic-type',
           'Contenitore extradimensionale · ' + DIMENSIONAL_BAG_CAPACITY_KG + ' kg (monete e bottino party)'));
+      } else if (isWeapon) {
+        var profile = weaponProfileOf(item);
+        card.appendChild(el('div', 'bag-badge ' + (equipped ? 'on' : 'off'),
+          equipped ? '✓ Impugnata in combattimento' : 'Non impugnata · tocca ⚔ per equipaggiare'));
+        if (profile) {
+          card.appendChild(el('p', 'relic-type',
+            (profile.die || '1d8') + ' ' + (profile.type || '') +
+            (profile.mastery ? ' · ' + profile.mastery : '')));
+        }
+      } else if (isShield) {
+        var shieldProfile = shieldProfileOf(item);
+        card.appendChild(el('div', 'bag-badge ' + (equipped ? 'on' : 'off'),
+          equipped ? '✓ Equipaggiato in combattimento' : 'Non equipaggiato · tocca 🛡 per equipaggiare'));
+        if (shieldProfile) {
+          card.appendChild(el('p', 'relic-type', 'CA +' + shieldProfile.acBonus));
+        }
       }
 
       if ((item.effects || []).length) {
@@ -2256,8 +2740,24 @@
       });
     }
     var state = window.AppStorage.getState();
+    var changed = false;
+    if (stripLegacyRelicModifiers(state.character)) {
+      changed = true;
+    }
     if (normalizeDimensionalBags(state.character)) {
+      changed = true;
+    }
+    if (normalizeWeaponItems(state.character)) {
+      changed = true;
+    }
+    if (normalizeShieldItems(state.character)) {
+      changed = true;
+    }
+    if (changed) {
       window.AppStorage.saveState(state);
+      if (window.AppStats && window.AppStats.render) {
+        window.AppStats.render();
+      }
     }
     render();
     if (window.AppTreasury && window.AppTreasury.renderCarryBar) {
@@ -2270,6 +2770,12 @@
     render: render,
     isDimensionalBag: isDimensionalBag,
     getEquippedDimensionalBag: getEquippedDimensionalBag,
+    isWeaponItem: isWeaponItem,
+    activeEquippedWeaponProfile: activeEquippedWeaponProfile,
+    isShieldItem: isShieldItem,
+    characterHasEquippedShield: characterHasEquippedShield,
+    activeEquippedShieldBonus: activeEquippedShieldBonus,
+    itemEffectsActive: itemEffectsActive,
     DIMENSIONAL_BAG_CAPACITY_KG: DIMENSIONAL_BAG_CAPACITY_KG,
     DIMENSIONAL_BAG_SELF_KG: DIMENSIONAL_BAG_SELF_KG,
     medallionSvg: medallionSvg,

@@ -362,7 +362,17 @@
     var atkBonus = 0;
     (ch.modifiers || []).forEach(function (m) { if (m.target === 'attacco') { atkBonus += m.value; } });
     (ch.items || []).forEach(function (it) {
-      (it.effects || []).forEach(function (e) { if (e.target === 'attacco') { atkBonus += e.value; } });
+      if (window.AppItems && window.AppItems.itemEffectsActive && !AppItems.itemEffectsActive(it)) {
+        return;
+      }
+      if (it.requiresAttunement && !it.attuned) {
+        return;
+      }
+      (it.effects || []).forEach(function (e) {
+        if (e.target === 'attacco') {
+          atkBonus += Number(e.value) || 0;
+        }
+      });
     });
     if (atkBonus > 0) { parts.push('Colpire e danni includono i bonus magici dell\'arma (+' + atkBonus + ').'); }
     /* Le note valgono solo quando il bonus si applica DAVVERO (stesse

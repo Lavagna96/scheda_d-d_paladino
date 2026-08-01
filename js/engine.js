@@ -112,17 +112,18 @@
        additiva dei modifiers "di sistema", ma da un array separato — vedi
        character.items in js/items.js. character.modifiers resta intatto. */
     (ch.items || []).forEach(function (item) {
-      // Sintonizzazione (Step 3.6): un oggetto che la richiede conta i suoi
-      // effetti solo se è effettivamente sintonizzato (fallback per item
-      // vecchi senza questi campi: requiresAttunement assente = false).
-      if (item.requiresAttunement && !item.attuned) {
+      if (window.AppItems && window.AppItems.itemEffectsActive) {
+        if (!window.AppItems.itemEffectsActive(item)) {
+          return;
+        }
+      } else if (item.requiresAttunement && !item.attuned) {
         return;
       }
       // Effetti a testo libero (Step 3.9.a) non hanno `target`: il confronto
       // sotto li scarta da solo, nessun controllo esplicito necessario.
       (item.effects || []).forEach(function (eff) {
         if (eff.target === target) {
-          total += eff.value;
+          total += Number(eff.value) || 0;
         }
       });
     });
@@ -209,6 +210,9 @@
 
     var armor = armorById((ch.armor || {}).id);
     var hasArmor = !!(ch.armor && ch.armor.id && ch.armor.id !== 'nessuna');
+    var shieldFromItem = window.AppItems && window.AppItems.characterHasEquippedShield
+      && window.AppItems.characterHasEquippedShield(ch);
+    var hasShield = !!(ch.armor && ch.armor.shield) || shieldFromItem;
     var ac;
     if (armor) {
       /* dexCap 0 = armatura pesante: il PHB dice che il mod DES "non si
@@ -230,14 +234,20 @@
          Il Barbaro la mantiene anche con lo scudo in mano (lo dice il PHB), il
          Monaco no (`unarmoredDefenseNoShield`): con lo scudo perde il bonus di
          SAG ma non lo scudo stesso, sommato comunque più sotto. */
-      var udApplies = !klass.unarmoredDefenseNoShield || !(ch.armor && ch.armor.shield);
+      var udApplies = !klass.unarmoredDefenseNoShield || !hasShield;
       ac = 10 + mods.DES + (klass.unarmoredDefense && udApplies ? mods[klass.unarmoredDefense] : 0);
     }
     var defenseBonus = (ch.fightingStyle === 'difesa' && hasArmor) ? 1 : 0;
-    var shieldAc = ((window.MANUAL_55 && window.MANUAL_55.shield) || {}).ac || 2;
-    ac += (ch.armor && ch.armor.shield ? shieldAc : 0) + defenseBonus + modSum(ch, 'ca');
+    var defaultShieldAc = ((window.MANUAL_55 && window.MANUAL_55.shield) || {}).ac || 2;
+    var shieldAcAdd = 0;
+    if (shieldFromItem) {
+      shieldAcAdd = window.AppItems.activeEquippedShieldBonus(ch) || defaultShieldAc;
+    } else if (ch.armor && ch.armor.shield) {
+      shieldAcAdd = defaultShieldAc;
+    }
+    ac += shieldAcAdd + defenseBonus + modSum(ch, 'ca');
     var acNote = (armor ? armor.label : 'Senza armatura') +
-                 (ch.armor && ch.armor.shield ? ' + Scudo' : '');
+                 (hasShield ? ' + Scudo' : '');
 
     /* Velocità: due condizioni diverse secondo la classe: 'unarmored'
        (default, Monaco) = niente armatura né scudo; 'notHeavy' (Ranger,
@@ -246,7 +256,6 @@
        specie). */
     var species = manual.species[ch.speciesId] || {};
     var elfLineage = (manual.elfLineages || {})[ch.elfLineageId];
-    var hasShield = !!(ch.armor && ch.armor.shield);
     var speedGateOk = klass.speedBonusGate === 'notHeavy'
       ? (!armor || armor.cat !== 'pesante')
       : (!hasArmor && !hasShield);
@@ -394,7 +403,9 @@
       }
     });
 
-    var w = ch.weapon || {};
+    var w = (window.AppItems && window.AppItems.activeEquippedWeaponProfile)
+      ? (window.AppItems.activeEquippedWeaponProfile(ch) || ch.weapon || {})
+      : (ch.weapon || {});
     /* Abilità d'attacco dell'arma (Blocco 5.A.3): a distanza → DES; agile
        (finesse) → la migliore tra FOR e DES; altrimenti FOR. I flag
        w.ranged / w.finesse vivono nei dati dell'arma del personaggio. */
