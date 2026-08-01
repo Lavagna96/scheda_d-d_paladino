@@ -222,6 +222,43 @@
     card.classList.toggle('hidden', types.length === 0);
   }
 
+  /* Effetti a testo libero dagli oggetti custom attivi (Step 3.9.a): stesso
+     criterio di modSum/renderResistances — sintonizzazione richiesta =
+     solo se sintonizzato. Mostrati in Scheda → Info/Comb per consultarli
+     a tavolo senza aprire Tesoreria. */
+  function renderItemTextEffects() {
+    var card = document.getElementById('item-text-effects-card');
+    var list = document.getElementById('item-text-effects-list');
+    if (!card || !list) {
+      return;
+    }
+    var ch = window.AppStorage.getState().character;
+    var entries = [];
+    (ch.items || []).forEach(function (it) {
+      var active = !it.requiresAttunement || it.attuned !== false;
+      if (!active) {
+        return;
+      }
+      (it.effects || []).forEach(function (eff) {
+        if (eff.text !== undefined && String(eff.text).trim()) {
+          entries.push({ text: String(eff.text).trim(), source: it.name || 'Oggetto' });
+        }
+      });
+    });
+    list.innerHTML = '';
+    entries.forEach(function (entry) {
+      var li = document.createElement('li');
+      li.className = 'item-text-effect-row';
+      li.appendChild(document.createTextNode(entry.text));
+      var src = document.createElement('span');
+      src.className = 'item-text-effect-src';
+      src.textContent = entry.source;
+      li.appendChild(src);
+      list.appendChild(li);
+    });
+    card.classList.toggle('hidden', entries.length === 0);
+  }
+
   /* Icona generica per le risorse di classe generate dinamicamente (che non
      hanno una card statica in index.html), es. la Furia del Barbaro. */
   function classResIcon() {
@@ -450,6 +487,7 @@
     renderSkills(view);
     renderResistances();
     renderSenses();
+    renderItemTextEffects();
     renderResources(view);
     renderAttacks(view);
     setText('loh-max', view.poolMax.loh);

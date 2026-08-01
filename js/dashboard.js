@@ -15,6 +15,7 @@
 
   var REVEAL_WIDTH = 84; // larghezza del pulsante Elimina, px — stesso valore nel CSS
   var LAYOUT_KEY = 'app-dashboard-layout';
+  var PROTECTED_CHAR_ID = 'tharion-velnar'; // scheda storica: non eliminabile
 
   // Ultimi items/onSelect ricevuti da loadDashboard (js/cloud.js): servono
   // per ridisegnare la lista quando si cambia layout, dato che il toggle non
@@ -170,6 +171,7 @@
       dx = 0;
       tracking = true;
       dragging = false;
+      moved = false;
       inner.style.transition = 'none';
     }, { passive: true });
 
@@ -203,10 +205,11 @@
     }, { passive: false });
 
     function settle() {
+      var wasDragging = dragging;
       tracking = false;
       inner.style.transition = '';
       inner.style.transform = '';
-      if (!dragging) {
+      if (!wasDragging) {
         return;
       }
       dragging = false;
@@ -215,6 +218,10 @@
       } else {
         closeSwipe(wrap);
       }
+      /* Evita che il tap post-swipe resti bloccato da moved === true. */
+      window.setTimeout(function () {
+        moved = false;
+      }, 320);
     }
 
     inner.addEventListener('touchend', settle);
@@ -271,6 +278,15 @@
     list.innerHTML = '';
     (items || []).forEach(function (item) {
       var inner = mode === 'list' ? buildRow(item) : buildCard(item);
+      if (item.id === PROTECTED_CHAR_ID) {
+        inner.classList.add('dash-protected');
+        inner.addEventListener('click', function () {
+          onSelect(item.id);
+        });
+        list.appendChild(inner);
+
+        return;
+      }
       list.appendChild(buildSwipeItem(item, onSelect, inner));
     });
 

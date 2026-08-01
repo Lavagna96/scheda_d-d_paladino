@@ -104,6 +104,12 @@
   /* Sintonizzazione (Step 3.6): al massimo 3 oggetti attivi insieme */
   var MAX_ATTUNED = 3;
 
+  /* Sacca dimensionale: contenitore extradimensionale equipaggiabile.
+     Monete e bottino party vanno qui (fino a 250 kg); lo zaino personale
+     resta sempre sul personaggio. Peso fisso della sacca equipaggiata. */
+  var DIMENSIONAL_BAG_CAPACITY_KG = 250;
+  var DIMENSIONAL_BAG_SELF_KG = 7.5;
+
   function attunedCount(ch) {
     return (ch.items || []).filter(function (it) {
       return it.requiresAttunement && it.attuned;
@@ -144,6 +150,81 @@
     return item.senses || [];
   }
 
+  function itemKindOf(item) {
+    return item.kind || null;
+  }
+
+  function isDimensionalBag(item) {
+    if (itemKindOf(item) === 'dimensional-bag') {
+      return true;
+    }
+    var art = itemArtOf(item);
+
+    return art.type === 'preset' && art.value === 'bag';
+  }
+
+  function itemEquippedOf(item) {
+    return !!item.equipped;
+  }
+
+  function getDimensionalBags(character) {
+    return (character.items || []).filter(isDimensionalBag);
+  }
+
+  function getEquippedDimensionalBag(character) {
+    var bags = getDimensionalBags(character);
+    var equipped = null;
+    bags.forEach(function (it) {
+      if (itemEquippedOf(it)) {
+        equipped = it;
+      }
+    });
+    if (equipped) {
+      return equipped;
+    }
+    // Compatibilità: una sacca sola conta come equipaggiata.
+    if (bags.length === 1) {
+      return bags[0];
+    }
+
+    return null;
+  }
+
+  function isBagActive(item, character) {
+    var active = getEquippedDimensionalBag(character);
+
+    return !!(active && active.id === item.id);
+  }
+
+  function normalizeDimensionalBags(character) {
+    var changed = false;
+    (character.items || []).forEach(function (it) {
+      var art = itemArtOf(it);
+      if (art.type === 'preset' && art.value === 'bag' && itemKindOf(it) !== 'dimensional-bag') {
+        it.kind = 'dimensional-bag';
+        changed = true;
+      }
+    });
+    var bags = getDimensionalBags(character);
+    if (bags.length && !bags.some(itemEquippedOf)) {
+      bags.forEach(function (it, i) {
+        it.equipped = i === 0;
+      });
+      changed = true;
+    }
+
+    return changed;
+  }
+
+  function equipDimensionalBag(character, itemId) {
+    (character.items || []).forEach(function (it) {
+      if (!isDimensionalBag(it)) {
+        return;
+      }
+      it.equipped = it.id === itemId;
+    });
+  }
+
   /* Icone (stesso stile minimale a tratto di js/sheet.js: viewBox 24x24,
      stroke corrente, tratto 2). 'sword' e 'shield' sono gli stessi path di
      IC_SWORD/IC_SHIELD in js/sheet.js; le altre 6 sono disegnate ex novo.
@@ -161,9 +242,23 @@
     wand: '<path d="M4.5 19.5l9 -9"/><path d="M17 3l1.2 2.3l2.3 1.2l-2.3 1.2l-1.2 2.3l-1.2 -2.3l-2.3 -1.2l2.3 -1.2z"/>',
     potion: '<path d="M10 3h4"/><path d="M11 3v3.5l-4.3 6.8a3.3 3.3 0 0 0 2.8 5h5a3.3 3.3 0 0 0 2.8 -5l-4.3 -6.8v-3.5"/>',
     tome: '<path d="M4 5a2 2 0 0 1 2 -2h6v18H6a2 2 0 0 1 -2 -2z"/>' +
-      '<path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-6"/>'
+      '<path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-6"/>',
+    bag: '<path d="M7 10h10l1 11h-12z"/><path d="M8 10v-2a4 4 0 0 1 8 0v2"/>' +
+      '<path d="M6 10q6 -4 12 0"/><path d="M9 14h6"/>'
   };
-  var ICON_IDS = ['sword', 'shield', 'ring', 'amulet', 'cloak', 'wand', 'potion', 'tome'];
+  var ICON_IDS = ['sword', 'shield', 'ring', 'amulet', 'cloak', 'wand', 'potion', 'tome', 'bag'];
+
+  var TYPE_LABELS = {
+    sword: 'Arma',
+    shield: 'Scudo',
+    ring: 'Anello',
+    amulet: 'Amuleto',
+    cloak: 'Mantello',
+    wand: 'Bacchetta',
+    potion: 'Pozione',
+    tome: 'Tomo',
+    bag: 'Sacca dimensionale'
+  };
 
   function iconSvg(id) {
     return '<svg ' + SVG_ATTRS + '>' + (ICONS[id] || ICONS.ring) + '</svg>';
@@ -370,6 +465,38 @@
           '<radialGradient id="gem' + id + '" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#8fe8dc"/><stop offset="45%" stop-color="#2a8a7a"/><stop offset="100%" stop-color="#0e332c"/></radialGradient>' +
           '<radialGradient id="glow' + id + '" cx="50%" cy="45%" r="52%"><stop offset="0%" stop-color="rgba(42,138,122,0.3)"/><stop offset="65%" stop-color="rgba(42,138,122,0.07)"/><stop offset="100%" stop-color="rgba(42,138,122,0)"/></radialGradient>';
       }
+    },
+    /* Sacca dimensionale: sacchetto di stoffa con cordino e apertura magica */
+    bag: {
+      body: function (id) {
+        return '<circle cx="70" cy="82" r="60" fill="url(#glow' + id + ')"/>' +
+          '<path d="M34 58 Q70 44 106 58 L112 108 Q108 132 70 136 Q32 132 28 108 Z" fill="url(#cloth' + id + ')" stroke="#4a3220" stroke-width="1.3" stroke-linejoin="round"/>' +
+          '<path d="M36 62 Q70 50 104 62" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="2.2"/>' +
+          '<path d="M40 78 Q70 68 100 78" fill="none" stroke="rgba(0,0,0,0.14)" stroke-width="1.4"/>' +
+          '<path d="M44 96 Q70 88 96 96" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.2"/>' +
+          '<path d="M48 112 Q70 106 92 112" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>' +
+          '<path d="M32 58 Q70 38 108 58" fill="none" stroke="url(#gold' + id + ')" stroke-width="2.4" stroke-linecap="round"/>' +
+          '<path d="M38 56 Q70 48 102 56 L100 62 Q70 54 40 62 Z" fill="url(#hem' + id + ')" stroke="#4a3220" stroke-width="0.8"/>' +
+          '<ellipse cx="70" cy="56" rx="22" ry="5.5" fill="url(#rift' + id + ')" stroke="url(#gold' + id + ')" stroke-width="1.4"/>' +
+          '<ellipse cx="70" cy="56" rx="14" ry="3.5" fill="url(#void' + id + ')"/>' +
+          '<path d="M60 55 Q70 50 80 55" fill="none" stroke="rgba(143,232,220,0.75)" stroke-width="1.1"/>' +
+          '<path d="M34 58 Q28 54 32 48 Q38 42 46 46" fill="none" stroke="url(#cord' + id + ')" stroke-width="2.2" stroke-linecap="round"/>' +
+          '<path d="M106 58 Q112 54 108 48 Q102 42 94 46" fill="none" stroke="url(#cord' + id + ')" stroke-width="2.2" stroke-linecap="round"/>' +
+          '<circle cx="32" cy="48" r="3" fill="url(#gold' + id + ')" stroke="#6b5116" stroke-width="0.6"/>' +
+          '<circle cx="108" cy="48" r="3" fill="url(#gold' + id + ')" stroke="#6b5116" stroke-width="0.6"/>' +
+          '<path d="M58 44 Q70 36 82 44" fill="none" stroke="url(#cord' + id + ')" stroke-width="2" stroke-linecap="round"/>' +
+          '<path d="M52 38 L88 38 L86 44 L54 44 Z" fill="url(#strap' + id + ')" stroke="#4a3220" stroke-width="0.8"/>' +
+          '<path d="M66 38 L66 30 Q70 24 74 30 L74 38" fill="none" stroke="url(#cord' + id + ')" stroke-width="2" stroke-linecap="round"/>';
+      },
+      grad: function (id) {
+        return '<linearGradient id="cloth' + id + '" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a06838"/><stop offset="45%" stop-color="#7a4e28"/><stop offset="100%" stop-color="#4a2e18"/></linearGradient>' +
+          '<linearGradient id="hem' + id + '" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8a5a32"/><stop offset="100%" stop-color="#5c3a20"/></linearGradient>' +
+          '<linearGradient id="cord' + id + '" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6b5116"/><stop offset="50%" stop-color="#c9a443"/><stop offset="100%" stop-color="#6b5116"/></linearGradient>' +
+          '<linearGradient id="strap' + id + '" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8a5a32"/><stop offset="100%" stop-color="#5c3a20"/></linearGradient>' +
+          '<radialGradient id="rift' + id + '" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#b8fff4"/><stop offset="55%" stop-color="#2a8a7a"/><stop offset="100%" stop-color="#143830"/></radialGradient>' +
+          '<radialGradient id="void' + id + '" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="#0a1620"/><stop offset="100%" stop-color="#1a2840"/></radialGradient>' +
+          '<radialGradient id="glow' + id + '" cx="50%" cy="42%" r="55%"><stop offset="0%" stop-color="rgba(42,138,122,0.35)"/><stop offset="65%" stop-color="rgba(42,138,122,0.09)"/><stop offset="100%" stop-color="rgba(42,138,122,0)"/></radialGradient>';
+      }
     }
   };
 
@@ -446,7 +573,8 @@
 
   function closeSheet() {
     overlay.classList.add('hidden');
-    bodyEl.innerHTML = ''; // scarta qualunque bozza non salvata
+    bodyEl.innerHTML = '';
+    bodyEl.className = 'sheet-body';
   }
 
   /* ---------- applica + rerender (lista Tratti + res-card + stats/sheet) ---------- */
@@ -462,11 +590,14 @@
     if (window.AppSheet && window.AppSheet.render) {
       window.AppSheet.render();
     }
+    if (window.AppTreasury && window.AppTreasury.renderCarryBar) {
+      window.AppTreasury.renderCarryBar();
+    }
   }
 
   /* ---------- sezione arte (galleria di medaglioni preimpostati + upload foto) ---------- */
 
-  function buildArtGrid(draft) {
+  function buildArtGrid(draft, kindSync) {
     var wrap = el('div', 'edit-field');
     wrap.appendChild(el('span', 'edit-label', 'Arte'));
     var grid = el('div', 'art-grid');
@@ -487,10 +618,16 @@
       var tile = el('button', 'art-tile');
       tile.type = 'button';
       tile.innerHTML = medallionSvg({ type: 'preset', value: id }, 40);
-      tile.setAttribute('aria-label', 'Arte ' + id);
+      tile.setAttribute('aria-label', id === 'bag' ? 'Sacca dimensionale' : 'Arte ' + id);
       tile.addEventListener('click', function () {
         draft.art = { type: 'preset', value: id };
+        if (id === 'bag') {
+          draft.kind = 'dimensional-bag';
+        }
         refresh();
+        if (kindSync && kindSync.refreshKind) {
+          kindSync.refreshKind();
+        }
       });
       tiles[id] = tile;
       grid.appendChild(tile);
@@ -566,6 +703,38 @@
       draft.requiresAttunement = toggle.classList.toggle('on');
     });
     wrap.appendChild(toggle);
+
+    return wrap;
+  }
+
+  function buildDimensionalBagSection(draft, kindSync) {
+    var wrap = el('div', 'edit-field');
+    wrap.appendChild(el('span', 'edit-label', 'Tipo oggetto'));
+    var toggle = el('button', 'chip' + (draft.kind === 'dimensional-bag' ? ' on' : ''), 'Sacca dimensionale');
+    toggle.type = 'button';
+    var hint = el('p', 'item-kind-hint hidden',
+      'Capacità ' + DIMENSIONAL_BAG_CAPACITY_KG + ' kg (monete e bottino party). ' +
+      'Peso equipaggiata ' + DIMENSIONAL_BAG_SELF_KG + ' kg. Lo zaino resta sulle spalle. ' +
+      'Si equipaggia automaticamente al salvataggio.');
+    function refreshKind() {
+      var isBag = draft.kind === 'dimensional-bag';
+      toggle.classList.toggle('on', isBag);
+      hint.classList.toggle('hidden', !isBag);
+    }
+    if (kindSync) {
+      kindSync.refreshKind = refreshKind;
+    }
+    toggle.addEventListener('click', function () {
+      var isOn = toggle.classList.toggle('on');
+      draft.kind = isOn ? 'dimensional-bag' : null;
+      if (isOn && draft.art.type === 'preset' && draft.art.value !== 'bag') {
+        draft.art = { type: 'preset', value: 'bag' };
+      }
+      refreshKind();
+    });
+    refreshKind();
+    wrap.appendChild(toggle);
+    wrap.appendChild(hint);
 
     return wrap;
   }
@@ -681,9 +850,11 @@
 
   /* ---------- sezione effetti (righe ripetibili) ---------- */
 
-  function buildEffectsSection(draft) {
+  function buildEffectsSection(draft, skipTitle) {
     var section = el('div');
-    section.appendChild(el('div', 'edit-section-label', 'Effetti'));
+    if (!skipTitle) {
+      section.appendChild(el('div', 'edit-section-label', 'Effetti'));
+    }
     var list = el('div', 'effects-list');
     section.appendChild(list);
 
@@ -826,6 +997,187 @@
     return wrap;
   }
 
+  function draftTypeId(draft) {
+    if (draft.art.type === 'image') {
+      return 'custom';
+    }
+    if (draft.art.type === 'preset') {
+      return draft.art.value;
+    }
+
+    return 'ring';
+  }
+
+  function isBagDraft(draft) {
+    return draft.kind === 'dimensional-bag' || draftTypeId(draft) === 'bag';
+  }
+
+  function isPotionDraft(draft) {
+    return draftTypeId(draft) === 'potion';
+  }
+
+  function applyTypeToDraft(draft, typeId) {
+    draft.art = { type: 'preset', value: typeId };
+    if (typeId === 'bag') {
+      draft.kind = 'dimensional-bag';
+    } else {
+      draft.kind = null;
+    }
+    if (typeId === 'potion' && draft.usesMax <= 0) {
+      draft.usesMax = 1;
+    }
+  }
+
+  function buildEditorAccordion(title, contentBuilder, opts) {
+    opts = opts || {};
+    var acc = el('div', 'item-editor-acc');
+    if (opts.open) {
+      acc.classList.add('open');
+    }
+    if (opts.hidden) {
+      acc.classList.add('hidden');
+    }
+    if (opts.id) {
+      acc.setAttribute('data-acc-id', opts.id);
+    }
+
+    var head = el('button', 'item-editor-acc-head');
+    head.type = 'button';
+    head.appendChild(el('span', 'item-editor-acc-arrow', opts.open ? '▾' : '▸'));
+    head.appendChild(el('span', 'item-editor-acc-title', title));
+    if (opts.hint) {
+      head.appendChild(el('span', 'item-editor-acc-hint', opts.hint));
+    }
+
+    var body = el('div', 'item-editor-acc-body');
+    if (!opts.open) {
+      body.classList.add('hidden');
+    }
+    contentBuilder(body);
+
+    head.addEventListener('click', function () {
+      var open = acc.classList.toggle('open');
+      body.classList.toggle('hidden', !open);
+      head.querySelector('.item-editor-acc-arrow').textContent = open ? '▾' : '▸';
+    });
+
+    acc.appendChild(head);
+    acc.appendChild(body);
+
+    return acc;
+  }
+
+  function buildTypeScroll(draft, onChange) {
+    var wrap = el('div', 'edit-field item-editor-type-field');
+    wrap.appendChild(el('span', 'edit-label', 'Tipo'));
+    var row = el('div', 'item-editor-type-scroll');
+
+    function refreshSelection() {
+      var current = draftTypeId(draft);
+      row.querySelectorAll('[data-type-id]').forEach(function (tile) {
+        var id = tile.getAttribute('data-type-id');
+        tile.classList.toggle('on', id === current);
+      });
+      var custom = row.querySelector('[data-type-id="custom"]');
+      if (custom) {
+        var isImage = draft.art.type === 'image';
+        custom.classList.toggle('has-image', isImage);
+        custom.style.backgroundImage = isImage ? 'url(' + draft.art.value + ')' : '';
+      }
+    }
+
+    ICON_IDS.forEach(function (id) {
+      var tile = el('button', 'item-editor-type-pill');
+      tile.type = 'button';
+      tile.setAttribute('data-type-id', id);
+      tile.innerHTML = medallionSvg({ type: 'preset', value: id }, 36);
+      tile.appendChild(el('span', 'item-editor-type-label', TYPE_LABELS[id] || id));
+      tile.addEventListener('click', function () {
+        applyTypeToDraft(draft, id);
+        refreshSelection();
+        if (onChange) {
+          onChange();
+        }
+      });
+      row.appendChild(tile);
+    });
+
+    var customTile = el('button', 'item-editor-type-pill item-editor-type-custom');
+    customTile.type = 'button';
+    customTile.setAttribute('data-type-id', 'custom');
+    customTile.innerHTML = '<span class="item-editor-upload-icon" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/>' +
+      '<path d="M6 10l6 -6l6 6"/><path d="M4 20h16"/></svg></span>';
+    customTile.appendChild(el('span', 'item-editor-type-label', 'Foto'));
+
+    var fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.className = 'item-editor-type-file';
+    fileInput.setAttribute('aria-label', 'Carica una foto per questa reliquia');
+    fileInput.addEventListener('change', function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function () {
+        draft.art = { type: 'image', value: reader.result };
+        draft.kind = null;
+        refreshSelection();
+        if (onChange) {
+          onChange();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    customTile.appendChild(fileInput);
+    customTile.addEventListener('click', function (e) {
+      if (e.target !== fileInput) {
+        fileInput.click();
+      }
+    });
+    row.appendChild(customTile);
+
+    refreshSelection();
+    wrap.appendChild(row);
+
+    return wrap;
+  }
+
+  function buildBagTypeInfo() {
+    var box = el('div', 'item-editor-type-info');
+    box.appendChild(el('strong', null, TYPE_LABELS.bag));
+    box.appendChild(document.createTextNode(
+      ' — Contiene monete e bottino party fino a ' + DIMENSIONAL_BAG_CAPACITY_KG +
+      ' kg. Peso sulle spalle: ' + DIMENSIONAL_BAG_SELF_KG +
+      ' kg. Lo zaino personale resta fuori.'
+    ));
+
+    return box;
+  }
+
+  function refreshEditorTypeUi(draft, ui) {
+    if (ui.previewEl) {
+      ui.previewEl.innerHTML = medallionSvg(draft.art, 120);
+    }
+    var bag = isBagDraft(draft);
+    if (ui.bagInfoEl) {
+      ui.bagInfoEl.classList.toggle('hidden', !bag);
+    }
+    if (ui.accPoteri) {
+      ui.accPoteri.classList.toggle('hidden', bag);
+      var poteriHint = ui.accPoteri.querySelector('.item-editor-acc-hint');
+      if (poteriHint) {
+        poteriHint.textContent = bag ? 'non previsto per Sacca' : '';
+      }
+    }
+    if (ui.accResistenze) {
+      ui.accResistenze.classList.toggle('hidden', bag);
+    }
+  }
+
   /* ---------- bottom sheet "Nuova Reliquia" / modifica ---------- */
 
   function buildItemSheet(existingItem) {
@@ -849,93 +1201,83 @@
       immunities: itemImmunitiesOf(existingItem).slice(),
       senses: itemSensesOf(existingItem).map(function (s) {
         return { type: s.type, rangeM: s.rangeM };
-      })
+      }),
+      kind: itemKindOf(existingItem) || (itemArtOf(existingItem).type === 'preset' && itemArtOf(existingItem).value === 'bag'
+        ? 'dimensional-bag' : null),
+      equipped: itemEquippedOf(existingItem)
     } : {
       id: null, name: '', desc: '', art: { type: 'preset', value: 'ring' }, rarity: 'non-comune',
-      effects: [], usesMax: 0, requiresAttunement: false, resistances: [], immunities: [], senses: []
+      effects: [], usesMax: 0, requiresAttunement: false, resistances: [], immunities: [], senses: [],
+      kind: null, equipped: false
     };
 
     openSheet(isEdit ? 'Modifica reliquia' : 'Nuova reliquia');
+    bodyEl.className = 'sheet-body item-editor-sheet-body';
+
+    var form = el('div', 'item-editor-form');
+    var scroll = el('div', 'item-editor-scroll');
+    var ui = {};
+
+    scroll.appendChild(buildTypeScroll(draft, function () {
+      refreshEditorTypeUi(draft, ui);
+    }));
+
+    ui.previewEl = el('div', 'item-editor-medal-wrap');
+    ui.previewEl.innerHTML = medallionSvg(draft.art, 120);
+    scroll.appendChild(ui.previewEl);
+
+    ui.bagInfoEl = buildBagTypeInfo();
+    if (!isBagDraft(draft)) {
+      ui.bagInfoEl.classList.add('hidden');
+    }
+    scroll.appendChild(ui.bagInfoEl);
 
     var nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.className = 'edit-input';
     nameInput.value = draft.name;
+    nameInput.placeholder = 'Nome reliquia';
     nameInput.addEventListener('input', function () {
       draft.name = nameInput.value;
     });
-    bodyEl.appendChild(buildField('Nome', nameInput, 'item-name-input'));
+    scroll.appendChild(buildField('Nome', nameInput, 'item-name-input'));
+    scroll.appendChild(buildRaritySection(draft));
 
-    var descInput = document.createElement('textarea');
-    descInput.className = 'edit-input item-desc-input';
-    descInput.rows = 3;
-    descInput.value = draft.desc;
-    descInput.addEventListener('input', function () {
-      draft.desc = descInput.value;
-    });
-    bodyEl.appendChild(buildField('Descrizione', descInput, 'item-desc-input'));
+    scroll.appendChild(buildEditorAccordion('Identità', function (body) {
+      var descInput = document.createElement('textarea');
+      descInput.className = 'edit-input item-desc-input';
+      descInput.rows = 3;
+      descInput.placeholder = 'Descrizione, note di gioco…';
+      descInput.value = draft.desc;
+      descInput.addEventListener('input', function () {
+        draft.desc = descInput.value;
+      });
+      body.appendChild(descInput);
+    }, { open: true, id: 'identity' }));
 
-    bodyEl.appendChild(buildArtGrid(draft));
-    bodyEl.appendChild(buildRaritySection(draft));
-    bodyEl.appendChild(buildResistancesSection(draft));
-    bodyEl.appendChild(buildSensesSection(draft));
-    bodyEl.appendChild(buildEffectsSection(draft));
-    bodyEl.appendChild(buildUsesSection(draft));
-    bodyEl.appendChild(buildAttunementSection(draft));
+    ui.accPoteri = buildEditorAccordion('Poteri', function (body) {
+      body.appendChild(buildEffectsSection(draft, true));
+    }, { open: false, id: 'powers', hidden: isBagDraft(draft) });
+
+    scroll.appendChild(ui.accPoteri);
+
+    ui.accResistenze = buildEditorAccordion('Resistenze & sensi', function (body) {
+      body.appendChild(buildResistancesSection(draft));
+      body.appendChild(buildSensesSection(draft));
+    }, { open: false, id: 'resists', hidden: isBagDraft(draft) });
+
+    scroll.appendChild(ui.accResistenze);
+
+    scroll.appendChild(buildEditorAccordion('Opzioni', function (body) {
+      body.appendChild(buildUsesSection(draft));
+      body.appendChild(buildAttunementSection(draft));
+    }, { open: false, id: 'options' }));
 
     var errorEl = el('p', 'item-form-error');
-    bodyEl.appendChild(errorEl);
+    scroll.appendChild(errorEl);
+    form.appendChild(scroll);
 
-    var saveBtn = el('button', 'save-btn', 'Salva');
-    saveBtn.type = 'button';
-    saveBtn.addEventListener('click', function () {
-      if (!draft.name.trim()) {
-        errorEl.textContent = 'Serve un nome per la reliquia.';
-
-        return;
-      }
-      // Righe di testo libero lasciate vuote non vanno salvate (diventerebbero
-      // un bullet senza contenuto nella lista effetti della card).
-      draft.effects = draft.effects.filter(function (eff) {
-        return eff.text === undefined || eff.text.trim() !== '';
-      }).map(function (eff) {
-        return eff.text !== undefined ? { text: eff.text.trim() } : eff;
-      });
-      commitState(function (character) {
-        character.items = character.items || [];
-        if (isEdit) {
-          var idx = -1;
-          character.items.forEach(function (it, i) {
-            if (it.id === draft.id) {
-              idx = i;
-            }
-          });
-          if (idx !== -1) {
-            character.items[idx] = {
-              id: draft.id, name: draft.name.trim(), desc: draft.desc,
-              art: draft.art, rarity: draft.rarity, effects: draft.effects, usesMax: draft.usesMax,
-              requiresAttunement: draft.requiresAttunement, attuned: draft.attuned,
-              resistances: draft.resistances, immunities: draft.immunities, senses: draft.senses
-            };
-          }
-        } else {
-          character.items.push({
-            id: 'itm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-            name: draft.name.trim(), desc: draft.desc,
-            art: draft.art, rarity: draft.rarity, effects: draft.effects, usesMax: draft.usesMax,
-            requiresAttunement: draft.requiresAttunement,
-            // Un oggetto nuovo che richiede sintonizzazione entra in collezione
-            // ma non è subito attivo/equipaggiato: va sintonizzato a mano dalla
-            // lista (gemma sulla testata dell'accordion).
-            attuned: !draft.requiresAttunement,
-            resistances: draft.resistances, immunities: draft.immunities, senses: draft.senses
-          });
-        }
-      });
-      closeSheet();
-    });
-    bodyEl.appendChild(saveBtn);
-
+    var footer = el('div', 'item-editor-footer');
     if (isEdit) {
       var deleteBtn = el('button', 'delete-btn', 'Elimina');
       deleteBtn.type = 'button';
@@ -950,8 +1292,66 @@
         });
         closeSheet();
       });
-      bodyEl.appendChild(deleteBtn);
+      footer.appendChild(deleteBtn);
     }
+
+    var saveBtn = el('button', 'save-btn', 'Salva');
+    saveBtn.type = 'button';
+    saveBtn.addEventListener('click', function () {
+      if (!draft.name.trim()) {
+        errorEl.textContent = 'Serve un nome per la reliquia.';
+
+        return;
+      }
+      draft.effects = draft.effects.filter(function (eff) {
+        return eff.text === undefined || eff.text.trim() !== '';
+      }).map(function (eff) {
+        return eff.text !== undefined ? { text: eff.text.trim() } : eff;
+      });
+      commitState(function (character) {
+        character.items = character.items || [];
+        var itemId = draft.id;
+        if (isEdit) {
+          var idx = -1;
+          character.items.forEach(function (it, i) {
+            if (it.id === draft.id) {
+              idx = i;
+            }
+          });
+          if (idx !== -1) {
+            character.items[idx] = {
+              id: draft.id, name: draft.name.trim(), desc: draft.desc,
+              art: draft.art, rarity: draft.rarity, effects: draft.effects, usesMax: draft.usesMax,
+              requiresAttunement: draft.requiresAttunement, attuned: draft.attuned,
+              resistances: draft.resistances, immunities: draft.immunities, senses: draft.senses,
+              kind: draft.kind || null, equipped: draft.equipped
+            };
+            itemId = draft.id;
+          }
+        } else {
+          itemId = 'itm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+          character.items.push({
+            id: itemId,
+            name: draft.name.trim(), desc: draft.desc,
+            art: draft.art, rarity: draft.rarity, effects: draft.effects, usesMax: draft.usesMax,
+            requiresAttunement: draft.requiresAttunement,
+            attuned: !draft.requiresAttunement,
+            resistances: draft.resistances, immunities: draft.immunities, senses: draft.senses,
+            kind: draft.kind || null, equipped: false
+          });
+        }
+        if (draft.kind === 'dimensional-bag') {
+          equipDimensionalBag(character, itemId);
+        }
+        normalizeDimensionalBags(character);
+      });
+      closeSheet();
+    });
+    footer.appendChild(saveBtn);
+    form.appendChild(footer);
+    bodyEl.appendChild(form);
+
+    refreshEditorTypeUi(draft, ui);
   }
 
   /* ---------- render: contatore sintonizzazione (sopra la lista, solo se
@@ -997,6 +1397,8 @@
       var rarity = itemRarityOf(item);
       var requiresAttunement = itemRequiresAttunementOf(item);
       var attuned = itemAttunedOf(item);
+      var isBag = isDimensionalBag(item);
+      var equipped = isBagActive(item, ch);
 
       var acc = el('div', 'relic-acc' + (requiresAttunement && !attuned ? ' dim' : ''));
 
@@ -1004,7 +1406,26 @@
       head.type = 'button';
       head.setAttribute('aria-expanded', 'false');
 
-      if (requiresAttunement) {
+      if (isBag) {
+        var bagBtn = el('button', 'head-bag' + (equipped ? ' on' : ''), '🎒');
+        bagBtn.type = 'button';
+        bagBtn.setAttribute('aria-label', equipped ? 'Togli dalle spalle' : 'Equipaggia');
+        bagBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          commitState(function (character) {
+            if (equipped) {
+              (character.items || []).forEach(function (it) {
+                if (it.id === item.id) {
+                  it.equipped = false;
+                }
+              });
+            } else {
+              equipDimensionalBag(character, item.id);
+            }
+          });
+        });
+        head.appendChild(bagBtn);
+      } else if (requiresAttunement) {
         var gem = el('button', 'head-gem' + (attuned ? ' on' : ''), '✦');
         gem.type = 'button';
         gem.setAttribute('aria-label', attuned ? 'Dis-sintonizza' : 'Sintonizza');
@@ -1070,6 +1491,13 @@
       if (requiresAttunement) {
         card.appendChild(el('div', 'attune-badge ' + (attuned ? 'on' : 'off'),
           attuned ? '✓ Sintonizzato' : 'Non sintonizzato'));
+      }
+
+      if (isBag) {
+        card.appendChild(el('div', 'bag-badge ' + (equipped ? 'on' : 'off'),
+          equipped ? '✓ Equipaggiata · ' + DIMENSIONAL_BAG_SELF_KG + ' kg sulle spalle' : 'Non equipaggiata'));
+        card.appendChild(el('p', 'relic-type',
+          'Contenitore extradimensionale · ' + DIMENSIONAL_BAG_CAPACITY_KG + ' kg (monete e bottino party)'));
       }
 
       if ((item.effects || []).length) {
@@ -1170,7 +1598,6 @@
     if (closeBtn) {
       closeBtn.addEventListener('click', closeSheet);
     }
-    // tap fuori dal foglio: chiude e scarta (nessuno stato è stato scritto)
     overlay.addEventListener('click', function (e) {
       if (e.target === overlay) {
         closeSheet();
@@ -1182,11 +1609,26 @@
         buildItemSheet(null);
       });
     }
+    var state = window.AppStorage.getState();
+    if (normalizeDimensionalBags(state.character)) {
+      window.AppStorage.saveState(state);
+    }
     render();
+    if (window.AppTreasury && window.AppTreasury.renderCarryBar) {
+      window.AppTreasury.renderCarryBar();
+    }
   }
 
   window.AppItems = {
     init: init,
-    render: render
+    render: render,
+    isDimensionalBag: isDimensionalBag,
+    getEquippedDimensionalBag: getEquippedDimensionalBag,
+    DIMENSIONAL_BAG_CAPACITY_KG: DIMENSIONAL_BAG_CAPACITY_KG,
+    DIMENSIONAL_BAG_SELF_KG: DIMENSIONAL_BAG_SELF_KG,
+    medallionSvg: medallionSvg,
+    ICON_IDS: ICON_IDS,
+    TYPE_LABELS: TYPE_LABELS,
+    RARITY_OPTIONS: RARITY_OPTIONS
   };
 })();

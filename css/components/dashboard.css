@@ -275,6 +275,12 @@ body.in-dashboard #global-fab {
   box-shadow: none;
   transition: transform 0.25s ease;
   transform: translateX(0);
+  touch-action: pan-y; /* swipe orizzontale gestito da JS, scroll verticale libero */
+}
+
+.dash-card.dash-protected,
+.dash-row.dash-protected {
+  cursor: pointer;
 }
 
 .dash-swipe.open .dash-card,

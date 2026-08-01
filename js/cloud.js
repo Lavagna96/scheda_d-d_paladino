@@ -241,7 +241,14 @@ import {
         return; // eco delle nostre stesse scritture
       }
       if (!snap.exists()) {
-        pushNow(); // primo accesso: carica la scheda locale nel cloud
+        /* Primo upload: stato in locale ma doc assente. Dopo un'eliminazione
+           dalla dashboard la chiave locale è già stata rimossa: non fare push
+           (altrimenti watchDoc ricreerebbe il personaggio da AppStorage in RAM). */
+        try {
+          if (localStorage.getItem('char-' + charId() + '-state')) {
+            pushNow();
+          }
+        } catch (e) { /* ignore */ }
 
         return;
       }
@@ -294,24 +301,64 @@ import {
     return dashboardItemFromCharacter(state.character, charId());
   }
 
+  /* Personaggi presenti solo in localStorage (es. creati offline o orfani dopo
+     sync parziale): vanno mostrati in dashboard così si possono eliminare. */
+  function localCharactersFromStorage() {
+    var found = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || key.indexOf('char-') !== 0 || key.slice(-6) !== '-state') {
+          continue;
+        }
+        var id = key.slice(5, -6);
+        if (!id) {
+          continue;
+        }
+        try {
+          var parsed = JSON.parse(localStorage.getItem(key));
+          if (parsed && parsed.character) {
+            found.push({ id: id, item: dashboardItemFromCharacter(parsed.character, id) });
+          }
+        } catch (e) { /* ignore */ }
+      }
+    } catch (e) { /* ignore */ }
+
+    return found;
+  }
+
   function loadDashboard() {
     if (!window.AppDashboard) {
       return;
     }
     getDocs(collection(db, 'users', user.uid, 'characters')).then(function (snap) {
-      var items = [];
+      var byId = {};
       snap.forEach(function (d) {
         var data = d.data();
         if (data && data.state) {
-          items.push(dashboardItemFromCharacter(data.state.character, d.id));
+          byId[d.id] = dashboardItemFromCharacter(data.state.character, d.id);
         }
       });
+      localCharactersFromStorage().forEach(function (entry) {
+        if (!byId[entry.id]) {
+          byId[entry.id] = entry.item;
+        }
+      });
+      var items = Object.keys(byId).map(function (k) { return byId[k]; });
       if (items.length === 0) {
         items = [localDashboardItem()];
       }
       window.AppDashboard.render(items, onSelectCharacter);
     }).catch(function () {
-      window.AppDashboard.render([localDashboardItem()], onSelectCharacter);
+      var byId = {};
+      localCharactersFromStorage().forEach(function (entry) {
+        byId[entry.id] = entry.item;
+      });
+      var items = Object.keys(byId).map(function (k) { return byId[k]; });
+      if (items.length === 0) {
+        items = [localDashboardItem()];
+      }
+      window.AppDashboard.render(items, onSelectCharacter);
       window.AppDashboard.showError('Impossibile aggiornare la lista dal cloud');
     });
   }
@@ -355,6 +402,9 @@ import {
      personaggio": la lista vuota resta comunque con lo slot "+ Nuovo
      personaggio" per ripartire. */
   function deleteCharacter(id) {
+    if (id === DEFAULT_CHAR_ID) {
+      return Promise.resolve();
+    }
     localStorage.removeItem('char-' + id + '-state');
     if (localStorage.getItem('app-active-char') === id) {
       localStorage.removeItem('app-active-char');
@@ -367,8 +417,10 @@ import {
     }
 
     return deleteDoc(doc(db, 'users', user.uid, 'characters', id)).then(function () {
+      watchDoc();
       loadDashboard();
     }).catch(function () {
+      watchDoc();
       loadDashboard();
     });
   }

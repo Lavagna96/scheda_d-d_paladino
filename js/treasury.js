@@ -27,15 +27,74 @@
     return Math.round(str * 15 * 0.4536 * 10) / 10;
   }
 
-  function renderCarryBar() {
+  function bagConstants() {
+    if (window.AppItems) {
+      return {
+        capacity: window.AppItems.DIMENSIONAL_BAG_CAPACITY_KG,
+        self: window.AppItems.DIMENSIONAL_BAG_SELF_KG
+      };
+    }
+
+    return { capacity: 250, self: 7.5 };
+  }
+
+  function getEquippedBag() {
+    if (!window.AppItems || !window.AppItems.getEquippedDimensionalBag) {
+      return null;
+    }
+
+    return window.AppItems.getEquippedDimensionalBag(window.AppStorage.getState().character);
+  }
+
+  function computeCarryBreakdown() {
     var state = window.AppStorage.getState();
     var coins = state.coins;
     var partyW = itemsWeight(state.treasury.partyItems);
     var personalW = itemsWeight(state.treasury.personalItems);
     var coinW = coinWeightKg(coins);
-    var total = coinW + partyW + personalW;
+    var bag = getEquippedBag();
+    var bagCfg = bagConstants();
     var max = carryMaxKg();
-    var pct = Math.min(100, total / max * 100);
+
+    if (!bag) {
+      return {
+        bagEquipped: false,
+        coinW: coinW,
+        partyW: partyW,
+        personalW: personalW,
+        bagStored: 0,
+        bagOverflow: 0,
+        bagSelf: 0,
+        carryTotal: coinW + partyW + personalW,
+        carryMax: max,
+        bagCapacity: bagCfg.capacity
+      };
+    }
+
+    var storeable = coinW + partyW;
+    var bagStored = Math.min(storeable, bagCfg.capacity);
+    var bagOverflow = Math.max(0, storeable - bagCfg.capacity);
+    var carryTotal = bagCfg.self + personalW + bagOverflow;
+
+    return {
+      bagEquipped: true,
+      coinW: coinW,
+      partyW: partyW,
+      personalW: personalW,
+      bagStored: bagStored,
+      bagOverflow: bagOverflow,
+      bagSelf: bagCfg.self,
+      carryTotal: carryTotal,
+      carryMax: max,
+      bagCapacity: bagCfg.capacity
+    };
+  }
+
+  function renderCarryBar() {
+    var bd = computeCarryBreakdown();
+    var total = bd.carryTotal;
+    var max = bd.carryMax;
+    var pct = max > 0 ? Math.min(100, total / max * 100) : 0;
     var fill = document.getElementById('carry-bar-fill');
     var label = document.getElementById('carry-label-val');
     if (fill) {
@@ -50,6 +109,72 @@
     if (label) {
       label.textContent = total.toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
         + ' / ' + max.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' kg';
+    }
+
+    var bagBlock = document.getElementById('bag-carry-block');
+    if (bagBlock) {
+      bagBlock.classList.toggle('hidden', !bd.bagEquipped);
+    }
+    if (bd.bagEquipped) {
+      var bagFill = document.getElementById('bag-carry-bar-fill');
+      var bagLabel = document.getElementById('bag-carry-label-val');
+      var bagPct = bd.bagCapacity > 0 ? Math.min(100, bd.bagStored / bd.bagCapacity * 100) : 0;
+      if (bagFill) {
+        bagFill.style.width = bagPct + '%';
+        bagFill.classList.remove('warning', 'danger');
+        if (bd.bagStored > bd.bagCapacity) {
+          bagFill.classList.add('danger');
+        } else if (bagPct >= 80) {
+          bagFill.classList.add('warning');
+        }
+      }
+      if (bagLabel) {
+        bagLabel.textContent = bd.bagStored.toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+          + ' / ' + bd.bagCapacity.toLocaleString('it-IT', { maximumFractionDigits: 0 }) + ' kg';
+      }
+    }
+
+    var coinNote = document.getElementById('coin-bag-note');
+    if (coinNote) {
+      if (bd.bagEquipped && bd.coinW > 0) {
+        var inBag = Math.min(bd.coinW, Math.max(0, bd.bagCapacity - Math.max(0, bd.bagStored - bd.coinW)));
+        var onPerson = Math.max(0, bd.coinW - inBag);
+        if (onPerson > 0.05) {
+          coinNote.textContent = inBag.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' kg in sacca · '
+            + onPerson.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' kg sulle spalle';
+          coinNote.classList.remove('hidden');
+        } else {
+          coinNote.textContent = 'In sacca dimensionale';
+          coinNote.classList.remove('hidden');
+        }
+      } else {
+        coinNote.textContent = '';
+        coinNote.classList.add('hidden');
+      }
+    }
+
+    var partyNote = document.getElementById('party-bag-note');
+    if (partyNote) {
+      if (bd.bagEquipped && bd.partyW > 0) {
+        var coinsInBag = Math.min(bd.coinW, bd.bagCapacity);
+        var partyRoom = Math.max(0, bd.bagCapacity - coinsInBag);
+        var partyInBag = Math.min(bd.partyW, partyRoom);
+        var partyOnPerson = Math.max(0, bd.partyW - partyInBag);
+        if (partyOnPerson > 0.05) {
+          partyNote.textContent = partyInBag.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' kg in sacca · '
+            + partyOnPerson.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' kg sulle spalle';
+          partyNote.classList.remove('hidden');
+        } else if (partyInBag > 0) {
+          partyNote.textContent = 'In sacca dimensionale';
+          partyNote.classList.remove('hidden');
+        } else {
+          partyNote.textContent = '';
+          partyNote.classList.add('hidden');
+        }
+      } else {
+        partyNote.textContent = '';
+        partyNote.classList.add('hidden');
+      }
     }
   }
 
@@ -197,6 +322,7 @@
       row.appendChild(del);
       list.appendChild(row);
     });
+    renderCarryBar();
   }
 
   function addItem(type) {
@@ -247,6 +373,8 @@
   window.AppTreasury = {
     init: init,
     render: render,
-    addItem: addItem
+    addItem: addItem,
+    renderCarryBar: renderCarryBar,
+    computeCarryBreakdown: computeCarryBreakdown
   };
 })();
