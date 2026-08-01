@@ -575,6 +575,10 @@
     overlay.classList.add('hidden');
     bodyEl.innerHTML = '';
     bodyEl.className = 'sheet-body';
+    var sheetRoot = overlay.querySelector('.bottom-sheet');
+    if (sheetRoot) {
+      sheetRoot.classList.remove('item-editor-sheet-root');
+    }
   }
 
   /* ---------- applica + rerender (lista Tratti + res-card + stats/sheet) ---------- */
@@ -772,9 +776,10 @@
   }
 
   function buildResistancesSection(draft) {
-    var section = el('div');
-    section.appendChild(buildChipToggleGroup('Resistenza a', DAMAGE_TYPES, draft.resistances, 'on-res'));
-    section.appendChild(buildChipToggleGroup('Immunità a', DAMAGE_TYPES.concat(CONDITIONS), draft.immunities));
+    var section = el('div', 'item-editor-resists');
+    section.appendChild(buildMultiSelectDropdown('Resistenza a', DAMAGE_TYPES, draft.resistances));
+    section.appendChild(buildMultiSelectDropdown('Immunità a', DAMAGE_TYPES.concat(CONDITIONS), draft.immunities));
+    section.appendChild(buildSensesMultiSelect(draft));
 
     return section;
   }
@@ -850,7 +855,8 @@
 
   /* ---------- sezione effetti (righe ripetibili) ---------- */
 
-  function buildEffectsSection(draft, skipTitle) {
+  function buildEffectsSection(draft, skipTitle, hooks) {
+    hooks = hooks || {};
     var section = el('div');
     if (!skipTitle) {
       section.appendChild(el('div', 'edit-section-label', 'Effetti'));
@@ -870,26 +876,40 @@
     function renderRows() {
       list.innerHTML = '';
       draft.effects.forEach(function (eff, idx) {
-        var row = el('div', 'effect-row');
+        var row = el('div', 'item-effect-card');
+
+        var removeBtn = el('button', 'item-effect-card-remove', '✕');
+        removeBtn.type = 'button';
+        removeBtn.setAttribute('aria-label', 'Rimuovi questo effetto');
+        removeBtn.addEventListener('click', function () {
+          draft.effects.splice(idx, 1);
+          renderRows();
+          if (draft.effects.length === 0 && hooks.onEmpty) {
+            hooks.onEmpty();
+          }
+        });
+        row.appendChild(removeBtn);
 
         if (isTextEffect(eff)) {
           var textInput = document.createElement('input');
           textInput.type = 'text';
-          textInput.className = 'edit-input effect-text-input';
-          textInput.placeholder = 'Es. Vantaggio ai tiri salvezza contro incantesimi';
+          textInput.className = 'edit-input';
+          textInput.placeholder = 'Descrivi l\'effetto…';
           textInput.value = eff.text;
           textInput.addEventListener('input', function () {
             eff.text = textInput.value;
           });
+          row.appendChild(el('span', 'item-effect-card-tag', 'Testo'));
           row.appendChild(textInput);
         } else {
+          row.appendChild(el('span', 'item-effect-card-tag', 'Bonus'));
           var select = buildSelect(EFFECT_OPTIONS, eff.target);
           select.addEventListener('change', function () {
             eff.target = select.value;
           });
           row.appendChild(select);
 
-          var stepper = el('div', 'edit-stepper');
+          var stepper = el('div', 'edit-stepper item-effect-stepper');
           var minus = el('button', 'stepper-btn minus', '−');
           minus.type = 'button';
           minus.setAttribute('aria-label', 'Diminuisci valore effetto');
@@ -911,38 +931,61 @@
           row.appendChild(stepper);
         }
 
-        var removeBtn = el('button', 'effect-remove-btn', '✕');
-        removeBtn.type = 'button';
-        removeBtn.setAttribute('aria-label', 'Rimuovi questo effetto');
-        removeBtn.addEventListener('click', function () {
-          draft.effects.splice(idx, 1);
-          renderRows();
-        });
-        row.appendChild(removeBtn);
-
         list.appendChild(row);
       });
     }
     renderRows();
 
-    var addRow = el('div', 'effect-add-row');
-    var addBtn = el('button', 'effect-add-btn', '+ Aggiungi effetto');
-    addBtn.type = 'button';
-    addBtn.addEventListener('click', function () {
-      draft.effects.push({ target: EFFECT_OPTIONS[0].id, value: 1 });
-      renderRows();
-    });
-    var addTextBtn = el('button', 'effect-add-btn effect-add-text-btn', '+ Aggiungi testo libero');
-    addTextBtn.type = 'button';
-    addTextBtn.addEventListener('click', function () {
-      draft.effects.push({ text: '' });
-      renderRows();
-    });
-    addRow.appendChild(addBtn);
-    addRow.appendChild(addTextBtn);
-    section.appendChild(addRow);
+    if (!hooks.hideAddRow) {
+      var addRow = el('div', 'effect-add-row');
+      var addBtn = el('button', 'effect-add-btn', '+ Aggiungi effetto');
+      addBtn.type = 'button';
+      addBtn.addEventListener('click', function () {
+        draft.effects.push({ target: EFFECT_OPTIONS[0].id, value: 1 });
+        renderRows();
+      });
+      var addTextBtn = el('button', 'effect-add-btn effect-add-text-btn', '+ Aggiungi testo libero');
+      addTextBtn.type = 'button';
+      addTextBtn.addEventListener('click', function () {
+        draft.effects.push({ text: '' });
+        renderRows();
+      });
+      addRow.appendChild(addBtn);
+      addRow.appendChild(addTextBtn);
+      section.appendChild(addRow);
+    }
+
+    section.renderRows = renderRows;
 
     return section;
+  }
+
+  function buildUsesStepper(draft) {
+    var usesField = el('div', 'edit-field');
+    usesField.appendChild(el('label', 'edit-label', 'Usi al giorno'));
+    var stepper = el('div', 'edit-stepper');
+    var minus = el('button', 'stepper-btn minus', '−');
+    minus.type = 'button';
+    var localUses = draft.usesMax > 0 ? draft.usesMax : 1;
+    var valEl = el('span', 'edit-stat-score', String(localUses));
+    var plus = el('button', 'stepper-btn plus', '+');
+    plus.type = 'button';
+    minus.addEventListener('click', function () {
+      localUses = Math.max(1, localUses - 1);
+      draft.usesMax = localUses;
+      valEl.textContent = String(localUses);
+    });
+    plus.addEventListener('click', function () {
+      localUses = Math.min(20, localUses + 1);
+      draft.usesMax = localUses;
+      valEl.textContent = String(localUses);
+    });
+    stepper.appendChild(minus);
+    stepper.appendChild(valEl);
+    stepper.appendChild(plus);
+    usesField.appendChild(stepper);
+
+    return usesField;
   }
 
   /* ---------- sezione usi limitati ---------- */
@@ -993,6 +1036,172 @@
       draft.usesMax = isOn ? localUses : 0;
       refreshVisibility();
     });
+
+    return wrap;
+  }
+
+  /* Scelte del menu inline "Aggiungi caratteristica" (sintonizzazione è sempre
+     visibile nel form, non passa da qui). */
+  var FEATURE_ADD_OPTIONS = [
+    { id: 'resistances', block: 'resistances', label: 'Resistenze', hint: 'Riduce un tipo di danno', singleton: true },
+    { id: 'immunities', block: 'immunities', label: 'Immunità', hint: 'Ignora danno o condizione', singleton: true },
+    { id: 'senses', block: 'senses', label: 'Sensi', hint: 'Scurovisione, vista cieca…', singleton: true },
+    { id: 'uses', block: 'uses', label: 'Usi al giorno', hint: 'Pozioni e cariche giornaliere', singleton: true }
+  ];
+
+  function initEnabledFeatureBlocks(draft) {
+    var blocks = {};
+    if (draft.resistances.length > 0) {
+      blocks.resistances = true;
+    }
+    if (draft.immunities.length > 0) {
+      blocks.immunities = true;
+    }
+    if (draft.senses.length > 0) {
+      blocks.senses = true;
+    }
+    if (draft.usesMax > 0) {
+      blocks.uses = true;
+    }
+
+    return blocks;
+  }
+
+  function buildFeatureBlockShell(title, onRemove) {
+    var block = el('div', 'item-extra-block');
+    var head = el('div', 'item-extra-block-head');
+    head.appendChild(el('span', 'item-extra-block-title', title));
+    var removeBtn = el('button', 'item-extra-block-remove');
+    removeBtn.type = 'button';
+    removeBtn.setAttribute('aria-label', 'Rimuovi ' + title);
+    removeBtn.textContent = 'Rimuovi';
+    removeBtn.addEventListener('click', onRemove);
+    head.appendChild(removeBtn);
+    var body = el('div', 'item-extra-block-body');
+    block.appendChild(head);
+    block.appendChild(body);
+
+    return { block: block, body: body };
+  }
+
+  function renderItemFeatureBlocks(draft, enabledBlocks, container, rerender) {
+    container.innerHTML = '';
+
+    if (enabledBlocks.resistances) {
+      var resShell = buildFeatureBlockShell('Resistenze', function () {
+        draft.resistances = [];
+        delete enabledBlocks.resistances;
+        rerender();
+      });
+      resShell.body.appendChild(buildMultiSelectDropdown('Tipo di danno', DAMAGE_TYPES, draft.resistances));
+      container.appendChild(resShell.block);
+    }
+
+    if (enabledBlocks.immunities) {
+      var immShell = buildFeatureBlockShell('Immunità', function () {
+        draft.immunities = [];
+        delete enabledBlocks.immunities;
+        rerender();
+      });
+      immShell.body.appendChild(
+        buildMultiSelectDropdown('Danno o condizione', DAMAGE_TYPES.concat(CONDITIONS), draft.immunities)
+      );
+      container.appendChild(immShell.block);
+    }
+
+    if (enabledBlocks.senses) {
+      var senShell = buildFeatureBlockShell('Sensi', function () {
+        draft.senses = [];
+        delete enabledBlocks.senses;
+        rerender();
+      });
+      senShell.body.appendChild(buildSensesMultiSelect(draft, true));
+      container.appendChild(senShell.block);
+    }
+
+    if (enabledBlocks.uses) {
+      var useShell = buildFeatureBlockShell('Usi limitati', function () {
+        draft.usesMax = 0;
+        delete enabledBlocks.uses;
+        rerender();
+      });
+      useShell.body.appendChild(buildUsesStepper(draft));
+      container.appendChild(useShell.block);
+    }
+  }
+
+  function availableFeatureOptions(enabledBlocks, filterIds) {
+    return FEATURE_ADD_OPTIONS.filter(function (opt) {
+      if (filterIds && filterIds.indexOf(opt.id) === -1) {
+        return false;
+      }
+      if (opt.singleton && enabledBlocks[opt.block]) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  function applyFeatureAdd(featureId, draft, enabledBlocks) {
+    if (featureId === 'effect-numeric') {
+      enabledBlocks.effects = true;
+      draft.effects.push({ target: EFFECT_OPTIONS[0].id, value: 1 });
+    } else if (featureId === 'effect-text') {
+      enabledBlocks.effects = true;
+      draft.effects.push({ text: '' });
+    } else if (featureId === 'resistances') {
+      enabledBlocks.resistances = true;
+    } else if (featureId === 'immunities') {
+      enabledBlocks.immunities = true;
+    } else if (featureId === 'senses') {
+      enabledBlocks.senses = true;
+    } else if (featureId === 'uses') {
+      enabledBlocks.uses = true;
+      if (draft.usesMax <= 0) {
+        draft.usesMax = 1;
+      }
+    }
+  }
+
+  function buildFeatureAddSelect(draft, enabledBlocks, onPick) {
+    var wrap = el('div', 'item-feature-add-select-wrap');
+    wrap.appendChild(el('span', 'edit-label', 'Altre caratteristiche'));
+    var select = document.createElement('select');
+    select.className = 'edit-select item-feature-add-select';
+
+    function populate() {
+      var current = select.value;
+      select.innerHTML = '';
+      var placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Scegli cosa aggiungere…';
+      select.appendChild(placeholder);
+      availableFeatureOptions(enabledBlocks).forEach(function (opt) {
+        var o = document.createElement('option');
+        o.value = opt.id;
+        o.textContent = opt.label + ' — ' + opt.hint;
+        select.appendChild(o);
+      });
+      select.disabled = select.options.length <= 1;
+      if (current && select.querySelector('option[value="' + current + '"]')) {
+        select.value = current;
+      }
+    }
+
+    select.addEventListener('change', function () {
+      if (!select.value) {
+        return;
+      }
+      applyFeatureAdd(select.value, draft, enabledBlocks);
+      select.value = '';
+      populate();
+      onPick();
+    });
+
+    wrap.populate = populate;
+    wrap.appendChild(select);
+    populate();
 
     return wrap;
   }
@@ -1067,50 +1276,367 @@
     return acc;
   }
 
-  function buildTypeScroll(draft, onChange) {
-    var wrap = el('div', 'edit-field item-editor-type-field');
-    wrap.appendChild(el('span', 'edit-label', 'Tipo'));
-    var row = el('div', 'item-editor-type-scroll');
+  function defaultSenseRange(type) {
+    var map = {
+      scurovisione: 18,
+      'vista-cieca': 10,
+      'vista-vera': 36,
+      'percezione-tremore': 18
+    };
 
-    function refreshSelection() {
-      var current = draftTypeId(draft);
-      row.querySelectorAll('[data-type-id]').forEach(function (tile) {
-        var id = tile.getAttribute('data-type-id');
-        tile.classList.toggle('on', id === current);
+    return map[type] || 18;
+  }
+
+  var openMselPanels = [];
+
+  function closeAllMselPanels(except) {
+    openMselPanels.forEach(function (panel) {
+      if (panel !== except) {
+        panel.classList.add('hidden');
+      }
+    });
+  }
+
+  function bindMselPanel(panel, trigger) {
+    openMselPanels.push(panel);
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var willOpen = panel.classList.contains('hidden');
+      closeAllMselPanels(willOpen ? panel : null);
+      panel.classList.toggle('hidden', !willOpen);
+    });
+    panel.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+  }
+
+  if (!window.__itemMselDocBound) {
+    window.__itemMselDocBound = true;
+    document.addEventListener('click', function () {
+      closeAllMselPanels(null);
+    });
+  }
+
+  function mselSummary(selected, emptyLabel) {
+    if (!selected.length) {
+      return emptyLabel || 'Nessuno';
+    }
+    if (selected.length <= 2) {
+      return selected.join(', ');
+    }
+
+    return selected.length + ' selezionati';
+  }
+
+  function buildMultiSelectDropdown(labelText, options, selectedArr) {
+    var wrap = el('div', 'edit-field item-msel-field');
+    wrap.appendChild(el('span', 'edit-label', labelText));
+    var dd = el('div', 'item-msel');
+    var trigger = el('button', 'item-msel-trigger');
+    trigger.type = 'button';
+    var chev = el('span', 'item-msel-chev', '▾');
+    var panel = el('div', 'item-msel-panel hidden');
+
+    function refreshTrigger() {
+      trigger.textContent = mselSummary(selectedArr, 'Nessuno');
+      trigger.appendChild(chev);
+    }
+
+    options.forEach(function (name) {
+      var row = el('label', 'item-msel-opt');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = selectedArr.indexOf(name) !== -1;
+      cb.addEventListener('change', function () {
+        var idx = selectedArr.indexOf(name);
+        if (cb.checked && idx === -1) {
+          selectedArr.push(name);
+        } else if (!cb.checked && idx !== -1) {
+          selectedArr.splice(idx, 1);
+        }
+        refreshTrigger();
       });
-      var custom = row.querySelector('[data-type-id="custom"]');
-      if (custom) {
-        var isImage = draft.art.type === 'image';
-        custom.classList.toggle('has-image', isImage);
-        custom.style.backgroundImage = isImage ? 'url(' + draft.art.value + ')' : '';
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(name));
+      panel.appendChild(row);
+    });
+
+    refreshTrigger();
+    bindMselPanel(panel, trigger);
+    dd.appendChild(trigger);
+    dd.appendChild(panel);
+    wrap.appendChild(dd);
+
+    return wrap;
+  }
+
+  function buildSensesMultiSelect(draft, hideLabel) {
+    var wrap = el('div', 'edit-field item-msel-field');
+    if (!hideLabel) {
+      wrap.appendChild(el('span', 'edit-label', 'Sensi'));
+    }
+    var dd = el('div', 'item-msel');
+    var trigger = el('button', 'item-msel-trigger');
+    trigger.type = 'button';
+    var chev = el('span', 'item-msel-chev', '▾');
+    var panel = el('div', 'item-msel-panel hidden');
+
+    function selectedLabels() {
+      return draft.senses.map(function (s) {
+        return senseLabel(s.type);
+      });
+    }
+
+    function refreshTrigger() {
+      trigger.textContent = mselSummary(selectedLabels(), 'Nessuno');
+      trigger.appendChild(chev);
+    }
+
+    SENSE_OPTIONS.forEach(function (opt) {
+      var row = el('label', 'item-msel-opt');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = draft.senses.some(function (s) { return s.type === opt.id; });
+      cb.addEventListener('change', function () {
+        var idx = -1;
+        draft.senses.forEach(function (s, i) {
+          if (s.type === opt.id) {
+            idx = i;
+          }
+        });
+        if (cb.checked && idx === -1) {
+          draft.senses.push({ type: opt.id, rangeM: defaultSenseRange(opt.id) });
+        } else if (!cb.checked && idx !== -1) {
+          draft.senses.splice(idx, 1);
+        }
+        refreshTrigger();
+      });
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(opt.label));
+      panel.appendChild(row);
+    });
+
+    refreshTrigger();
+    bindMselPanel(panel, trigger);
+    dd.appendChild(trigger);
+    dd.appendChild(panel);
+    wrap.appendChild(dd);
+
+    return wrap;
+  }
+
+  function buildRarityDropdown(draft) {
+    var wrap = el('div', 'edit-field item-editor-compact-field');
+    wrap.appendChild(el('span', 'edit-label', 'Rarità'));
+    var select = buildSelect(RARITY_OPTIONS, draft.rarity);
+    select.addEventListener('change', function () {
+      draft.rarity = select.value;
+    });
+    wrap.appendChild(select);
+
+    return wrap;
+  }
+
+  function buildAttunementToggleRow(draft) {
+    var field = el('div', 'edit-field item-attune-field');
+    field.appendChild(el('span', 'edit-label', 'Sintonizzazione'));
+    var row = el('div', 'item-attune-row');
+    var toggle = el('label', 'item-toggle');
+    var input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = draft.requiresAttunement;
+    input.addEventListener('change', function () {
+      draft.requiresAttunement = input.checked;
+    });
+    toggle.appendChild(input);
+    toggle.appendChild(el('span', 'item-toggle-slider'));
+    row.appendChild(toggle);
+    row.appendChild(el('span', 'item-attune-text', 'Richiede sintonizzazione'));
+    field.appendChild(row);
+
+    return field;
+  }
+
+  function buildEditorEffectsPanel(draft) {
+    var panel = el('div', 'item-effects-panel');
+    var addMain = el('button', 'item-effects-add-main', '+ Aggiungi Effetto');
+    addMain.type = 'button';
+    var addMenu = el('div', 'item-effects-add-menu hidden');
+    var addNum = el('button', 'item-effects-add-opt', 'Bonus numerico');
+    addNum.type = 'button';
+    var addText = el('button', 'item-effects-add-opt', 'Testo libero');
+    addText.type = 'button';
+    addMenu.appendChild(addNum);
+    addMenu.appendChild(addText);
+
+    var box = el('div', 'item-effects-box');
+    var list = el('div', 'item-effects-list');
+
+    function renderRows() {
+      list.innerHTML = '';
+      draft.effects.forEach(function (eff, idx) {
+        var row = el('div', 'item-effect-line');
+        var isText = eff.text !== undefined;
+
+        if (isText) {
+          row.classList.add('item-effect-line--text');
+          row.appendChild(el('span', 'item-effect-info', 'i'));
+          var textInput = document.createElement('input');
+          textInput.type = 'text';
+          textInput.className = 'item-effect-line-text';
+          textInput.value = eff.text;
+          textInput.placeholder = 'Descrivi l\'effetto…';
+          textInput.addEventListener('input', function () {
+            eff.text = textInput.value;
+          });
+          row.appendChild(textInput);
+        } else {
+          row.classList.add('item-effect-line--num');
+          var select = buildSelect(EFFECT_OPTIONS, eff.target);
+          select.className = 'edit-select item-effect-line-select';
+          select.addEventListener('change', function () {
+            eff.target = select.value;
+          });
+          row.appendChild(select);
+          var stepper = el('div', 'edit-stepper item-effect-line-stepper');
+          var minus = el('button', 'stepper-btn minus', '−');
+          minus.type = 'button';
+          var valEl = el('span', 'edit-stat-score', window.AppEngine.formatMod(eff.value));
+          var plus = el('button', 'stepper-btn plus', '+');
+          plus.type = 'button';
+          minus.addEventListener('click', function () {
+            eff.value = Math.max(-10, eff.value - 1);
+            valEl.textContent = window.AppEngine.formatMod(eff.value);
+          });
+          plus.addEventListener('click', function () {
+            eff.value = Math.min(10, eff.value + 1);
+            valEl.textContent = window.AppEngine.formatMod(eff.value);
+          });
+          stepper.appendChild(minus);
+          stepper.appendChild(valEl);
+          stepper.appendChild(plus);
+          row.appendChild(stepper);
+        }
+
+        var removeBtn = el('button', 'item-effect-line-remove', '✕');
+        removeBtn.type = 'button';
+        removeBtn.setAttribute('aria-label', 'Rimuovi effetto');
+        removeBtn.addEventListener('click', function () {
+          draft.effects.splice(idx, 1);
+          renderRows();
+        });
+        row.appendChild(removeBtn);
+        list.appendChild(row);
+      });
+    }
+
+    addMain.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var willOpen = addMenu.classList.contains('hidden');
+      closeAllMselPanels(willOpen ? addMenu : null);
+      addMenu.classList.toggle('hidden', !willOpen);
+    });
+    addNum.addEventListener('click', function () {
+      draft.effects.push({ target: EFFECT_OPTIONS[0].id, value: 1 });
+      addMenu.classList.add('hidden');
+      renderRows();
+    });
+    addText.addEventListener('click', function () {
+      draft.effects.push({ text: '' });
+      addMenu.classList.add('hidden');
+      renderRows();
+    });
+
+    var quickRow = el('div', 'item-effects-quick');
+    var quickInput = document.createElement('input');
+    quickInput.type = 'text';
+    quickInput.className = 'item-effects-quick-input';
+    quickInput.placeholder = 'Scegli un nuovo effetto o digita…';
+    var quickBtn = el('button', 'item-effects-quick-btn', '+ Aggiungi');
+    quickBtn.type = 'button';
+    quickBtn.addEventListener('click', function () {
+      var text = quickInput.value.trim();
+      if (!text) {
+        return;
+      }
+      draft.effects.push({ text: text });
+      quickInput.value = '';
+      renderRows();
+    });
+    quickRow.appendChild(el('span', 'item-effects-quick-plus', '+'));
+    quickRow.appendChild(quickInput);
+    quickRow.appendChild(quickBtn);
+
+    addMenu.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+    openMselPanels.push(addMenu);
+
+    renderRows();
+    panel.appendChild(addMain);
+    panel.appendChild(addMenu);
+    panel.appendChild(box);
+    box.appendChild(list);
+    box.appendChild(quickRow);
+    panel.renderRows = renderRows;
+
+    return panel;
+  }
+
+  function buildTypeHero(draft, onChange) {
+    var wrap = el('div', 'item-type-hero-wrap');
+    var hero = el('button', 'item-type-hero');
+    hero.type = 'button';
+    hero.setAttribute('aria-label', 'Cambia tipo reliquia');
+    var medal = el('div', 'item-type-hero-medal');
+    var label = el('span', 'item-type-hero-label');
+    hero.appendChild(medal);
+    hero.appendChild(label);
+
+    var panelWrap = el('div', 'item-type-hero-panel hidden');
+    var panel = el('div', 'item-type-panel');
+    var hintEl = el('p', 'item-type-hint hidden');
+
+    function refreshHero() {
+      medal.classList.remove('has-photo');
+      medal.style.backgroundImage = '';
+      if (draft.art.type === 'image') {
+        medal.classList.add('has-photo');
+        medal.style.backgroundImage = 'url(' + draft.art.value + ')';
+        medal.innerHTML = '';
+        label.textContent = 'Foto personalizzata';
+      } else {
+        medal.innerHTML = medallionSvg(draft.art, 72);
+        label.textContent = TYPE_LABELS[draftTypeId(draft)] || draftTypeId(draft);
+      }
+      var bag = isBagDraft(draft);
+      hintEl.classList.toggle('hidden', !bag);
+      if (bag) {
+        hintEl.textContent = 'Sacca: ' + DIMENSIONAL_BAG_CAPACITY_KG + ' kg monete/bottino, ' +
+          DIMENSIONAL_BAG_SELF_KG + ' kg sulle spalle.';
       }
     }
 
     ICON_IDS.forEach(function (id) {
-      var tile = el('button', 'item-editor-type-pill');
-      tile.type = 'button';
-      tile.setAttribute('data-type-id', id);
-      tile.innerHTML = medallionSvg({ type: 'preset', value: id }, 36);
-      tile.appendChild(el('span', 'item-editor-type-label', TYPE_LABELS[id] || id));
-      tile.addEventListener('click', function () {
+      var opt = el('button', 'item-type-opt');
+      opt.type = 'button';
+      opt.innerHTML = medallionSvg({ type: 'preset', value: id }, 32);
+      opt.appendChild(el('span', 'item-type-opt-label', TYPE_LABELS[id] || id));
+      opt.addEventListener('click', function () {
         applyTypeToDraft(draft, id);
-        refreshSelection();
+        refreshHero();
+        panelWrap.classList.add('hidden');
         if (onChange) {
           onChange();
         }
       });
-      row.appendChild(tile);
+      panel.appendChild(opt);
     });
 
-    var customTile = el('button', 'item-editor-type-pill item-editor-type-custom');
-    customTile.type = 'button';
-    customTile.setAttribute('data-type-id', 'custom');
-    customTile.innerHTML = '<span class="item-editor-upload-icon" aria-hidden="true">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
-      'stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/>' +
-      '<path d="M6 10l6 -6l6 6"/><path d="M4 20h16"/></svg></span>';
-    customTile.appendChild(el('span', 'item-editor-type-label', 'Foto'));
-
+    var customOpt = el('button', 'item-type-opt item-type-opt-custom');
+    customOpt.type = 'button';
+    customOpt.innerHTML = '<span class="item-type-opt-upload" aria-hidden="true">📷</span>';
+    customOpt.appendChild(el('span', 'item-type-opt-label', 'Foto'));
     var fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
@@ -1125,56 +1651,164 @@
       reader.onload = function () {
         draft.art = { type: 'image', value: reader.result };
         draft.kind = null;
-        refreshSelection();
+        refreshHero();
+        panelWrap.classList.add('hidden');
         if (onChange) {
           onChange();
         }
       };
       reader.readAsDataURL(file);
     });
-    customTile.appendChild(fileInput);
-    customTile.addEventListener('click', function (e) {
+    customOpt.appendChild(fileInput);
+    customOpt.addEventListener('click', function (e) {
       if (e.target !== fileInput) {
         fileInput.click();
       }
     });
-    row.appendChild(customTile);
+    panel.appendChild(customOpt);
 
-    refreshSelection();
-    wrap.appendChild(row);
+    hero.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var willOpen = panelWrap.classList.contains('hidden');
+      closeAllMselPanels(willOpen ? panelWrap : null);
+      panelWrap.classList.toggle('hidden', !willOpen);
+    });
+    panelWrap.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+    openMselPanels.push(panelWrap);
+
+    refreshHero();
+    panelWrap.appendChild(panel);
+    wrap.appendChild(hero);
+    wrap.appendChild(panelWrap);
+    wrap.appendChild(hintEl);
+    wrap.refreshHero = refreshHero;
 
     return wrap;
   }
 
-  function buildBagTypeInfo() {
-    var box = el('div', 'item-editor-type-info');
-    box.appendChild(el('strong', null, TYPE_LABELS.bag));
-    box.appendChild(document.createTextNode(
-      ' — Contiene monete e bottino party fino a ' + DIMENSIONAL_BAG_CAPACITY_KG +
-      ' kg. Peso sulle spalle: ' + DIMENSIONAL_BAG_SELF_KG +
-      ' kg. Lo zaino personale resta fuori.'
-    ));
+  function buildTypeDropdown(draft, onChange) {
+    var wrap = el('div', 'edit-field item-editor-type-field');
+    wrap.appendChild(el('span', 'edit-label', 'Tipo'));
+    var dd = el('div', 'item-msel item-type-msel');
+    var trigger = el('button', 'item-msel-trigger item-type-trigger');
+    trigger.type = 'button';
+    var chev = el('span', 'item-msel-chev', '▾');
+    var panel = el('div', 'item-msel-panel item-type-panel hidden');
+    var hintEl = el('p', 'item-type-hint hidden');
 
-    return box;
+    function refreshTrigger() {
+      trigger.innerHTML = '';
+      var iconWrap = el('span', 'item-type-trigger-icon');
+      if (draft.art.type === 'image') {
+        iconWrap.classList.add('has-photo');
+        iconWrap.style.backgroundImage = 'url(' + draft.art.value + ')';
+      } else {
+        iconWrap.innerHTML = medallionSvg(draft.art, 28);
+      }
+      trigger.appendChild(iconWrap);
+      var label = draft.art.type === 'image'
+        ? 'Foto personalizzata'
+        : (TYPE_LABELS[draftTypeId(draft)] || draftTypeId(draft));
+      trigger.appendChild(el('span', 'item-type-trigger-label', label));
+      trigger.appendChild(chev);
+      var bag = isBagDraft(draft);
+      hintEl.classList.toggle('hidden', !bag);
+      if (bag) {
+        hintEl.textContent = 'Sacca: ' + DIMENSIONAL_BAG_CAPACITY_KG + ' kg monete/bottino, ' +
+          DIMENSIONAL_BAG_SELF_KG + ' kg sulle spalle.';
+      }
+    }
+
+    ICON_IDS.forEach(function (id) {
+      var opt = el('button', 'item-type-opt');
+      opt.type = 'button';
+      opt.setAttribute('data-type-id', id);
+      opt.innerHTML = medallionSvg({ type: 'preset', value: id }, 32);
+      opt.appendChild(el('span', 'item-type-opt-label', TYPE_LABELS[id] || id));
+      opt.addEventListener('click', function () {
+        applyTypeToDraft(draft, id);
+        refreshTrigger();
+        panel.classList.add('hidden');
+        if (onChange) {
+          onChange();
+        }
+      });
+      panel.appendChild(opt);
+    });
+
+    var customOpt = el('button', 'item-type-opt item-type-opt-custom');
+    customOpt.type = 'button';
+    customOpt.setAttribute('data-type-id', 'custom');
+    customOpt.innerHTML = '<span class="item-type-opt-upload" aria-hidden="true">📷</span>';
+    customOpt.appendChild(el('span', 'item-type-opt-label', 'Foto'));
+    var fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.className = 'item-editor-type-file';
+    fileInput.setAttribute('aria-label', 'Carica una foto per questa reliquia');
+    fileInput.addEventListener('change', function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function () {
+        draft.art = { type: 'image', value: reader.result };
+        draft.kind = null;
+        refreshTrigger();
+        panel.classList.add('hidden');
+        if (onChange) {
+          onChange();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    customOpt.appendChild(fileInput);
+    customOpt.addEventListener('click', function (e) {
+      if (e.target !== fileInput) {
+        fileInput.click();
+      }
+    });
+    panel.appendChild(customOpt);
+
+    refreshTrigger();
+    bindMselPanel(panel, trigger);
+    dd.appendChild(trigger);
+    dd.appendChild(panel);
+    wrap.appendChild(dd);
+    wrap.appendChild(hintEl);
+
+    return wrap;
   }
 
   function refreshEditorTypeUi(draft, ui) {
-    if (ui.previewEl) {
-      ui.previewEl.innerHTML = medallionSvg(draft.art, 120);
-    }
     var bag = isBagDraft(draft);
-    if (ui.bagInfoEl) {
-      ui.bagInfoEl.classList.toggle('hidden', !bag);
+    if (ui.typeHero && ui.typeHero.refreshHero) {
+      ui.typeHero.refreshHero();
     }
-    if (ui.accPoteri) {
-      ui.accPoteri.classList.toggle('hidden', bag);
-      var poteriHint = ui.accPoteri.querySelector('.item-editor-acc-hint');
-      if (poteriHint) {
-        poteriHint.textContent = bag ? 'non previsto per Sacca' : '';
+    if (ui.effectsPanel) {
+      ui.effectsPanel.classList.toggle('hidden', bag);
+      if (ui.effectsPanel.renderRows) {
+        ui.effectsPanel.renderRows();
       }
     }
-    if (ui.accResistenze) {
-      ui.accResistenze.classList.toggle('hidden', bag);
+    if (ui.featuresWrap) {
+      ui.featuresWrap.classList.toggle('hidden', bag);
+    }
+    if (ui.addSelectWrap) {
+      ui.addSelectWrap.classList.toggle('hidden', bag);
+    }
+    if (ui.attuneWrap) {
+      ui.attuneWrap.classList.toggle('hidden', bag);
+    }
+    if (bag) {
+      return;
+    }
+    if (isPotionDraft(draft) && draft.usesMax > 0) {
+      ui.enabledBlocks.uses = true;
+      ui.renderFeatures();
     }
   }
 
@@ -1212,25 +1846,21 @@
     };
 
     openSheet(isEdit ? 'Modifica reliquia' : 'Nuova reliquia');
+    openMselPanels.length = 0;
     bodyEl.className = 'sheet-body item-editor-sheet-body';
+    var sheetRoot = overlay.querySelector('.bottom-sheet');
+    if (sheetRoot) {
+      sheetRoot.classList.add('item-editor-sheet-root');
+    }
 
     var form = el('div', 'item-editor-form');
-    var scroll = el('div', 'item-editor-scroll');
+    var main = el('div', 'item-editor-main');
     var ui = {};
 
-    scroll.appendChild(buildTypeScroll(draft, function () {
+    ui.typeHero = buildTypeHero(draft, function () {
       refreshEditorTypeUi(draft, ui);
-    }));
-
-    ui.previewEl = el('div', 'item-editor-medal-wrap');
-    ui.previewEl.innerHTML = medallionSvg(draft.art, 120);
-    scroll.appendChild(ui.previewEl);
-
-    ui.bagInfoEl = buildBagTypeInfo();
-    if (!isBagDraft(draft)) {
-      ui.bagInfoEl.classList.add('hidden');
-    }
-    scroll.appendChild(ui.bagInfoEl);
+    });
+    main.appendChild(ui.typeHero);
 
     var nameInput = document.createElement('input');
     nameInput.type = 'text';
@@ -1240,44 +1870,61 @@
     nameInput.addEventListener('input', function () {
       draft.name = nameInput.value;
     });
-    scroll.appendChild(buildField('Nome', nameInput, 'item-name-input'));
-    scroll.appendChild(buildRaritySection(draft));
+    main.appendChild(buildField('Nome', nameInput, 'item-name-input'));
+    main.appendChild(buildRarityDropdown(draft));
 
-    scroll.appendChild(buildEditorAccordion('Identità', function (body) {
-      var descInput = document.createElement('textarea');
-      descInput.className = 'edit-input item-desc-input';
-      descInput.rows = 3;
-      descInput.placeholder = 'Descrizione, note di gioco…';
-      descInput.value = draft.desc;
-      descInput.addEventListener('input', function () {
-        draft.desc = descInput.value;
-      });
-      body.appendChild(descInput);
-    }, { open: true, id: 'identity' }));
+    var descInput = document.createElement('textarea');
+    descInput.className = 'edit-input item-desc-input';
+    descInput.rows = 3;
+    descInput.placeholder = 'Aggiungi una descrizione dettagliata…';
+    descInput.value = draft.desc;
+    descInput.addEventListener('input', function () {
+      draft.desc = descInput.value;
+    });
+    main.appendChild(buildField('Descrizione', descInput));
 
-    ui.accPoteri = buildEditorAccordion('Poteri', function (body) {
-      body.appendChild(buildEffectsSection(draft, true));
-    }, { open: false, id: 'powers', hidden: isBagDraft(draft) });
+    ui.attuneWrap = el('div', 'item-editor-attune-wrap');
+    ui.attuneWrap.appendChild(buildAttunementToggleRow(draft));
+    if (isBagDraft(draft)) {
+      ui.attuneWrap.classList.add('hidden');
+    }
+    main.appendChild(ui.attuneWrap);
 
-    scroll.appendChild(ui.accPoteri);
+    ui.effectsPanel = buildEditorEffectsPanel(draft);
+    if (isBagDraft(draft)) {
+      ui.effectsPanel.classList.add('hidden');
+    }
+    main.appendChild(ui.effectsPanel);
 
-    ui.accResistenze = buildEditorAccordion('Resistenze & sensi', function (body) {
-      body.appendChild(buildResistancesSection(draft));
-      body.appendChild(buildSensesSection(draft));
-    }, { open: false, id: 'resists', hidden: isBagDraft(draft) });
+    ui.enabledBlocks = initEnabledFeatureBlocks(draft);
+    ui.featuresWrap = el('div', 'item-editor-features-wrap');
+    ui.featuresEl = el('div', 'item-editor-features');
+    ui.featuresWrap.appendChild(ui.featuresEl);
 
-    scroll.appendChild(ui.accResistenze);
+    ui.addSelectWrap = buildFeatureAddSelect(draft, ui.enabledBlocks, function () {
+      ui.renderFeatures();
+    });
 
-    scroll.appendChild(buildEditorAccordion('Opzioni', function (body) {
-      body.appendChild(buildUsesSection(draft));
-      body.appendChild(buildAttunementSection(draft));
-    }, { open: false, id: 'options' }));
+    ui.renderFeatures = function () {
+      renderItemFeatureBlocks(draft, ui.enabledBlocks, ui.featuresEl, ui.renderFeatures);
+      ui.addSelectWrap.populate();
+      var hasOpts = availableFeatureOptions(ui.enabledBlocks).length > 0;
+      ui.addSelectWrap.classList.toggle('hidden', !hasOpts || isBagDraft(draft));
+    };
+    if (isBagDraft(draft)) {
+      ui.featuresWrap.classList.add('hidden');
+      ui.addSelectWrap.classList.add('hidden');
+    }
+    ui.renderFeatures();
+    main.appendChild(ui.addSelectWrap);
+    main.appendChild(ui.featuresWrap);
 
     var errorEl = el('p', 'item-form-error');
-    scroll.appendChild(errorEl);
-    form.appendChild(scroll);
+    form.appendChild(main);
+    bodyEl.appendChild(form);
 
     var footer = el('div', 'item-editor-footer');
+    footer.appendChild(errorEl);
     if (isEdit) {
       var deleteBtn = el('button', 'delete-btn', 'Elimina');
       deleteBtn.type = 'button';
@@ -1348,8 +1995,7 @@
       closeSheet();
     });
     footer.appendChild(saveBtn);
-    form.appendChild(footer);
-    bodyEl.appendChild(form);
+    bodyEl.appendChild(footer);
 
     refreshEditorTypeUi(draft, ui);
   }

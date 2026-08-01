@@ -402,9 +402,6 @@ import {
      personaggio": la lista vuota resta comunque con lo slot "+ Nuovo
      personaggio" per ripartire. */
   function deleteCharacter(id) {
-    if (id === DEFAULT_CHAR_ID) {
-      return Promise.resolve();
-    }
     localStorage.removeItem('char-' + id + '-state');
     if (localStorage.getItem('app-active-char') === id) {
       localStorage.removeItem('app-active-char');

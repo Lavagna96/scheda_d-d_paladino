@@ -278,11 +278,6 @@ body.in-dashboard #global-fab {
   touch-action: pan-y; /* swipe orizzontale gestito da JS, scroll verticale libero */
 }
 
-.dash-card.dash-protected,
-.dash-row.dash-protected {
-  cursor: pointer;
-}
-
 .dash-swipe.open .dash-card,
 .dash-swipe.open .dash-row {
   transform: translateX(-84px);
