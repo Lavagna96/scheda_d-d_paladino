@@ -277,7 +277,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 52px;
+  min-height: 44px;
   background:
     radial-gradient(circle at 0% 50%, rgba(201, 164, 67, 0.08), transparent 55%),
     var(--bg-card);
@@ -294,32 +294,64 @@
 #custom-items-list .relic-acc-head {
   flex: 1;
   min-width: 0;
-  min-height: 52px;
-  padding: var(--space-3);
+  min-height: 44px;
+  padding: 8px var(--space-3) 8px 4px;
   border: none;
   background: transparent;
   border-radius: 0;
   cursor: pointer;
   text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-#custom-items-list .relic-acc-icons {
+#custom-items-list .relic-acc-head .relic-acc-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  text-align: left;
   display: flex;
   align-items: center;
   gap: 4px;
-  padding-left: 2px;
+}
+
+.relic-acc-attune-mark {
   flex: none;
+  color: var(--accent-gold);
+  font-size: 11px;
+  line-height: 1;
+}
+
+#custom-items-list .relic-acc-head .relic-acc-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#custom-items-list .relic-acc-head .relic-rarity {
+  flex: none;
+  font-size: 9px;
+  padding: 2px 7px;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+}
+
+#custom-items-list .relic-acc-head .relic-acc-arrow {
+  flex: none;
+  margin-left: 2px;
 }
 
 .relic-drag-handle {
-  width: 28px;
-  min-width: 28px;
-  height: 52px;
-  padding: 0 2px;
+  width: 24px;
+  min-width: 24px;
+  height: 44px;
+  padding: 0;
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1;
   cursor: grab;
   touch-action: none;
@@ -327,19 +359,240 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.relic-drag-handle:active {
-  cursor: grabbing;
+.relic-drag-handle.relic-drag-ready {
+  color: var(--accent-gold);
+  animation: relicDragHandleReady 0.42s ease-in-out infinite;
 }
 
-.relic-acc.relic-dragging {
-  opacity: 0.88;
+@keyframes relicDragHandleReady {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(1);
+    filter: none;
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.22);
+    filter: drop-shadow(0 0 6px rgba(201, 164, 67, 0.85));
+  }
 }
 
-.relic-acc.relic-drag-target .relic-acc-row {
-  outline: 2px solid var(--accent-gold);
-  outline-offset: -2px;
+#custom-items-list .relic-acc-row.relic-drag-holding {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  transform: scale(0.985);
+  border-color: rgba(201, 164, 67, 0.55);
+  box-shadow:
+    inset 0 0 0 1px rgba(201, 164, 67, 0.35),
+    0 0 14px rgba(201, 164, 67, 0.12);
+}
+
+.relic-drag-ghost.relic-drag-ghost-pickup {
+  animation: relicDragGhostPickup 0.4s cubic-bezier(0.34, 1.45, 0.48, 1) forwards;
+}
+
+@keyframes relicDragGhostPickup {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+    border-color: var(--border-gold);
+  }
+  38% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  62% {
+    transform: scale(1.09);
+    border-color: var(--accent-gold);
+    box-shadow:
+      0 0 0 5px rgba(201, 164, 67, 0.55),
+      0 0 28px rgba(201, 164, 67, 0.45),
+      0 18px 36px rgba(0, 0, 0, 0.48);
+  }
+  100% {
+    transform: scale(1.03);
+    border-color: var(--accent-gold);
+    box-shadow:
+      0 0 0 2px rgba(201, 164, 67, 0.4),
+      0 14px 30px rgba(0, 0, 0, 0.44);
+  }
+}
+
+#custom-items-list .relic-acc {
+  position: relative;
+}
+
+#custom-items-list.relic-list-dragging {
+  touch-action: none;
+}
+
+#custom-items-list.relic-list-dragging .relic-acc:not(.relic-drag-placeholder) {
+  will-change: transform;
+}
+
+.relic-drag-ghost {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
+  border-radius: var(--radius-lg);
+  opacity: 0.98;
+  transition: none;
+  left: 0;
+  top: 0;
+  border: 1px solid var(--border-gold);
+  background:
+    radial-gradient(circle at 0% 50%, rgba(201, 164, 67, 0.08), transparent 55%),
+    var(--bg-card);
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  transform-origin: left center;
+}
+
+.relic-drag-ghost .relic-acc-head {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px var(--space-3) 8px 4px;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.relic-drag-ghost .relic-acc-head .relic-acc-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.relic-drag-ghost .relic-acc-head .relic-acc-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relic-drag-ghost .relic-acc-head .relic-rarity {
+  flex: none;
+  font-size: 9px;
+  padding: 2px 7px;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+}
+
+.relic-drag-ghost .relic-acc-head .relic-acc-arrow {
+  flex: none;
+  margin-left: 2px;
+}
+
+#custom-items-list .relic-acc.relic-drag-placeholder {
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  border: none;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.relic-acc.relic-drag-collapsed .relic-acc-body {
+  display: none;
+}
+
+.relic-acc.relic-drag-placeholder .relic-acc-row {
+  display: none;
+}
+
+.relic-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: stretch;
+  margin: 0 0 var(--space-2);
+  padding: 0 var(--space-1);
+  width: 100%;
+  box-sizing: border-box;
+  touch-action: manipulation;
+}
+
+.relic-action-btn {
+  flex: 1 1 calc(50% - 4px);
+  min-width: 0;
+  max-width: calc(50% - 4px);
+  padding: 7px 8px;
+  min-height: 32px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  touch-action: manipulation;
+  transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.relic-action-btn.relic-action-pressed,
+.relic-action-btn:active {
+  transform: scale(0.96);
+}
+
+.relic-action-btn:only-child {
+  flex: 1 1 100%;
+  max-width: 100%;
+}
+
+.relic-action-btn.relic-action-attune.on {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.14);
+  box-shadow: 0 0 8px rgba(201, 164, 67, 0.25);
+}
+
+.relic-action-btn.relic-action-equip.on {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.16);
+  box-shadow: 0 0 8px rgba(201, 164, 67, 0.2);
+}
+
+.relic-action-btn.relic-action-shield.on {
+  border-color: #5b8fd4;
+  color: #9ec8f5;
+  background: rgba(91, 143, 212, 0.16);
+  box-shadow: 0 0 8px rgba(91, 143, 212, 0.2);
+}
+
+.relic-action-btn.relic-action-bag.on {
+  color: #2a8a7a;
+  border-color: rgba(42, 138, 122, 0.45);
+  background: rgba(42, 138, 122, 0.12);
+}
+
+#custom-items-list .relic-card.relic-holding {
+  outline: 2px solid rgba(201, 164, 67, 0.55);
+  outline-offset: 2px;
 }
 
 /* Corpo espanso compatto (stile reliquie statiche) */
@@ -374,8 +627,8 @@
 .bag-badge-btn {
   display: block;
   width: fit-content;
-  margin: 0 auto var(--space-2);
-  padding: 3px 12px;
+  margin: 0;
+  padding: 5px 10px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-color);
   background: rgba(255, 255, 255, 0.03);
@@ -383,6 +636,7 @@
   font-weight: 600;
   cursor: pointer;
   font-family: var(--font-body);
+  line-height: 1.2;
 }
 
 .bag-badge-btn.on {
@@ -399,7 +653,8 @@
    (le due reliquie storiche in index.html restano statiche): scoping a
    #custom-items-list per non aggiungere un cursore ingannevole altrove. */
 #custom-items-list .relic-card {
-  cursor: pointer;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ---------- bottone "+ Nuova Reliquia" (segnaposto tratteggiato cliccabile,

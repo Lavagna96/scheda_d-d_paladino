@@ -839,6 +839,9 @@
     if (window.AppTreasury && window.AppTreasury.renderCarryBar) {
       window.AppTreasury.renderCarryBar();
     }
+    if (window.AppGrimorio && window.AppGrimorio.render) {
+      window.AppGrimorio.render();
+    }
   }
 
   /* ---------- sezione arte (galleria di medaglioni preimpostati + upload foto) ---------- */
@@ -2486,74 +2489,786 @@
     return item.desc || '';
   }
 
-  function attachDragReorder(handle, acc, listEl, itemIndex) {
-    var dragActive = false;
-    var dragTargetIdx = itemIndex;
+  var openRelicIds = {};
+  var RELIC_LONG_PRESS_MS = 480;
+  var RELIC_DRAG_MOVE_CANCEL_PX = 14;
+  var RELIC_DRAG_SCROLL_EDGE = 72;
+  var RELIC_DRAG_SCROLL_MAX_SPEED = 12;
 
-    function getAccIndexAtY(clientY) {
-      var accs = listEl.querySelectorAll('.relic-acc');
+  function wireActionButton(btn) {
+    btn.addEventListener('pointerdown', function (e) {
+      e.stopPropagation();
+      btn.classList.add('relic-action-pressed');
+    });
+    btn.addEventListener('pointerup', function (e) {
+      e.stopPropagation();
+      btn.classList.remove('relic-action-pressed');
+    });
+    btn.addEventListener('pointercancel', function (e) {
+      e.stopPropagation();
+      btn.classList.remove('relic-action-pressed');
+    });
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+  }
+
+  function attachLongPress(el, onLongPress, options) {
+    options = options || {};
+    var ms = options.ms || RELIC_LONG_PRESS_MS;
+    var hintMs = options.hintMs || 160;
+    var skipSelector = options.skipSelector || 'button, .relic-action-btn, a, input, select, textarea';
+    var holdClass = options.holdClass || 'relic-holding';
+    var pressTimer = null;
+    var hintTimer = null;
+    var startX = 0;
+    var startY = 0;
+
+    function clearPress() {
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+      if (hintTimer) {
+        clearTimeout(hintTimer);
+        hintTimer = null;
+      }
+      el.classList.remove(holdClass);
+    }
+
+    el.addEventListener('pointerdown', function (e) {
+      if (e.target.closest(skipSelector)) {
+        return;
+      }
+      e.stopPropagation();
+      startX = e.clientX;
+      startY = e.clientY;
+      clearPress();
+      hintTimer = setTimeout(function () {
+        hintTimer = null;
+        el.classList.add(holdClass);
+      }, hintMs);
+      pressTimer = setTimeout(function () {
+        pressTimer = null;
+        clearPress();
+        onLongPress();
+      }, ms);
+    });
+
+    el.addEventListener('pointermove', function (e) {
+      if (!pressTimer && !hintTimer) {
+        return;
+      }
+      if (Math.abs(e.clientX - startX) > RELIC_DRAG_MOVE_CANCEL_PX ||
+          Math.abs(e.clientY - startY) > RELIC_DRAG_MOVE_CANCEL_PX) {
+        clearPress();
+      }
+    });
+
+    el.addEventListener('pointerup', function (e) {
+      e.stopPropagation();
+      clearPress();
+    });
+    el.addEventListener('pointercancel', clearPress);
+  }
+
+  function syncItemsOrderFromDom(listEl, character) {
+    var ids = Array.prototype.map.call(listEl.querySelectorAll('.relic-acc'), function (node) {
+      return node.getAttribute('data-item-id');
+    });
+    var items = character.items || [];
+    var byId = {};
+    items.forEach(function (it) {
+      byId[it.id] = it;
+    });
+    var reordered = ids.map(function (id) {
+      return byId[id];
+    }).filter(Boolean);
+
+    if (reordered.length === items.length) {
+      character.items = reordered;
+    }
+  }
+
+  function itemsOrderChanged(listEl, character) {
+    var ids = Array.prototype.map.call(listEl.querySelectorAll('.relic-acc'), function (node) {
+      return node.getAttribute('data-item-id');
+    });
+    var oldIds = (character.items || []).map(function (it) {
+      return it.id;
+    });
+
+    return ids.some(function (id, i) {
+      return id !== oldIds[i];
+    });
+  }
+
+  function attachLongPressDrag(handle, acc, listEl) {
+    var pressTimer = null;
+    var hintTimer = null;
+    var dragActive = false;
+    var startX = 0;
+    var startY = 0;
+    var pointerId = null;
+    var ghost = null;
+    var grabOffsetY = 0;
+    var grabOffsetX = 0;
+    var ghostWidth = 0;
+    var dragRowHeight = 0;
+    var dragItemGap = 0;
+    var dragFinishing = false;
+    var rafId = null;
+    var pendingX = 0;
+    var pendingY = 0;
+    var dragTickActive = false;
+    var engageRowRect = null;
+
+    function pinGhostToEngageRect() {
+      if (!ghost || !engageRowRect) {
+        return;
+      }
+      ghost.style.transition = 'none';
+      ghost.style.left = engageRowRect.left + 'px';
+      ghost.style.top = engageRowRect.top + 'px';
+      ghost.style.width = engageRowRect.width + 'px';
+      ghostWidth = engageRowRect.width;
+    }
+
+    function getScrollContainer() {
+      return document.getElementById('main-content');
+    }
+
+    function getListDragBounds() {
+      var accs = getAccElements();
+      var listRect = listEl.getBoundingClientRect();
+      var firstTop = null;
+      var lastBottom = null;
+      var listLeft = listRect.left;
+      var listWidth = listRect.width;
+
+      accs.forEach(function (node) {
+        if (node === acc) {
+          return;
+        }
+        var rect = node.getBoundingClientRect();
+        if (firstTop === null || rect.top < firstTop) {
+          firstTop = rect.top;
+        }
+        if (lastBottom === null || rect.bottom > lastBottom) {
+          lastBottom = rect.bottom;
+        }
+        listLeft = rect.left;
+        listWidth = rect.width;
+      });
+
+      if (!isPlaceholderCollapsed()) {
+        var slotRect = acc.getBoundingClientRect();
+        if (slotRect.height > 1) {
+          if (firstTop === null) {
+            firstTop = slotRect.top;
+            lastBottom = slotRect.bottom;
+          } else {
+            firstTop = Math.min(firstTop, slotRect.top);
+            lastBottom = Math.max(lastBottom, slotRect.bottom);
+          }
+          listLeft = slotRect.left;
+          listWidth = slotRect.width;
+        }
+      }
+
+      if (firstTop === null) {
+        firstTop = listRect.top;
+        lastBottom = listRect.bottom;
+      }
+
+      var rowH = dragRowHeight || 44;
+      var minGhostTop = firstTop;
+      var maxGhostTop = lastBottom - rowH;
+      if (maxGhostTop < minGhostTop) {
+        maxGhostTop = minGhostTop;
+      }
+
+      return {
+        minGhostTop: minGhostTop,
+        maxGhostTop: maxGhostTop,
+        minPointerY: minGhostTop + grabOffsetY,
+        maxPointerY: maxGhostTop + grabOffsetY,
+        left: listLeft,
+        width: listWidth
+      };
+    }
+
+    function clampPointerY(clientY) {
+      var bounds = getListDragBounds();
+      return Math.max(bounds.minPointerY, Math.min(bounds.maxPointerY, clientY));
+    }
+
+    function reorderYFromGhost(clampedPointerY, bounds) {
+      var box = bounds || getListDragBounds();
+      var ghostTop = clampedPointerY - grabOffsetY;
+      var reorderY = ghostTop + dragRowHeight * 0.5;
+      if (ghostTop <= box.minGhostTop + 2) {
+        reorderY = box.minGhostTop + dragRowHeight * 0.2;
+      } else if (ghostTop >= box.maxGhostTop - 2) {
+        reorderY = box.maxGhostTop + dragRowHeight * 0.8;
+      }
+
+      return reorderY;
+    }
+
+    function isInAutoScrollZone(clientY) {
+      var sc = getScrollContainer();
+      if (!sc) {
+        return false;
+      }
+      var scRect = sc.getBoundingClientRect();
+      return clientY < scRect.top + RELIC_DRAG_SCROLL_EDGE ||
+        clientY > scRect.bottom - RELIC_DRAG_SCROLL_EDGE;
+    }
+
+    function autoScrollIfNeeded(clientY) {
+      var sc = getScrollContainer();
+      if (!sc) {
+        return 0;
+      }
+      var scRect = sc.getBoundingClientRect();
+      var topEdge = scRect.top + RELIC_DRAG_SCROLL_EDGE;
+      var bottomEdge = scRect.bottom - RELIC_DRAG_SCROLL_EDGE;
+      var speed = 0;
+
+      if (clientY < topEdge) {
+        var topDist = topEdge - clientY;
+        speed = -Math.min(RELIC_DRAG_SCROLL_MAX_SPEED, RELIC_DRAG_SCROLL_MAX_SPEED * (topDist / RELIC_DRAG_SCROLL_EDGE));
+      } else if (clientY > bottomEdge) {
+        var bottomDist = clientY - bottomEdge;
+        speed = Math.min(RELIC_DRAG_SCROLL_MAX_SPEED, RELIC_DRAG_SCROLL_MAX_SPEED * (bottomDist / RELIC_DRAG_SCROLL_EDGE));
+      }
+
+      if (speed !== 0) {
+        var maxScroll = sc.scrollHeight - sc.clientHeight;
+        sc.scrollTop = Math.max(0, Math.min(maxScroll, sc.scrollTop + speed));
+      }
+
+      return speed;
+    }
+
+    function runDragFrame() {
+      autoScrollIfNeeded(pendingY);
+      var bounds = getListDragBounds();
+      var clampedY = clampPointerY(pendingY);
+      positionGhost(pendingX, clampedY, bounds);
+      moveAccToPointer(reorderYFromGhost(clampedY, bounds));
+    }
+
+    function ensureDragTick() {
+      if (dragTickActive) {
+        return;
+      }
+      dragTickActive = true;
+      function tick() {
+        if (!dragActive) {
+          dragTickActive = false;
+          return;
+        }
+        runDragFrame();
+        if (isInAutoScrollZone(pendingY)) {
+          requestAnimationFrame(tick);
+        } else {
+          dragTickActive = false;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function getAccElements() {
+      return Array.prototype.slice.call(listEl.querySelectorAll('.relic-acc'));
+    }
+
+    function indexOfAcc() {
+      var accs = getAccElements();
       for (var i = 0; i < accs.length; i++) {
-        var rect = accs[i].getBoundingClientRect();
-        if (clientY >= rect.top && clientY <= rect.bottom) {
+        if (accs[i] === acc) {
           return i;
         }
       }
 
-      return itemIndex;
+      return -1;
     }
 
-    function clearTargets() {
-      listEl.querySelectorAll('.relic-acc.relic-drag-target').forEach(function (node) {
-        node.classList.remove('relic-drag-target');
+    function clearPressTimer() {
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+      if (hintTimer) {
+        clearTimeout(hintTimer);
+        hintTimer = null;
+      }
+      handle.classList.remove('relic-drag-ready');
+      var holdRow = acc.querySelector('.relic-acc-row');
+      if (holdRow) {
+        holdRow.classList.remove('relic-drag-holding');
+      }
+    }
+
+    function destroyGhost() {
+      if (ghost && ghost.parentNode) {
+        ghost.parentNode.removeChild(ghost);
+      }
+      ghost = null;
+    }
+
+    function removeDocListeners() {
+      document.removeEventListener('pointermove', onDocMove);
+      document.removeEventListener('pointerup', onDocEnd);
+      document.removeEventListener('pointercancel', onDocEnd);
+    }
+
+    function resetDragStyles() {
+      acc.classList.remove('relic-drag-placeholder', 'relic-drag-collapsed');
+      acc.style.transform = '';
+      acc.style.zIndex = '';
+      acc.style.height = '';
+      acc.style.minHeight = '';
+      acc.style.marginBottom = '';
+      listEl.classList.remove('relic-list-dragging');
+      handle.classList.remove('relic-drag-ready');
+      var holdRow = acc.querySelector('.relic-acc-row');
+      if (holdRow) {
+        holdRow.classList.remove('relic-drag-holding');
+      }
+      destroyGhost();
+      engageRowRect = null;
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      dragTickActive = false;
+      getAccElements().forEach(function (node) {
+        node.style.transition = '';
+        node.style.transform = '';
       });
     }
 
-    handle.addEventListener('pointerdown', function (e) {
-      e.stopPropagation();
-      dragActive = true;
-      dragTargetIdx = itemIndex;
-      acc.classList.add('relic-dragging');
-      handle.setPointerCapture(e.pointerId);
-    });
+    function snapshotTopPositions() {
+      var tops = {};
+      getAccElements().forEach(function (node) {
+        tops[node.getAttribute('data-item-id')] = node.getBoundingClientRect().top;
+      });
 
-    handle.addEventListener('pointermove', function (e) {
-      if (!dragActive) {
+      return tops;
+    }
+
+    function setPlaceholderExpanded(expanded) {
+      if (expanded) {
+        acc.style.height = dragRowHeight + 'px';
+        acc.style.minHeight = dragRowHeight + 'px';
+        acc.style.marginBottom = dragItemGap + 'px';
+      } else {
+        acc.style.height = '0';
+        acc.style.minHeight = '0';
+        acc.style.marginBottom = '0';
+      }
+    }
+
+    function isPlaceholderCollapsed() {
+      return acc.style.height === '0px' || acc.style.height === '0';
+    }
+
+    function getTargetSlotRect() {
+      var slotRect = acc.getBoundingClientRect();
+      if (slotRect.height > 1) {
+        return {
+          top: slotRect.top,
+          left: slotRect.left,
+          width: slotRect.width
+        };
+      }
+
+      var accs = getAccElements();
+      var idx = indexOfAcc();
+      if (idx < 0) {
+        return null;
+      }
+      var prevSibling = idx > 0 ? accs[idx - 1] : null;
+      var nextSibling = idx < accs.length - 1 ? accs[idx + 1] : null;
+
+      if (prevSibling && prevSibling !== acc) {
+        var prevRect = prevSibling.getBoundingClientRect();
+        return {
+          top: prevRect.bottom + dragItemGap,
+          left: prevRect.left,
+          width: prevRect.width
+        };
+      }
+      if (nextSibling) {
+        var nextRect = nextSibling.getBoundingClientRect();
+        return {
+          top: nextRect.top,
+          left: nextRect.left,
+          width: nextRect.width
+        };
+      }
+      if (ghost) {
+        return {
+          top: parseFloat(ghost.style.top) || 0,
+          left: parseFloat(ghost.style.left) || 0,
+          width: ghostWidth
+        };
+      }
+
+      return null;
+    }
+
+    function finishDrag() {
+      if (dragFinishing) {
         return;
       }
-      clearTargets();
-      dragTargetIdx = getAccIndexAtY(e.clientY);
-      var accs = listEl.querySelectorAll('.relic-acc');
-      if (accs[dragTargetIdx]) {
-        accs[dragTargetIdx].classList.add('relic-drag-target');
-      }
-    });
-
-    function endDrag(e) {
-      if (!dragActive) {
-        return;
-      }
-      dragActive = false;
-      acc.classList.remove('relic-dragging');
-      clearTargets();
-      try {
-        handle.releasePointerCapture(e.pointerId);
-      } catch (err) {
-        /* pointer già rilasciato */
-      }
-      if (dragTargetIdx !== itemIndex) {
+      dragFinishing = true;
+      resetDragStyles();
+      dragFinishing = false;
+      var state = window.AppStorage.getState();
+      if (itemsOrderChanged(listEl, state.character)) {
         commitState(function (character) {
-          var bag = character.items || [];
-          if (itemIndex < 0 || dragTargetIdx < 0 || itemIndex >= bag.length || dragTargetIdx >= bag.length) {
-            return;
-          }
-          var moved = bag.splice(itemIndex, 1)[0];
-          bag.splice(dragTargetIdx, 0, moved);
+          syncItemsOrderFromDom(listEl, character);
         });
       }
     }
 
-    handle.addEventListener('pointerup', endDrag);
-    handle.addEventListener('pointercancel', endDrag);
+    function snapGhostToSlot() {
+      var slot = getTargetSlotRect();
+      if (!ghost || !slot) {
+        finishDrag();
+        return;
+      }
+      ghost.style.transition = 'top 0.22s cubic-bezier(0.2, 0.85, 0.25, 1), left 0.22s cubic-bezier(0.2, 0.85, 0.25, 1), width 0.22s cubic-bezier(0.2, 0.85, 0.25, 1)';
+      ghost.style.top = slot.top + 'px';
+      ghost.style.left = slot.left + 'px';
+      ghost.style.width = slot.width + 'px';
+      setTimeout(finishDrag, 230);
+    }
+
+    function positionGhost(clientX, clientY, bounds) {
+      if (!ghost) {
+        return;
+      }
+      ghost.classList.remove('relic-drag-ghost-pickup');
+      ghost.style.transform = '';
+      var box = bounds || getListDragBounds();
+      var clampedY = Math.max(box.minPointerY, Math.min(box.maxPointerY, clientY));
+      ghost.style.transition = 'none';
+      ghost.style.left = box.left + 'px';
+      ghost.style.top = (clampedY - grabOffsetY) + 'px';
+      ghost.style.width = box.width + 'px';
+      ghostWidth = box.width;
+    }
+
+    function animateListFlip(tops) {
+      getAccElements().forEach(function (node) {
+        if (node === acc) {
+          return;
+        }
+        var id = node.getAttribute('data-item-id');
+        var prevTop = tops[id];
+        if (prevTop === undefined) {
+          return;
+        }
+        var dy = prevTop - node.getBoundingClientRect().top;
+        if (Math.abs(dy) < 1) {
+          return;
+        }
+        node.style.transition = 'none';
+        node.style.transform = 'translateY(' + dy + 'px)';
+        requestAnimationFrame(function () {
+          node.style.transition = 'transform 0.24s cubic-bezier(0.2, 0.85, 0.25, 1)';
+          node.style.transform = '';
+        });
+      });
+    }
+
+    function moveAccToPointer(clientY) {
+      var tops = snapshotTopPositions();
+
+      var insertBefore = null;
+      var accs = getAccElements();
+      for (var i = 0; i < accs.length; i++) {
+        var node = accs[i];
+        if (node === acc) {
+          continue;
+        }
+        var rect = node.getBoundingClientRect();
+        if (clientY < rect.top + rect.height / 2) {
+          insertBefore = node;
+          break;
+        }
+      }
+
+      var moved = false;
+      if (insertBefore) {
+        if (acc.nextSibling !== insertBefore) {
+          listEl.insertBefore(acc, insertBefore);
+          moved = true;
+        }
+      } else if (acc !== listEl.lastElementChild) {
+        listEl.appendChild(acc);
+        moved = true;
+      }
+
+      var wasCollapsed = isPlaceholderCollapsed();
+      setPlaceholderExpanded(true);
+
+      if (moved || wasCollapsed) {
+        animateListFlip(tops);
+      }
+    }
+
+    function onDocMove(e) {
+      if (!dragActive || e.pointerId !== pointerId) {
+        return;
+      }
+      e.preventDefault();
+      pendingX = e.clientX;
+      pendingY = e.clientY;
+      ensureDragTick();
+    }
+
+    function onDocEnd(e) {
+      if (e.pointerId !== pointerId) {
+        return;
+      }
+      removeDocListeners();
+      clearPressTimer();
+      if (!dragActive) {
+        return;
+      }
+      dragActive = false;
+      dragTickActive = false;
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      runDragFrame();
+      snapGhostToSlot();
+    }
+
+    function engageDrag() {
+      var row = acc.querySelector('.relic-acc-row');
+      if (!row) {
+        return;
+      }
+      dragActive = true;
+      pressTimer = null;
+      row.classList.remove('relic-drag-holding');
+      var fingerX = pendingX || startX;
+      var fingerY = pendingY || startY;
+      var rect = row.getBoundingClientRect();
+      engageRowRect = {
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height
+      };
+      grabOffsetY = fingerY - rect.top;
+      grabOffsetX = fingerX - rect.left;
+      ghostWidth = rect.width;
+      dragRowHeight = rect.height;
+      var nextAcc = acc.nextElementSibling;
+      if (nextAcc && nextAcc.classList.contains('relic-acc')) {
+        dragItemGap = nextAcc.getBoundingClientRect().top - rect.bottom;
+      } else {
+        var prevAcc = acc.previousElementSibling;
+        if (prevAcc && prevAcc.classList.contains('relic-acc')) {
+          dragItemGap = rect.top - prevAcc.getBoundingClientRect().bottom;
+        } else {
+          dragItemGap = 12;
+        }
+      }
+
+      ghost = row.cloneNode(true);
+      ghost.classList.add('relic-drag-ghost', 'relic-drag-ghost-pickup');
+      ghost.setAttribute('aria-hidden', 'true');
+      ghost.style.height = rect.height + 'px';
+      document.body.appendChild(ghost);
+      pinGhostToEngageRect();
+
+      var collapseTop = snapshotTopPositions();
+      acc.classList.add('relic-drag-placeholder', 'relic-drag-collapsed');
+      setPlaceholderExpanded(false);
+      animateListFlip(collapseTop);
+
+      requestAnimationFrame(function () {
+        pinGhostToEngageRect();
+      });
+
+      listEl.classList.add('relic-list-dragging');
+      handle.classList.add('relic-drag-ready');
+
+      document.addEventListener('pointermove', onDocMove, { passive: false });
+      document.addEventListener('pointerup', onDocEnd);
+      document.addEventListener('pointercancel', onDocEnd);
+    }
+
+    handle.addEventListener('pointerdown', function (e) {
+      e.stopPropagation();
+      dragActive = false;
+      pointerId = e.pointerId;
+      startX = e.clientX;
+      startY = e.clientY;
+      pendingX = e.clientX;
+      pendingY = e.clientY;
+      clearPressTimer();
+      pressTimer = setTimeout(engageDrag, RELIC_LONG_PRESS_MS);
+      hintTimer = setTimeout(function () {
+        hintTimer = null;
+        handle.classList.add('relic-drag-ready');
+        var holdRow = acc.querySelector('.relic-acc-row');
+        if (holdRow) {
+          holdRow.classList.add('relic-drag-holding');
+        }
+      }, 160);
+    });
+
+    handle.addEventListener('pointermove', function (e) {
+      pendingX = e.clientX;
+      pendingY = e.clientY;
+      if (dragActive) {
+        return;
+      }
+      if (pressTimer &&
+          (Math.abs(e.clientX - startX) > RELIC_DRAG_MOVE_CANCEL_PX ||
+           Math.abs(e.clientY - startY) > RELIC_DRAG_MOVE_CANCEL_PX)) {
+        clearPressTimer();
+      }
+    });
+
+    handle.addEventListener('pointerup', function (e) {
+      if (!dragActive) {
+        clearPressTimer();
+      }
+    });
+
+    handle.addEventListener('pointercancel', function () {
+      if (!dragActive) {
+        clearPressTimer();
+      }
+    });
+  }
+
+  function appendItemActions(card, ch, item, opts) {
+    var isBag = opts.isBag;
+    var isWeapon = opts.isWeapon;
+    var isShield = opts.isShield;
+    var requiresAttunement = opts.requiresAttunement;
+    var attuned = opts.attuned;
+    var equipped = opts.equipped;
+    var hasWear = isBag || isWeapon || isShield;
+    var hasAttune = !isBag && requiresAttunement;
+
+    if (!hasWear && !hasAttune) {
+      return;
+    }
+
+    var actions = el('div', 'relic-actions');
+    actions.addEventListener('pointerdown', function (e) {
+      e.stopPropagation();
+    });
+
+    if (isWeapon) {
+      var weaponBtn = el('button', 'relic-action-btn relic-action-equip' + (equipped ? ' on' : ''),
+        equipped ? '⚔ Impugnata' : '⚔ Riposta');
+      weaponBtn.type = 'button';
+      weaponBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        commitState(function (character) {
+          if (equipped) {
+            (character.items || []).forEach(function (it) {
+              if (it.id === item.id) {
+                it.equipped = false;
+              }
+            });
+          } else if (itemEffectsActive(item)) {
+            equipWeaponItem(character, item.id);
+          }
+        });
+      });
+      wireActionButton(weaponBtn);
+      actions.appendChild(weaponBtn);
+    } else if (isShield) {
+      var shieldBtn = el('button', 'relic-action-btn relic-action-equip relic-action-shield' + (equipped ? ' on' : ''),
+        equipped ? '🛡 Equipaggiato' : '🛡 Riposto');
+      shieldBtn.type = 'button';
+      shieldBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        commitState(function (character) {
+          if (equipped) {
+            (character.items || []).forEach(function (it) {
+              if (it.id === item.id) {
+                it.equipped = false;
+              }
+            });
+          } else if (itemEffectsActive(item)) {
+            equipShieldItem(character, item.id);
+          }
+        });
+      });
+      wireActionButton(shieldBtn);
+      actions.appendChild(shieldBtn);
+    } else if (isBag) {
+      var bagBtn = el('button', 'relic-action-btn relic-action-bag' + (equipped ? ' on' : ''));
+      bagBtn.type = 'button';
+      bagBtn.textContent = equipped
+        ? '✓ Equipaggiata · ' + DIMENSIONAL_BAG_SELF_KG + ' kg'
+        : 'Equipaggia sulle spalle';
+      bagBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        commitState(function (character) {
+          if (equipped) {
+            (character.items || []).forEach(function (it) {
+              if (it.id === item.id) {
+                it.equipped = false;
+              }
+            });
+          } else {
+            equipDimensionalBag(character, item.id);
+          }
+        });
+      });
+      wireActionButton(bagBtn);
+      actions.appendChild(bagBtn);
+    }
+
+    if (hasAttune) {
+      var gem = el('button', 'relic-action-btn relic-action-attune' + (attuned ? ' on' : ''),
+        attuned ? '✦ Sintonizzato' : '✦ Sintonizza');
+      gem.type = 'button';
+      if (!attuned && !canAttune(ch, item)) {
+        gem.title = 'Slot pieni';
+      }
+      gem.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (attuned) {
+          commitState(function (character) {
+            (character.items || []).forEach(function (it) {
+              if (it.id === item.id) {
+                it.attuned = false;
+              }
+            });
+          });
+        } else if (canAttune(ch, item)) {
+          commitState(function (character) {
+            (character.items || []).forEach(function (it) {
+              if (it.id === item.id) {
+                it.attuned = true;
+              }
+            });
+          });
+        }
+      });
+      wireActionButton(gem);
+      actions.appendChild(gem);
+    }
+
+    card.appendChild(actions);
   }
 
   function renderTraitsList() {
@@ -2561,9 +3276,19 @@
     if (!list) {
       return;
     }
+    list.querySelectorAll('.relic-acc.open').forEach(function (node) {
+      var id = node.getAttribute('data-item-id');
+      if (id) {
+        openRelicIds[id] = true;
+      }
+    });
+
     var ch = window.AppStorage.getState().character;
     var items = ch.items || [];
     list.innerHTML = '';
+    document.querySelectorAll('.relic-drag-ghost').forEach(function (node) {
+      node.remove();
+    });
 
     var anyAttunement = items.some(function (it) {
       return itemRequiresAttunementOf(it);
@@ -2572,7 +3297,7 @@
       list.appendChild(buildAttuneCounter(ch));
     }
 
-    items.forEach(function (item, itemIndex) {
+    items.forEach(function (item) {
       var art = itemArtOf(item);
       var rarity = itemRarityOf(item);
       var requiresAttunement = itemRequiresAttunementOf(item);
@@ -2595,100 +3320,43 @@
       }
 
       var acc = el('div', 'relic-acc' + dimClasses);
+      acc.setAttribute('data-item-id', item.id);
       var row = el('div', 'relic-acc-row');
 
-      var dragHandle = el('button', 'relic-drag-handle', '≡');
-      dragHandle.type = 'button';
-      dragHandle.setAttribute('aria-label', 'Riordina');
-      attachDragReorder(dragHandle, acc, list, itemIndex);
+      var dragHandle = el('span', 'relic-drag-handle', '≡');
+      dragHandle.setAttribute('role', 'button');
+      dragHandle.setAttribute('aria-label', 'Tieni premuto per riordina');
+      attachLongPressDrag(dragHandle, acc, list);
       row.appendChild(dragHandle);
-
-      var icons = el('div', 'relic-acc-icons');
-
-      if (isWeapon) {
-        var weaponBtn = el('button', 'head-weapon' + (equipped ? ' on' : ''), '⚔');
-        weaponBtn.type = 'button';
-        weaponBtn.setAttribute('aria-label', equipped ? 'Riponi l\'arma' : 'Impugna');
-        weaponBtn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          commitState(function (character) {
-            if (equipped) {
-              (character.items || []).forEach(function (it) {
-                if (it.id === item.id) {
-                  it.equipped = false;
-                }
-              });
-            } else if (itemEffectsActive(item)) {
-              equipWeaponItem(character, item.id);
-            }
-          });
-        });
-        icons.appendChild(weaponBtn);
-      } else if (isShield) {
-        var shieldBtn = el('button', 'head-shield' + (equipped ? ' on' : ''), '🛡');
-        shieldBtn.type = 'button';
-        shieldBtn.setAttribute('aria-label', equipped ? 'Riponi lo scudo' : 'Equipaggia scudo');
-        shieldBtn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          commitState(function (character) {
-            if (equipped) {
-              (character.items || []).forEach(function (it) {
-                if (it.id === item.id) {
-                  it.equipped = false;
-                }
-              });
-            } else if (itemEffectsActive(item)) {
-              equipShieldItem(character, item.id);
-            }
-          });
-        });
-        icons.appendChild(shieldBtn);
-      }
-
-      if (!isBag && requiresAttunement) {
-        var gem = el('button', 'head-gem' + (attuned ? ' on' : ''), '✦');
-        gem.type = 'button';
-        gem.setAttribute('aria-label', attuned ? 'Dis-sintonizza' : 'Sintonizza');
-        if (!attuned && !canAttune(ch, item)) {
-          gem.title = 'Slot pieni';
-        }
-        gem.addEventListener('click', function (e) {
-          e.stopPropagation();
-          if (attuned) {
-            commitState(function (character) {
-              (character.items || []).forEach(function (it) {
-                if (it.id === item.id) {
-                  it.attuned = false;
-                }
-              });
-            });
-          } else if (canAttune(ch, item)) {
-            commitState(function (character) {
-              (character.items || []).forEach(function (it) {
-                if (it.id === item.id) {
-                  it.attuned = true;
-                }
-              });
-            });
-          }
-        });
-        icons.appendChild(gem);
-      }
-
-      if (icons.childNodes.length) {
-        row.appendChild(icons);
-      }
 
       var head = el('button', 'relic-acc-head');
       head.type = 'button';
       head.setAttribute('aria-expanded', 'false');
-      head.appendChild(el('span', 'relic-acc-name', item.name));
+      var nameEl = el('span', 'relic-acc-name');
+      if (requiresAttunement) {
+        var attuneMark = el('span', 'relic-acc-attune-mark', '✦');
+        attuneMark.setAttribute('aria-hidden', 'true');
+        nameEl.appendChild(attuneMark);
+      }
+      var nameText = el('span', 'relic-acc-name-text', item.name);
+      nameEl.appendChild(nameText);
+      head.appendChild(nameEl);
       head.appendChild(el('span', 'relic-rarity ' + rarity, rarityLabel(rarity)));
       head.appendChild(el('span', 'relic-acc-arrow', '▾'));
+
+      if (openRelicIds[item.id]) {
+        acc.classList.add('open');
+        head.setAttribute('aria-expanded', 'true');
+      }
 
       head.addEventListener('click', function () {
         var isOpen = acc.classList.toggle('open');
         head.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (isOpen) {
+          openRelicIds[item.id] = true;
+        } else {
+          delete openRelicIds[item.id];
+        }
       });
 
       row.appendChild(head);
@@ -2706,28 +3374,14 @@
       headRow.appendChild(el('span', 'relic-rarity ' + rarity, rarityLabel(rarity)));
       card.appendChild(headRow);
 
-      if (isBag) {
-        var bagStatus = el('button', 'bag-badge bag-badge-btn ' + (equipped ? 'on' : 'off'));
-        bagStatus.type = 'button';
-        bagStatus.textContent = equipped
-          ? '✓ Equipaggiata · ' + DIMENSIONAL_BAG_SELF_KG + ' kg sulle spalle'
-          : 'Equipaggia sulle spalle';
-        bagStatus.addEventListener('click', function (e) {
-          e.stopPropagation();
-          commitState(function (character) {
-            if (equipped) {
-              (character.items || []).forEach(function (it) {
-                if (it.id === item.id) {
-                  it.equipped = false;
-                }
-              });
-            } else {
-              equipDimensionalBag(character, item.id);
-            }
-          });
-        });
-        card.appendChild(bagStatus);
-      }
+      appendItemActions(card, ch, item, {
+        isBag: isBag,
+        isWeapon: isWeapon,
+        isShield: isShield,
+        requiresAttunement: requiresAttunement,
+        attuned: attuned,
+        equipped: equipped
+      });
 
       var typeLine = buildItemTypeLine(item, isBag, isWeapon, isShield);
       if (typeLine) {
@@ -2745,7 +3399,7 @@
         card.appendChild(ul);
       }
 
-      card.addEventListener('click', function () {
+      attachLongPress(card, function () {
         buildItemSheet(item);
       });
 

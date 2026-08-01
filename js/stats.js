@@ -381,7 +381,10 @@
        un arco in mano o senz'armatura — il numero nella riga Colpire/Danni
        era già corretto, solo la nota mentiva. */
     var hasArmorForNote = !!(ch.armor && ch.armor.id && ch.armor.id !== 'nessuna');
-    if (ch.fightingStyle === 'duello' && !(ch.weapon || {}).ranged && !(ch.weapon || {}).twoHanded) {
+    var equippedWeapon = (window.AppItems && window.AppItems.activeEquippedWeaponProfile)
+      ? (window.AppItems.activeEquippedWeaponProfile(ch) || ch.weapon || {})
+      : (ch.weapon || {});
+    if (ch.fightingStyle === 'duello' && !equippedWeapon.ranged && !equippedWeapon.twoHanded) {
       parts.push('Stile Duellante +2 ai danni.');
     }
     if (ch.fightingStyle === 'difesa' && hasArmorForNote) { parts.push('Stile Difesa +1 alla CA.'); }
@@ -429,7 +432,7 @@
     // ne ha una (5.B.3).
     var mastEl = document.getElementById('atk-weapon-mastery');
     if (mastEl) {
-      var mastery = (ch.weapon && ch.weapon.mastery) || '';
+      var mastery = view.weapon.mastery || '';
       mastEl.textContent = mastery ? 'Maestria: ' + mastery : '';
       mastEl.classList.toggle('hidden', !mastery);
     }
