@@ -252,18 +252,148 @@
   color: var(--gold-bright);
 }
 
-/* ---------- card "inattiva" (richiede sintonizzazione ma non è attiva):
-   stesso trattamento smorzato ovunque nella card, gemma esclusa (resta
-   sempre leggibile per poter essere ri-sintonizzata) ---------- */
+/* ---------- card "inattiva" (non sintonizzato): smorzamento visivo, gemma
+   esclusa (resta leggibile per ri-sintonizzare) ---------- */
 
 .relic-acc.dim .relic-acc-head { border-color: var(--border-color); }
-.relic-acc.dim .medal-sm svg,
-.relic-acc.dim .relic-art-big svg { filter: grayscale(.85) opacity(.5); }
+.relic-acc.dim .relic-art svg { filter: grayscale(.85) opacity(.5); }
 .relic-acc.dim .relic-acc-name,
 .relic-acc.dim .relic-name { color: var(--text-secondary); text-shadow: none; }
 .relic-acc.dim .relic-card { border-color: var(--border-color); }
 .relic-acc.dim .relic-effects li { color: var(--text-secondary); opacity: .7; }
 .relic-acc.dim .relic-effects li::before { color: var(--text-secondary); }
+
+/* Arma/scudo non equipaggiati: spento come grigio, icone ⚔/🛡 restano attive */
+.relic-acc.dim-wear .relic-art svg { filter: grayscale(.85) opacity(.5); }
+.relic-acc.dim-wear .relic-acc-name,
+.relic-acc.dim-wear .relic-name { color: var(--text-secondary); text-shadow: none; }
+.relic-acc.dim-wear .relic-card { border-color: var(--border-color); }
+.relic-acc.dim-wear .relic-effects li { color: var(--text-secondary); opacity: .7; }
+.relic-acc.dim-wear .relic-effects li::before { color: var(--text-secondary); }
+
+/* ---------- lista custom: riga testata (maniglia + icone + espansione) ---------- */
+
+#custom-items-list .relic-acc-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  background:
+    radial-gradient(circle at 0% 50%, rgba(201, 164, 67, 0.08), transparent 55%),
+    var(--bg-card);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+}
+
+#custom-items-list .relic-acc.open .relic-acc-row {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: var(--border-soft);
+}
+
+#custom-items-list .relic-acc-head {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  padding: var(--space-3);
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+#custom-items-list .relic-acc-icons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 2px;
+  flex: none;
+}
+
+.relic-drag-handle {
+  width: 28px;
+  min-width: 28px;
+  height: 52px;
+  padding: 0 2px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1;
+  cursor: grab;
+  touch-action: none;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.relic-drag-handle:active {
+  cursor: grabbing;
+}
+
+.relic-acc.relic-dragging {
+  opacity: 0.88;
+}
+
+.relic-acc.relic-drag-target .relic-acc-row {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: -2px;
+}
+
+/* Corpo espanso compatto (stile reliquie statiche) */
+#custom-items-list .relic-acc-body .relic-card {
+  padding: var(--space-3) var(--space-3) var(--space-4);
+}
+
+#custom-items-list .relic-art {
+  margin-bottom: var(--space-2);
+}
+
+#custom-items-list .relic-art svg {
+  width: 108px;
+  height: 116px;
+}
+
+#custom-items-list .relic-name {
+  font-size: 17px;
+}
+
+#custom-items-list .relic-type {
+  margin: 2px 0 var(--space-2);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+#custom-items-list .relic-effects li {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.bag-badge-btn {
+  display: block;
+  width: fit-content;
+  margin: 0 auto var(--space-2);
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.bag-badge-btn.on {
+  color: #2a8a7a;
+  border-color: rgba(42, 138, 122, 0.45);
+  background: rgba(42, 138, 122, 0.12);
+}
+
+.bag-badge-btn.off {
+  color: var(--text-secondary);
+}
 
 /* Solo le card generate da questo modulo sono cliccabili per modificare
    (le due reliquie storiche in index.html restano statiche): scoping a

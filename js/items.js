@@ -2448,6 +2448,114 @@
      hardcoded di Lama Vincolante/Scudo Magico, vedi index.html e
      css/components/treasury.css) ---------- */
 
+  function buildItemTypeLine(item, isBag, isWeapon, isShield) {
+    if (isBag) {
+      return 'Sacca dimensionale · ' + DIMENSIONAL_BAG_CAPACITY_KG + ' kg (monete e bottino party)';
+    }
+    if (isWeapon) {
+      var profile = weaponProfileOf(item);
+      var parts = [];
+      if (item.desc) {
+        parts.push(item.desc);
+      } else if (profile && profile.name) {
+        parts.push(profile.name);
+      }
+      if (profile) {
+        var stats = (profile.die || '1d8') + ' ' + (profile.type || '');
+        if (profile.mastery) {
+          stats += ' · ' + profile.mastery;
+        }
+        parts.push(stats);
+      }
+
+      return parts.join(' · ');
+    }
+    if (isShield) {
+      var shieldProfile = shieldProfileOf(item);
+      var shieldParts = [];
+      if (item.desc) {
+        shieldParts.push(item.desc);
+      }
+      if (shieldProfile) {
+        shieldParts.push('CA +' + shieldProfile.acBonus);
+      }
+
+      return shieldParts.join(' · ');
+    }
+
+    return item.desc || '';
+  }
+
+  function attachDragReorder(handle, acc, listEl, itemIndex) {
+    var dragActive = false;
+    var dragTargetIdx = itemIndex;
+
+    function getAccIndexAtY(clientY) {
+      var accs = listEl.querySelectorAll('.relic-acc');
+      for (var i = 0; i < accs.length; i++) {
+        var rect = accs[i].getBoundingClientRect();
+        if (clientY >= rect.top && clientY <= rect.bottom) {
+          return i;
+        }
+      }
+
+      return itemIndex;
+    }
+
+    function clearTargets() {
+      listEl.querySelectorAll('.relic-acc.relic-drag-target').forEach(function (node) {
+        node.classList.remove('relic-drag-target');
+      });
+    }
+
+    handle.addEventListener('pointerdown', function (e) {
+      e.stopPropagation();
+      dragActive = true;
+      dragTargetIdx = itemIndex;
+      acc.classList.add('relic-dragging');
+      handle.setPointerCapture(e.pointerId);
+    });
+
+    handle.addEventListener('pointermove', function (e) {
+      if (!dragActive) {
+        return;
+      }
+      clearTargets();
+      dragTargetIdx = getAccIndexAtY(e.clientY);
+      var accs = listEl.querySelectorAll('.relic-acc');
+      if (accs[dragTargetIdx]) {
+        accs[dragTargetIdx].classList.add('relic-drag-target');
+      }
+    });
+
+    function endDrag(e) {
+      if (!dragActive) {
+        return;
+      }
+      dragActive = false;
+      acc.classList.remove('relic-dragging');
+      clearTargets();
+      try {
+        handle.releasePointerCapture(e.pointerId);
+      } catch (err) {
+        /* pointer già rilasciato */
+      }
+      if (dragTargetIdx !== itemIndex) {
+        commitState(function (character) {
+          var bag = character.items || [];
+          if (itemIndex < 0 || dragTargetIdx < 0 || itemIndex >= bag.length || dragTargetIdx >= bag.length) {
+            return;
+          }
+          var moved = bag.splice(itemIndex, 1)[0];
+          bag.splice(dragTargetIdx, 0, moved);
+        });
+      }
+    }
+
+    handle.addEventListener('pointerup', endDrag);
+    handle.addEventListener('pointercancel', endDrag);
+  }
+
   function renderTraitsList() {
     var list = document.getElementById('custom-items-list');
     if (!list) {
@@ -2464,7 +2572,7 @@
       list.appendChild(buildAttuneCounter(ch));
     }
 
-    items.forEach(function (item) {
+    items.forEach(function (item, itemIndex) {
       var art = itemArtOf(item);
       var rarity = itemRarityOf(item);
       var requiresAttunement = itemRequiresAttunementOf(item);
@@ -2476,32 +2584,28 @@
         ? isBagActive(item, ch)
         : (isWeapon ? isWeaponEquipped(item, ch) : (isShield ? isShieldEquipped(item, ch) : false));
 
-      var acc = el('div', 'relic-acc' + (requiresAttunement && !attuned ? ' dim' : ''));
+      var dimClasses = '';
+      if (isWeapon || isShield) {
+        if (!equipped) {
+          dimClasses += ' dim-wear';
+        }
+      }
+      if (requiresAttunement && !attuned) {
+        dimClasses += ' dim';
+      }
 
-      var head = el('button', 'relic-acc-head');
-      head.type = 'button';
-      head.setAttribute('aria-expanded', 'false');
+      var acc = el('div', 'relic-acc' + dimClasses);
+      var row = el('div', 'relic-acc-row');
 
-      if (isBag) {
-        var bagBtn = el('button', 'head-bag' + (equipped ? ' on' : ''), '🎒');
-        bagBtn.type = 'button';
-        bagBtn.setAttribute('aria-label', equipped ? 'Togli dalle spalle' : 'Equipaggia');
-        bagBtn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          commitState(function (character) {
-            if (equipped) {
-              (character.items || []).forEach(function (it) {
-                if (it.id === item.id) {
-                  it.equipped = false;
-                }
-              });
-            } else {
-              equipDimensionalBag(character, item.id);
-            }
-          });
-        });
-        head.appendChild(bagBtn);
-      } else if (isWeapon) {
+      var dragHandle = el('button', 'relic-drag-handle', '≡');
+      dragHandle.type = 'button';
+      dragHandle.setAttribute('aria-label', 'Riordina');
+      attachDragReorder(dragHandle, acc, list, itemIndex);
+      row.appendChild(dragHandle);
+
+      var icons = el('div', 'relic-acc-icons');
+
+      if (isWeapon) {
         var weaponBtn = el('button', 'head-weapon' + (equipped ? ' on' : ''), '⚔');
         weaponBtn.type = 'button';
         weaponBtn.setAttribute('aria-label', equipped ? 'Riponi l\'arma' : 'Impugna');
@@ -2519,7 +2623,7 @@
             }
           });
         });
-        head.appendChild(weaponBtn);
+        icons.appendChild(weaponBtn);
       } else if (isShield) {
         var shieldBtn = el('button', 'head-shield' + (equipped ? ' on' : ''), '🛡');
         shieldBtn.type = 'button';
@@ -2538,8 +2642,10 @@
             }
           });
         });
-        head.appendChild(shieldBtn);
-      } else if (requiresAttunement) {
+        icons.appendChild(shieldBtn);
+      }
+
+      if (!isBag && requiresAttunement) {
         var gem = el('button', 'head-gem' + (attuned ? ' on' : ''), '✦');
         gem.type = 'button';
         gem.setAttribute('aria-label', attuned ? 'Dis-sintonizza' : 'Sintonizza');
@@ -2566,17 +2672,16 @@
             });
           }
         });
-        head.appendChild(gem);
-      } else {
-        var spacer = el('span', 'head-gem spacer', '✦');
-        spacer.setAttribute('aria-hidden', 'true');
-        head.appendChild(spacer);
+        icons.appendChild(gem);
       }
 
-      var medSm = el('span', 'medal-sm');
-      medSm.innerHTML = medallionSvg(art, 30);
-      head.appendChild(medSm);
+      if (icons.childNodes.length) {
+        row.appendChild(icons);
+      }
 
+      var head = el('button', 'relic-acc-head');
+      head.type = 'button';
+      head.setAttribute('aria-expanded', 'false');
       head.appendChild(el('span', 'relic-acc-name', item.name));
       head.appendChild(el('span', 'relic-rarity ' + rarity, rarityLabel(rarity)));
       head.appendChild(el('span', 'relic-acc-arrow', '▾'));
@@ -2586,10 +2691,13 @@
         head.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
       });
 
+      row.appendChild(head);
+      acc.appendChild(row);
+
       var body = el('div', 'relic-acc-body');
       var card = el('div', 'relic-card');
 
-      var artWrap = el('div', 'relic-art relic-art-big');
+      var artWrap = el('div', 'relic-art');
       artWrap.innerHTML = medallionSvg(art, 132);
       card.appendChild(artWrap);
 
@@ -2598,36 +2706,32 @@
       headRow.appendChild(el('span', 'relic-rarity ' + rarity, rarityLabel(rarity)));
       card.appendChild(headRow);
 
-      if (item.desc) {
-        card.appendChild(el('p', 'relic-type', item.desc));
-      }
-
-      if (requiresAttunement) {
-        card.appendChild(el('div', 'attune-badge ' + (attuned ? 'on' : 'off'),
-          attuned ? '✓ Sintonizzato' : 'Non sintonizzato'));
-      }
-
       if (isBag) {
-        card.appendChild(el('div', 'bag-badge ' + (equipped ? 'on' : 'off'),
-          equipped ? '✓ Equipaggiata · ' + DIMENSIONAL_BAG_SELF_KG + ' kg sulle spalle' : 'Non equipaggiata'));
-        card.appendChild(el('p', 'relic-type',
-          'Contenitore extradimensionale · ' + DIMENSIONAL_BAG_CAPACITY_KG + ' kg (monete e bottino party)'));
-      } else if (isWeapon) {
-        var profile = weaponProfileOf(item);
-        card.appendChild(el('div', 'bag-badge ' + (equipped ? 'on' : 'off'),
-          equipped ? '✓ Impugnata in combattimento' : 'Non impugnata · tocca ⚔ per equipaggiare'));
-        if (profile) {
-          card.appendChild(el('p', 'relic-type',
-            (profile.die || '1d8') + ' ' + (profile.type || '') +
-            (profile.mastery ? ' · ' + profile.mastery : '')));
-        }
-      } else if (isShield) {
-        var shieldProfile = shieldProfileOf(item);
-        card.appendChild(el('div', 'bag-badge ' + (equipped ? 'on' : 'off'),
-          equipped ? '✓ Equipaggiato in combattimento' : 'Non equipaggiato · tocca 🛡 per equipaggiare'));
-        if (shieldProfile) {
-          card.appendChild(el('p', 'relic-type', 'CA +' + shieldProfile.acBonus));
-        }
+        var bagStatus = el('button', 'bag-badge bag-badge-btn ' + (equipped ? 'on' : 'off'));
+        bagStatus.type = 'button';
+        bagStatus.textContent = equipped
+          ? '✓ Equipaggiata · ' + DIMENSIONAL_BAG_SELF_KG + ' kg sulle spalle'
+          : 'Equipaggia sulle spalle';
+        bagStatus.addEventListener('click', function (e) {
+          e.stopPropagation();
+          commitState(function (character) {
+            if (equipped) {
+              (character.items || []).forEach(function (it) {
+                if (it.id === item.id) {
+                  it.equipped = false;
+                }
+              });
+            } else {
+              equipDimensionalBag(character, item.id);
+            }
+          });
+        });
+        card.appendChild(bagStatus);
+      }
+
+      var typeLine = buildItemTypeLine(item, isBag, isWeapon, isShield);
+      if (typeLine) {
+        card.appendChild(el('p', 'relic-type', typeLine));
       }
 
       if ((item.effects || []).length) {
@@ -2641,16 +2745,11 @@
         card.appendChild(ul);
       }
 
-      // Non c'è più un click diretto sulla card (l'intera testata apre/chiude
-      // l'accordion, come le due reliquie storiche): la modifica resta
-      // raggiungibile toccando il corpo espanso.
-      card.appendChild(el('p', 'relic-note', 'Tocca per modificare'));
       card.addEventListener('click', function () {
         buildItemSheet(item);
       });
 
       body.appendChild(card);
-      acc.appendChild(head);
       acc.appendChild(body);
       list.appendChild(acc);
     });
