@@ -8,9 +8,55 @@
      (localStorage), impostato dalla dashboard prima di ricaricare la pagina. */
   var ACTIVE_CHAR_KEY = 'app-active-char';
   var DEFAULT_CHAR_ID = 'tharion-velnar';
+  var DELETED_CHARS_KEY = 'app-deleted-characters';
+
+  function getDeletedCharacters() {
+    try {
+      var raw = localStorage.getItem(DELETED_CHARS_KEY);
+      if (!raw) {
+        return [];
+      }
+      var parsed = JSON.parse(raw);
+
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function isCharacterDeleted(id) {
+    return getDeletedCharacters().indexOf(id) !== -1;
+  }
+
+  function markCharacterDeleted(id) {
+    var list = getDeletedCharacters();
+    if (list.indexOf(id) !== -1) {
+      return;
+    }
+    list.push(id);
+    try {
+      localStorage.setItem(DELETED_CHARS_KEY, JSON.stringify(list));
+    } catch (e) { /* ignore */ }
+  }
 
   function activeCharId() {
-    return localStorage.getItem(ACTIVE_CHAR_KEY) || DEFAULT_CHAR_ID;
+    var explicit = localStorage.getItem(ACTIVE_CHAR_KEY);
+    if (explicit) {
+      if (isCharacterDeleted(explicit)) {
+        try {
+          localStorage.removeItem(ACTIVE_CHAR_KEY);
+        } catch (e) { /* ignore */ }
+
+        return null;
+      }
+
+      return explicit;
+    }
+    if (isCharacterDeleted(DEFAULT_CHAR_ID)) {
+      return null;
+    }
+
+    return DEFAULT_CHAR_ID;
   }
 
   function charStateKey(id) {
@@ -191,6 +237,9 @@
 
   function loadState() {
     var id = activeCharId();
+    if (!id) {
+      return getBaseState();
+    }
     var key = charStateKey(id);
 
     try {
@@ -202,6 +251,10 @@
         }
       }
     } catch (e) { /* ignore */ }
+
+    if (isCharacterDeleted(id)) {
+      return defaultsFor(id);
+    }
 
     /* Migrazione dalle chiavi legacy: solo per il personaggio storico
        (Tharion), solo quando non esiste ancora una chiave per-personaggio. */
@@ -254,7 +307,11 @@
     if (!window.__applyingRemoteState) {
       state.lastModifiedMs = Date.now();
     }
-    var key = charStateKey(activeCharId());
+    var id = activeCharId();
+    if (!id || isCharacterDeleted(id)) {
+      return;
+    }
+    var key = charStateKey(id);
     if (immediate) {
       try {
         localStorage.setItem(key, JSON.stringify(state));
@@ -295,12 +352,38 @@
     saveState(state, true);
   }
 
+  /* Eliminazione dalla dashboard: marca l'id, rimuove tutte le chiavi locali
+     (incluse le legacy di Tharion) e svuota la cache in RAM se era attivo. */
+  function purgeCharacter(id) {
+    markCharacterDeleted(id);
+    try {
+      localStorage.removeItem(charStateKey(id));
+    } catch (e) { /* ignore */ }
+    if (id === DEFAULT_CHAR_ID) {
+      try {
+        localStorage.removeItem(cfg.STORAGE_KEY);
+        localStorage.removeItem(cfg.STORAGE_KEY_V1);
+      } catch (e) { /* ignore */ }
+    }
+    var explicit = localStorage.getItem(ACTIVE_CHAR_KEY);
+    var wasActive = explicit === id || (!explicit && id === DEFAULT_CHAR_ID);
+    if (wasActive) {
+      try {
+        localStorage.removeItem(ACTIVE_CHAR_KEY);
+      } catch (e) { /* ignore */ }
+      state = null;
+    }
+  }
+
   window.AppStorage = {
     getState: getState,
     updateState: updateState,
     saveState: saveState,
     resetState: resetState,
     getDefaultState: getDefaultState,
-    migrateV1: migrateV1
+    migrateV1: migrateV1,
+    activeCharId: activeCharId,
+    isCharacterDeleted: isCharacterDeleted,
+    purgeCharacter: purgeCharacter
   };
 })();

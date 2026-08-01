@@ -14,6 +14,7 @@
    */
 
   var REVEAL_WIDTH = 84; // larghezza del pulsante Elimina, px — stesso valore nel CSS
+  var DISMISS_THRESHOLD = Math.round(REVEAL_WIDTH * 1.55); // ~130px: swipe oltre → elimina (stile Gmail)
   var LAYOUT_KEY = 'app-dashboard-layout';
 
   // Ultimi items/onSelect ricevuti da loadDashboard (js/cloud.js): servono
@@ -134,6 +135,27 @@
     openSwipeWrap = wrap;
   }
 
+  function deleteCharacter(item) {
+    if (window.AppCloud && window.AppCloud.deleteCharacter) {
+      window.AppCloud.deleteCharacter(item.id);
+    }
+  }
+
+  // Swipe lungo oltre DISMISS_THRESHOLD: anima l'uscita e elimina senza conferma
+  // (il gesto vale come conferma, come in Gmail).
+  function dismissSwipeItem(wrap, item, inner) {
+    if (openSwipeWrap === wrap) {
+      openSwipeWrap = null;
+    }
+    wrap.classList.add('dismissing');
+    inner.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+    inner.style.transform = 'translateX(-' + wrap.offsetWidth + 'px)';
+    inner.style.opacity = '0';
+    window.setTimeout(function () {
+      deleteCharacter(item);
+    }, 240);
+  }
+
   // Avvolge `inner` (una .dash-card o una .dash-row) in un wrapper .dash-swipe
   // con dietro un pulsante Elimina: swipe a sinistra per rivelarlo (stile
   // iOS). La discriminazione fra scroll verticale e swipe orizzontale ricalca
@@ -152,9 +174,7 @@
       if (!confirm('Eliminare "' + (item.name || 'Senza nome') + '"? L\'azione non si può annullare.')) {
         return;
       }
-      if (window.AppCloud && window.AppCloud.deleteCharacter) {
-        window.AppCloud.deleteCharacter(item.id);
-      }
+      deleteCharacter(item);
     });
     wrap.appendChild(del);
     wrap.appendChild(inner);
@@ -197,21 +217,28 @@
         e.preventDefault();
       }
       // Se la riga era già aperta si parte da -REVEAL_WIDTH, non da 0: lo
-      // swipe successivo continua da dov'è, non salta.
+      // swipe successivo continua da dov'è, non salta. Oltre REVEAL_WIDTH si
+      // può trascinare fino a ~85% della larghezza (poi settle → elimina).
       var base = wrap.classList.contains('open') ? -REVEAL_WIDTH : 0;
-      dx = Math.max(-REVEAL_WIDTH, Math.min(0, base + deltaX));
+      var maxDrag = -Math.round(wrap.offsetWidth * 0.85);
+      dx = Math.max(maxDrag, Math.min(0, base + deltaX));
       inner.style.transform = 'translateX(' + dx + 'px)';
     }, { passive: false });
 
     function settle() {
       var wasDragging = dragging;
       tracking = false;
-      inner.style.transition = '';
-      inner.style.transform = '';
       if (!wasDragging) {
         return;
       }
       dragging = false;
+      if (dx <= -DISMISS_THRESHOLD) {
+        dismissSwipeItem(wrap, item, inner);
+
+        return;
+      }
+      inner.style.transition = '';
+      inner.style.transform = '';
       if (dx <= -REVEAL_WIDTH / 2) {
         openSwipe(wrap);
       } else {

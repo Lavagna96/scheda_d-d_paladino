@@ -23,7 +23,20 @@ import {
   var PUSH_DEBOUNCE_MS = 1500;
 
   function charId() {
+    if (window.AppStorage && window.AppStorage.activeCharId) {
+      return window.AppStorage.activeCharId();
+    }
+
     return localStorage.getItem('app-active-char') || DEFAULT_CHAR_ID;
+  }
+
+  function effectiveActiveId() {
+    return charId() || DEFAULT_CHAR_ID;
+  }
+
+  function isDeletedCharacter(id) {
+    return window.AppStorage && window.AppStorage.isCharacterDeleted
+      && window.AppStorage.isCharacterDeleted(id);
   }
 
   var accountBtn = document.getElementById('opt-account');
@@ -99,6 +112,10 @@ import {
 
   function pushNow() {
     if (!user) {
+      return;
+    }
+    var id = charId();
+    if (!id || isDeletedCharacter(id)) {
       return;
     }
     var state = window.AppStorage.getState();
@@ -236,6 +253,10 @@ import {
     if (unsubscribeDoc) {
       unsubscribeDoc();
     }
+    var id = charId();
+    if (!id || isDeletedCharacter(id)) {
+      return;
+    }
     unsubscribeDoc = onSnapshot(charRef(), function (snap) {
       if (snap.metadata.hasPendingWrites) {
         return; // eco delle nostre stesse scritture
@@ -244,6 +265,9 @@ import {
         /* Primo upload: stato in locale ma doc assente. Dopo un'eliminazione
            dalla dashboard la chiave locale è già stata rimossa: non fare push
            (altrimenti watchDoc ricreerebbe il personaggio da AppStorage in RAM). */
+        if (isDeletedCharacter(charId())) {
+          return;
+        }
         try {
           if (localStorage.getItem('char-' + charId() + '-state')) {
             pushNow();
@@ -296,9 +320,13 @@ import {
   }
 
   function localDashboardItem() {
+    var id = charId();
+    if (!id || isDeletedCharacter(id)) {
+      return null;
+    }
     var state = window.AppStorage.getState();
 
-    return dashboardItemFromCharacter(state.character, charId());
+    return dashboardItemFromCharacter(state.character, id);
   }
 
   /* Personaggi presenti solo in localStorage (es. creati offline o orfani dopo
@@ -312,7 +340,7 @@ import {
           continue;
         }
         var id = key.slice(5, -6);
-        if (!id) {
+        if (!id || isDeletedCharacter(id)) {
           continue;
         }
         try {
@@ -334,6 +362,9 @@ import {
     getDocs(collection(db, 'users', user.uid, 'characters')).then(function (snap) {
       var byId = {};
       snap.forEach(function (d) {
+        if (isDeletedCharacter(d.id)) {
+          return;
+        }
         var data = d.data();
         if (data && data.state) {
           byId[d.id] = dashboardItemFromCharacter(data.state.character, d.id);
@@ -346,7 +377,10 @@ import {
       });
       var items = Object.keys(byId).map(function (k) { return byId[k]; });
       if (items.length === 0) {
-        items = [localDashboardItem()];
+        var fallback = localDashboardItem();
+        if (fallback) {
+          items = [fallback];
+        }
       }
       window.AppDashboard.render(items, onSelectCharacter);
     }).catch(function () {
@@ -356,7 +390,10 @@ import {
       });
       var items = Object.keys(byId).map(function (k) { return byId[k]; });
       if (items.length === 0) {
-        items = [localDashboardItem()];
+        var fallback = localDashboardItem();
+        if (fallback) {
+          items = [fallback];
+        }
       }
       window.AppDashboard.render(items, onSelectCharacter);
       window.AppDashboard.showError('Impossibile aggiornare la lista dal cloud');
@@ -396,27 +433,58 @@ import {
     });
   }
 
+  function reassignActiveCharacter(deletedId) {
+    if (!user) {
+      return Promise.resolve();
+    }
+
+    return getDocs(collection(db, 'users', user.uid, 'characters')).then(function (snap) {
+      var nextId = null;
+      snap.forEach(function (d) {
+        if (d.id !== deletedId && !isDeletedCharacter(d.id) && !nextId) {
+          nextId = d.id;
+        }
+      });
+      if (nextId) {
+        localStorage.setItem('app-active-char', nextId);
+      }
+    });
+  }
+
   /* Elimina un personaggio (swipe-to-delete dalla dashboard, js/dashboard.js):
      stato locale rimosso subito, doc Firestore cancellato, poi la dashboard
      si ricarica da sé — non serve un caso speciale per "era l'ultimo
      personaggio": la lista vuota resta comunque con lo slot "+ Nuovo
      personaggio" per ripartire. */
   function deleteCharacter(id) {
-    localStorage.removeItem('char-' + id + '-state');
-    if (localStorage.getItem('app-active-char') === id) {
-      localStorage.removeItem('app-active-char');
+    var wasActive = effectiveActiveId() === id;
+
+    if (window.AppStorage && window.AppStorage.purgeCharacter) {
+      window.AppStorage.purgeCharacter(id);
+    } else {
+      localStorage.removeItem('char-' + id + '-state');
+      if (localStorage.getItem('app-active-char') === id) {
+        localStorage.removeItem('app-active-char');
+      }
+    }
+
+    function finishDelete() {
+      var chain = wasActive ? reassignActiveCharacter(id) : Promise.resolve();
+
+      return chain.then(function () {
+        watchDoc();
+        loadDashboard();
+      });
     }
 
     if (!user) {
-      loadDashboard();
-
-      return Promise.resolve();
+      return finishDelete();
     }
 
     return deleteDoc(doc(db, 'users', user.uid, 'characters', id)).then(function () {
-      watchDoc();
-      loadDashboard();
+      return finishDelete();
     }).catch(function () {
+      window.AppDashboard.showError('Eliminazione non riuscita: riprova quando sei online.');
       watchDoc();
       loadDashboard();
     });

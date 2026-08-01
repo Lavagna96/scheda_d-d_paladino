@@ -283,6 +283,10 @@ body.in-dashboard #global-fab {
   transform: translateX(-84px);
 }
 
+.dash-swipe.dismissing {
+  pointer-events: none;
+}
+
 /* ---------- layout a righe (toggle griglia/righe) ---------- */
 
 .dash-list.mode-list {
