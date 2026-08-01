@@ -106,14 +106,14 @@
 <header id="app-header">
   <div class="header-top">
     <button type="button" class="header-avatar" id="avatar-btn" aria-label="Apri ritratto del personaggio">
-      <img class="avatar-img" src="avatar.jpg?v=166" alt="Ritratto di Tharion Velnar" onerror="this.style.display='none'">
+      <img class="avatar-img" src="" alt="" style="display:none">
       <span class="avatar-fallback" aria-hidden="true">✦</span>
     </button>
     <div class="header-info">
-      <div class="header-name" id="header-name">Tharion Velnar</div>
-      <div class="header-class" id="header-class">Paladino · Livello 7</div>
+      <div class="header-name" id="header-name">Personaggio</div>
+      <div class="header-class" id="header-class">—</div>
       <button type="button" class="levelup-btn" id="levelup-btn" aria-label="Sali di livello">⬆ Sali di Livello</button>
-      <div class="header-meta" id="header-meta">Dragonide d'Oro</div>
+      <div class="header-meta" id="header-meta">—</div>
     </div>
     <div class="header-right">
       <button type="button" class="header-options" id="header-options" aria-label="Opzioni">⚙</button>
@@ -125,7 +125,6 @@
   <button type="button" id="opt-dashboard" class="hidden">I tuoi personaggi</button>
   <button type="button" id="opt-account" class="hidden">Account e sincronizzazione</button>
   <button type="button" id="opt-manual">Manuale 5.5</button>
-  <button type="button" id="opt-reset">Ripristina dati</button>
   <button type="button" id="opt-export">Esporta JSON</button>
   <button type="button" id="opt-import">Importa JSON</button>
 </div>
@@ -146,16 +145,16 @@
       <div class="combat-stats-band">
         <div class="combat-left">
           <div class="combat-stat-init">
-            <div class="big" id="combat-init">−1</div>
+            <div class="big" id="combat-init">—</div>
             <div class="lab">Iniziativa</div>
-            <div class="sub" id="combat-init-note">vant. iniziativa</div>
+            <div class="sub" id="combat-init-note"></div>
           </div>
           <button type="button" class="insp-tile" id="insp-badge" aria-label="Ispirazione" aria-pressed="false">
             <span class="insp-star" id="insp-star">☆</span>
             <span class="insp-lab">Ispirazione</span>
           </button>
           <div class="combat-stat-speed">
-            <div class="big" id="combat-speed">9 m</div>
+            <div class="big" id="combat-speed">—</div>
             <div class="lab">Velocità</div>
           </div>
         </div>
@@ -219,11 +218,11 @@
                   <ellipse cx="58" cy="14" rx="5" ry="2.2" fill="rgba(255,255,255,0.35)" transform="rotate(-18 58 14)"/>
                 </g>
               </svg>
-              <span class="ac-ruby-val" id="combat-ac">20</span>
+              <span class="ac-ruby-val" id="combat-ac">—</span>
               </div>
               <div class="ac-ruby-meta">
                 <span class="ac-ruby-lab">Classe Armatura</span>
-                <span class="ac-ruby-sub" id="combat-ac-note">Piastre + Scudo</span>
+                <span class="ac-ruby-sub" id="combat-ac-note"></span>
               </div>
             </div>
             <div class="ds-wing">
@@ -242,7 +241,7 @@
       <div class="card hp-combat-card">
         <div class="hp-top">
           <span class="hp-title"><span class="hp-heart" aria-hidden="true">❤</span> Punti Ferita</span>
-          <span class="hp-val"><span id="pv-hp">60</span><span class="hp-max" id="hp-max"> / 60</span></span>
+          <span class="hp-val"><span id="pv-hp">0</span><span class="hp-max" id="hp-max"> / 0</span></span>
         </div>
         <div class="hp-bar-track"><div class="hp-bar-fill" id="hp-bar-fill" style="width:100%"></div></div>
         <div class="hp-temp-bar-wrap hidden" id="temp-hp-bar-wrap" aria-hidden="true">
@@ -256,13 +255,13 @@
       </div>
 
       <div class="card combat-card">
-        <h2 class="card-title sec">Attacchi <small id="atk-extra">Attacco Extra: 2 colpi</small> <button type="button" class="edit-pencil" id="edit-equip-btn" aria-label="Modifica equipaggiamento">✎</button></h2>
+        <h2 class="card-title sec">Attacchi <small id="atk-extra" class="hidden">Attacco Extra</small> <button type="button" class="edit-pencil" id="edit-equip-btn" aria-label="Modifica equipaggiamento">✎</button></h2>
         <table class="combat-table">
           <thead><tr><th>Arma</th><th>Colpire</th><th>Danni</th></tr></thead>
           <tbody>
             <tr>
-              <td><span class="atk-name" id="atk-weapon-name">Spada lunga ✦ (magica)</span><div class="mast" id="atk-weapon-mastery">Maestria: Vex</div></td>
-              <td id="atk-weapon-hit">+8</td><td id="atk-weapon-dmg">1d8+7 tagl.</td>
+              <td><span class="atk-name" id="atk-weapon-name">—</span><div class="mast" id="atk-weapon-mastery"></div></td>
+              <td id="atk-weapon-hit">—</td><td id="atk-weapon-dmg">—</td>
             </tr>
             <tr>
               <td><span class="atk-name" id="atk-breath-name">Soffio</span><div class="mast">cono 4,5 m / linea 9 m</div></td>
@@ -271,10 +270,10 @@
           </tbody>
         </table>
         <p class="note hidden" id="atk-masteries"></p>
-        <p class="note" id="atk-note">Colpire/danni includono spada +1. Stile Duellante +2 ai danni. Con Arma Sacra: +3 al colpire (→ +11) e danni Radiosi.</p>
+        <p class="note hidden" id="atk-note"></p>
       </div>
 
-      <div class="card">
+      <div class="card hidden" id="paladin-smite-card">
         <h2 class="card-title sec">Punizione Divina <small>Az. bonus dopo colpo in mischia</small></h2>
         <div class="smite-rows">
           <div class="stat-row"><span>Slot 1° livello</span><span class="v">2d8 radiosi</span></div>
@@ -293,7 +292,7 @@
         <div class="loh-card">
           <div class="loh-top">
             <span><b>Imposizione delle Mani</b></span>
-            <span><span id="pv-loh">35</span> / <span id="loh-max">35</span> PF</span>
+            <span><span id="pv-loh">0</span> / <span id="loh-max">0</span> PF</span>
           </div>
           <div class="loh-bar-track" id="loh-bar-track"><div class="loh-bar-fill" id="loh-bar-fill"></div></div>
           <div class="loh-actions">
@@ -373,19 +372,10 @@
           </div>
         </div>
 
-        <div class="res-sec res-sec-day">
+        <div class="res-sec res-sec-day hidden">
           <div class="res-sec-head">
             <span class="res-plaque"><span class="res-plaque-gem" aria-hidden="true"></span>1 al giorno</span>
             <span class="res-sec-line" aria-hidden="true"></span>
-          </div>
-          <div class="res-card" data-key="shield" data-max="1">
-            <span class="rc-med" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3A12 12 0 0 1 12 21 12 12 0 0 1 3.5 6 12 12 0 0 0 12 3"/></svg></span>
-            <div class="rc-info">
-              <span class="rc-name">Scudo magico</span>
-              <span class="rc-ctx">+5 CA · reazione</span>
-              <div class="segbar"></div>
-            </div>
-            <span class="rc-count"></span>
           </div>
         </div>
 
@@ -407,27 +397,27 @@
       <div class="card">
         <h2 class="card-title">Caratteristiche <button type="button" class="edit-pencil" id="edit-abilita-btn" aria-label="Modifica caratteristiche">✎</button></h2>
         <div class="abil-grid">
-          <div class="abil-card" data-abil="FOR"><span class="name">FOR</span><span class="mod">+4</span><span class="score">18</span></div>
-          <div class="abil-card" data-abil="DES"><span class="name">DES</span><span class="mod">−1</span><span class="score">8</span></div>
-          <div class="abil-card" data-abil="COS"><span class="name">COS</span><span class="mod">+2</span><span class="score">14</span></div>
+          <div class="abil-card" data-abil="FOR"><span class="name">FOR</span><span class="mod">+0</span><span class="score">10</span></div>
+          <div class="abil-card" data-abil="DES"><span class="name">DES</span><span class="mod">+0</span><span class="score">10</span></div>
+          <div class="abil-card" data-abil="COS"><span class="name">COS</span><span class="mod">+0</span><span class="score">10</span></div>
           <div class="abil-card" data-abil="INT"><span class="name">INT</span><span class="mod">+0</span><span class="score">10</span></div>
           <div class="abil-card" data-abil="SAG"><span class="name">SAG</span><span class="mod">+0</span><span class="score">10</span></div>
-          <div class="abil-card" data-abil="CAR"><span class="name">CAR</span><span class="mod">+3</span><span class="score">16</span></div>
+          <div class="abil-card" data-abil="CAR"><span class="name">CAR</span><span class="mod">+0</span><span class="score">10</span></div>
         </div>
       </div>
       <div class="card">
-        <h2 class="card-title sec">Tiri Salvezza <small id="ts-aura-note">Aura +3 inclusa</small></h2>
-        <div class="stat-row" data-save="FOR"><span class="lbl"><span class="skill-dot" hidden></span>Forza</span><span class="v">+7</span></div>
-        <div class="stat-row" data-save="DES"><span class="lbl"><span class="skill-dot" hidden></span>Destrezza</span><span class="v">+2</span></div>
-        <div class="stat-row" data-save="COS"><span class="lbl"><span class="skill-dot" hidden></span>Costituzione</span><span class="v">+5</span></div>
-        <div class="stat-row" data-save="INT"><span class="lbl"><span class="skill-dot" hidden></span>Intelligenza</span><span class="v">+3</span></div>
-        <div class="stat-row" data-save="SAG"><span class="lbl"><span class="skill-dot" hidden></span>Saggezza</span><span class="v">+6</span></div>
-        <div class="stat-row" data-save="CAR"><span class="lbl"><span class="skill-dot" hidden></span>Carisma</span><span class="v">+9</span></div>
+        <h2 class="card-title sec">Tiri Salvezza <small id="ts-aura-note"></small></h2>
+        <div class="stat-row" data-save="FOR"><span class="lbl"><span class="skill-dot" hidden></span>Forza</span><span class="v">+0</span></div>
+        <div class="stat-row" data-save="DES"><span class="lbl"><span class="skill-dot" hidden></span>Destrezza</span><span class="v">+0</span></div>
+        <div class="stat-row" data-save="COS"><span class="lbl"><span class="skill-dot" hidden></span>Costituzione</span><span class="v">+0</span></div>
+        <div class="stat-row" data-save="INT"><span class="lbl"><span class="skill-dot" hidden></span>Intelligenza</span><span class="v">+0</span></div>
+        <div class="stat-row" data-save="SAG"><span class="lbl"><span class="skill-dot" hidden></span>Saggezza</span><span class="v">+0</span></div>
+        <div class="stat-row" data-save="CAR"><span class="lbl"><span class="skill-dot" hidden></span>Carisma</span><span class="v">+0</span></div>
       </div>
       <div class="card">
         <h2 class="card-title sec">Abilità <button type="button" class="edit-pencil" id="edit-skills-btn" aria-label="Modifica abilità">✎</button></h2>
         <div id="skills-list"></div>
-        <div class="stat-row"><span class="dim">Percez. passiva</span><span class="v dim" id="skill-passive-perception">13</span></div>
+        <div class="stat-row"><span class="dim">Percez. passiva</span><span class="v dim" id="skill-passive-perception">10</span></div>
       </div>
       <div class="card hidden" id="resistances-card">
         <h2 class="card-title sec">Resistenze &amp; Immunità</h2>
@@ -463,19 +453,21 @@
   <!-- ========== GRIMORIO ========== -->
   <section id="view-grimorio" class="view-panel hidden">
     <div class="grim-header">
-      <h2 class="card-title">Grimorio — <span id="grim-char-name">Tharion Velnar</span></h2>
+      <h2 class="card-title">Grimorio — <span id="grim-char-name">Personaggio</span>
+        <button type="button" class="edit-pencil" id="grim-advanced-btn" aria-label="Modifica trucchetti e risorse extra">✎</button>
+      </h2>
     </div>
     <div class="grim-stats" aria-label="Statistiche incantesimi">
       <div class="grim-stat celest">
-        <div class="big" id="grim-dc">15</div>
+        <div class="big" id="grim-dc">—</div>
         <div class="lab">CD Incant.</div>
       </div>
       <div class="grim-stat">
-        <div class="big" id="grim-atk">+7</div>
+        <div class="big" id="grim-atk">—</div>
         <div class="lab">Attacco</div>
       </div>
       <div class="grim-stat gold">
-        <div class="big" id="grim-cha">+3</div>
+        <div class="big" id="grim-cha">—</div>
         <div class="lab" id="grim-cha-label">Carisma</div>
       </div>
       <div class="grim-stat prep">
@@ -530,12 +522,12 @@
   <section id="view-cavalcatura" class="view-panel hidden">
     <div class="steed-name-row">
       <span class="steed-icon" aria-hidden="true">🐴</span>
-      <input type="text" class="steed-name-input" id="steed-name" value="Destriero Ultraterreno" aria-label="Nome cavalcatura">
+      <input type="text" class="steed-name-input" id="steed-name" value="" placeholder="Nome cavalcatura" aria-label="Nome cavalcatura">
     </div>
     <div class="card hp-combat-card steed-hp-card">
       <div class="hp-top">
         <span class="hp-title"><span class="steed-hp-icon" aria-hidden="true">🐴</span> Punti Ferita</span>
-        <span class="hp-val"><span id="pv-steedhp">25</span><span class="hp-max" id="steed-hp-max"> / 25</span></span>
+        <span class="hp-val"><span id="pv-steedhp">0</span><span class="hp-max" id="steed-hp-max"> / 0</span></span>
       </div>
       <div class="hp-bar-track"><div class="hp-bar-fill" id="steed-bar-fill" style="width:100%"></div></div>
       <div class="hp-actions hp-actions-dh">
@@ -712,6 +704,17 @@
   </div>
 </div>
 
+<div id="grim-advanced-overlay" class="hidden" role="dialog" aria-modal="true">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h2 class="sheet-title" id="grim-advanced-title"></h2>
+      <button type="button" class="sheet-close" id="grim-advanced-close" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="sheet-body" id="grim-advanced-body"></div>
+  </div>
+</div>
+
 <div id="hp-modal" class="hp-modal hidden" role="dialog" aria-modal="true" aria-label="Modifica punti ferita">
   <div class="hp-modal-sheet">
     <div class="sheet-handle"></div>
@@ -796,11 +799,11 @@
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
     <div class="avatar-frame-inner">
-      <img id="avatar-full-img" src="avatar-full.jpg?v=166" alt="Ritratto di Tharion Velnar">
+      <img id="avatar-full-img" src="" alt="" style="display:none">
     </div>
     <figcaption class="avatar-frame-caption">
-      <span class="afc-name">Tharion Velnar</span>
-      <span class="afc-sub">Paladino · Livello 7 · Dragonide d'Oro</span>
+      <span class="afc-name">Personaggio</span>
+      <span class="afc-sub">—</span>
       <button type="button" class="account-btn avatar-change-btn" id="avatar-change">Cambia ritratto</button>
       <input type="file" id="avatar-file" accept="image/*" class="hidden">
     </figcaption>
@@ -818,6 +821,7 @@
 <script src="js/traits.js?v=166"></script>
 <script src="js/sheet.js?v=166"></script>
 <script src="js/grimorio.js?v=166"></script>
+<script src="js/grimorio-advanced.js?v=166"></script>
 <script src="js/treasury.js?v=166"></script>
 <script src="js/diary.js?v=166"></script>
 <script src="js/inspiration.js?v=166"></script>

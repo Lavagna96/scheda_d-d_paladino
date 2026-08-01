@@ -329,6 +329,32 @@
     el.classList.toggle('hidden', !msg);
   }
 
+  function selectCharacter(id) {
+    localStorage.setItem('app-active-char', id);
+    sessionStorage.setItem('app-skip-dashboard', '1');
+    location.reload();
+  }
+
+  /* Avvio senza personaggio attivo: mostra la dashboard (anche in solo-locale). */
+  function bootShell() {
+    if (document.body.classList.contains('auth-out') ||
+        document.body.classList.contains('auth-checking') ||
+        document.body.classList.contains('auth-locked')) {
+      return;
+    }
+    if (sessionStorage.getItem('app-skip-dashboard') === '1') {
+      sessionStorage.removeItem('app-skip-dashboard');
+      if (window.AppStorage && window.AppStorage.activeCharId && window.AppStorage.activeCharId()) {
+        document.body.classList.remove('in-dashboard');
+
+        return;
+      }
+    }
+    document.body.classList.add('in-dashboard');
+    var items = window.AppStorage ? window.AppStorage.listCharactersForDashboard() : [];
+    render(items, selectCharacter);
+  }
+
   var layoutBtn = document.getElementById('dash-layout-toggle');
   if (layoutBtn) {
     layoutBtn.addEventListener('click', toggleLayout);
@@ -336,6 +362,8 @@
 
   window.AppDashboard = {
     render: render,
-    showError: showError
+    showError: showError,
+    selectCharacter: selectCharacter,
+    bootShell: bootShell
   };
 })();

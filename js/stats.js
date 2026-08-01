@@ -503,6 +503,10 @@
     renderItemTextEffects();
     renderResources(view);
     renderAttacks(view);
+    var smiteCard = document.getElementById('paladin-smite-card');
+    if (smiteCard) {
+      smiteCard.classList.toggle('hidden', view.classId !== 'paladino');
+    }
     setText('loh-max', view.poolMax.loh);
     // La card Imposizione delle Mani (pool) compare solo se la classe ha quel pool.
     var lohCard = document.querySelector('.loh-card');

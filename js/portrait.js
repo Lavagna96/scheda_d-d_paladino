@@ -1,13 +1,8 @@
 (function () {
   /*
-   * Ritratti personaggio (Fase 2): l'immagine viene ridimensionata lato
-   * client e salvata come data URL dentro state.character.portrait, così
-   * viaggia insieme al resto della scheda (localStorage + Firestore) senza
-   * bisogno di storage esterno.
+   * Migrazione ritratto da file statico legacy (avatar.jpg): se il personaggio
+   * ha un path relativo come ritratto, lo importa una volta come data URL.
    */
-
-  var MAX_SIDE = 900;
-  var MAX_CHARS = 700000; // ~700 KB di data URL: soglia prudente per Firestore
 
   function loadImage(fileOrBlob) {
     return new Promise(function (resolve, reject) {
@@ -37,6 +32,9 @@
   }
 
   function resizeToDataUrl(fileOrBlob) {
+    var MAX_SIDE = 900;
+    var MAX_CHARS = 700000;
+
     return loadImage(fileOrBlob).then(function (img) {
       var out = drawToDataUrl(img, MAX_SIDE, 0.8);
       if (out.length > MAX_CHARS) {
@@ -53,29 +51,36 @@
   function setPortrait(dataUrl) {
     var state = window.AppStorage.getState();
     state.character.portrait = dataUrl;
+    state.character.portraitFull = dataUrl;
     window.AppStorage.saveState(state, true);
-    // AppHeader.render() applica il nuovo ritratto sia all'avatar dell'header
-    // sia all'immagine dentro il modal a schermo intero.
     if (window.AppHeader && window.AppHeader.render) {
       window.AppHeader.render();
     }
   }
 
-  /* Il ritratto storico di Tharion viveva come file statico (avatar-full.jpg):
-     la prima volta che gira con lo stato nuovo lo importa come data URL,
-     così anche lui passa dal meccanismo unico dei ritratti. Silenziosa in
-     caso di errore (nessun avatar legacy, offline, ecc.). */
-  function migrateLegacy() {
+  function isLegacyPortraitPath(value) {
+    if (!value || typeof value !== 'string') {
+      return false;
+    }
+    if (value.indexOf('data:') === 0) {
+      return false;
+    }
+
+    return value.indexOf('avatar') !== -1 && value.indexOf('.jpg') !== -1;
+  }
+
+  function migrateLegacyPortrait() {
     try {
-      var activeId = localStorage.getItem('app-active-char') || 'tharion-velnar';
-      if (activeId !== 'tharion-velnar') {
+      var id = window.AppStorage.activeCharId && window.AppStorage.activeCharId();
+      if (!id) {
         return;
       }
       var state = window.AppStorage.getState();
-      if (state.character && state.character.portrait) {
+      var portrait = state.character && state.character.portrait;
+      if (!isLegacyPortraitPath(portrait)) {
         return;
       }
-      fetch('avatar-full.jpg').then(function (res) {
+      fetch(portrait).then(function (res) {
         if (!res.ok) {
           throw new Error('avatar legacy assente');
         }
@@ -110,12 +115,14 @@
     });
   }
 
-  bindUi();
-  migrateLegacy();
+  function init() {
+    migrateLegacyPortrait();
+    bindUi();
+  }
 
-  window.AppPortrait = {
-    resizeToDataUrl: resizeToDataUrl,
-    setPortrait: setPortrait,
-    migrateLegacy: migrateLegacy
-  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

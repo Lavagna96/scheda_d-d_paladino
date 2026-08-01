@@ -538,6 +538,10 @@
     renderGrimStats();
     renderSpellCards();
     renderSlots();
+    var intro = document.querySelector('.grim-intro');
+    if (intro) {
+      intro.classList.toggle('hidden', character().classId !== 'paladino');
+    }
   }
 
   function init() {
@@ -545,6 +549,9 @@
     bindLevelTabs();
     bindSearch();
     bindModals();
+    if (window.AppGrimorioAdvanced && window.AppGrimorioAdvanced.init) {
+      window.AppGrimorioAdvanced.init();
+    }
   }
 
   window.AppGrimorio = {

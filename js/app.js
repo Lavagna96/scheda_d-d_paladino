@@ -790,19 +790,6 @@
       panel.classList.add('hidden');
     });
 
-    document.getElementById('opt-reset').addEventListener('click', function () {
-      if (confirm('Ripristinare tutti i dati ai valori iniziali?')) {
-        window.AppStorage.resetState();
-        window.AppHeader.render();
-        window.AppSheet.render();
-        window.AppGrimorio.render();
-        window.AppTreasury.render();
-        window.AppDiary.render();
-        window.AppInspiration.render();
-      }
-      panel.classList.add('hidden');
-    });
-
     document.getElementById('opt-export').addEventListener('click', function () {
       var state = window.AppStorage.getState();
       var data = JSON.stringify(state, null, 2);
@@ -832,7 +819,7 @@
         reader.onload = function () {
           try {
             var parsed = JSON.parse(reader.result);
-            window.AppStorage.saveState(Object.assign(window.AppStorage.getDefaultState(), parsed), true);
+            window.AppStorage.saveState(window.AppStorage.mergeImportedState(parsed), true);
             window.AppHeader.render();
             window.AppSheet.render();
             window.AppGrimorio.render();

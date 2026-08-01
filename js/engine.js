@@ -393,7 +393,13 @@
       resources.push({ key: 'sl' + (i + 1), max: n });
     });
     (ch.extraResources || []).forEach(function (r) {
-      resources.push(r);
+      resources.push({
+        key: r.key,
+        max: r.max,
+        name: r.name || r.key,
+        ctx: r.ctx || '',
+        resetOn: r.resetOn || 'long'
+      });
     });
     (ch.items || []).forEach(function (item) {
       // Idem: un oggetto non sintonizzato non genera/consuma usi giornalieri.

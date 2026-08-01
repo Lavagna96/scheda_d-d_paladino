@@ -36,6 +36,14 @@
       fullImg.style.display = full ? '' : 'none';
       fullImg.alt = 'Ritratto di ' + (ch.name || 'personaggio');
     }
+    var afcName = document.querySelector('.afc-name');
+    if (afcName) {
+      afcName.textContent = ch.name || 'Personaggio';
+    }
+    var afcSub = document.querySelector('.afc-sub');
+    if (afcSub) {
+      afcSub.textContent = view.classLine || '—';
+    }
   }
 
   function bindAvatarModal() {

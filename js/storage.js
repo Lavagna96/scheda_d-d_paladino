@@ -7,7 +7,6 @@
      'char-<id>-state'. Il personaggio attivo è in 'app-active-char'
      (localStorage), impostato dalla dashboard prima di ricaricare la pagina. */
   var ACTIVE_CHAR_KEY = 'app-active-char';
-  var DEFAULT_CHAR_ID = 'tharion-velnar';
   var DELETED_CHARS_KEY = 'app-deleted-characters';
 
   function getDeletedCharacters() {
@@ -41,22 +40,18 @@
 
   function activeCharId() {
     var explicit = localStorage.getItem(ACTIVE_CHAR_KEY);
-    if (explicit) {
-      if (isCharacterDeleted(explicit)) {
-        try {
-          localStorage.removeItem(ACTIVE_CHAR_KEY);
-        } catch (e) { /* ignore */ }
-
-        return null;
-      }
-
-      return explicit;
+    if (!explicit) {
+      return null;
     }
-    if (isCharacterDeleted(DEFAULT_CHAR_ID)) {
+    if (isCharacterDeleted(explicit)) {
+      try {
+        localStorage.removeItem(ACTIVE_CHAR_KEY);
+      } catch (e) { /* ignore */ }
+
       return null;
     }
 
-    return DEFAULT_CHAR_ID;
+    return explicit;
   }
 
   function charStateKey(id) {
@@ -67,16 +62,7 @@
     return JSON.parse(JSON.stringify(obj));
   }
 
-  function getDefaultState() {
-    return deepClone(cfg.DEFAULT_STATE);
-  }
-
-  /* Scheletro NEUTRO di uno stato (5.B.3). `cfg.DEFAULT_STATE` è la scheda di
-     Tharion: usarlo come base del merge per un personaggio qualsiasi gli
-     regalava i campi che non dichiara (è così che a un paladino di 1° livello
-     appena creato sono finiti addosso `initiativeNote: 'vant. iniziativa'` e il
-     destriero). Da qui in poi la scheda storica si fonde sui propri default,
-     tutti gli altri su questo scheletro: nessun dato di Tharion può colare. */
+  /* Scheletro neutro di uno stato (5.B.3): base per merge, nuovi PG e import. */
   var BASE_CHARACTER = {
     name: '',
     classId: '',
@@ -95,8 +81,6 @@
     abilities: { FOR: 10, DES: 10, COS: 10, INT: 10, SAG: 10, CAR: 10 },
     profSaves: [],
     profSkills: [],
-    // Competenza (doppio bonus di competenza) su alcune abilità già competenti
-    // — Espero del Ladro (id delle abilità, sottoinsieme di profSkills).
     expertiseSkills: [],
     fightingStyle: 'nessuno',
     armor: { id: '', shield: false },
@@ -106,11 +90,8 @@
     extraResources: [],
     items: [],
     feats: [],
-    // Opzioni di Metamagia conosciute (Stregone): [id, ...] — id da manual.metamagic.
     metamagicIds: [],
-    // Invocazioni Occulte conosciute (Warlock): [id, ...] — id da manual.invocations.
     invocationIds: [],
-    // Manovre conosciute (Guerriero, Maestro di Battaglia): [id, ...] — id da manual.maneuvers.
     maneuverIds: [],
     levelChoices: {}
   };
@@ -133,14 +114,56 @@
     return deepClone(BASE_STATE);
   }
 
-  // Default su cui fondere uno stato salvato: la scheda storica sui suoi,
-  // chiunque altro sullo scheletro neutro.
-  function defaultsFor(id) {
-    return id === DEFAULT_CHAR_ID ? getDefaultState() : getBaseState();
+  function characterClassName(classId) {
+    var manual = window.MANUAL_55;
+    if (manual && manual.classes && manual.classes[classId]) {
+      return manual.classes[classId].name;
+    }
+
+    return classId || '';
+  }
+
+  function dashboardItemFromCharacter(ch, id) {
+    ch = ch || {};
+
+    return {
+      id: id,
+      name: ch.name || 'Senza nome',
+      className: characterClassName(ch.classId),
+      subclassName: ch.subclassName || '',
+      level: ch.level || 1,
+      speciesLabel: ch.speciesLabel || '',
+      portrait: ch.portrait || '',
+      avatar: ch.avatar || '✦'
+    };
+  }
+
+  function listCharactersForDashboard() {
+    var byId = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || key.indexOf('char-') !== 0 || key.slice(-6) !== '-state') {
+          continue;
+        }
+        var id = key.slice(5, -6);
+        if (!id || isCharacterDeleted(id)) {
+          continue;
+        }
+        try {
+          var parsed = JSON.parse(localStorage.getItem(key));
+          if (parsed && parsed.character) {
+            byId[id] = dashboardItemFromCharacter(parsed.character, id);
+          }
+        } catch (e) { /* ignore */ }
+      }
+    } catch (e) { /* ignore */ }
+
+    return Object.keys(byId).map(function (k) { return byId[k]; });
   }
 
   function migrateV1(raw) {
-    var next = getDefaultState();
+    var next = getBaseState();
     if (raw.pools) {
       next.pools = Object.assign({}, next.pools, raw.pools);
       if (raw.pools.tempHp == null) {
@@ -151,7 +174,7 @@
       next.spent = Object.assign({}, raw.spent);
     }
     if (raw.coins) {
-      next.coins = Object.assign({}, next.coins);
+      next.coins = Object.assign({}, raw.coins);
     }
     if (typeof raw.notes === 'string' && raw.notes.trim()) {
       next.diary.sessions.push({
@@ -180,18 +203,26 @@
         };
       });
     }
-    try {
-      if (localStorage.getItem(cfg.INSPIRATION_KEY) === '1') {
-        next.inspiration = true;
-      }
-    } catch (e) { /* ignore */ }
+    if (readInspirationFlag()) {
+      next.inspiration = true;
+    }
 
     return next;
   }
 
-  /* v3: i fatti base del personaggio entrano nello stato (state.character).
-     Merge conservativo sui default: gli oggetti annidati si integrano campo
-     per campo, gli array (competenze, modificatori…) vincono se presenti. */
+  function readInspirationFlag() {
+    try {
+      if (localStorage.getItem(cfg.INSPIRATION_KEY) === '1') {
+        return true;
+      }
+      if (cfg.LEGACY_INSPIRATION_KEY && localStorage.getItem(cfg.LEGACY_INSPIRATION_KEY) === '1') {
+        return true;
+      }
+    } catch (e) { /* ignore */ }
+
+    return false;
+  }
+
   function mergeCharacter(def, saved) {
     if (!saved) {
       return def;
@@ -204,14 +235,8 @@
     return out;
   }
 
-  /* Adatta un oggetto salvato in formato v2/v3 allo stato corrente,
-     integrando i campi mancanti con i default (stessa logica di sempre,
-     estratta per essere riusata sia dalla chiave per-personaggio sia dalla
-     migrazione dalla vecchia chiave legacy). `def` sono i default su cui
-     fondere: la scheda di Tharion per la sua, lo scheletro neutro per tutti
-     gli altri (vedi defaultsFor). */
   function fromSavedV2(parsed, def) {
-    var base = def || getDefaultState();
+    var base = def || getBaseState();
     var next = deepClone(base);
     next = Object.assign(next, parsed);
     next.version = 3;
@@ -235,6 +260,35 @@
     return next;
   }
 
+  function mergeImportedState(parsed) {
+    return fromSavedV2(parsed, getBaseState());
+  }
+
+  function tryLegacyMigration(id) {
+    if (id !== cfg.LEGACY_CHAR_ID) {
+      return null;
+    }
+
+    try {
+      var v2 = localStorage.getItem(cfg.LEGACY_STORAGE_KEY);
+      if (v2) {
+        var parsed = JSON.parse(v2);
+        if (parsed && (parsed.version === 2 || parsed.version === 3)) {
+          return fromSavedV2(parsed, getBaseState());
+        }
+      }
+    } catch (e) { /* ignore */ }
+
+    try {
+      var v1 = localStorage.getItem(cfg.LEGACY_STORAGE_KEY_V1);
+      if (v1) {
+        return migrateV1(JSON.parse(v1));
+      }
+    } catch (e) { /* ignore */ }
+
+    return null;
+  }
+
   function loadState() {
     var id = activeCharId();
     if (!id) {
@@ -247,51 +301,26 @@
       if (own) {
         var parsedOwn = JSON.parse(own);
         if (parsedOwn && (parsedOwn.version === 2 || parsedOwn.version === 3)) {
-          return fromSavedV2(parsedOwn, defaultsFor(id));
+          return fromSavedV2(parsedOwn, getBaseState());
         }
       }
     } catch (e) { /* ignore */ }
 
     if (isCharacterDeleted(id)) {
-      return defaultsFor(id);
+      return getBaseState();
     }
 
-    /* Migrazione dalle chiavi legacy: solo per il personaggio storico
-       (Tharion), solo quando non esiste ancora una chiave per-personaggio. */
-    if (id === DEFAULT_CHAR_ID) {
-      try {
-        var v2 = localStorage.getItem(cfg.STORAGE_KEY);
-        if (v2) {
-          var parsed = JSON.parse(v2);
-          if (parsed && (parsed.version === 2 || parsed.version === 3)) {
-            var migrated = fromSavedV2(parsed, getDefaultState());
-            saveState(migrated, true);
+    var legacy = tryLegacyMigration(id);
+    if (legacy) {
+      saveState(legacy, true);
 
-            return migrated;
-          }
-        }
-      } catch (e) { /* ignore */ }
-
-      try {
-        var v1 = localStorage.getItem(cfg.STORAGE_KEY_V1);
-        if (v1) {
-          var fromV1 = migrateV1(JSON.parse(v1));
-          saveState(fromV1, true);
-
-          return fromV1;
-        }
-      } catch (e) { /* ignore */ }
+      return legacy;
     }
 
-    // Nessuno stato salvato: la scheda storica parte dai suoi default, un
-    // personaggio qualsiasi (es. doc cloud non ancora sceso in locale) parte
-    // vuoto — mai dalla scheda di Tharion.
-    var next = defaultsFor(id);
-    try {
-      if (localStorage.getItem(cfg.INSPIRATION_KEY) === '1') {
-        next.inspiration = true;
-      }
-    } catch (e) { /* ignore */ }
+    var next = getBaseState();
+    if (readInspirationFlag()) {
+      next.inspiration = true;
+    }
 
     return next;
   }
@@ -347,27 +376,18 @@
     saveState(current);
   }
 
-  function resetState() {
-    state = getDefaultState();
-    saveState(state, true);
-  }
-
-  /* Eliminazione dalla dashboard: marca l'id, rimuove tutte le chiavi locali
-     (incluse le legacy di Tharion) e svuota la cache in RAM se era attivo. */
   function purgeCharacter(id) {
     markCharacterDeleted(id);
     try {
       localStorage.removeItem(charStateKey(id));
     } catch (e) { /* ignore */ }
-    if (id === DEFAULT_CHAR_ID) {
+    if (id === cfg.LEGACY_CHAR_ID) {
       try {
-        localStorage.removeItem(cfg.STORAGE_KEY);
-        localStorage.removeItem(cfg.STORAGE_KEY_V1);
+        localStorage.removeItem(cfg.LEGACY_STORAGE_KEY);
+        localStorage.removeItem(cfg.LEGACY_STORAGE_KEY_V1);
       } catch (e) { /* ignore */ }
     }
-    var explicit = localStorage.getItem(ACTIVE_CHAR_KEY);
-    var wasActive = explicit === id || (!explicit && id === DEFAULT_CHAR_ID);
-    if (wasActive) {
+    if (localStorage.getItem(ACTIVE_CHAR_KEY) === id) {
       try {
         localStorage.removeItem(ACTIVE_CHAR_KEY);
       } catch (e) { /* ignore */ }
@@ -379,11 +399,13 @@
     getState: getState,
     updateState: updateState,
     saveState: saveState,
-    resetState: resetState,
-    getDefaultState: getDefaultState,
+    getBaseState: getBaseState,
+    mergeImportedState: mergeImportedState,
     migrateV1: migrateV1,
     activeCharId: activeCharId,
     isCharacterDeleted: isCharacterDeleted,
-    purgeCharacter: purgeCharacter
+    purgeCharacter: purgeCharacter,
+    listCharactersForDashboard: listCharactersForDashboard,
+    dashboardItemFromCharacter: dashboardItemFromCharacter
   };
 })();

@@ -19,7 +19,6 @@ import {
 
 (function () {
   var config = window.FIREBASE_CONFIG;
-  var DEFAULT_CHAR_ID = 'tharion-velnar';
   var PUSH_DEBOUNCE_MS = 1500;
 
   function charId() {
@@ -27,11 +26,7 @@ import {
       return window.AppStorage.activeCharId();
     }
 
-    return localStorage.getItem('app-active-char') || DEFAULT_CHAR_ID;
-  }
-
-  function effectiveActiveId() {
-    return charId() || DEFAULT_CHAR_ID;
+    return localStorage.getItem('app-active-char');
   }
 
   function isDeletedCharacter(id) {
@@ -52,6 +47,15 @@ import {
   if (!config) {
     setAuthPhase('auth-in'); // cloud non configurato: app in solo-locale, niente gate
     document.body.classList.remove('login-not-ready');
+    setTimeout(function () {
+      if (window.AppDashboard && window.AppDashboard.bootShell) {
+        window.AppDashboard.bootShell();
+      }
+    }, 0);
+    window.AppCloud = {
+      enabled: false,
+      schedulePush: function () {}
+    };
 
     return;
   }
@@ -143,7 +147,7 @@ import {
     window.__applyingRemoteState = true; // evita il ri-timbro di lastModifiedMs
     try {
       window.AppStorage.saveState(
-        Object.assign(window.AppStorage.getDefaultState(), remoteState),
+        window.AppStorage.mergeImportedState(remoteState),
         true
       );
       rerenderAll();
@@ -295,66 +299,6 @@ import {
 
   /* ---------- dashboard multi-personaggio (Fase 2) ---------- */
 
-  function characterClassName(classId) {
-    var manual = window.MANUAL_55;
-    if (manual && manual.classes && manual.classes[classId]) {
-      return manual.classes[classId].name;
-    }
-
-    return classId || '';
-  }
-
-  function dashboardItemFromCharacter(ch, id) {
-    ch = ch || {};
-
-    return {
-      id: id,
-      name: ch.name || 'Senza nome',
-      className: characterClassName(ch.classId),
-      subclassName: ch.subclassName || '',
-      level: ch.level || 1,
-      speciesLabel: ch.speciesLabel || '',
-      portrait: ch.portrait || '',
-      avatar: ch.avatar || '✦'
-    };
-  }
-
-  function localDashboardItem() {
-    var id = charId();
-    if (!id || isDeletedCharacter(id)) {
-      return null;
-    }
-    var state = window.AppStorage.getState();
-
-    return dashboardItemFromCharacter(state.character, id);
-  }
-
-  /* Personaggi presenti solo in localStorage (es. creati offline o orfani dopo
-     sync parziale): vanno mostrati in dashboard così si possono eliminare. */
-  function localCharactersFromStorage() {
-    var found = [];
-    try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var key = localStorage.key(i);
-        if (!key || key.indexOf('char-') !== 0 || key.slice(-6) !== '-state') {
-          continue;
-        }
-        var id = key.slice(5, -6);
-        if (!id || isDeletedCharacter(id)) {
-          continue;
-        }
-        try {
-          var parsed = JSON.parse(localStorage.getItem(key));
-          if (parsed && parsed.character) {
-            found.push({ id: id, item: dashboardItemFromCharacter(parsed.character, id) });
-          }
-        } catch (e) { /* ignore */ }
-      }
-    } catch (e) { /* ignore */ }
-
-    return found;
-  }
-
   function loadDashboard() {
     if (!window.AppDashboard) {
       return;
@@ -366,44 +310,28 @@ import {
           return;
         }
         var data = d.data();
-        if (data && data.state) {
-          byId[d.id] = dashboardItemFromCharacter(data.state.character, d.id);
+        if (data && data.state && window.AppStorage.dashboardItemFromCharacter) {
+          byId[d.id] = window.AppStorage.dashboardItemFromCharacter(data.state.character, d.id);
         }
       });
-      localCharactersFromStorage().forEach(function (entry) {
-        if (!byId[entry.id]) {
-          byId[entry.id] = entry.item;
+      (window.AppStorage.listCharactersForDashboard() || []).forEach(function (item) {
+        if (!byId[item.id]) {
+          byId[item.id] = item;
         }
       });
       var items = Object.keys(byId).map(function (k) { return byId[k]; });
-      if (items.length === 0) {
-        var fallback = localDashboardItem();
-        if (fallback) {
-          items = [fallback];
-        }
-      }
       window.AppDashboard.render(items, onSelectCharacter);
     }).catch(function () {
-      var byId = {};
-      localCharactersFromStorage().forEach(function (entry) {
-        byId[entry.id] = entry.item;
-      });
-      var items = Object.keys(byId).map(function (k) { return byId[k]; });
-      if (items.length === 0) {
-        var fallback = localDashboardItem();
-        if (fallback) {
-          items = [fallback];
-        }
-      }
+      var items = window.AppStorage.listCharactersForDashboard() || [];
       window.AppDashboard.render(items, onSelectCharacter);
       window.AppDashboard.showError('Impossibile aggiornare la lista dal cloud');
     });
   }
 
   function onSelectCharacter(id) {
-    localStorage.setItem('app-active-char', id);
-    sessionStorage.setItem('app-skip-dashboard', '1');
-    location.reload(); // stato pulito: scelta deliberata
+    if (window.AppDashboard && window.AppDashboard.selectCharacter) {
+      window.AppDashboard.selectCharacter(id);
+    }
   }
 
   /* Crea un nuovo personaggio (dal wizard di creazione, js/create.js): salva
@@ -457,7 +385,7 @@ import {
      personaggio": la lista vuota resta comunque con lo slot "+ Nuovo
      personaggio" per ripartire. */
   function deleteCharacter(id) {
-    var wasActive = effectiveActiveId() === id;
+    var wasActive = charId() === id;
 
     if (window.AppStorage && window.AppStorage.purgeCharacter) {
       window.AppStorage.purgeCharacter(id);
@@ -495,14 +423,15 @@ import {
      (sessionStorage 'app-skip-dashboard', impostato da onSelectCharacter
      e dal reload di ritorno dal lucchetto). */
   function enterApp() {
+    setAuthPhase('auth-in');
     if (sessionStorage.getItem('app-skip-dashboard') === '1') {
       sessionStorage.removeItem('app-skip-dashboard');
-      document.body.classList.remove('in-dashboard');
-      setAuthPhase('auth-in');
+      if (charId()) {
+        document.body.classList.remove('in-dashboard');
 
-      return;
+        return;
+      }
     }
-    setAuthPhase('auth-in');
     document.body.classList.add('in-dashboard');
     loadDashboard();
   }
