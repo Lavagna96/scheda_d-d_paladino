@@ -41,12 +41,7 @@ window.APP_CONFIG = {
       weapon: { name: 'Spada lunga ✦ (magica)', die: '1d8', type: 'tagl.', mastery: 'Vex' },
       steedSlotLevel: 2,
       initiativeNote: 'vant. iniziativa',
-      modifiers: [
-        { source: 'Lama Vincolante — Ascesa (Liv. II)', target: 'attacco', value: 1 },
-        { source: 'Lama Vincolante — Ascesa (Liv. II)', target: 'danni', value: 1 },
-        { source: 'Lama Vincolante — Ascesa (Liv. II)', target: 'cd-inc', value: 1 },
-        { source: 'Lama Vincolante — Ascesa (Liv. II)', target: 'att-inc', value: 1 }
-      ],
+      modifiers: [],
       extraResources: [
         { key: 'shield', max: 1 }
       ],

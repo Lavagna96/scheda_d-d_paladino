@@ -233,20 +233,6 @@
     if (langEl) {
       langEl.textContent = (character.languages || []).length ? character.languages.join(', ') : '—';
     }
-
-    /* Card "Lama Vincolante": HTML statico pensato per Tharion, mai reso
-       condizionale — compariva per QUALUNQUE personaggio, anche uno senza
-       quell'oggetto (trovato testando il Druido). Visibile solo se il
-       personaggio ha davvero i modifiers della spada (character.modifiers,
-       source 'Lama Vincolante...'), stesso principio di hasSteed/grimoire
-       già usato per gli altri residui di Tharion (5.B.3). */
-    var swordCard = document.getElementById('lama-vincolante-card');
-    if (swordCard) {
-      var hasSword = (character.modifiers || []).some(function (m) {
-        return (m.source || '').indexOf('Lama Vincolante') === 0;
-      });
-      swordCard.classList.toggle('hidden', !hasSword);
-    }
   }
 
   window.AppTraits = {
