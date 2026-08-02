@@ -29,6 +29,18 @@ body {
   color: var(--text-primary);
   background: var(--bg-principal);
   -webkit-font-smoothing: antialiased;
+  /* App, non pagina web: niente selezione testo/lente d'ingrandimento/menu
+     "Copia" nativo di iOS, che scattava ovunque (liste, drag) confondendosi
+     coi gesti dell'app. Riabilitata solo dove serve scrivere (campi sotto). */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input, textarea, select, [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
 }
 
 button, a, input, textarea, select {
@@ -147,8 +159,6 @@ select option {
 [contenteditable="true"] {
   background: transparent;
   color: var(--text-primary);
-  -webkit-user-select: text;
-  user-select: text;
 }
 
 [contenteditable="true"]:empty::before,
