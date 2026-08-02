@@ -283,6 +283,9 @@
     var(--bg-card);
   border: 1px solid var(--border-gold);
   border-radius: var(--radius-lg);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 #custom-items-list .relic-acc.open .relic-acc-row {
@@ -655,6 +658,9 @@
 #custom-items-list .relic-card {
   cursor: default;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* ---------- bottone "+ Nuova Reliquia" (segnaposto tratteggiato cliccabile,
