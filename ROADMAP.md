@@ -181,6 +181,20 @@
   stesso account, e la verifica nella console Firebase che `manuals/5.5/feats`
   sia arrivato su Firestore (step 4.4 — il sync fallisce in silenzio se la
   regola non è deployata).
+- **2026-08-02** — Ripresa questa linea di lavoro (Step 3.9, "Estensione
+  degli effetti degli oggetti custom") dopo che una **sessione Cursor
+  parallela** ha fatto 9 commit il 2026-08-01 (`07bf5cc`→`045df8e`,
+  `origin/main` e sito live erano già allineati a `045df8e`/`?v=166`,
+  nessun problema di sync) mai registrati qui: editor reliquie ridisegnato
+  più volte, sacca dimensionale, armi/scudi custom equipaggiabili in
+  combattimento, riordino con drag, rimozione delle due reliquie storiche
+  hardcoded, e uno stato neutro multi-personaggio senza più Tharion di
+  default. Ora loggati in 2.6, 3.10 e "Bug risolti" **dai soli messaggi di
+  commit + verifica leggera a grep** (non con un harness completo come le
+  voci precedenti di 3.9): da riverificare più a fondo prima di fare
+  affidamento cieco su quei dettagli. Confermato con grep che Tranche 1/2
+  di 3.9 (testo libero, Velocità/Percezione passiva, Resistenze & Immunità,
+  Sensi) sono sopravvissute al redesign dell'editor.
 
 ---
 
@@ -335,6 +349,16 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
       cloud"): le regole Firestore devono permettere la lettura della
       collezione `users/{uid}/characters` (es. `match /users/{userId}/{document=**}`
       con `allow read, write: if request.auth.uid == userId`).
+- [x] 2.6 **Stato neutro multi-personaggio, senza Tharion di default** — FATTO
+      (2026-08-01, commit `045df8e`, sessione Cursor parallela — non verificato
+      da questa sessione, vedi nota in "Dove siamo"). Rimosso `DEFAULT_STATE`
+      (era Tharion cablato in `js/config.js`): i personaggi nuovi partono da
+      un `BASE_STATE` neutro in `js/storage.js`, con migrazione legacy
+      one-shot dalle vecchie chiavi `tharion-*` per chi le aveva già.
+      Ritratto e intestazione (nome/classe/livello) dinamici invece che
+      testo fisso; Grimorio esteso per trucchetti e risorse extra; import
+      JSON passa da `mergeImportedState`. Completa la visione originale
+      della Fase 2: davvero multi-personaggio, non più "Tharion + altri".
 
 ### Fase 3 — Modifica valori della scheda con persistenza
 *Il punto 3 della visione. Dipende dalla Fase 0.*
@@ -428,9 +452,12 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
       hanno avuto un secondo giro dopo un riferimento visivo mandato da
       Andrea (non copiato, solo composizione: cappuccio, drappeggio, fodera
       visibile, collare lavorato).
-- [ ] 3.9 **Estensione degli effetti che un oggetto custom può modificare**
-      — IN CORSO (avviato 2026-07-31, Tranche 1 fatta lo stesso giorno,
-      Tranche 2 non ancora iniziata). L'app non tira mai i dadi:
+- [x] 3.9 **Estensione degli effetti che un oggetto custom può modificare**
+      — Tranche 1 e 2 FATTE (avviato 2026-07-31, Tranche 1 lo stesso
+      giorno, Tranche 2 completata il 2026-08-02); resta solo la Tranche 3
+      "in sospeso" (3.9.c), che per sua natura potrebbe restare così a
+      lungo — vedi cosa contiene più sotto prima di considerare questo
+      punto "chiuso per sempre". L'app non tira mai i dadi:
       "vantaggio" è sempre e solo una nota testuale (già vero oggi per
       Scudo Magico: "Vantaggio ai tiri di iniziativa" è testo nella lista
       effetti, non un modificatore), non un calcolo — questo abbassa molto
@@ -457,7 +484,7 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
         "Vantaggio contro Spaventato, Prono, Spinto" e "Vantaggio ai tiri di
         iniziativa") — bullet indistinguibile da quelli delle due reliquie
         vere. Nessun errore console in nessuno stato provato.
-  - [ ] 3.9.b **Tranche 2 (media)**:
+  - [x] 3.9.b **Tranche 2 (media)** — completa (tutte e 3 le parti fatte):
     - [x] **Resistenze & Immunità con tag strutturati** — FATTO
           (2026-07-31, `?v=131`, scelta la variante **A** tra 3 alternative
           con preview — chip preimpostate — invece di tag libero o di un
@@ -479,10 +506,36 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
           dati di default: due oggetti sintonizzati mostrano i loro tag,
           un terzo oggetto con la stessa resistenza ma **non** sintonizzato
           resta escluso, come atteso. Nessun errore console.
-    - [ ] **Competenza extra concessa dall'oggetto** (abilità o TS) — non
-          ancora iniziata: tocca la logica di competenze in `stats.js`,
-          più delicata perché interagisce con le competenze di classe già
-          esistenti.
+    - [x] **Competenza extra concessa dall'oggetto** (abilità o TS) — FATTO
+          (2026-08-02, `?v=167`). Nuovi campi `item.profSkills`/
+          `item.profSaves` (array di id: gli stessi di
+          `window.AppEngine.SKILLS` per le abilità, FOR/DES/COS/INT/SAG/CAR
+          per i TS). In `engine.js`, nuova `itemGrantsProf(ch, field, id)`:
+          un OR calcolato al volo tra `ch.profSkills`/`ch.profSaves` (i
+          fatti base, classe/background/level-up, **mai toccati**) e gli
+          oggetti attivi — stesso criterio di attivazione già centralizzato
+          in `window.AppItems.itemEffectsActive` (con fallback se
+          `items.js` non è ancora caricato). Se l'oggetto viene rimosso o
+          dis-sintonizzato la competenza sparisce da sola, nessuno stato
+          duplicato da tenere sincronizzato. **Niente card nuova**: le
+          abilità/TS concessi compaiono semplicemente come "competenti"
+          nelle card Abilità/Tiri Salvezza già esistenti (pallino +
+          bonus), a differenza di resistenze/sensi che avevano bisogno di
+          una card dedicata. Editor: nuovo blocco progressivo "Competenze"
+          (coerente con `resistenze`/`immunità`/`sensi`/`usi`, stesso
+          menu "Altre caratteristiche" → aggiungi/rimuovi), due
+          multi-select dropdown (Abilità, Tiri Salvezza) via un nuovo
+          helper generico `buildIdLabelMultiSelect` (id salvato ≠ label
+          mostrata, serve perché qui — a differenza di resistenze/danni,
+          dove id e label coincidono — l'id deve combaciare con quello che
+          il motore si aspetta). Verificato con harness: un anello
+          sintonizzato che concede Arcano+TS Intelligenza li rende
+          davvero competenti (bonus di competenza incluso nel totale); lo
+          stesso anello non sintonizzato non concede nulla; le competenze
+          di classe/background restano intatte in entrambi i casi.
+          Editor verificato dal vivo: il blocco compare/scompare dal menu
+          "Altre caratteristiche", i due multi-select mostrano le abilità
+          vere. Nessun errore console.
     - [x] **Sensi strutturati** (Scurovisione N m, Vista Cieca...) — FATTO
           (2026-07-31, `?v=132`, fatta prima della competenza extra perché
           più semplice/meno rischiosa, stesso impianto delle chip appena
@@ -507,6 +560,40 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
         trigger narrativi condizionali ("quando colpisci un nemico
         Maledetto, danni extra") — probabilmente da lasciare per sempre
         solo testo descrittivo, non ha senso modellarli uno per uno.
+- [x] 3.10 **Editor reliquie ridisegnato, equip in combattimento, sacca
+      dimensionale, riordino drag** — FATTO (2026-08-01, commit da
+      `07bf5cc` a `3f6395b`, sessione Cursor parallela — **non verificato
+      da questa sessione**, vedi nota in "Dove siamo"). Grosso lavoro sul
+      sistema oggetti, sopra lo Step 3.9:
+      - Editor della scheda di creazione/modifica **ridisegnato più
+        volte** (prima un layout a scorrimento orizzontale "B", poi la
+        versione finale "secondo mockup"): icona tipo centrata, campi in
+        colonna, toggle sintonizzazione, pannello effetti con aggiunta
+        progressiva, footer fisso Salva/Elimina, corpo scrollabile.
+      - **Sacca dimensionale**: nuovo tipo di oggetto equipaggiabile in
+        Tesoreria, contenitore per monete/bottino party (fino a 250 kg)
+        separato dallo zaino personale (7,5 kg fissi quando equipaggiata).
+      - **Armi e scudi custom equipaggiabili in combattimento** (⚔/🛡):
+        una reliquia sintonizzata di tipo spada/scudo si impugna e
+        aggiorna davvero la riga Attacco o la CA nel motore, con profilo
+        arma dal manuale; resta grigia se non impugnata/equipaggiata.
+      - **Riordino con drag**: maniglia ≡, ghost ancorato alla riga al
+        long press, slot invisibile a tutta altezza (le righe si
+        scavalcano senza sovrapporsi), scroll automatico ai bordi su
+        mobile.
+      - **Rimosse le due reliquie storiche hardcoded** (Lama Vincolante,
+        Scudo Magico) da HTML e Tratti: il sistema di creazione oggetti
+        (Step 3.5-3.9) è ora l'unica fonte di reliquie, nessun bonus più
+        cablato nei default.
+      - Verificato con grep mirati che le parti della Tranche 1/2 di 3.9
+        (testo libero, Velocità/Percezione passiva, Resistenze &
+        Immunità, Sensi) **sono ancora presenti nel codice** dopo il
+        redesign dell'editor (`buildResistancesSection`/
+        `buildSensesSection`/`isTextEffect` esistono ancora in
+        `js/items.js`, la griglia di chip è diventata un
+        `buildMultiSelectDropdown`) — ma non riverificate end-to-end con
+        un harness in questa sessione: da controllare prima del prossimo
+        deploy se si tocca ancora quell'area.
 
 ### Fase 4 — Level up Paladino
 *Il punto 4 della visione, la fase più grande. Dipende dalle Fasi 0 e 3.*
@@ -2462,6 +2549,14 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
   Paladino di prova con `subclassId: 'gloria'` (clone dello stato via
   `AppEngine.derive`, senza toccare i dati reali) ha `sacredWeaponBonus: 0` e
   la nota sparisce. Console pulita.
+
+- 2026-08-01 — **Swipe per eliminare personaggio inaffidabile, Tharion
+  risorgeva dopo l'eliminazione.** Commit `f1645d2`, sessione Cursor
+  parallela (non verificato da questa sessione). Swipe oltre ~130px ora
+  elimina senza bisogno di un tap extra (stile Gmail); impedito che
+  `tharion-velnar` ricomparisse dopo l'eliminazione con purge delle chiavi
+  legacy, una lista `app-deleted-characters` e il blocco del push al cloud
+  per personaggi cancellati.
 
 ## Decisioni prese
 

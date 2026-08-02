@@ -101,6 +101,31 @@
     return (n >= 0 ? '+' : '−') + Math.abs(n);
   }
 
+  /* Competenza extra concessa da un oggetto custom (Step 3.9.b, terza
+     parte): stesso principio di modSum, un oggetto conta solo se attivo
+     (itemEffectsActive di js/items.js, o il fallback se items.js non è
+     ancora caricato). MAI scritto dentro ch.profSkills/ch.profSaves — quei
+     due restano solo i fatti base (classe/background/level-up), la
+     competenza da oggetto è un OR calcolato qui, sparisce da sola se
+     l'oggetto viene rimosso o dis-sintonizzato. `field` è 'profSkills' o
+     'profSaves', `id` l'id abilità o la sigla caratteristica (FOR/DES/...). */
+  function itemGrantsProf(ch, field, id) {
+    var granted = false;
+    (ch.items || []).forEach(function (item) {
+      if (granted) {
+        return;
+      }
+      var active = window.AppItems && window.AppItems.itemEffectsActive
+        ? window.AppItems.itemEffectsActive(item)
+        : (!item.requiresAttunement || item.attuned);
+      if (active && (item[field] || []).indexOf(id) !== -1) {
+        granted = true;
+      }
+    });
+
+    return granted;
+  }
+
   function modSum(ch, target) {
     var total = 0;
     (ch.modifiers || []).forEach(function (m) {
@@ -187,7 +212,7 @@
     });
 
     var saves = ABILITY_ORDER.map(function (k) {
-      var prof = (ch.profSaves || []).indexOf(k) !== -1;
+      var prof = (ch.profSaves || []).indexOf(k) !== -1 || itemGrantsProf(ch, 'profSaves', k);
       var total = mods[k] + (prof ? pb : 0) + auraBonus + modSum(ch, 'ts');
 
       return { key: k, label: ABILITY_LABELS[k], prof: prof, total: total, text: fmt(total) };
@@ -195,7 +220,7 @@
 
     var skills = {};
     SKILLS.forEach(function (sk) {
-      var prof = (ch.profSkills || []).indexOf(sk.id) !== -1;
+      var prof = (ch.profSkills || []).indexOf(sk.id) !== -1 || itemGrantsProf(ch, 'profSkills', sk.id);
       // Competenza (Ladro, dal 1° livello): raddoppia il bonus di competenza
       // su un'abilità già competente — non si applica da sola senza prof.
       var expertise = prof && (ch.expertiseSkills || []).indexOf(sk.id) !== -1;

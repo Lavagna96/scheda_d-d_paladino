@@ -68,6 +68,24 @@
     return found || type;
   }
 
+  /* Competenza extra concessa dall'oggetto (Step 3.9.b, terza parte): stessi
+     id di ABILITY_ORDER/ABILITY_LABELS in js/engine.js per i Tiri Salvezza
+     (FOR/DES/COS/INT/SAG/CAR), stessi id di window.AppEngine.SKILLS per le
+     abilità — items.js li legge da lì invece di duplicarli, sono 18 e
+     possono cambiare. Un oggetto concede solo la competenza semplice, mai
+     l'Espero (troppo di nicchia per un picker generico). */
+  var PROF_SAVE_OPTIONS = [
+    { id: 'FOR', label: 'Forza' }, { id: 'DES', label: 'Destrezza' },
+    { id: 'COS', label: 'Costituzione' }, { id: 'INT', label: 'Intelligenza' },
+    { id: 'SAG', label: 'Saggezza' }, { id: 'CAR', label: 'Carisma' }
+  ];
+
+  function profSkillOptions() {
+    return (window.AppEngine.SKILLS || []).map(function (sk) {
+      return { id: sk.id, label: sk.label };
+    });
+  }
+
   /* Le 5 rarità D&D usate per il badge .relic-rarity (stesso componente delle
      due reliquie storiche: qui solo le varianti aggiuntive per gli oggetti
      creati dall'utente, vedi css/components/treasury.css). */
@@ -148,6 +166,14 @@
 
   function itemSensesOf(item) {
     return item.senses || [];
+  }
+
+  function itemProfSkillsOf(item) {
+    return item.profSkills || [];
+  }
+
+  function itemProfSavesOf(item) {
+    return item.profSaves || [];
   }
 
   function itemKindOf(item) {
@@ -1291,7 +1317,8 @@
     { id: 'resistances', block: 'resistances', label: 'Resistenze', hint: 'Riduce un tipo di danno', singleton: true },
     { id: 'immunities', block: 'immunities', label: 'Immunità', hint: 'Ignora danno o condizione', singleton: true },
     { id: 'senses', block: 'senses', label: 'Sensi', hint: 'Scurovisione, vista cieca…', singleton: true },
-    { id: 'uses', block: 'uses', label: 'Usi al giorno', hint: 'Pozioni e cariche giornaliere', singleton: true }
+    { id: 'uses', block: 'uses', label: 'Usi al giorno', hint: 'Pozioni e cariche giornaliere', singleton: true },
+    { id: 'proficiencies', block: 'proficiencies', label: 'Competenze', hint: 'Abilità o Tiri Salvezza extra', singleton: true }
   ];
 
   function initEnabledFeatureBlocks(draft) {
@@ -1307,6 +1334,9 @@
     }
     if (draft.usesMax > 0) {
       blocks.uses = true;
+    }
+    if (draft.profSkills.length > 0 || draft.profSaves.length > 0) {
+      blocks.proficiencies = true;
     }
 
     return blocks;
@@ -1373,6 +1403,18 @@
       useShell.body.appendChild(buildUsesStepper(draft));
       container.appendChild(useShell.block);
     }
+
+    if (enabledBlocks.proficiencies) {
+      var profShell = buildFeatureBlockShell('Competenze', function () {
+        draft.profSkills = [];
+        draft.profSaves = [];
+        delete enabledBlocks.proficiencies;
+        rerender();
+      });
+      profShell.body.appendChild(buildIdLabelMultiSelect('Abilità', profSkillOptions(), draft.profSkills));
+      profShell.body.appendChild(buildIdLabelMultiSelect('Tiri Salvezza', PROF_SAVE_OPTIONS, draft.profSaves));
+      container.appendChild(profShell.block);
+    }
   }
 
   function availableFeatureOptions(enabledBlocks, filterIds) {
@@ -1406,6 +1448,8 @@
       if (draft.usesMax <= 0) {
         draft.usesMax = 1;
       }
+    } else if (featureId === 'proficiencies') {
+      enabledBlocks.proficiencies = true;
     }
   }
 
@@ -1720,6 +1764,57 @@
       });
       row.appendChild(cb);
       row.appendChild(document.createTextNode(name));
+      panel.appendChild(row);
+    });
+
+    refreshTrigger();
+    bindMselPanel(panel, trigger);
+    dd.appendChild(trigger);
+    dd.appendChild(panel);
+    wrap.appendChild(dd);
+
+    return wrap;
+  }
+
+  /* Stesso identico widget di buildMultiSelectDropdown, ma per opzioni
+     {id, label}: qui la lista visibile (label) e il valore salvato (id)
+     sono diversi, serve per abilità/TS dove l'id è quello che engine.js si
+     aspetta di trovare in ch.profSkills/ch.profSaves. */
+  function buildIdLabelMultiSelect(labelText, options, selectedArr) {
+    var wrap = el('div', 'edit-field item-msel-field');
+    wrap.appendChild(el('span', 'edit-label', labelText));
+    var dd = el('div', 'item-msel');
+    var trigger = el('button', 'item-msel-trigger');
+    trigger.type = 'button';
+    var chev = el('span', 'item-msel-chev', '▾');
+    var panel = el('div', 'item-msel-panel hidden');
+
+    function refreshTrigger() {
+      var labels = options.filter(function (o) {
+        return selectedArr.indexOf(o.id) !== -1;
+      }).map(function (o) {
+        return o.label;
+      });
+      trigger.textContent = mselSummary(labels, 'Nessuna');
+      trigger.appendChild(chev);
+    }
+
+    options.forEach(function (opt) {
+      var row = el('label', 'item-msel-opt');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = selectedArr.indexOf(opt.id) !== -1;
+      cb.addEventListener('change', function () {
+        var idx = selectedArr.indexOf(opt.id);
+        if (cb.checked && idx === -1) {
+          selectedArr.push(opt.id);
+        } else if (!cb.checked && idx !== -1) {
+          selectedArr.splice(idx, 1);
+        }
+        refreshTrigger();
+      });
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(opt.label));
       panel.appendChild(row);
     });
 
@@ -2212,6 +2307,8 @@
       senses: itemSensesOf(existingItem).map(function (s) {
         return { type: s.type, rangeM: s.rangeM };
       }),
+      profSkills: itemProfSkillsOf(existingItem).slice(),
+      profSaves: itemProfSavesOf(existingItem).slice(),
       kind: itemKindOf(existingItem) || (itemArtOf(existingItem).type === 'preset' && itemArtOf(existingItem).value === 'bag'
         ? 'dimensional-bag' : (isWeaponItem(existingItem) ? 'weapon' : (isShieldItem(existingItem) ? 'shield' : null))),
       equipped: itemEquippedOf(existingItem),
@@ -2220,6 +2317,7 @@
     } : {
       id: null, name: '', desc: '', art: { type: 'preset', value: 'ring' }, rarity: 'non-comune',
       effects: [], usesMax: 0, requiresAttunement: false, resistances: [], immunities: [], senses: [],
+      profSkills: [], profSaves: [],
       kind: null, equipped: false, weaponProfile: null, shieldProfile: null
     };
 
@@ -2363,6 +2461,8 @@
           resistances: draft.resistances,
           immunities: draft.immunities,
           senses: draft.senses,
+          profSkills: draft.profSkills,
+          profSaves: draft.profSaves,
           kind: draft.kind || null,
           weaponProfile: weaponProfile,
           shieldProfile: shieldProfile
