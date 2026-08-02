@@ -76,6 +76,28 @@
     return ids.filter(function (id, i) { return ids.indexOf(id) === i; });
   }
 
+  /* Stessa somma di getFixedIds() ma SENZA grim.cantrips: serve al picker
+     "tutte le classi" (Step 3.11) per distinguere i due lucchetti diversi —
+     uno strutturale (arrivano dalla classe/sottoclasse/un talento, non si
+     possono togliere da qui) e uno che l'utente ha aggiunto liberamente
+     (in grim.cantrips, quindi RIMOVIBILE anche se conta come "fisso" agli
+     effetti del motore). Se qui usassi getFixedIds() gli incantesimi già
+     aggiunti liberamente diventerebbero permanenti per errore. */
+  function getLockedIds() {
+    var ch = character();
+    var klass = getManualClass();
+    if (!klass) {
+      return [];
+    }
+    var sub = (klass.subclasses || {})[ch.subclassId] || null;
+    var grim = window.AppStorage.getState().grimoire || {};
+    var ids = spellsFromTable(klass.spellsByLevel, ch.level)
+      .concat(spellsFromTable(sub && sub.spellsByLevel, ch.level))
+      .concat(grim.always || []);
+
+    return ids.filter(function (id, i) { return ids.indexOf(id) === i; });
+  }
+
   function getPreparedIds() {
     var state = window.AppStorage.getState();
 
@@ -364,12 +386,16 @@
       openDetail(spell);
     });
 
-    /* tocco sul quadratino = prepara/rimuovi */
+    /* tocco sul quadratino = prepara/rimuovi (o l'azione custom di
+       opts.onToggle/opts.onAfterToggle — vedi renderFreeSpellsList, che
+       riusa questa stessa riga per il picker "tutte le classi" invece del
+       glossario della propria classe). */
     var check = row.querySelector('button.gloss-check');
     if (check) {
       check.addEventListener('click', function (e) {
         e.stopPropagation();
-        if (!togglePrepared(spell.id)) {
+        var toggleFn = opts.onToggle || togglePrepared;
+        if (!toggleFn(spell.id)) {
           var cnt = document.getElementById('gloss-count');
           if (cnt) {
             cnt.classList.remove('shake');
@@ -379,9 +405,13 @@
 
           return;
         }
-        renderGlossList();
-        renderGlossCount();
-        render(); // grimorio subito aggiornato dietro al glossario
+        if (opts.onAfterToggle) {
+          opts.onAfterToggle();
+        } else {
+          renderGlossList();
+          renderGlossCount();
+        }
+        render(); // grimorio subito aggiornato dietro al pannello
       });
     }
 
@@ -517,6 +547,128 @@
     }
   }
 
+  /* ---------- incantesimi liberi, qualunque classe (Step 3.11) ----------
+     Stesso identico stile del Glossario (spunte) unito ai chip di classe
+     del Manuale: si sceglie una classe dai chip, si spuntano/tolgono i
+     suoi incantesimi (trucchetti compresi) senza nessun limite — vanno in
+     grim.cantrips (nome storico, vedi commento su getFixedIds). Sostituisce
+     il vecchio editor "trucchetti" di js/grimorio-advanced.js, che ora
+     gestisce solo le risorse personalizzate (link in fondo a questo
+     pannello). */
+  var freeClassId = null;
+
+  /* Un incantesimo risulta "aggiunto" qui se sta in grim.cantrips (extra
+     senza tetto) O in grim.prepared (scelto col vecchio Glossario, dentro
+     al tetto della classe): a Andrea serve vedere qui ANCHE quello che
+     aveva già scelto prima, altrimenti sembra sparito. */
+  function isFreeSpell(id) {
+    var grim = window.AppStorage.getState().grimoire || {};
+
+    return (grim.cantrips || []).indexOf(id) !== -1 || (grim.prepared || []).indexOf(id) !== -1;
+  }
+
+  function toggleFreeSpell(id) {
+    var state = window.AppStorage.getState();
+    state.grimoire = state.grimoire || { prepared: [], cantrips: [], always: [] };
+    state.grimoire.cantrips = state.grimoire.cantrips || [];
+    state.grimoire.prepared = state.grimoire.prepared || [];
+    var inCantrips = state.grimoire.cantrips.indexOf(id) >= 0;
+    var inPrepared = state.grimoire.prepared.indexOf(id) >= 0;
+    if (inCantrips || inPrepared) {
+      // Si toglie da ENTRAMBI: può essere finito nell'uno o nell'altro a
+      // seconda di dove è stato scelto la prima volta, l'utente vede un
+      // solo quadratino e si aspetta che togliendolo sparisca e basta.
+      if (inCantrips) {
+        state.grimoire.cantrips.splice(state.grimoire.cantrips.indexOf(id), 1);
+      }
+      if (inPrepared) {
+        state.grimoire.prepared.splice(state.grimoire.prepared.indexOf(id), 1);
+      }
+    } else {
+      // Aggiunta nuova: sempre in cantrips (nessun tetto), mai in prepared
+      // (che resta il bersaglio del vecchio Glossario/tetto di classe).
+      state.grimoire.cantrips.push(id);
+    }
+    window.AppStorage.saveState(state);
+
+    return true; // nessun tetto: sempre permesso, a differenza di togglePrepared
+  }
+
+  function renderFreeSpellsList() {
+    var list = document.getElementById('free-spells-list');
+    var chips = document.getElementById('free-spells-classes');
+    var manual = window.MANUAL_55;
+    if (!list || !manual) {
+      return;
+    }
+    if (!freeClassId) {
+      freeClassId = character().classId;
+    }
+    if (chips) {
+      chips.innerHTML = '';
+      Object.keys(manual.classes).forEach(function (classId) {
+        if (getClassSpells(classId).length === 0) {
+          return; // classe senza incantesimi caricati: niente chip
+        }
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'manual-chip' + (classId === freeClassId ? ' active' : '');
+        chip.textContent = manual.classes[classId].name;
+        chip.addEventListener('click', function () {
+          freeClassId = classId;
+          renderFreeSpellsList();
+        });
+        chips.appendChild(chip);
+      });
+      var active = chips.querySelector('.manual-chip.active');
+      if (active) {
+        chips.scrollLeft = Math.max(0, active.offsetLeft - chips.clientWidth / 2 + active.offsetWidth / 2);
+      }
+    }
+    list.innerHTML = '';
+    var locked = getLockedIds();
+    var spells = getClassSpells(freeClassId);
+    var levels = [];
+    spells.forEach(function (s) {
+      if (levels.indexOf(s.level) === -1) {
+        levels.push(s.level);
+      }
+    });
+    levels.sort(function (a, b) { return a - b; });
+    levels.forEach(function (lvl) {
+      var head = document.createElement('div');
+      head.className = 'gloss-sec';
+      head.textContent = lvl === 0 ? 'Trucchetti' : lvl + '° livello';
+      list.appendChild(head);
+      spells.filter(function (s) { return s.level === lvl; }).forEach(function (spell) {
+        list.appendChild(spellRow(spell, {
+          mode: 'pick',
+          fixed: locked.indexOf(spell.id) >= 0,
+          prepared: isFreeSpell(spell.id),
+          onToggle: toggleFreeSpell,
+          onAfterToggle: renderFreeSpellsList
+        }));
+      });
+    });
+  }
+
+  function openFreeSpells() {
+    var modal = document.getElementById('free-spells-modal');
+    if (!modal) {
+      return;
+    }
+    freeClassId = character().classId;
+    renderFreeSpellsList();
+    modal.classList.remove('hidden');
+  }
+
+  function closeFreeSpells() {
+    var modal = document.getElementById('free-spells-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+
   function bindModals() {
     var glossOpen = document.getElementById('grim-gloss-open');
     if (glossOpen) {
@@ -529,6 +681,26 @@
     var manualClose = document.getElementById('manual-close');
     if (manualClose) {
       manualClose.addEventListener('click', closeManual);
+    }
+    var freeClose = document.getElementById('free-spells-close');
+    if (freeClose) {
+      freeClose.addEventListener('click', closeFreeSpells);
+    }
+    // La matitina del Grimorio apre il picker "tutte le classi" (era
+    // js/grimorio-advanced.js, che ora gestisce solo le risorse
+    // personalizzate — raggiungibili dal link in fondo a questo pannello).
+    var pencilBtn = document.getElementById('grim-advanced-btn');
+    if (pencilBtn) {
+      pencilBtn.addEventListener('click', openFreeSpells);
+    }
+    var resourcesLink = document.getElementById('free-spells-resources-link');
+    if (resourcesLink) {
+      resourcesLink.addEventListener('click', function () {
+        closeFreeSpells();
+        if (window.AppGrimorioAdvanced && window.AppGrimorioAdvanced.open) {
+          window.AppGrimorioAdvanced.open();
+        }
+      });
     }
   }
 

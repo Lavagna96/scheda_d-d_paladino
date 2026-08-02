@@ -594,6 +594,53 @@ modifica al Carisma andrebbe propagata a mano in decine di stringhe.
         `buildMultiSelectDropdown`) — ma non riverificate end-to-end con
         un harness in questa sessione: da controllare prima del prossimo
         deploy se si tocca ancora quell'area.
+- [x] 3.11 **"Grimorio avanzato" rifatto: picker incantesimi di qualunque
+      classe, stesso stile del Glossario** — FATTO (2026-08-02, `?v=169`).
+      Segnalato da Andrea: il vecchio pannello dietro la matitina del
+      Grimorio (solo trucchetti + risorse, vedi 3.5/step storico) non era
+      chiaro da usare e comunque limitato ai soli trucchetti — voleva poter
+      aggiungere/togliere incantesimi di **qualunque livello e classe**,
+      con lo stile del Glossario. Soluzione: **nessuna UI nuova da
+      disegnare**, ricombinati due pattern già esistenti e collaudati in
+      `js/grimorio.js` — le spunte "pick" del Glossario (`spellRow`,
+      generalizzata con `opts.onToggle`/`opts.onAfterToggle` per poterla
+      riusare fuori dal Glossario senza toccarne il comportamento
+      originale) + i chip di classe del Manuale (`renderManualList`).
+      Nuovo modal `#free-spells-modal` (stesse classi CSS `.gloss-modal`/
+      `.gloss-list` di Glossario e Manuale, zero CSS nuovo per la lista):
+      chip di una delle 8 classi con incantesimi caricati, righe con
+      spunta per aggiungere/togliere senza nessun tetto (a differenza del
+      Glossario, che rispetta il numero di preparati della classe).
+      Scritti in `grim.cantrips` (nome rimasto per compatibilità con i
+      dati già salvati — concettualmente non sono più "solo trucchetti",
+      `getFixedIds()` li concatena già senza filtrare per livello, zero
+      modifiche lì necessarie). Nuovo `getLockedIds()`: distingue gli
+      incantesimi davvero bloccati (da classe/sottoclasse/talento, ★ non
+      rimovibile) da quelli aggiunti liberamente (rimovibili anche se
+      "fissi" agli effetti del motore). **`js/grimorio-advanced.js`
+      ridotto alle sole risorse personalizzate** (rinominato "Risorse
+      personalizzate", raggiungibile da un link in fondo al nuovo picker
+      — non più dalla matitina, che ora apre sempre il picker incantesimi)
+      — il bug `keyInput` di 3.9/Bug risolti restava lì, ancora corretto.
+      Verificato con harness sul markup reale: 8 chip di classe, passaggio
+      a Mago mostra i suoi incantesimi, un trucchetto di Mago ("Guardia
+      della Lama") si aggiunge su un personaggio Paladino, resta spuntato
+      dopo chiudi/riapri, compare davvero tra le card del Grimorio del
+      Paladino; il link risorse apre il pannello giusto col titolo nuovo,
+      "+ Nuova risorsa" ancora senza crash. Nessun errore console.
+      **Corretto subito dopo** (stesso giorno, `?v=170`): Andrea ha
+      segnalato che gli incantesimi già scelti in `grim.prepared` (col
+      vecchio Glossario, dentro al tetto della classe) non comparivano
+      spuntati nel nuovo picker — sembravano spariti. `isFreeSpell`/
+      `toggleFreeSpell` ora controllano/toccano ANCHE `grim.prepared`, non
+      solo `grim.cantrips`: un incantesimo scelto in un modo o nell'altro
+      compare comunque spuntato qui, e togliendolo sparisce da qualunque
+      dei due array si trovasse. Le aggiunte nuove vanno sempre in
+      `cantrips` (nessun tetto); `prepared` resta il bersaglio del solo
+      Glossario storico. Verificato con harness: uno Benedizione già in
+      `grim.prepared` risulta spuntato nel picker; togliendolo si svuotano
+      sia `prepared` che `cantrips`; rimettendolo va in `cantrips`. Nessun
+      errore console.
 
 ### Fase 4 — Level up Paladino
 *Il punto 4 della visione, la fase più grande. Dipende dalle Fasi 0 e 3.*
@@ -2557,6 +2604,30 @@ lavoro su altro, così non si perde. Non sono bug urgenti: sono pezzi mancanti.*
   `tharion-velnar` ricomparisse dopo l'eliminazione con purge delle chiavi
   legacy, una lista `app-deleted-characters` e il blocco del push al cloud
   per personaggi cancellati.
+
+- 2026-08-02 — **"Grimorio avanzato" (matitina su Grimorio) crashava non
+  appena c'era almeno una risorsa custom.** Segnalato da Andrea: dalla
+  matitina doveva poter aggiungere/togliere liberamente trucchetti anche
+  di classi diverse dalla propria, ma "non funziona". Causa: in
+  `js/grimorio-advanced.js`, `buildResourceEditor()` usava `keyInput.type
+  = 'text'` senza mai averlo dichiarato (`var keyInput =
+  document.createElement('input')` mancante) — un `ReferenceError`
+  sincrono che interrompeva subito `openAdvanced()`, quindi bastava un
+  personaggio con una risorsa extra già salvata, o anche un solo click su
+  "+ Nuova risorsa", per rompere l'intero pannello (trucchetti inclusi,
+  anche se il bug tecnico stava nella sezione risorse). La libertà di
+  scegliere trucchetti fuori dalla propria classe era già implementata
+  correttamente (`allCantripSpells()` non filtra per classe,
+  `getFixedIds()` in `js/grimorio.js` concatena `grimoire.cantrips` senza
+  controlli) — il problema era solo il crash che impediva di arrivare al
+  Salva.
+  **Fix**: aggiunta la dichiarazione mancante. Verificato con harness che
+  carica l'app reale con il markup vero del Grimorio: "+ Nuova risorsa"
+  non crasha più; un trucchetto di un'altra classe (testato con "Guardia
+  della Lama", non-Paladino, su un personaggio Paladino) si seleziona, si
+  salva in `state.grimoire.cantrips` e compare davvero nella tab
+  Trucchetti insieme agli incantesimi fissi della classe. Nessun errore
+  console. Cache busting `?v=168`.
 
 ## Decisioni prese
 

@@ -374,6 +374,24 @@
   overscroll-behavior: contain;
 }
 
+/* Link secondario in fondo al picker "tutte le classi" (Step 3.11), verso
+   il pannello delle risorse personalizzate — resta fuori da .gloss-list
+   così non scorre via insieme agli incantesimi. */
+.gloss-foot-link {
+  flex: none;
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border: none;
+  border-top: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--accent-gold);
+  font-family: var(--font-body);
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+}
+
 .gloss-sec {
   font-family: var(--font-title);
   font-size: 11px;

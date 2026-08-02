@@ -1,8 +1,13 @@
 (function () {
   /*
-   * Grimorio avanzato: trucchetti liberi e risorse custom (extraResources).
-   * Per personaggi nati prima del wizard o con regole di casa — nessun vincolo
-   * di classe/background.
+   * Risorse personalizzate (extraResources): per personaggi nati prima del
+   * wizard o con regole di casa — nessun vincolo di classe/background.
+   *
+   * Dal redesign 3.11 questo file gestisce SOLO le risorse: la scelta di
+   * incantesimi liberi (prima "trucchetti", qui sotto) è passata al picker
+   * "tutte le classi" in js/grimorio.js (stesso stile del Glossario, chip
+   * di classe come il Manuale), raggiungibile dalla matitina del Grimorio.
+   * Questo pannello resta raggiungibile dal link in fondo a quel picker.
    */
 
   var RESET_OPTIONS = [
@@ -23,26 +28,6 @@
     }
 
     return node;
-  }
-
-  function allCantripSpells() {
-    var manual = window.MANUAL_55;
-    if (!manual || !manual.spells) {
-      return [];
-    }
-
-    return manual.spells.filter(function (s) { return s.level === 0; })
-      .sort(function (a, b) { return a.name.localeCompare(b.name, 'it'); });
-  }
-
-  function spellLabel(id) {
-    var manual = window.MANUAL_55;
-    if (!manual || !manual.spells) {
-      return id;
-    }
-    var found = manual.spells.filter(function (s) { return s.id === id; })[0];
-
-    return found ? found.name : id;
   }
 
   function openSheet(title) {
@@ -81,99 +66,6 @@
     }
   }
 
-  function buildCantripSection(draft) {
-    bodyEl.appendChild(el('div', 'edit-section-label', 'Trucchetti'));
-    bodyEl.appendChild(el('p', 'note', 'Dal manuale o id personalizzato — senza limiti di classe.'));
-
-    var chipRow = el('div', 'chip-row');
-    var controls = {};
-
-    function refreshCantripChips() {
-      Object.keys(controls).forEach(function (id) {
-        controls[id].setOn(draft.cantrips.indexOf(id) >= 0);
-      });
-    }
-
-    function toggleCantrip(id) {
-      var idx = draft.cantrips.indexOf(id);
-      if (idx >= 0) {
-        draft.cantrips.splice(idx, 1);
-      } else {
-        draft.cantrips.push(id);
-      }
-      refreshCantripChips();
-      renderCustomCantripList(draft, customList);
-    }
-
-    allCantripSpells().forEach(function (spell) {
-      var chip = el('button', 'chip', spell.name);
-      chip.type = 'button';
-      chip.addEventListener('click', function () { toggleCantrip(spell.id); });
-      chipRow.appendChild(chip);
-      controls[spell.id] = {
-        setOn: function (on) { chip.classList.toggle('on', on); }
-      };
-    });
-    bodyEl.appendChild(chipRow);
-
-    var customList = el('div', 'grim-custom-cantrips');
-    bodyEl.appendChild(customList);
-    renderCustomCantripList(draft, customList, toggleCantrip);
-
-    var addRow = el('div', 'edit-field');
-    var customInput = document.createElement('input');
-    customInput.type = 'text';
-    customInput.className = 'edit-input';
-    customInput.placeholder = 'Id trucchetto libero (es. mio-trucchetto)';
-    addRow.appendChild(el('label', 'edit-label', 'Aggiungi id personalizzato'));
-    addRow.appendChild(customInput);
-    var addBtn = el('button', 'chip', '+ Aggiungi');
-    addBtn.type = 'button';
-    addBtn.addEventListener('click', function () {
-      var id = (customInput.value || '').trim().toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
-      if (!id || draft.cantrips.indexOf(id) >= 0) {
-        return;
-      }
-      draft.cantrips.push(id);
-      customInput.value = '';
-      refreshCantripChips();
-      renderCustomCantripList(draft, customList, toggleCantrip);
-    });
-    addRow.appendChild(addBtn);
-    bodyEl.appendChild(addRow);
-
-    refreshCantripChips();
-  }
-
-  function renderCustomCantripList(draft, container, toggleFn) {
-    container.innerHTML = '';
-    var customIds = draft.cantrips.filter(function (id) {
-      return !allCantripSpells().some(function (s) { return s.id === id; });
-    });
-    if (!customIds.length) {
-      return;
-    }
-    container.appendChild(el('div', 'edit-section-label', 'Id personalizzati'));
-    customIds.forEach(function (id) {
-      var row = el('div', 'edit-stat-row');
-      row.appendChild(el('span', 'edit-stat-label', spellLabel(id)));
-      var rm = el('button', 'stepper-btn minus', '✕');
-      rm.type = 'button';
-      rm.setAttribute('aria-label', 'Rimuovi ' + id);
-      rm.addEventListener('click', function () {
-        var idx = draft.cantrips.indexOf(id);
-        if (idx >= 0) {
-          draft.cantrips.splice(idx, 1);
-        }
-        renderCustomCantripList(draft, container, toggleFn);
-      });
-      row.appendChild(rm);
-      container.appendChild(row);
-    });
-  }
-
   function newResourceDraft() {
     return { key: '', name: '', max: 1, ctx: '', resetOn: 'long' };
   }
@@ -184,6 +76,7 @@
 
     var keyField = el('div', 'edit-field');
     keyField.appendChild(el('label', 'edit-label', 'Chiave'));
+    var keyInput = document.createElement('input');
     keyInput.type = 'text';
     keyInput.className = 'edit-input';
     keyInput.value = resource.key || '';
@@ -269,7 +162,6 @@
   }
 
   function buildResourcesSection(draft) {
-    bodyEl.appendChild(el('div', 'edit-section-label', 'Risorse personalizzate'));
     bodyEl.appendChild(el('p', 'note', 'Appaiono nella tab Risorse (es. Scudo magico, oggetti con usi).'));
 
     var resourcesHost = el('div', 'grim-resources-list');
@@ -295,9 +187,7 @@
 
   function openAdvanced() {
     var state = window.AppStorage.getState();
-    var grim = state.grimoire || {};
     var draft = {
-      cantrips: (grim.cantrips || []).slice(),
       resources: (state.character.extraResources || []).map(function (r) {
         return {
           key: r.key || '',
@@ -309,16 +199,11 @@
       })
     };
 
-    openSheet('Grimorio avanzato');
-    buildCantripSection(draft);
+    openSheet('Risorse personalizzate');
     buildResourcesSection(draft);
 
     addSaveButton(function () {
       commit(function (next) {
-        next.grimoire = next.grimoire || { prepared: [], cantrips: [], always: [] };
-        next.grimoire.cantrips = draft.cantrips.filter(function (id, i, arr) {
-          return id && arr.indexOf(id) === i;
-        });
         next.character.extraResources = draft.resources
           .filter(function (r) { return r.key; })
           .map(function (r) {
@@ -350,10 +235,9 @@
         closeSheet();
       }
     });
-    var btn = document.getElementById('grim-advanced-btn');
-    if (btn) {
-      btn.addEventListener('click', openAdvanced);
-    }
+    // Il pulsante grim-advanced-btn (matitina) ora apre il picker "tutte le
+    // classi" in js/grimorio.js, non più questo pannello — vedi il link
+    // "Risorse personalizzate" dentro quel picker per arrivare qui.
   }
 
   window.AppGrimorioAdvanced = {
