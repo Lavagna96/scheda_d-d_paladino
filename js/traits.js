@@ -224,7 +224,8 @@
 
     /* Allineamento e lingue (passo Identità della creazione, 5.B.7): campi
        assenti sui personaggi creati prima di questa funzionalità, quindi con
-       un trattino di fallback invece di restare vuoti. */
+       un trattino di fallback invece di restare vuoti. Modificabili dalla
+       matita "Identità" (js/edit-sheet.js, buildIdentitySheet). */
     var alignEl = document.getElementById('identity-alignment');
     if (alignEl) {
       alignEl.textContent = character.alignment || '—';

@@ -31,6 +31,23 @@
      Tharion, che è magica e ha un nome suo). */
   var CUSTOM_WEAPON = '__custom__';
 
+  // Allineamento e Lingue Standard: stesse costanti del passo Identità della
+  // creazione personaggio (js/create.js), duplicate qui perché non esportate
+  // (moduli indipendenti, come da convenzione del progetto).
+  var ALIGNMENT_LAW = ['Legale', 'Neutrale', 'Caotico'];
+  var ALIGNMENT_MORALITY = ['Buono', 'Neutrale', 'Malvagio'];
+  var STANDARD_LANGUAGES = [
+    { id: 'lingua-segni', name: 'Lingua dei Segni Comune' },
+    { id: 'draconico', name: 'Draconico' },
+    { id: 'nanico', name: 'Nanico' },
+    { id: 'elfico', name: 'Elfico' },
+    { id: 'gigante', name: 'Gigante' },
+    { id: 'gnomesco', name: 'Gnomesco' },
+    { id: 'goblin', name: 'Goblin' },
+    { id: 'halfling', name: 'Halfling' },
+    { id: 'orchesco', name: 'Orchesco' }
+  ];
+
   function armorOptions() {
     var opts = [{ id: '', label: 'Nessuna armatura' }];
     (window.MANUAL_55.armors || []).forEach(function (a) {
@@ -489,6 +506,201 @@
     });
   }
 
+  /* ---------- Sheet D: Identità (Allineamento e Lingue) ---------- */
+
+  // Combinazione legge/morale -> stringa, con "Neutrale Puro" per il caso
+  // Neutrale/Neutrale: stessa logica di js/create.js (computeAlignment).
+  function parseAlignment(value) {
+    if (value === 'Neutrale Puro') {
+      return { law: 'Neutrale', morality: 'Neutrale' };
+    }
+    var parts = (value || '').split(' ');
+    if (parts.length === 2 && ALIGNMENT_LAW.indexOf(parts[0]) !== -1 && ALIGNMENT_MORALITY.indexOf(parts[1]) !== -1) {
+      return { law: parts[0], morality: parts[1] };
+    }
+
+    return { law: null, morality: null };
+  }
+
+  function combineAlignment(law, morality) {
+    if (!law || !morality) {
+      return '';
+    }
+    if (law === 'Neutrale' && morality === 'Neutrale') {
+      return 'Neutrale Puro';
+    }
+
+    return law + ' ' + morality;
+  }
+
+  // Stesso controllo a 3 stati con trascinamento della creazione personaggio
+  // (js/create.js, buildSegmentedRow), qui scritto su un draft locale invece
+  // che sul draft di creazione: si applica allo stato solo al Salva.
+  function buildSegmentedRow(container, title, options, current, onPick) {
+    container.appendChild(el('div', 'create-label', title));
+
+    var track = el('div', 'seg-track');
+    var highlight = el('div', 'seg-highlight');
+    track.appendChild(highlight);
+    var optEls = options.map(function (label) {
+      var opt = el('div', 'seg-opt', label);
+      track.appendChild(opt);
+
+      return opt;
+    });
+    container.appendChild(track);
+
+    var index = options.indexOf(current); // -1 se non ancora scelto
+
+    function snapTo(i) {
+      highlight.style.left = optEls[i].offsetLeft + 'px';
+      highlight.style.width = optEls[i].offsetWidth + 'px';
+    }
+
+    function applyIndex(i) {
+      if (i === index) {
+        return;
+      }
+      index = i;
+      optEls.forEach(function (o, j) { o.classList.toggle('on', j === i); });
+      onPick(options[i]);
+    }
+
+    function indexFromClientX(clientX) {
+      var rect = track.getBoundingClientRect();
+      var ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+
+      return Math.min(options.length - 1, Math.floor(ratio * options.length));
+    }
+
+    function followClientX(clientX) {
+      var rect = track.getBoundingClientRect();
+      var w = optEls[0].offsetWidth;
+      var half = w / 2;
+      var x = Math.min(rect.width - half, Math.max(half, clientX - rect.left));
+      highlight.style.width = w + 'px';
+      highlight.style.left = (x - half) + 'px';
+    }
+
+    track.addEventListener('pointerdown', function (e) {
+      try {
+        track.setPointerCapture(e.pointerId);
+      } catch (err) {
+        // ignorato di proposito, vedi create.js buildSegmentedRow
+      }
+      applyIndex(indexFromClientX(e.clientX));
+      followClientX(e.clientX);
+
+      function move(ev) {
+        applyIndex(indexFromClientX(ev.clientX));
+        followClientX(ev.clientX);
+      }
+      function up(ev) {
+        applyIndex(indexFromClientX(ev.clientX));
+        snapTo(index);
+        track.removeEventListener('pointermove', move);
+        track.removeEventListener('pointerup', up);
+      }
+      track.addEventListener('pointermove', move);
+      track.addEventListener('pointerup', up);
+    });
+
+    if (index !== -1) {
+      optEls[index].classList.add('on');
+      snapTo(index);
+    }
+  }
+
+  // Picker Lingue Standard a cap 2, stesso stile a chip disabilitati oltre il
+  // limite della creazione (js/create.js, buildSpellPicker ramo non-incantesimi).
+  function buildLanguagePicker(container, draft) {
+    var counterEl = el('div', 'create-points-counter');
+    container.appendChild(counterEl);
+    var chipRow = el('div', 'chip-row');
+    container.appendChild(chipRow);
+    var chipEls = {};
+
+    function refresh() {
+      counterEl.textContent = draft.languages.length + ' / 2';
+      STANDARD_LANGUAGES.forEach(function (l) {
+        var isOn = draft.languages.indexOf(l.id) !== -1;
+        var disable = draft.languages.length >= 2 && !isOn;
+        chipEls[l.id].classList.toggle('on', isOn);
+        chipEls[l.id].disabled = disable;
+        chipEls[l.id].classList.toggle('is-disabled', disable);
+      });
+    }
+
+    STANDARD_LANGUAGES.forEach(function (l) {
+      var chip = el('button', 'chip', l.name);
+      chip.type = 'button';
+      chip.addEventListener('click', function () {
+        var idx = draft.languages.indexOf(l.id);
+        if (idx !== -1) {
+          draft.languages.splice(idx, 1);
+        } else if (draft.languages.length < 2) {
+          draft.languages.push(l.id);
+        }
+        refresh();
+      });
+      chipEls[l.id] = chip;
+      chipRow.appendChild(chip);
+    });
+    refresh();
+  }
+
+  function buildIdentitySheet() {
+    var ch = window.AppStorage.getState().character;
+    var parsedAlign = parseAlignment(ch.alignment);
+    var existingLangNames = ch.languages || [];
+    var draft = {
+      alignmentLaw: parsedAlign.law,
+      alignmentMorality: parsedAlign.morality,
+      languages: STANDARD_LANGUAGES.filter(function (l) {
+        return existingLangNames.indexOf(l.name) !== -1;
+      }).map(function (l) { return l.id; })
+    };
+
+    openSheet('Modifica · Identità');
+
+    bodyEl.appendChild(el('div', 'edit-section-label', 'Allineamento'));
+    var recap = el('div', 'create-saves-line', '');
+
+    function refreshRecap() {
+      var val = combineAlignment(draft.alignmentLaw, draft.alignmentMorality);
+      recap.textContent = val ? ('Allineamento: ' + val) : 'Scegli legge e morale.';
+    }
+
+    buildSegmentedRow(bodyEl, 'Legge', ALIGNMENT_LAW, draft.alignmentLaw, function (v) {
+      draft.alignmentLaw = v;
+      refreshRecap();
+    });
+    buildSegmentedRow(bodyEl, 'Morale', ALIGNMENT_MORALITY, draft.alignmentMorality, function (v) {
+      draft.alignmentMorality = v;
+      refreshRecap();
+    });
+    bodyEl.appendChild(recap);
+    refreshRecap();
+
+    bodyEl.appendChild(el('div', 'edit-section-label', 'Lingue'));
+    bodyEl.appendChild(el('span', 'chip on', 'Comune ✓'));
+    buildLanguagePicker(bodyEl, draft);
+
+    addSaveButton(function () {
+      commit(function (character) {
+        var combined = combineAlignment(draft.alignmentLaw, draft.alignmentMorality);
+        if (combined) {
+          character.alignment = combined;
+        }
+        character.languages = ['Comune'].concat(draft.languages.map(function (id) {
+          var l = STANDARD_LANGUAGES.filter(function (x) { return x.id === id; })[0];
+
+          return l ? l.name : id;
+        }));
+      });
+    });
+  }
+
   /* ---------- bind ---------- */
 
   function bindTriggers() {
@@ -503,6 +715,10 @@
     var equipBtn = document.getElementById('edit-equip-btn');
     if (equipBtn) {
       equipBtn.addEventListener('click', buildEquipSheet);
+    }
+    var identityBtn = document.getElementById('edit-identity-btn');
+    if (identityBtn) {
+      identityBtn.addEventListener('click', buildIdentitySheet);
     }
   }
 
