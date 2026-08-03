@@ -238,6 +238,10 @@
     // Il pulsante grim-advanced-btn (matitina) ora apre il picker "tutte le
     // classi" in js/grimorio.js, non più questo pannello — vedi il link
     // "Risorse personalizzate" dentro quel picker per arrivare qui.
+    var resourcesBtn = document.getElementById('edit-resources-btn');
+    if (resourcesBtn) {
+      resourcesBtn.addEventListener('click', openAdvanced);
+    }
   }
 
   window.AppGrimorioAdvanced = {
