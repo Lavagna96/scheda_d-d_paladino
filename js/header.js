@@ -40,9 +40,12 @@
       fullImg.style.display = full ? '' : 'none';
       fullImg.alt = 'Ritratto di ' + (ch.name || 'personaggio');
     }
-    var afcName = document.querySelector('.afc-name');
-    if (afcName) {
-      afcName.textContent = ch.name || 'Personaggio';
+    var afcNameInput = document.getElementById('avatar-name-input');
+    // Non tocca il valore mentre l'utente ci sta scrivendo dentro: un render
+    // esterno (es. da un'altra scheda dello stesso stato) non deve rimangiarsi
+    // il carattere appena digitato.
+    if (afcNameInput && document.activeElement !== afcNameInput) {
+      afcNameInput.value = ch.name || 'Personaggio';
     }
     var afcSub = document.querySelector('.afc-sub');
     if (afcSub) {
@@ -83,9 +86,28 @@
     });
   }
 
+  // Stesso schema di steed-name-input (js/sheet.js, bindSteedName): salva a
+  // ogni tasto, senza pop-up o matita dedicati.
+  function bindNameEdit() {
+    var input = document.getElementById('avatar-name-input');
+    if (!input) {
+      return;
+    }
+    input.addEventListener('input', function () {
+      var state = window.AppStorage.getState();
+      state.character.name = input.value;
+      window.AppStorage.saveState(state);
+      var nameEl = document.getElementById('header-name');
+      if (nameEl) {
+        nameEl.textContent = input.value || 'Personaggio';
+      }
+    });
+  }
+
   function init() {
     render();
     bindAvatarModal();
+    bindNameEdit();
   }
 
   window.AppHeader = {

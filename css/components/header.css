@@ -6,7 +6,7 @@
 #app-header {
   position: relative;
   overflow: hidden;
-  padding: var(--space-4) var(--space-4) var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: linear-gradient(135deg, rgba(201, 164, 67, 0.1), transparent 60%), var(--bg-card);
 }
 
@@ -27,20 +27,20 @@
 
 .header-avatar {
   position: relative;
-  width: 68px;
-  height: 68px;
-  min-width: 68px;
-  min-height: 68px;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
   padding: 0;
   border-radius: 50%;
   overflow: hidden;
   background: radial-gradient(circle at 42% 32%, var(--ruby-bright), var(--ruby) 52%, var(--ruby-dark) 100%);
-  border: 3px solid var(--accent-gold);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 2px 12px rgba(0, 0, 0, 0.45), 0 0 18px rgba(201, 164, 67, 0.35);
+  border: 2px solid var(--accent-gold);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.4), 0 0 14px rgba(201, 164, 67, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 21px;
   flex-shrink: 0;
   color: #ffe6c4;
   cursor: pointer;
@@ -64,12 +64,12 @@
 
 .header-name {
   font-family: var(--font-title);
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--accent-gold);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(201, 164, 67, 0.3);
   line-height: 1.2;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -77,26 +77,38 @@
 
 /* Classe, livello e specie come tre distintivi separati invece di una riga
    di testo unica: si leggono a colpo d'occhio anche se uno è più lungo
-   degli altri, e vanno a capo da soli sugli schermi stretti. */
+   degli altri. Riga unica scorrevole (stesso trucco di .subtabs in
+   css/layout.css) invece di andare a capo: su schermi stretti con un nome
+   di specie lungo (es. "Dragonide d'Oro") il testo a capo spingeva giù il
+   resto dell'header — richiesto esplicitamente "tutto su una riga". */
 .header-badges {
   position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
+  flex-wrap: nowrap;
+  gap: 5px;
+  margin-top: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.header-badges::-webkit-scrollbar {
+  display: none;
 }
 
 .header-badge {
   font-family: var(--font-title);
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 600;
   letter-spacing: 0.3px;
   color: var(--accent-gold);
   border: 1px solid rgba(201, 164, 67, 0.4);
   background: rgba(201, 164, 67, 0.1);
-  padding: 3px 9px;
+  padding: 3px 8px;
   border-radius: var(--radius-pill);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .header-badge-species {
@@ -110,20 +122,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .header-options {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   border: 1px solid rgba(201, 164, 67, 0.35);
   border-radius: var(--radius-pill);
   background: rgba(0, 0, 0, 0.25);
   color: var(--accent-gold);
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -242,14 +254,29 @@
   padding: var(--space-3) var(--space-2) var(--space-1);
 }
 
-.avatar-frame-caption .afc-name {
+/* Input invece di testo statico: si tocca il ritratto per cambiare la foto
+   MA ANCHE il nome, invece di dover uscire e cercare un altro punto della
+   scheda — stesso trattamento "sempre modificabile" di steed-name-input
+   (css/components/steed.css), niente matita separata. */
+.afc-name-input {
   display: block;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  text-align: center;
+  padding: 2px 4px 4px;
   font-family: var(--font-title);
   font-size: 17px;
   font-weight: 700;
   color: var(--accent-gold);
   letter-spacing: 0.6px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 12px rgba(201, 164, 67, 0.3);
+}
+
+.afc-name-input:focus {
+  outline: none;
+  border-bottom-color: rgba(201, 164, 67, 0.5);
 }
 
 .avatar-frame-caption .afc-sub {
