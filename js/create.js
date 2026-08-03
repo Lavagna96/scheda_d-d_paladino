@@ -2465,7 +2465,13 @@
 
         return l ? l.name : id;
       })),
-      modifiers: [], extraResources: [], items: [], levelChoices: {}
+      modifiers: [], items: [], levelChoices: {},
+      // Scudo scelto come incantesimo di Iniziato alla Magia (PHB 2024 p.201):
+      // si lancia gratis 1 volta a riposo lungo, oltre che con gli slot — una
+      // risorsa da tracciare come Punizione Divina/Trova Destriero gratis.
+      extraResources: (draft.miSpells || []).indexOf('scudo') !== -1
+        ? [{ key: 'shieldfree', name: 'Scudo gratis', max: 1, ctx: 'senza spendere slot', resetOn: 'long' }]
+        : []
     };
   }
 
