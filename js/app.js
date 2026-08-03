@@ -773,11 +773,18 @@
   function bindOptions() {
     var btn = document.getElementById('header-options');
     var panel = document.getElementById('options-panel');
+    var header = document.getElementById('app-header');
     if (!btn || !panel) {
       return;
     }
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
+      // Il banner header (redesign 2026) non ha più un'altezza fissa: la
+      // posiziona sotto il bordo reale invece di un offset scritto a mano,
+      // che presumeva l'header basso e compatto di prima.
+      if (header) {
+        panel.style.top = (header.getBoundingClientRect().bottom + 8) + 'px';
+      }
       panel.classList.toggle('hidden');
     });
     document.addEventListener('click', function () {

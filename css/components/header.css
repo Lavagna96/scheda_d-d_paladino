@@ -1,4 +1,25 @@
+/* Banner dorato (redesign scelto fra 3 alternative con preview, 2026): prima
+   era una riga unica compressa (avatar 44px, testo 11px, azione di livello
+   incastrata in mezzo al nome) — così poco leggibile che l'utente l'ha
+   segnalata esplicitamente. #app-header eredita il bg/radius/padding da
+   css/layout.css: qui si sovrascrivono solo per il tono dorato del banner. */
+#app-header {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  background: linear-gradient(135deg, rgba(201, 164, 67, 0.1), transparent 60%), var(--bg-card);
+}
+
+#app-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% -20%, rgba(201, 164, 67, 0.18), transparent 55%);
+  pointer-events: none;
+}
+
 .header-top {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -6,20 +27,20 @@
 
 .header-avatar {
   position: relative;
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 68px;
+  height: 68px;
+  min-width: 68px;
+  min-height: 68px;
   padding: 0;
   border-radius: 50%;
   overflow: hidden;
   background: radial-gradient(circle at 42% 32%, var(--ruby-bright), var(--ruby) 52%, var(--ruby-dark) 100%);
-  border: 2px solid var(--accent-gold);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 10px rgba(201, 164, 67, 0.25);
+  border: 3px solid var(--accent-gold);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 2px 12px rgba(0, 0, 0, 0.45), 0 0 18px rgba(201, 164, 67, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 28px;
   flex-shrink: 0;
   color: #ffe6c4;
   cursor: pointer;
@@ -43,40 +64,53 @@
 
 .header-name {
   font-family: var(--font-title);
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--accent-gold);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(201, 164, 67, 0.3);
   line-height: 1.2;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.header-class {
+/* Classe, livello e specie come tre distintivi separati invece di una riga
+   di testo unica: si leggono a colpo d'occhio anche se uno è più lungo
+   degli altri, e vanno a capo da soli sugli schermi stretti. */
+.header-badges {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.header-badge {
   font-family: var(--font-title);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
+  letter-spacing: 0.3px;
   color: var(--accent-gold);
-  letter-spacing: 0.5px;
-  margin-top: 1px;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(201, 164, 67, 0.4);
+  background: rgba(201, 164, 67, 0.1);
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.header-meta {
-  font-size: 11px;
+.header-badge-species {
   color: var(--text-secondary);
-  margin-top: 1px;
+  border-color: var(--border-color);
+  background: transparent;
 }
 
 .header-right {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -85,10 +119,10 @@
   height: 36px;
   min-width: 36px;
   min-height: 36px;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(201, 164, 67, 0.35);
   border-radius: var(--radius-pill);
-  background: var(--bg-principal);
-  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--accent-gold);
   font-size: 16px;
   cursor: pointer;
   display: flex;

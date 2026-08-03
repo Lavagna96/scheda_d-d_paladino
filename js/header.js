@@ -2,16 +2,20 @@
   function render() {
     var view = window.AppEngine.getView();
     var nameEl = document.getElementById('header-name');
-    var classEl = document.getElementById('header-class');
-    var metaEl = document.getElementById('header-meta');
+    var classBadge = document.getElementById('header-badge-class');
+    var levelBadge = document.getElementById('header-badge-level');
+    var speciesBadge = document.getElementById('header-badge-species');
     if (nameEl) {
       nameEl.textContent = view.name;
     }
-    if (classEl) {
-      classEl.textContent = view.headerLine;
+    if (classBadge) {
+      classBadge.textContent = view.className;
     }
-    if (metaEl) {
-      metaEl.textContent = view.speciesLabel;
+    if (levelBadge) {
+      levelBadge.textContent = 'Livello ' + view.level;
+    }
+    if (speciesBadge) {
+      speciesBadge.textContent = view.speciesLabel;
     }
 
     /* Ritratto (Fase 2 + 5.B.3): viene sempre dal personaggio — quello caricato

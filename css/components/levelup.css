@@ -12,18 +12,18 @@
 .levelup-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  align-self: flex-start;
-  margin: 2px 0;
-  padding: 3px 10px;
-  border: 1px solid var(--border-gold-soft);
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border: 1px solid var(--accent-gold);
   border-radius: var(--radius-pill);
-  background: transparent;
+  background: rgba(201, 164, 67, 0.12);
   color: var(--accent-gold);
   font-family: var(--font-body);
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 /* ---------- badge livello ---------- */
