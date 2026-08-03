@@ -414,17 +414,42 @@
         }
       }
     });
+    // Risorse di classe/specie rimosse dal pannello "Risorse personalizzate"
+    // (js/grimorio-advanced.js): non richiedibili di nuovo qui, restano
+    // nascoste anche dopo un salire di livello finché non si aggiunge di
+    // nuovo una risorsa con la stessa chiave.
+    if (ch.hiddenResourceKeys && ch.hiddenResourceKeys.length) {
+      resources = resources.filter(function (r) {
+        return ch.hiddenResourceKeys.indexOf(r.key) === -1;
+      });
+    }
     slots.forEach(function (n, i) {
       resources.push({ key: 'sl' + (i + 1), max: n });
     });
+    // Sovrascrive in posto invece di accodare: da "Risorse personalizzate"
+    // si può modificare anche una risorsa di classe (stessa chiave), e senza
+    // questo sarebbe apparsa due volte per le risorse senza card statica in
+    // index.html (es. Furia del Barbaro).
     (ch.extraResources || []).forEach(function (r) {
-      resources.push({
+      var entry = {
         key: r.key,
         max: r.max,
         name: r.name || r.key,
         ctx: r.ctx || '',
         resetOn: r.resetOn || 'long'
-      });
+      };
+      var existingIdx = -1;
+      for (var ri = 0; ri < resources.length; ri++) {
+        if (resources[ri].key === r.key) {
+          existingIdx = ri;
+          break;
+        }
+      }
+      if (existingIdx !== -1) {
+        resources[existingIdx] = entry;
+      } else {
+        resources.push(entry);
+      }
     });
     (ch.items || []).forEach(function (item) {
       // Idem: un oggetto non sintonizzato non genera/consuma usi giornalieri.

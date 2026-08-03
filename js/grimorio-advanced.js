@@ -16,6 +16,21 @@
     { id: 'day', label: '1 al giorno' }
   ];
 
+  var RESET_LABELS = {
+    short: 'Riposo breve', 'short-full': 'Riposo breve',
+    long: 'Riposo lungo', day: '1 al giorno'
+  };
+
+  // Risorse calcolate da js/engine.js senza un campo `name` proprio (i dati
+  // di classResources hanno già il loro nome: qui solo le manciata pushate
+  // "a mano" in derive() — vedi Dadi Ferita/Incanalare/Soffio/Volo).
+  var KNOWN_RESOURCE_NAMES = {
+    cd: 'Incanalare Divinità',
+    hd: 'Dadi Ferita',
+    breath: 'Soffio del Drago',
+    flight: 'Volo Draconico'
+  };
+
   var overlay, titleEl, bodyEl;
 
   function el(tag, cls, text) {
@@ -66,55 +81,108 @@
     }
   }
 
-  function newResourceDraft() {
-    return { key: '', name: '', max: 1, ctx: '', resetOn: 'long' };
+  // Chiave interna (mai mostrata: l'utente ragiona solo sul Nome). Generata
+  // una volta e mai più toccata, così non cambia riaprendo il pannello.
+  function makeResourceKey() {
+    return 'res-' + Math.random().toString(36).slice(2, 8);
   }
 
-  function buildResourceEditor(draft, resource, index, onChange) {
-    var box = el('div', 'grim-resource-block');
-    box.appendChild(el('div', 'edit-section-label', 'Risorsa ' + (index + 1)));
+  function newResourceDraft() {
+    return { key: makeResourceKey(), name: '', max: 1, ctx: '', resetOn: 'long', auto: false };
+  }
 
-    var keyField = el('div', 'edit-field');
-    keyField.appendChild(el('label', 'edit-label', 'Chiave'));
-    var keyInput = document.createElement('input');
-    keyInput.type = 'text';
-    keyInput.className = 'edit-input';
-    keyInput.value = resource.key || '';
-    keyInput.placeholder = 'chiave (es. shield)';
-    keyInput.addEventListener('input', function () {
-      resource.key = keyInput.value.trim();
-      onChange();
+  // Riga compatta sotto il nome quando la card è chiusa: usi, descrizione,
+  // recupero in un colpo d'occhio senza dover aprire nulla.
+  function resourceHint(resource) {
+    var parts = [String(resource.max == null ? 1 : resource.max)];
+    if (resource.ctx) {
+      parts.push(resource.ctx);
+    }
+    parts.push(RESET_LABELS[resource.resetOn] || RESET_LABELS.long);
+
+    return parts.join(' · ');
+  }
+
+  /* Stessa fisarmonica di .item-editor-acc (css/components/items.css, già
+     usata per gli effetti degli oggetti): chiusa mostra solo nome + riepilogo,
+     un tocco la apre. Con 6+ risorse (classe + specie + personalizzate) tutte
+     spalancate insieme erano un muro da scorrere all'infinito.
+     Niente `onChange` sui campi: ricostruire la lista a ogni tasto premuto
+     toglieva il focus all'input a ogni carattere (bug "non funziona bene");
+     i campi mutano il resource in place, solo Rimuovi tocca la lista. */
+  function buildResourceEditor(resource, index, onRemove, opts) {
+    opts = opts || {};
+    var acc = el('div', 'item-editor-acc');
+    if (opts.open) {
+      acc.classList.add('open');
+    }
+
+    var head = el('div', 'item-editor-acc-head');
+    var arrow = el('span', 'item-editor-acc-arrow', opts.open ? '▾' : '▸');
+    head.appendChild(arrow);
+
+    var titleWrap = el('span', 'item-editor-acc-title');
+    var nameEl = el('span', null, resource.name || ('Risorsa ' + (index + 1)));
+    titleWrap.appendChild(nameEl);
+    var hintEl = el('span', 'item-editor-acc-hint', resourceHint(resource));
+    titleWrap.appendChild(hintEl);
+    head.appendChild(titleWrap);
+
+    if (resource.auto) {
+      head.appendChild(el('span', 'grim-resource-hint', 'dalla classe'));
+    }
+    var rm = el('button', 'grim-resource-remove', '✕');
+    rm.type = 'button';
+    rm.setAttribute('aria-label', 'Rimuovi risorsa');
+    rm.addEventListener('click', function (e) {
+      e.stopPropagation();
+      onRemove();
     });
-    keyField.appendChild(keyInput);
-    box.appendChild(keyField);
+    head.appendChild(rm);
+
+    var body = el('div', 'item-editor-acc-body');
+    if (!opts.open) {
+      body.classList.add('hidden');
+    }
+
+    head.addEventListener('click', function () {
+      var open = acc.classList.toggle('open');
+      body.classList.toggle('hidden', !open);
+      arrow.textContent = open ? '▾' : '▸';
+    });
+
+    function refreshHint() {
+      hintEl.textContent = resourceHint(resource);
+    }
 
     var nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.className = 'edit-input';
     nameInput.value = resource.name || '';
-    nameInput.placeholder = 'Nome visualizzato';
+    nameInput.placeholder = 'es. Scudo magico';
     nameInput.addEventListener('input', function () {
       resource.name = nameInput.value;
-      onChange();
+      nameEl.textContent = nameInput.value.trim() || ('Risorsa ' + (index + 1));
     });
     var nameField = el('div', 'edit-field');
     nameField.appendChild(el('label', 'edit-label', 'Nome'));
     nameField.appendChild(nameInput);
-    box.appendChild(nameField);
+    body.appendChild(nameField);
 
     var maxInput = document.createElement('input');
     maxInput.type = 'number';
     maxInput.min = '0';
+    maxInput.inputMode = 'numeric';
     maxInput.className = 'edit-input';
     maxInput.value = String(resource.max == null ? 1 : resource.max);
     maxInput.addEventListener('input', function () {
       resource.max = Math.max(0, parseInt(maxInput.value, 10) || 0);
-      onChange();
+      refreshHint();
     });
     var maxField = el('div', 'edit-field');
     maxField.appendChild(el('label', 'edit-label', 'Usi massimi'));
     maxField.appendChild(maxInput);
-    box.appendChild(maxField);
+    body.appendChild(maxField);
 
     var ctxInput = document.createElement('input');
     ctxInput.type = 'text';
@@ -123,12 +191,12 @@
     ctxInput.placeholder = 'es. +5 CA · reazione';
     ctxInput.addEventListener('input', function () {
       resource.ctx = ctxInput.value;
-      onChange();
+      refreshHint();
     });
     var ctxField = el('div', 'edit-field');
     ctxField.appendChild(el('label', 'edit-label', 'Descrizione breve'));
     ctxField.appendChild(ctxInput);
-    box.appendChild(ctxField);
+    body.appendChild(ctxField);
 
     var resetSelect = document.createElement('select');
     resetSelect.className = 'edit-select';
@@ -143,78 +211,136 @@
     });
     resetSelect.addEventListener('change', function () {
       resource.resetOn = resetSelect.value;
-      onChange();
+      refreshHint();
     });
     var resetField = el('div', 'edit-field');
     resetField.appendChild(el('label', 'edit-label', 'Recupero'));
     resetField.appendChild(resetSelect);
-    box.appendChild(resetField);
+    body.appendChild(resetField);
 
-    var rm = el('button', 'chip', 'Rimuovi risorsa');
-    rm.type = 'button';
-    rm.addEventListener('click', function () {
-      draft.resources.splice(index, 1);
-      onChange();
-    });
-    box.appendChild(rm);
+    acc.appendChild(head);
+    acc.appendChild(body);
 
-    return box;
+    return acc;
   }
 
-  function buildResourcesSection(draft) {
-    bodyEl.appendChild(el('p', 'note', 'Appaiono nella tab Risorse (es. Scudo magico, oggetti con usi).'));
+  /* Un gruppo di card modificabili (usato sia per "Dalla classe e specie"
+     che per "Personalizzate"): stesso editor, stesso Rimuovi. Le prime hanno
+     `onRemove` che le segna come nascoste invece di limitarsi a toglierle
+     dall'array — altrimenti al render successivo il motore le ricalcolerebbe
+     comunque da capo (sono un derivato di classe/livello, non uno stato). */
+  function buildResourceGroup(title, note, resources, onRemove, addLabel) {
+    bodyEl.appendChild(el('div', 'edit-section-label', title));
+    bodyEl.appendChild(el('p', 'note', note));
 
-    var resourcesHost = el('div', 'grim-resources-list');
+    var host = el('div', 'grim-resources-list');
+    bodyEl.appendChild(host);
 
-    function rerenderResources() {
-      resourcesHost.innerHTML = '';
-      draft.resources.forEach(function (resource, index) {
-        resourcesHost.appendChild(buildResourceEditor(draft, resource, index, rerenderResources));
+    // La nuova risorsa nasce aperta (ci si scrive subito dentro), le altre
+    // restano come sono state lasciate — riaprirle tutte a ogni Rimuovi/
+    // Aggiungi sarebbe fastidioso quanto non poterle mai chiudere.
+    var openIndex = -1;
+
+    function rerender() {
+      host.innerHTML = '';
+      resources.forEach(function (resource, index) {
+        host.appendChild(buildResourceEditor(resource, index, function () {
+          var removed = resources.splice(index, 1)[0];
+          if (onRemove) {
+            onRemove(removed);
+          }
+          openIndex = -1;
+          rerender();
+        }, { open: index === openIndex }));
       });
+      openIndex = -1;
     }
+    rerender();
 
-    bodyEl.appendChild(resourcesHost);
-    rerenderResources();
-
-    var addBtn = el('button', 'chip', '+ Nuova risorsa');
-    addBtn.type = 'button';
-    addBtn.addEventListener('click', function () {
-      draft.resources.push(newResourceDraft());
-      rerenderResources();
-    });
-    bodyEl.appendChild(addBtn);
+    if (addLabel) {
+      var addBtn = el('button', 'item-add-btn', addLabel);
+      addBtn.type = 'button';
+      addBtn.addEventListener('click', function () {
+        resources.push(newResourceDraft());
+        openIndex = resources.length - 1;
+        rerender();
+      });
+      bodyEl.appendChild(addBtn);
+    }
   }
 
   function openAdvanced() {
     var state = window.AppStorage.getState();
-    var draft = {
-      resources: (state.character.extraResources || []).map(function (r) {
-        return {
-          key: r.key || '',
-          name: r.name || '',
-          max: r.max == null ? 1 : r.max,
-          ctx: r.ctx || '',
-          resetOn: r.resetOn || 'long'
-        };
+    var ch = state.character;
+    var customKeys = {};
+    (ch.extraResources || []).forEach(function (r) { customKeys[r.key] = true; });
+    // Stessa esclusione di 'sl*'/'item-*' di js/stats.js: slot incantesimi e
+    // usi oggetto si gestiscono altrove (Grimorio, Oggetti), non qui.
+    var autoResources = (window.AppEngine.getView().resources || [])
+      .filter(function (r) {
+        return r.key.indexOf('sl') !== 0 && r.key.indexOf('item-') !== 0 && !customKeys[r.key];
       })
-    };
+      .map(function (r) {
+        return {
+          key: r.key,
+          name: r.name || KNOWN_RESOURCE_NAMES[r.key] || r.key,
+          max: r.max,
+          ctx: r.ctx || '',
+          resetOn: r.resetOn || 'long',
+          auto: true
+        };
+      });
+
+    var customResources = (ch.extraResources || []).map(function (r) {
+      return {
+        key: r.key || makeResourceKey(),
+        name: r.name || '',
+        max: r.max == null ? 1 : r.max,
+        ctx: r.ctx || '',
+        resetOn: r.resetOn || 'long',
+        auto: false
+      };
+    });
+
+    var newlyHiddenKeys = [];
 
     openSheet('Risorse personalizzate');
-    buildResourcesSection(draft);
+
+    if (autoResources.length) {
+      buildResourceGroup(
+        'Dalla classe e specie',
+        'Calcolate da classe, livello e specie: puoi modificarle o rimuoverle come le altre.',
+        autoResources,
+        function (removed) { newlyHiddenKeys.push(removed.key); },
+        null
+      );
+    }
+
+    buildResourceGroup(
+      'Personalizzate',
+      'Aggiungine quante ti servono: usi speciali, oggetti di casa, incantesimi gratuiti.',
+      customResources,
+      null,
+      '+ Nuova risorsa'
+    );
 
     addSaveButton(function () {
       commit(function (next) {
-        next.character.extraResources = draft.resources
-          .filter(function (r) { return r.key; })
+        // Una risorsa senza nome è una riga aggiunta e poi abbandonata: si
+        // scarta da sola invece di salvare un fantasma senza etichetta.
+        next.character.extraResources = autoResources.concat(customResources)
+          .filter(function (r) { return (r.name || '').trim(); })
           .map(function (r) {
             return {
               key: r.key,
-              name: r.name || r.key,
+              name: r.name.trim(),
               max: r.max,
               ctx: r.ctx || '',
               resetOn: r.resetOn || 'long'
             };
           });
+        next.character.hiddenResourceKeys = (next.character.hiddenResourceKeys || [])
+          .concat(newlyHiddenKeys);
       });
     });
   }

@@ -167,6 +167,79 @@
   font-size: 16px; /* evita lo zoom automatico di iOS sul focus */
 }
 
+/* ---------- risorse personalizzate (js/grimorio-advanced.js) ----------
+   Fisarmonica: chiusa mostra solo nome + riepilogo (usi/descrizione/
+   recupero) su .item-editor-acc, la stessa card degli effetti oggetto
+   (css/components/items.css) — con 6+ risorse tutte spalancate insieme
+   erano un muro da scorrere all'infinito. */
+
+.grim-resources-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.grim-resources-list .item-editor-acc-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.grim-resources-list .item-editor-acc-title > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grim-resources-list .item-editor-acc-hint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* "dalla classe": badge distinto dal riepilogo usi, per non confondere le
+   due righe di testo sotto il nome quando la card è chiusa. */
+.grim-resource-hint {
+  flex: none;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.grim-resource-remove {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.grim-resource-remove:active {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.grim-resource-body {
+  padding: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.grim-resource-body .edit-field:last-child {
+  margin-bottom: 0;
+}
+
 /* ---------- bottone Salva ---------- */
 
 .save-btn {
