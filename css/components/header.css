@@ -18,11 +18,19 @@
   pointer-events: none;
 }
 
+/* L'hamburger galleggia in absolute (angolo sinistro) invece di stare nel
+   flusso flex: così il resto dell'intestazione (nome/distintivi/ritratto)
+   può occupare tutta la riga come flex naturale — nome che cresce con lo
+   spazio libero invece di restare rimpicciolito contro il ritratto con un
+   grande vuoto prima (era "tutto schiacciato di lato", segnalato dopo il
+   primo giro di test). Il ritratto resta comunque ancorato all'angolo
+   destro, ben distinto dal bottone del menu sull'angolo opposto. */
 .header-top {
   position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  padding-left: 48px;
 }
 
 .header-avatar {
@@ -55,6 +63,11 @@
   object-position: 52% 10%;
   transform: scale(1.45);
   transform-origin: 52% 22%;
+}
+
+.avatar-badge-wrap {
+  position: relative;
+  flex-shrink: 0;
 }
 
 .header-info {
@@ -117,62 +130,23 @@
   background: transparent;
 }
 
-.header-right {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
 .header-options {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  min-height: 32px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   border: 1px solid rgba(201, 164, 67, 0.35);
   border-radius: var(--radius-pill);
   background: rgba(0, 0, 0, 0.25);
-  color: var(--accent-gold);
-  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.options-panel {
-  position: fixed;
-  top: calc(56px + env(safe-area-inset-top, 0px));
-  right: var(--space-4);
-  z-index: 55;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: var(--space-2);
-  min-width: 180px;
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
-}
-
-.options-panel button {
-  display: block;
-  width: 100%;
-  padding: var(--space-3);
-  border: none;
-  background: transparent;
-  color: var(--text-primary);
-  text-align: left;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: var(--radius-md);
-  min-height: var(--touch-min);
-}
-
-.options-panel button:hover,
-.options-panel button:active {
-  background: var(--border-color);
 }
 
 /* ===== Ritratto a schermo intero (clic sull'avatar) ===== */

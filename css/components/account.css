@@ -156,19 +156,6 @@
   text-align: center;
 }
 
-/* puntino oro sull'ingranaggio quando si è connessi al cloud */
-.header-options.cloud-on::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent-gold);
-  box-shadow: 0 0 6px rgba(201, 164, 67, 0.8);
-}
-
-.header-options {
-  position: relative;
-}
+/* .header-options stabilisce già il proprio contesto di posizionamento
+   (position: absolute, vedi css/components/header.css: galleggia
+   sull'angolo dell'header) — il puntino sopra si appoggia a quello. */

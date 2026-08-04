@@ -437,6 +437,7 @@
     var neighborIsLevel = false; // il vicino è un gruppo .spell-level-group (usa .hidden, non solo display)
     var viewPrevIdx = 0;       // sotto-tab della sezione di destinazione (per annullare)
     var startTarget = null;    // elemento toccato all'avvio: decide se il grimorio scorre i livelli o cambia sezione
+    var EDGE_MENU_DRAG = 130;  // px di trascinamento per aprire del tutto il menu dal bordo sinistro
 
     function clearStyles(p) {
       if (!p) {
@@ -704,6 +705,12 @@
         var el = elasticEl();
         el.style.transform = 'translateX(' + Math.round(dx * 0.25) + 'px)';
         el.style.filter = '';
+        // Bordo sinistro assoluto: il cassetto del menu segue il dito man
+        // mano che si trascina, non solo di scatto al rilascio (altrimenti
+        // non si capisce se il gesto sta facendo qualcosa).
+        if (dir === -1 && dx > 0 && window.AppMenu) {
+          window.AppMenu.dragTo(dx / EDGE_MENU_DRAG);
+        }
       }
     }, { passive: false });
 
@@ -719,6 +726,16 @@
       var touch = e.changedTouches[0];
       var dx = touch.clientX - startX;
       var dt = Date.now() - startT;
+      // Bordo sinistro assoluto (prima sotto-tab della prima sezione): non
+      // c'è nessuna pagina precedente da mostrare (showNeighbor(-1) non ha
+      // trovato nulla, quindi "neighbor" resta null e il gesto rimbalza).
+      // Il cassetto ha già seguito il dito durante il trascinamento
+      // (touchmove, sopra): qui si decide solo se completare l'apertura o
+      // tornare indietro, con l'animazione CSS normale.
+      if (!neighbor && dx > 0 && window.AppMenu) {
+        var shouldOpenMenu = dx >= EDGE_MENU_DRAG * 0.4 || (dx >= 40 && dt < 250);
+        window.AppMenu.dragEnd(shouldOpenMenu);
+      }
       // conferma se hai trascinato abbastanza o con un colpo rapido
       var commit = !!neighbor
         && (Math.abs(dx) >= panelW * 0.3 || (Math.abs(dx) >= 40 && dt < 250));
@@ -728,6 +745,9 @@
     main.addEventListener('touchcancel', function () {
       if (following) {
         following = false;
+        if (!neighbor && window.AppMenu) {
+          window.AppMenu.dragEnd(false);
+        }
         finish(false);
       }
       tracking = false;
@@ -770,34 +790,24 @@
     });
   }
 
-  function bindOptions() {
+  function bindMenu() {
+    // Apertura del cassetto (drawer) condiviso: js/menu.js gestisce
+    // apri/chiudi/toggle, qui restano solo i comandi propri della scheda
+    // (manuale, export/import) — quelli propri dell'account/dashboard sono
+    // in js/cloud.js.
     var btn = document.getElementById('header-options');
-    var panel = document.getElementById('options-panel');
-    var header = document.getElementById('app-header');
-    if (!btn || !panel) {
-      return;
+    if (btn) {
+      btn.addEventListener('click', function () {
+        window.AppMenu.toggle();
+      });
     }
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      // Il banner header (redesign 2026) non ha più un'altezza fissa: la
-      // posiziona sotto il bordo reale invece di un offset scritto a mano,
-      // che presumeva l'header basso e compatto di prima.
-      if (header) {
-        panel.style.top = (header.getBoundingClientRect().bottom + 8) + 'px';
-      }
-      panel.classList.toggle('hidden');
-    });
-    document.addEventListener('click', function () {
-      panel.classList.add('hidden');
-    });
-    panel.addEventListener('click', function (e) { e.stopPropagation(); });
 
-    document.getElementById('opt-manual').addEventListener('click', function () {
+    document.getElementById('menu-manual').addEventListener('click', function () {
       window.AppGrimorio.openManual();
-      panel.classList.add('hidden');
+      window.AppMenu.close();
     });
 
-    document.getElementById('opt-export').addEventListener('click', function () {
+    document.getElementById('menu-export').addEventListener('click', function () {
       var state = window.AppStorage.getState();
       var data = JSON.stringify(state, null, 2);
       var blob = new Blob([data], { type: 'application/json' });
@@ -810,10 +820,10 @@
         .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'personaggio';
       a.download = slug + '-backup.json';
       a.click();
-      panel.classList.add('hidden');
+      window.AppMenu.close();
     });
 
-    document.getElementById('opt-import').addEventListener('click', function () {
+    document.getElementById('menu-import').addEventListener('click', function () {
       var input = document.createElement('input');
       input.type = 'file';
       input.accept = 'application/json';
@@ -840,7 +850,7 @@
         reader.readAsText(file);
       };
       input.click();
-      panel.classList.add('hidden');
+      window.AppMenu.close();
     });
   }
 
@@ -942,7 +952,10 @@
     initSubTabs('#view-scheda');
     initSubTabs('#view-tesoreria');
     initSubTabs('#view-diario');
-    bindOptions();
+    if (window.AppMenu) {
+      window.AppMenu.init();
+    }
+    bindMenu();
     bindFab();
     syncNavVisibility();
     showView('scheda');

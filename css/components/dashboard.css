@@ -36,7 +36,7 @@ body.in-dashboard #global-fab {
 .dash-gear {
   position: absolute;
   top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
-  right: var(--space-4);
+  left: var(--space-4);
   width: 36px;
   height: 36px;
   min-width: 36px;
@@ -52,11 +52,29 @@ body.in-dashboard #global-fab {
   justify-content: center;
 }
 
-/* Toggle griglia/righe: stesso cerchio di .dash-gear, appena a sinistra
-   (36px + gap di 8px). L'icona mostrata è quella della vista in cui si
-   andrebbe cliccando (js/dashboard.js, updateLayoutToggleIcon). */
+/* Toggle griglia/righe: non più un\'icona isolata in alto (poco chiara),
+   ma una pillola con etichetta appena sopra la lista che controlla — il
+   testo dice esplicitamente su cosa si passerebbe cliccando (js/dashboard.js,
+   updateLayoutToggleIcon). */
+.dash-list-toolbar {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-2);
+}
+
 .dash-layout-toggle {
-  right: calc(var(--space-4) + 44px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill);
+  background: var(--bg-principal);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
 }
 
 .dash-head {

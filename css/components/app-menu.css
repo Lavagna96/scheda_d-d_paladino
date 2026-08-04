@@ -1,0 +1,145 @@
+/*
+ * Cassetto (drawer) di navigazione condiviso fra scheda e dashboard —
+ * sostituisce sia #options-panel (dropdown dell'ingranaggio in header)
+ * sia il click diretto di #dash-gear che apriva #account-modal. Un solo
+ * componente, contenuto leggermente diverso in base al contesto (le voci
+ * data-scope="scheda" spariscono in dashboard, vedi regola in fondo).
+ */
+
+.app-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 264;
+  background: var(--overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.app-menu-overlay:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.app-menu {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(82vw, 320px);
+  z-index: 265;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-gold);
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0.35, 1);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.app-menu.open {
+  transform: translateX(0);
+}
+
+.app-menu-brand {
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--border-gold-soft);
+  background: radial-gradient(ellipse at top, rgba(201, 164, 67, 0.09), transparent 70%);
+}
+
+.app-menu-crest {
+  width: 36px;
+  height: 36px;
+}
+
+.app-menu-account {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.app-menu-account b {
+  color: var(--accent-gold);
+}
+
+.app-menu-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.app-menu-item {
+  display: block;
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.app-menu-item:hover,
+.app-menu-item:active {
+  background: rgba(201, 164, 67, 0.09);
+  border-color: var(--border-gold-soft);
+}
+
+.app-menu-divider {
+  height: 1px;
+  background: var(--border-gold-soft);
+  margin: var(--space-2) var(--space-3);
+}
+
+.app-menu-logout {
+  flex-shrink: 0;
+  margin: var(--space-3);
+  padding: var(--space-3);
+  min-height: var(--touch-min);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(160deg, var(--ruby-bright), var(--ruby-dark));
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(158, 9, 34, 0.35);
+}
+
+/* In dashboard il drawer mostra solo "Account e sincronizzazione" + "Esci":
+   le voci pensate per la scheda (manuale, export/import, torna alla lista)
+   non hanno senso finché non si è aperto un personaggio. */
+body.in-dashboard .app-menu-item[data-scope="scheda"],
+body.in-dashboard .app-menu-divider[data-scope="scheda"] {
+  display: none;
+}
+
+/* Icona hamburger riusata sia da #header-options sia da #dash-gear. */
+.hamburger-lines {
+  width: 18px;
+  height: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hamburger-lines span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--accent-gold);
+  border-radius: 2px;
+}

@@ -34,7 +34,7 @@ import {
       && window.AppStorage.isCharacterDeleted(id);
   }
 
-  var accountBtn = document.getElementById('opt-account');
+  var accountBtn = document.getElementById('menu-account');
 
   /* Cancello d'ingresso (Fase 1) + lucchetto Face ID (Step 1.3): stati sul
      body — vedi css/components/login.css */
@@ -462,9 +462,9 @@ import {
     if (dashUserEl && user) {
       dashUserEl.textContent = user.email;
     }
-    var gear = document.getElementById('header-options');
-    if (gear) {
-      gear.classList.toggle('cloud-on', !!user);
+    var menuEmailEl = document.getElementById('app-menu-email');
+    if (menuEmailEl) {
+      menuEmailEl.textContent = user ? user.email : '—';
     }
     setSyncStatus(lastSyncLabel);
     updateFaceIdBtnLabel();
@@ -484,7 +484,9 @@ import {
     setError('');
     refreshAccountUi();
     show(document.getElementById('account-modal'), true);
-    document.getElementById('options-panel').classList.add('hidden');
+    if (window.AppMenu) {
+      window.AppMenu.close();
+    }
   }
 
   function closeModal() {
@@ -587,9 +589,11 @@ import {
 
     var dashGear = document.getElementById('dash-gear');
     if (dashGear) {
-      dashGear.addEventListener('click', openModal);
+      dashGear.addEventListener('click', function () {
+        window.AppMenu.toggle();
+      });
     }
-    var optDashboard = document.getElementById('opt-dashboard');
+    var optDashboard = document.getElementById('menu-dashboard');
     if (optDashboard) {
       show(optDashboard, true);
       optDashboard.addEventListener('click', function () {
@@ -629,6 +633,16 @@ import {
     document.getElementById('acc-logout').addEventListener('click', function () {
       signOut(auth);
     });
+
+    var menuLogout = document.getElementById('menu-logout');
+    if (menuLogout) {
+      menuLogout.addEventListener('click', function () {
+        if (window.AppMenu) {
+          window.AppMenu.close();
+        }
+        signOut(auth);
+      });
+    }
 
     var faceidBtn = document.getElementById('acc-faceid');
     if (faceidBtn && window.AppFaceId && AppFaceId.isSupported()) {

@@ -278,9 +278,10 @@
     if (!btn) {
       return;
     }
-    // Mostra l'icona della vista in cui si andrebbe cliccando, non quella
-    // corrente (pattern comune per i toggle a icona singola).
-    btn.textContent = currentLayout() === 'list' ? '▦' : '☰';
+    // Etichetta testuale oltre al glifo: mostra la vista in cui si andrebbe
+    // cliccando (non quella corrente), così il pulsante spiega da solo a
+    // cosa serve invece di essere un'icona isolata poco chiara.
+    btn.textContent = currentLayout() === 'list' ? '▦ Griglia' : '▤ Elenco';
   }
 
   function toggleLayout() {
@@ -359,6 +360,80 @@
   if (layoutBtn) {
     layoutBtn.addEventListener('click', toggleLayout);
   }
+
+  /* ---------- swipe per aprire il menu ---------- */
+
+  // Swipe verso destra in un punto qualunque della dashboard (non solo sulle
+  // righe dei personaggi, che gestiscono già il proprio swipe a sinistra per
+  // eliminare): apre il menu senza dover toccare l'hamburger. Il gesto delle
+  // righe risponde solo a trascinamenti verso sinistra (dx clampato a <= 0 in
+  // openSwipe/closeSwipe sopra), quindi qui i due non si accavallano anche
+  // se il tocco parte sopra una riga.
+  (function bindMenuSwipe() {
+    var view = document.getElementById('view-dashboard');
+    if (!view) {
+      return;
+    }
+    var EDGE_MENU_DRAG = 130; // px di trascinamento per aprire del tutto il menu
+    var startX = 0, startY = 0, tracking = false, dragging = false;
+
+    view.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) {
+        return;
+      }
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      tracking = true;
+      dragging = false;
+    }, { passive: true });
+
+    view.addEventListener('touchmove', function (e) {
+      if (!tracking) {
+        return;
+      }
+      var dx = e.touches[0].clientX - startX;
+      var dy = e.touches[0].clientY - startY;
+      if (!dragging) {
+        if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) {
+          tracking = false; // gesto verticale: lascia scorrere la lista
+
+          return;
+        }
+        if (dx > 12 && dx > Math.abs(dy) * 1.2) {
+          dragging = true;
+        } else {
+          return;
+        }
+      }
+      // Il cassetto segue il dito man mano che si trascina, non solo di
+      // scatto al rilascio (altrimenti non si capisce se sta succedendo
+      // qualcosa).
+      if (window.AppMenu) {
+        window.AppMenu.dragTo(dx / EDGE_MENU_DRAG);
+      }
+    }, { passive: true });
+
+    function finish(e) {
+      if (!tracking) {
+        return;
+      }
+      tracking = false;
+      if (!dragging) {
+        return;
+      }
+      dragging = false;
+      var touch = e.changedTouches && e.changedTouches[0];
+      var dx = touch ? touch.clientX - startX : 0;
+      if (window.AppMenu) {
+        window.AppMenu.dragEnd(dx >= EDGE_MENU_DRAG * 0.4);
+      }
+    }
+
+    view.addEventListener('touchend', finish);
+    view.addEventListener('touchcancel', function (e) {
+      finish(e);
+    });
+  })();
 
   window.AppDashboard = {
     render: render,
