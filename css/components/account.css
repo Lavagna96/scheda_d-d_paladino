@@ -61,26 +61,6 @@
   justify-content: center;
 }
 
-.account-hint {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.45;
-  margin-bottom: var(--space-3);
-}
-
-.account-in {
-  display: block;
-  width: 100%;
-  min-height: 44px;
-  margin-bottom: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--bg-principal);
-  color: var(--text-primary);
-  font-size: 16px; /* >=16px: evita lo zoom automatico di iOS */
-}
-
 .account-actions {
   display: flex;
   gap: var(--space-2);
@@ -103,30 +83,10 @@
   cursor: pointer;
 }
 
-.account-btn.primary {
-  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
-  color: #241a08;
-  border-color: var(--accent-gold-dim);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
 .account-btn.danger {
   border-color: var(--ruby-bright);
   color: var(--ruby-bright);
   background: rgba(158, 9, 34, 0.12);
-}
-
-.account-link {
-  display: block;
-  margin: var(--space-3) auto 0;
-  padding: var(--space-1) var(--space-2);
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 12px;
-  text-decoration: underline;
-  cursor: pointer;
-  min-height: auto;
 }
 
 .account-user {

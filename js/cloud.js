@@ -452,8 +452,6 @@ import {
   }
 
   function refreshAccountUi() {
-    show(document.getElementById('account-logged-out'), !user);
-    show(document.getElementById('account-logged-in'), !!user);
     var emailEl = document.getElementById('acc-user-email');
     if (emailEl && user) {
       emailEl.textContent = user.email;
@@ -600,35 +598,6 @@ import {
         location.reload(); // niente skip flag: si riatterra sulla dashboard
       });
     }
-
-    document.getElementById('acc-login').addEventListener('click', function () {
-      setError('');
-      signInWithEmailAndPassword(auth,
-        document.getElementById('acc-email').value.trim(),
-        document.getElementById('acc-pass').value
-      ).catch(function (err) { setError(errorMessage(err)); });
-    });
-
-    document.getElementById('acc-register').addEventListener('click', function () {
-      setError('');
-      createUserWithEmailAndPassword(auth,
-        document.getElementById('acc-email').value.trim(),
-        document.getElementById('acc-pass').value
-      ).catch(function (err) { setError(errorMessage(err)); });
-    });
-
-    document.getElementById('acc-forgot').addEventListener('click', function () {
-      setError('');
-      var email = document.getElementById('acc-email').value.trim();
-      if (!email) {
-        setError('Scrivi la tua email qui sopra, poi ripremi.');
-
-        return;
-      }
-      sendPasswordResetEmail(auth, email).then(function () {
-        setError('Email di recupero inviata ✓');
-      }).catch(function (err) { setError(errorMessage(err)); });
-    });
 
     document.getElementById('acc-logout').addEventListener('click', function () {
       signOut(auth);
