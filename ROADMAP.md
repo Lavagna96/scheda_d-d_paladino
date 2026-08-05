@@ -111,11 +111,35 @@
   lista del Chierico" e la nota del talento per esteso, pacchetto A "Kit
   del tempio: ... 8 mo" + B "50 mo"; tripla non-regressione, Talenti (17),
   Specie (10) e Incantesimi (8 chip) invariati; console pulita.
-  **Con Talenti/Specie/Background tutti fatti, il sottopannello Manuale
-  copre ora 4 sezioni** (con Incantesimi). Prossimo passo aperto: non
-  c'è più un candidato ovvio segnalato da Andrea — chiedere se ce n'è
-  un altro (es. Classi, con privilegi 1→20, il dato più corposo rimasto
-  fuori) o se il filone Manuale si considera chiuso per ora.
+  **Sottopannello Manuale, sezione Classi** — FATTO (stesso giorno,
+  `?v=202`), su richiesta esplicita di Andrea. Nuova voce `classi` in
+  `SOURCES`: le 12 classi, ordinate alfabeticamente, sottotitolo "Dado
+  Vita · TS"; dettaglio col riepilogo in testa e **tutti i privilegi
+  1→20** raggruppati per livello (intestazione "N° livello" con la
+  stessa classe `.gloss-sec` già usata per i gruppi di riga nelle liste,
+  qui riusata dentro il foglio), + una riga finale con i nomi delle
+  sottoclassi (senza espanderne i privilegi: sono un secondo livello di
+  scelta con le sue stesse incognite architetturali già note — CA su due
+  caratteristiche, incantatori legati alla sottoclasse — fuori scope
+  qui). A differenza di Specie, le descrizioni dei privilegi di classe
+  **non hanno mai segnaposto `{{...}}`** (verificato con una grep sui
+  dati): vanno a schermo dirette, nessun `fillTemplate` necessario.
+  **Corretto in corsa un bug della sessione**: il filtro `trait !== false`
+  copiato da `js/traits.js` in `speciesData` escludeva anche contenuto
+  vero (l'unico caso, "Ascendenza Draconica" del Dragonide — quel flag lì
+  serve solo a non duplicare una card già mostrata altrove nella scheda
+  LIVE, qui non esiste nessuna scheda). Rimosso il filtro da Specie.
+  Verificato in locale: 12 classi in ordine alfabetico, dettaglio del
+  Paladino con 20 sezioni di livello/24 privilegi e la riga finale "Sotto
+  classi: Devozione, Gloria, Antichi, Vendetta"; Dragonide ora mostra
+  anche "Ascendenza Draconica. Drago progenitore: a scelta..."; quadrupla
+  non-regressione, Talenti (17)/Specie (10, +1 tratto dopo la correzione)/
+  Background (16)/Incantesimi (8 chip) invariati; console pulita.
+  **Con Incantesimi/Talenti/Specie/Background/Classi il sottopannello
+  Manuale copre tutte le sezioni di dati oggi modellate in
+  `manual-55.js`** (restano fuori solo le sottoclassi per esteso, un
+  problema distinto — vedi sopra). Prossimo passo aperto: nessun altro
+  candidato segnalato da Andrea per questo filone.
 - **Aggiornamento precedente:** 2026-07-31
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
   GitHub Pages. L'intera visione originale (login, dashboard multi-personaggio,

@@ -822,6 +822,11 @@
       window.AppMenu.close();
     });
 
+    document.getElementById('menu-classes').addEventListener('click', function () {
+      window.AppManualBrowse.open('classi');
+      window.AppMenu.close();
+    });
+
     document.getElementById('menu-export').addEventListener('click', function () {
       var state = window.AppStorage.getState();
       var data = JSON.stringify(state, null, 2);

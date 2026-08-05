@@ -70,8 +70,13 @@
     var rows = ids.map(function (id) {
       var sp = manual.species[id];
       var sub = 'Taglia ' + sp.size + ' · Velocità ' + sp.speedM.toLocaleString('it-IT') + ' m';
+      // A differenza di js/traits.js (che filtra trait:false per non
+      // duplicare card già mostrate altrove nella scheda live), qui non c'è
+      // una scheda: ogni tratto è contenuto vero del manuale, va mostrato
+      // tutto (es. l'Ascendenza Draconica del Dragonide, trait:false lì
+      // perché ridondante con un altro campo della scheda).
       var body = '<p class="sc-meta">' + sub + '</p>' +
-        sp.traits.filter(function (t) { return t.trait !== false; }).map(function (t) {
+        sp.traits.map(function (t) {
           return '<p class="sheet-desc"><b>' + t.name + '.</b> ' + fillTemplate(t.desc, ctx) + '</p>';
         }).join('');
 
@@ -139,7 +144,38 @@
     };
   }
 
-  var SOURCES = { talenti: featsData, specie: speciesData, background: backgroundsData };
+  function classesData() {
+    var manual = window.MANUAL_55 || { classes: {} };
+    var ids = Object.keys(manual.classes || {}).sort(function (a, b) {
+      return manual.classes[a].name.localeCompare(manual.classes[b].name, 'it');
+    });
+    var rows = ids.map(function (id) {
+      var k = manual.classes[id];
+      var sub = 'Dado Vita ' + k.hitDie + ' · TS ' + k.saves.join('/');
+      var body = '<p class="sc-meta">' + sub + '</p>';
+      var levels = Object.keys(k.levelFeatures || {}).map(Number).sort(function (a, b) { return a - b; });
+      levels.forEach(function (lvl) {
+        body += '<div class="gloss-sec">' + lvl + '° livello</div>';
+        k.levelFeatures[lvl].forEach(function (f) {
+          body += '<p class="sheet-desc"><b>' + f.name + '.</b> ' + f.desc + '</p>';
+        });
+      });
+      var subNames = Object.keys(k.subclasses || {}).map(function (s) { return k.subclasses[s].name; });
+      if (subNames.length) {
+        body += '<p class="sc-meta">Sottoclassi: ' + subNames.join(', ') + '</p>';
+      }
+
+      return { name: k.name, sub: sub, body: body };
+    });
+
+    return {
+      title: 'Manuale 5.5 — Classi',
+      hint: 'Tocca una classe per i privilegi 1→20',
+      groups: [{ label: 'Classi', rows: rows }]
+    };
+  }
+
+  var SOURCES = { talenti: featsData, specie: speciesData, background: backgroundsData, classi: classesData };
 
   function row(item) {
     var el = document.createElement('div');
