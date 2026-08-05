@@ -34,6 +34,9 @@
         overlay.classList.add('hidden');
       }, 250);
     }
+    // Alla riapertura si riparte sempre dalla lista principale, non da un
+    // sottopannello (Impostazioni/Manuale) rimasto aperto l'ultima volta.
+    showPanel('main');
   }
 
   function isOpen() {
@@ -105,6 +108,9 @@
         }, 250);
       }
     }
+    if (!shouldOpen) {
+      showPanel('main');
+    }
   }
 
   /* ---------- swipe per chiudere ---------- */
@@ -174,6 +180,31 @@
     menu.addEventListener('touchcancel', finish);
   }
 
+  /* ---------- sottopannelli (Impostazioni, Manuale) ---------- */
+
+  // Voci come "Impostazioni" o "Manuale" non escono dal cassetto: aprono un
+  // secondo pannello al posto della lista principale, con un bottone
+  // "← Indietro" per tornare. Un solo pannello visibile alla volta.
+  function showPanel(name) {
+    document.querySelectorAll('.app-menu-panel').forEach(function (p) {
+      p.classList.toggle('active', p.getAttribute('data-panel') === name);
+    });
+  }
+
+  function bindPanels() {
+    var settingsBtn = document.getElementById('menu-settings');
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', function () { showPanel('settings'); });
+    }
+    var manualRootBtn = document.getElementById('menu-manual-root');
+    if (manualRootBtn) {
+      manualRootBtn.addEventListener('click', function () { showPanel('manual'); });
+    }
+    document.querySelectorAll('.app-menu-back').forEach(function (btn) {
+      btn.addEventListener('click', function () { showPanel('main'); });
+    });
+  }
+
   function init() {
     var overlay = document.getElementById('app-menu-overlay');
     if (overlay) {
@@ -185,6 +216,7 @@
       }
     });
     bindSwipeClose();
+    bindPanels();
   }
 
   window.AppMenu = {

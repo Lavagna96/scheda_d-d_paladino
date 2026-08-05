@@ -1,9 +1,10 @@
 /*
  * Cassetto (drawer) di navigazione condiviso fra scheda e dashboard —
  * sostituisce sia #options-panel (dropdown dell'ingranaggio in header)
- * sia il click diretto di #dash-gear che apriva #account-modal. Un solo
- * componente, contenuto leggermente diverso in base al contesto (le voci
- * data-scope="scheda" spariscono in dashboard, vedi regola in fondo).
+ * sia il vecchio modale #account-modal (email/stato sync/Face ID, ora
+ * dentro qui). Un solo componente, contenuto leggermente diverso in base
+ * al contesto (le voci data-scope="scheda" spariscono in dashboard, vedi
+ * regola in fondo).
  */
 
 .app-menu-overlay {
@@ -69,13 +70,57 @@
   color: var(--accent-gold);
 }
 
-.app-menu-list {
+.app-menu-sync {
+  font-family: var(--font-title);
+  font-size: 10.5px;
+  letter-spacing: 0.4px;
+  color: var(--celest-bright);
+  margin-top: 4px;
+}
+
+/* Due livelli: la lista principale e i sottopannelli (Impostazioni,
+   Manuale) che scorrono al posto suo — un tap sulla voce apre il
+   sottopannello, "← Indietro" torna alla lista principale. Un solo
+   pannello visibile alla volta (.active), niente animazione di
+   scorrimento: il cassetto stesso è già animato, un secondo livello di
+   slide qui sarebbe eccessivo. */
+.app-menu-panels {
   flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.app-menu-panel {
+  display: none;
+  height: 100%;
   overflow-y: auto;
   padding: var(--space-2);
-  display: flex;
   flex-direction: column;
   gap: 3px;
+}
+
+.app-menu-panel.active {
+  display: flex;
+}
+
+.app-menu-back {
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.app-menu-static-item {
+  padding: var(--space-3);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.app-menu-static-item b {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-primary);
+  font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
 .app-menu-item {
@@ -119,9 +164,9 @@
   box-shadow: 0 6px 16px rgba(158, 9, 34, 0.35);
 }
 
-/* In dashboard il drawer mostra solo "Account e sincronizzazione" + "Esci":
-   le voci pensate per la scheda (manuale, export/import, torna alla lista)
-   non hanno senso finché non si è aperto un personaggio. */
+/* In dashboard il drawer mostra solo "Impostazioni" + "Esci": le voci
+   pensate per la scheda (manuale, export/import, torna alla lista) non
+   hanno senso finché non si è aperto un personaggio. */
 body.in-dashboard .app-menu-item[data-scope="scheda"],
 body.in-dashboard .app-menu-divider[data-scope="scheda"] {
   display: none;

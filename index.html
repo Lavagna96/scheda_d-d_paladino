@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=193">
+<link rel="stylesheet" href="css/styles.css?v=195">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -782,24 +782,6 @@
   <button type="button" class="gloss-foot-link" id="free-spells-resources-link">Risorse personalizzate →</button>
 </div>
 
-<div id="account-modal" class="account-modal hidden" role="dialog" aria-modal="true" aria-label="Account e sincronizzazione">
-  <div class="account-card">
-    <button type="button" class="account-close" id="account-close" aria-label="Chiudi">✕</button>
-    <h2 class="account-title">Account</h2>
-
-    <div id="account-logged-in">
-      <p class="account-user">Connesso come <b id="acc-user-email"></b></p>
-      <p class="account-sync" id="acc-sync-status">—</p>
-      <div class="account-actions">
-        <button type="button" id="acc-faceid" class="account-btn hidden">Attiva sblocco con Face ID</button>
-        <button type="button" id="acc-logout" class="account-btn danger">Esci</button>
-      </div>
-    </div>
-
-    <p class="account-error" id="acc-error" aria-live="polite"></p>
-  </div>
-</div>
-
 <div id="avatar-modal" class="avatar-modal hidden" role="dialog" aria-modal="true" aria-label="Ritratto del personaggio">
   <button type="button" class="avatar-modal-close" id="avatar-modal-close" aria-label="Chiudi">✕</button>
   <figure class="avatar-frame">
@@ -824,43 +806,55 @@
       <path d="M50 26 l6 12 13 2-9.5 9 2 13L50 56l-11.5 6 2-13L31 40l13-2z" fill="#c9a443"/>
     </svg>
     <p class="app-menu-account">Connesso come<br><b id="app-menu-email">—</b></p>
+    <p class="app-menu-sync" id="app-menu-sync">—</p>
   </div>
-  <nav class="app-menu-list">
-    <button type="button" class="app-menu-item" id="menu-dashboard" data-scope="scheda">I tuoi personaggi</button>
-    <button type="button" class="app-menu-item" id="menu-account">Account e sincronizzazione</button>
-    <button type="button" class="app-menu-item" id="menu-manual" data-scope="scheda">Manuale 5.5</button>
-    <div class="app-menu-divider" data-scope="scheda"></div>
-    <button type="button" class="app-menu-item" id="menu-export" data-scope="scheda">Esporta JSON</button>
-    <button type="button" class="app-menu-item" id="menu-import" data-scope="scheda">Importa JSON</button>
-  </nav>
+  <div class="app-menu-panels">
+    <nav class="app-menu-panel active" data-panel="main">
+      <button type="button" class="app-menu-item" id="menu-dashboard" data-scope="scheda">I tuoi personaggi</button>
+      <button type="button" class="app-menu-item" id="menu-settings">Impostazioni</button>
+      <button type="button" class="app-menu-item" id="menu-manual-root" data-scope="scheda">Manuale</button>
+      <div class="app-menu-divider" data-scope="scheda"></div>
+      <button type="button" class="app-menu-item" id="menu-export" data-scope="scheda">Esporta JSON</button>
+      <button type="button" class="app-menu-item" id="menu-import" data-scope="scheda">Importa JSON</button>
+    </nav>
+    <nav class="app-menu-panel" data-panel="settings">
+      <button type="button" class="app-menu-item app-menu-back" data-back>← Indietro</button>
+      <div class="app-menu-static-item">Email<br><b id="menu-settings-email">—</b></div>
+      <button type="button" class="app-menu-item hidden" id="menu-faceid">Attiva sblocco con Face ID</button>
+    </nav>
+    <nav class="app-menu-panel" data-panel="manual">
+      <button type="button" class="app-menu-item app-menu-back" data-back>← Indietro</button>
+      <button type="button" class="app-menu-item" id="menu-manual">Incantesimi</button>
+    </nav>
+  </div>
   <button type="button" class="app-menu-logout" id="menu-logout">Esci</button>
 </aside>
 
-<script src="js/firebase-config.js?v=193"></script>
-<script src="js/manual-55.js?v=193"></script>
-<script src="js/config.js?v=193"></script>
-<script src="js/storage.js?v=193"></script>
-<script src="js/engine.js?v=193"></script>
-<script src="js/hp-bar.js?v=193"></script>
-<script src="js/header.js?v=193"></script>
-<script src="js/stats.js?v=193"></script>
-<script src="js/traits.js?v=193"></script>
-<script src="js/sheet.js?v=193"></script>
-<script src="js/grimorio.js?v=193"></script>
-<script src="js/grimorio-advanced.js?v=193"></script>
-<script src="js/treasury.js?v=193"></script>
-<script src="js/diary.js?v=193"></script>
-<script src="js/inspiration.js?v=193"></script>
-<script src="js/bottom-sheet.js?v=193"></script>
-<script src="js/edit-sheet.js?v=193"></script>
-<script src="js/items.js?v=193"></script>
-<script src="js/levelup.js?v=193"></script>
-<script src="js/menu.js?v=193"></script>
-<script src="js/app.js?v=193"></script>
-<script src="js/faceid.js?v=193"></script>
-<script src="js/dashboard.js?v=193"></script>
-<script src="js/create.js?v=193"></script>
-<script src="js/portrait.js?v=193"></script>
-<script type="module" src="js/cloud.js?v=193"></script>
+<script src="js/firebase-config.js?v=195"></script>
+<script src="js/manual-55.js?v=195"></script>
+<script src="js/config.js?v=195"></script>
+<script src="js/storage.js?v=195"></script>
+<script src="js/engine.js?v=195"></script>
+<script src="js/hp-bar.js?v=195"></script>
+<script src="js/header.js?v=195"></script>
+<script src="js/stats.js?v=195"></script>
+<script src="js/traits.js?v=195"></script>
+<script src="js/sheet.js?v=195"></script>
+<script src="js/grimorio.js?v=195"></script>
+<script src="js/grimorio-advanced.js?v=195"></script>
+<script src="js/treasury.js?v=195"></script>
+<script src="js/diary.js?v=195"></script>
+<script src="js/inspiration.js?v=195"></script>
+<script src="js/bottom-sheet.js?v=195"></script>
+<script src="js/edit-sheet.js?v=195"></script>
+<script src="js/items.js?v=195"></script>
+<script src="js/levelup.js?v=195"></script>
+<script src="js/menu.js?v=195"></script>
+<script src="js/app.js?v=195"></script>
+<script src="js/faceid.js?v=195"></script>
+<script src="js/dashboard.js?v=195"></script>
+<script src="js/create.js?v=195"></script>
+<script src="js/portrait.js?v=195"></script>
+<script type="module" src="js/cloud.js?v=195"></script>
 </body>
 </html>

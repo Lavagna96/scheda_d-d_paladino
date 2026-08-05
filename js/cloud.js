@@ -34,8 +34,6 @@ import {
       && window.AppStorage.isCharacterDeleted(id);
   }
 
-  var accountBtn = document.getElementById('menu-account');
-
   /* Cancello d'ingresso (Fase 1) + lucchetto Face ID (Step 1.3): stati sul
      body — vedi css/components/login.css */
   function setAuthPhase(phase) {
@@ -80,7 +78,7 @@ import {
 
   function setSyncStatus(label) {
     lastSyncLabel = label;
-    var el = document.getElementById('acc-sync-status');
+    var el = document.getElementById('app-menu-sync');
     if (el) {
       el.textContent = label;
     }
@@ -444,18 +442,7 @@ import {
     }
   }
 
-  function setError(msg) {
-    var el = document.getElementById('acc-error');
-    if (el) {
-      el.textContent = msg || '';
-    }
-  }
-
   function refreshAccountUi() {
-    var emailEl = document.getElementById('acc-user-email');
-    if (emailEl && user) {
-      emailEl.textContent = user.email;
-    }
     var dashUserEl = document.getElementById('dash-user');
     if (dashUserEl && user) {
       dashUserEl.textContent = user.email;
@@ -464,31 +451,22 @@ import {
     if (menuEmailEl) {
       menuEmailEl.textContent = user ? user.email : '—';
     }
+    var settingsEmailEl = document.getElementById('menu-settings-email');
+    if (settingsEmailEl) {
+      settingsEmailEl.textContent = user ? user.email : '—';
+    }
     setSyncStatus(lastSyncLabel);
     updateFaceIdBtnLabel();
   }
 
   function updateFaceIdBtnLabel() {
-    var btn = document.getElementById('acc-faceid');
+    var btn = document.getElementById('menu-faceid');
     if (!btn || btn.classList.contains('hidden')) {
       return;
     }
     btn.textContent = window.AppFaceId && AppFaceId.isEnabled()
       ? 'Disattiva sblocco con Face ID'
       : 'Attiva sblocco con Face ID';
-  }
-
-  function openModal() {
-    setError('');
-    refreshAccountUi();
-    show(document.getElementById('account-modal'), true);
-    if (window.AppMenu) {
-      window.AppMenu.close();
-    }
-  }
-
-  function closeModal() {
-    show(document.getElementById('account-modal'), false);
   }
 
   /* ---------- vista di login ---------- */
@@ -575,16 +553,6 @@ import {
   }
 
   function bindUi() {
-    show(accountBtn, true);
-    accountBtn.addEventListener('click', openModal);
-    document.getElementById('account-close').addEventListener('click', closeModal);
-    var modal = document.getElementById('account-modal');
-    modal.addEventListener('click', function (e) {
-      if (e.target === modal) {
-        closeModal();
-      }
-    });
-
     var dashGear = document.getElementById('dash-gear');
     if (dashGear) {
       dashGear.addEventListener('click', function () {
@@ -599,10 +567,6 @@ import {
       });
     }
 
-    document.getElementById('acc-logout').addEventListener('click', function () {
-      signOut(auth);
-    });
-
     var menuLogout = document.getElementById('menu-logout');
     if (menuLogout) {
       menuLogout.addEventListener('click', function () {
@@ -613,7 +577,7 @@ import {
       });
     }
 
-    var faceidBtn = document.getElementById('acc-faceid');
+    var faceidBtn = document.getElementById('menu-faceid');
     if (faceidBtn && window.AppFaceId && AppFaceId.isSupported()) {
       AppFaceId.checkPlatformAuthenticator().then(function (hasAuthenticator) {
         if (hasAuthenticator) {
@@ -622,7 +586,6 @@ import {
         }
       });
       faceidBtn.addEventListener('click', function () {
-        setError('');
         if (AppFaceId.isEnabled()) {
           AppFaceId.disable();
           updateFaceIdBtnLabel();
@@ -630,7 +593,7 @@ import {
           AppFaceId.enable(user.uid, user.email).then(function () {
             updateFaceIdBtnLabel();
           }).catch(function (err) {
-            setError('Face ID non attivato: ' + ((err && err.message) || 'errore sconosciuto'));
+            alert('Face ID non attivato: ' + ((err && err.message) || 'errore sconosciuto'));
           });
         }
       });
