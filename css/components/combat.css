@@ -1,5 +1,6 @@
-.combat-stats-band {
-  display: flex;
+.combat-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1.35fr;
   align-items: stretch;
   gap: var(--space-2);
   margin-bottom: var(--space-3);
@@ -31,104 +32,20 @@
   margin-top: 4px;
 }
 
-.combat-left {
-  flex: 0 0 80px;
+.cs-tile {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.combat-stat-init {
-  flex: 1 1 auto;
   text-align: center;
-  padding: var(--space-3) var(--space-2);
+  padding: var(--space-2) var(--space-1);
   border-radius: var(--radius-md);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.insp-tile {
-  flex: 0 0 auto;
+  background: var(--bg-stat-tile);
+  border: 1px solid var(--border-gold-soft);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: var(--space-2) var(--space-1);
-  border: 1px solid var(--border-gold);
-  background: var(--bg-stat-tile);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  color: var(--text-secondary);
 }
 
-.insp-tile .insp-star {
-  font-size: 20px;
-  line-height: 1;
-  color: var(--text-secondary);
-  transition: color 0.2s ease, text-shadow 0.2s ease;
-}
-
-.insp-tile .insp-lab {
-  font-family: var(--font-title);
-  font-size: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  transition: color 0.2s ease;
-}
-
-.insp-tile.active {
-  border-color: var(--accent-gold);
-  background: rgba(201, 164, 67, 0.12);
-  box-shadow: 0 0 10px rgba(201, 164, 67, 0.22), var(--shadow-sm);
-}
-
-.insp-tile.active .insp-star {
-  color: var(--accent-gold);
-  text-shadow: 0 0 8px rgba(201, 164, 67, 0.65);
-}
-
-.insp-tile.active .insp-lab {
-  color: var(--accent-gold);
-}
-
-.combat-stat-init .big {
-  font-family: var(--font-title);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--accent-gold);
-  line-height: 1.1;
-}
-
-.combat-stat-init .lab {
-  font-family: var(--font-title);
-  font-size: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  margin-top: var(--space-1);
-}
-
-.combat-stat-init .sub {
-  font-size: 9px;
-  color: var(--text-secondary);
-  margin-top: 2px;
-  font-style: italic;
-  line-height: 1.2;
-}
-
-.combat-stat-speed {
-  flex: 0 0 auto;
-  text-align: center;
-  padding: var(--space-2) var(--space-1);
-  border-radius: var(--radius-md);
-}
-
-.combat-stat-speed .big {
+.cs-tile .big {
   font-family: var(--font-title);
   font-size: 16px;
   font-weight: 700;
@@ -136,106 +53,135 @@
   line-height: 1.1;
 }
 
-.combat-stat-speed .lab {
+.cs-tile .lab {
   font-family: var(--font-title);
-  font-size: 8px;
+  font-size: 7px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   color: var(--text-secondary);
-  margin-top: var(--space-1);
+  margin-top: 2px;
 }
 
-/* ===== Cartiglio CA + Tiri Morte (medaglione) ===== */
-.combat-stats-core {
-  flex: 1;
-  min-width: 0;
-  position: relative;
-  padding: 21px var(--space-3) var(--space-2);
-  border-radius: var(--radius-lg);
-  background:
-    radial-gradient(ellipse at 50% 42%, rgba(158, 9, 34, 0.16), rgba(158, 9, 34, 0) 60%),
-    var(--bg-stat-tile);
-  box-shadow:
-    0 2px 12px rgba(0, 0, 0, 0.32),
-    inset 0 0 0 1px rgba(201, 164, 67, 0.16),
-    inset 0 0 26px rgba(158, 9, 34, 0.08);
+.cs-init .sub {
+  font-size: 8px;
+  color: var(--text-secondary);
+  margin-top: 1px;
+  font-style: italic;
+  line-height: 1.15;
 }
 
-/* anello dorato metallico della cornice */
-.combat-stats-core::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-lg);
-  padding: 2px;
-  background: linear-gradient(145deg, #f2d889 0%, #c9a443 26%, #8a6820 50%, #c9a443 74%, #f2d889 100%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
+.cs-insp {
+  gap: 2px;
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  color: var(--text-secondary);
 }
 
-.ds-frame-title {
-  position: absolute;
-  top: 5px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  pointer-events: none;
+.cs-insp .insp-star {
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-secondary);
+  transition: color 0.2s ease, text-shadow 0.2s ease;
 }
 
-.ds-frame-title span {
-  position: relative;
-  font-family: var(--font-title);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+.cs-insp.active {
+  border-color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.12);
+  box-shadow: 0 0 8px rgba(201, 164, 67, 0.22), var(--shadow-sm);
+}
+
+.cs-insp.active .insp-star {
   color: var(--accent-gold);
-  padding: 0 20px;
+  text-shadow: 0 0 6px rgba(201, 164, 67, 0.65);
 }
 
-.ds-frame-title span::before,
-.ds-frame-title span::after {
-  content: "◆";
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 6px;
-  color: var(--accent-gold-dim);
+.cs-insp.active .lab {
+  color: var(--accent-gold);
 }
 
-.ds-frame-title span::before {
-  left: 4px;
-}
-
-.ds-frame-title span::after {
-  right: 4px;
-}
-
-.ac-ds-medallion {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-}
-
-/* ali tiri morte: gemme verticali */
-.ds-wing {
-  flex: 0 0 auto;
+/* ===== distintivo CA: scudo araldico col numero dentro, senza tessera propria ===== */
+.cs-ac-wrap {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  gap: 2px;
+}
+
+.cs-ac-badge {
+  position: relative;
+  line-height: 0;
+}
+
+.cs-ac-shield {
+  width: 60px;
+  height: 68px;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+.cs-ac-val {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-title);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.cs-ac-lab {
+  font-family: var(--font-title);
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary);
+}
+
+/* ===== Tiri Morte: tessera compatta a due righe ===== */
+.cs-ds {
+  position: relative;
+  min-width: 0;
+  gap: 3px;
+}
+
+.cs-ds-title {
+  font-family: var(--font-title);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+}
+
+.cs-ds .ds-reset {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
+  min-height: 15px;
+  font-size: 8px;
+}
+
+.cs-ds-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .ds-wing-lab {
   font-family: var(--font-title);
-  font-size: 8px;
+  font-size: 7px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.4px;
 }
 
 .ds-wing-lab-fail {
@@ -248,35 +194,34 @@
 
 .ds-pips {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  gap: 3px;
 }
 
 .ds-pip {
   position: relative;
-  width: 28px;
-  height: 24px;
-  min-width: 28px;
-  min-height: 24px;
+  width: 13px;
+  height: 11px;
+  min-width: 13px;
+  min-height: 11px;
   padding: 0;
   border-radius: 50%;
   cursor: pointer;
-  border: 1.5px solid #8a6820;
+  border: 1.2px solid #8a6820;
   background: radial-gradient(circle at 50% 32%, #2c2522, #14100e 78%);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.7),
-    inset 0 -1px 2px rgba(255, 255, 255, 0.05),
-    0 1px 1px rgba(0, 0, 0, 0.3);
+    inset 0 1px 2px rgba(0, 0, 0, 0.7),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.05);
 }
 
 /* lucentezza cabochon sulle gemme accese */
 .ds-pip.filled::after {
   content: "";
   position: absolute;
-  top: 3px;
-  left: 6px;
-  width: 8px;
-  height: 5px;
+  top: 1.5px;
+  left: 2.5px;
+  width: 4px;
+  height: 2.5px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
   transform: rotate(-18deg);
@@ -285,88 +230,13 @@
 .ds-fail .ds-pip.filled {
   border-color: #e8c96a;
   background: radial-gradient(circle at 42% 30%, #ff7c92 0%, #e8324f 32%, #9e0922 64%, #4a0612 100%);
-  box-shadow:
-    0 0 9px rgba(204, 36, 64, 0.6),
-    inset 0 2px 3px rgba(255, 255, 255, 0.35),
-    inset 0 -2px 3px rgba(74, 6, 18, 0.55);
+  box-shadow: 0 0 6px rgba(204, 36, 64, 0.6);
 }
 
 .ds-success .ds-pip.filled {
   border-color: #e8c96a;
   background: radial-gradient(circle at 42% 30%, #86e6ba 0%, #2fae7c 32%, #1a7a55 64%, #0d3a28 100%);
-  box-shadow:
-    0 0 9px rgba(45, 148, 112, 0.55),
-    inset 0 2px 3px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 3px rgba(13, 58, 40, 0.55);
-}
-
-/* ===== gemma CA centrale ===== */
-.ac-ruby-wrap {
-  position: relative;
-  flex: 0 0 auto;
-  text-align: center;
-  line-height: 0;
-}
-
-.ac-ruby-gem-box {
-  position: relative;
-  width: 82px;
-  height: 90px;
-  margin: 0 auto;
-}
-
-.ac-ruby-gem-box::before {
-  content: "";
-  position: absolute;
-  inset: -8px -4px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 42%, rgba(255, 120, 140, 0.32), rgba(158, 9, 34, 0) 70%);
-  pointer-events: none;
-}
-
-.ac-ruby-art {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.ac-ruby-val {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  transform: translate(-50%, -50%);
-  font-family: var(--font-title);
-  font-size: 26px;
-  font-weight: 700;
-  color: #fff0dc;
-  line-height: 1;
-  text-shadow:
-    0 0 12px rgba(255, 120, 140, 0.45),
-    0 2px 4px rgba(0, 0, 0, 0.65);
-  pointer-events: none;
-}
-
-.ac-ruby-meta {
-  text-align: center;
-  line-height: 1.25;
-  margin-top: var(--space-1);
-}
-
-.ac-ruby-lab {
-  display: block;
-  font-family: var(--font-title);
-  font-size: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--accent-gold);
-}
-
-.ac-ruby-sub {
-  display: block;
-  font-size: 9px;
-  color: var(--text-secondary);
-  font-style: italic;
+  box-shadow: 0 0 6px rgba(45, 148, 112, 0.55);
 }
 
 /* reset tiri morte */
@@ -399,13 +269,13 @@
 
 .death-status {
   font-family: var(--font-title);
-  font-size: 9px;
+  font-size: 7px;
   font-weight: 600;
-  letter-spacing: 0.3px;
-  min-height: 12px;
-  margin-top: var(--space-1);
+  letter-spacing: 0.2px;
+  min-height: 9px;
+  margin-top: 1px;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .death-status.stable {

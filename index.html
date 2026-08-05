@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=202">
+<link rel="stylesheet" href="css/styles.css?v=207">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -166,93 +166,46 @@
 
     <!-- Info/Comb -->
     <div class="subpanel active" data-subpanel="comb">
-      <div class="combat-stats-band">
-        <div class="combat-left">
-          <div class="combat-stat-init">
-            <div class="big" id="combat-init">—</div>
-            <div class="lab">Iniziativa</div>
-            <div class="sub" id="combat-init-note"></div>
-          </div>
-          <button type="button" class="insp-tile" id="insp-badge" aria-label="Ispirazione" aria-pressed="false">
-            <span class="insp-star" id="insp-star">☆</span>
-            <span class="insp-lab">Ispirazione</span>
-          </button>
-          <div class="combat-stat-speed">
-            <div class="big" id="combat-speed">—</div>
-            <div class="lab">Velocità</div>
-          </div>
+      <div class="combat-stats-row">
+        <div class="cs-tile cs-init">
+          <div class="big" id="combat-init">—</div>
+          <div class="lab">Iniziativa</div>
+          <div class="sub" id="combat-init-note"></div>
         </div>
-        <div class="combat-stats-core ac-ds-frame">
-          <div class="ds-frame-title"><span>Tiri Morte</span></div>
+        <button type="button" class="cs-tile cs-insp" id="insp-badge" aria-label="Ispirazione" aria-pressed="false">
+          <span class="insp-star" id="insp-star">☆</span>
+          <span class="lab">Ispiraz.</span>
+        </button>
+        <div class="cs-ac-wrap" aria-label="Classe Armatura">
+          <div class="cs-ac-badge">
+            <svg class="cs-ac-shield" viewBox="0 0 40 46" aria-hidden="true" focusable="false">
+              <defs>
+                <linearGradient id="acShieldFill" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#3a332a"/>
+                  <stop offset="100%" stop-color="#1c1712"/>
+                </linearGradient>
+              </defs>
+              <path d="M20 1.5 L37 8 V22 C37 33 30 41 20 44.5 C10 41 3 33 3 22 V8 Z" fill="url(#acShieldFill)" stroke="#c9a443" stroke-width="1.6" stroke-linejoin="round"/>
+            </svg>
+            <span class="cs-ac-val" id="combat-ac">—</span>
+          </div>
+          <span class="cs-ac-lab">CA</span>
+          <span class="sr-only" id="combat-ac-note"></span>
+        </div>
+        <div class="cs-tile cs-speed">
+          <div class="big" id="combat-speed">—</div>
+          <div class="lab">Velocità</div>
+        </div>
+        <div class="cs-tile cs-ds">
+          <span class="cs-ds-title">Tiri Morte</span>
           <button type="button" class="ds-reset" id="death-reset" aria-label="Azzera tiri morte">↺</button>
-          <div class="ac-ds-medallion">
-            <div class="ds-wing">
-              <span class="ds-wing-lab ds-wing-lab-fail">Fall.</span>
-              <div class="ds-pips ds-fail" id="ds-fail-bar" role="group" aria-label="Fallimenti tiri morte"></div>
-            </div>
-            <div class="ac-ruby-wrap" aria-label="Classe Armatura">
-              <div class="ac-ruby-gem-box">
-                <svg class="ac-ruby-art" viewBox="28 2 80 88" aria-hidden="true" focusable="false">
-                <defs>
-                  <linearGradient id="acRubyDeep" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ff8a9a"/>
-                    <stop offset="22%" stop-color="#e8324f"/>
-                    <stop offset="55%" stop-color="#9e0922"/>
-                    <stop offset="100%" stop-color="#4a0612"/>
-                  </linearGradient>
-                  <linearGradient id="acRubyMid" x1="20%" y1="0%" x2="80%" y2="100%">
-                    <stop offset="0%" stop-color="#ff6b82"/>
-                    <stop offset="100%" stop-color="#7a0818"/>
-                  </linearGradient>
-                  <linearGradient id="acRubyLight" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="rgba(255,255,255,0.65)"/>
-                    <stop offset="45%" stop-color="rgba(255,220,220,0.15)"/>
-                    <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-                  </linearGradient>
-                  <linearGradient id="acRubyTable" x1="50%" y1="0%" x2="50%" y2="100%">
-                    <stop offset="0%" stop-color="rgba(255,245,235,0.55)"/>
-                    <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-                  </linearGradient>
-                  <linearGradient id="acGoldBezel" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#e8c96a"/>
-                    <stop offset="50%" stop-color="#c9a443"/>
-                    <stop offset="100%" stop-color="#8a6820"/>
-                  </linearGradient>
-                  <filter id="acRubyGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#9e0922" flood-opacity="0.55"/>
-                  </filter>
-                </defs>
-                <g filter="url(#acRubyGlow)">
-                  <path d="M68 5 L96 18 L106 44 L90 74 L68 87 L46 74 L30 44 L40 18 Z" fill="url(#acRubyDeep)" stroke="url(#acGoldBezel)" stroke-width="1.2" stroke-linejoin="round"/>
-                  <path d="M68 5 L96 18 L68 24 L40 18 Z" fill="url(#acRubyTable)"/>
-                  <path d="M68 5 L78 8 L68 24 L58 8 Z" fill="url(#acRubyLight)" opacity="0.85"/>
-                  <path d="M68 24 L96 18 L106 44 L68 52 Z" fill="url(#acRubyMid)" opacity="0.55"/>
-                  <path d="M68 24 L40 18 L30 44 L68 52 Z" fill="#7a0818" opacity="0.35"/>
-                  <path d="M68 52 L106 44 L90 74 L68 87 Z" fill="#5a0612" opacity="0.45"/>
-                  <path d="M68 52 L30 44 L46 74 L68 87 Z" fill="#8a1028" opacity="0.4"/>
-                  <path d="M68 24 L68 87" stroke="rgba(255,255,255,0.14)" stroke-width="0.65"/>
-                  <path d="M40 18 L96 44" stroke="rgba(255,255,255,0.1)" stroke-width="0.55"/>
-                  <path d="M96 18 L40 44" stroke="rgba(0,0,0,0.28)" stroke-width="0.55"/>
-                  <path d="M68 24 L40 18" stroke="rgba(255,255,255,0.18)" stroke-width="0.5"/>
-                  <path d="M68 24 L96 18" stroke="rgba(255,255,255,0.18)" stroke-width="0.5"/>
-                  <path d="M68 24 L30 44" stroke="rgba(0,0,0,0.22)" stroke-width="0.5"/>
-                  <path d="M68 24 L106 44" stroke="rgba(0,0,0,0.22)" stroke-width="0.5"/>
-                  <path d="M68 52 L90 74" stroke="rgba(0,0,0,0.25)" stroke-width="0.5"/>
-                  <path d="M68 52 L46 74" stroke="rgba(0,0,0,0.25)" stroke-width="0.5"/>
-                  <ellipse cx="58" cy="14" rx="5" ry="2.2" fill="rgba(255,255,255,0.35)" transform="rotate(-18 58 14)"/>
-                </g>
-              </svg>
-              <span class="ac-ruby-val" id="combat-ac">—</span>
-              </div>
-              <div class="ac-ruby-meta">
-                <span class="ac-ruby-lab">Classe Armatura</span>
-                <span class="ac-ruby-sub" id="combat-ac-note"></span>
-              </div>
-            </div>
-            <div class="ds-wing">
-              <span class="ds-wing-lab ds-wing-lab-succ">Succ.</span>
-              <div class="ds-pips ds-success" id="ds-success-bar" role="group" aria-label="Successi tiri morte"></div>
-            </div>
+          <div class="cs-ds-row">
+            <span class="ds-wing-lab ds-wing-lab-fail">F</span>
+            <div class="ds-pips ds-fail" id="ds-fail-bar" role="group" aria-label="Fallimenti tiri morte"></div>
+          </div>
+          <div class="cs-ds-row">
+            <span class="ds-wing-lab ds-wing-lab-succ">S</span>
+            <div class="ds-pips ds-success" id="ds-success-bar" role="group" aria-label="Successi tiri morte"></div>
           </div>
           <div class="death-status" id="death-status" aria-live="polite"></div>
         </div>
@@ -877,33 +830,33 @@
   <button type="button" class="app-menu-logout" id="menu-logout">Esci</button>
 </aside>
 
-<script src="js/firebase-config.js?v=202"></script>
-<script src="js/manual-55.js?v=202"></script>
-<script src="js/config.js?v=202"></script>
-<script src="js/storage.js?v=202"></script>
-<script src="js/engine.js?v=202"></script>
-<script src="js/hp-bar.js?v=202"></script>
-<script src="js/header.js?v=202"></script>
-<script src="js/stats.js?v=202"></script>
-<script src="js/traits.js?v=202"></script>
-<script src="js/sheet.js?v=202"></script>
-<script src="js/grimorio.js?v=202"></script>
-<script src="js/grimorio-advanced.js?v=202"></script>
-<script src="js/manual-browse.js?v=202"></script>
-<script src="js/treasury.js?v=202"></script>
-<script src="js/diary.js?v=202"></script>
-<script src="js/inspiration.js?v=202"></script>
-<script src="js/bottom-sheet.js?v=202"></script>
-<script src="js/edit-sheet.js?v=202"></script>
-<script src="js/items.js?v=202"></script>
-<script src="js/equip.js?v=202"></script>
-<script src="js/levelup.js?v=202"></script>
-<script src="js/menu.js?v=202"></script>
-<script src="js/app.js?v=202"></script>
-<script src="js/faceid.js?v=202"></script>
-<script src="js/dashboard.js?v=202"></script>
-<script src="js/create.js?v=202"></script>
-<script src="js/portrait.js?v=202"></script>
-<script type="module" src="js/cloud.js?v=202"></script>
+<script src="js/firebase-config.js?v=207"></script>
+<script src="js/manual-55.js?v=207"></script>
+<script src="js/config.js?v=207"></script>
+<script src="js/storage.js?v=207"></script>
+<script src="js/engine.js?v=207"></script>
+<script src="js/hp-bar.js?v=207"></script>
+<script src="js/header.js?v=207"></script>
+<script src="js/stats.js?v=207"></script>
+<script src="js/traits.js?v=207"></script>
+<script src="js/sheet.js?v=207"></script>
+<script src="js/grimorio.js?v=207"></script>
+<script src="js/grimorio-advanced.js?v=207"></script>
+<script src="js/manual-browse.js?v=207"></script>
+<script src="js/treasury.js?v=207"></script>
+<script src="js/diary.js?v=207"></script>
+<script src="js/inspiration.js?v=207"></script>
+<script src="js/bottom-sheet.js?v=207"></script>
+<script src="js/edit-sheet.js?v=207"></script>
+<script src="js/items.js?v=207"></script>
+<script src="js/equip.js?v=207"></script>
+<script src="js/levelup.js?v=207"></script>
+<script src="js/menu.js?v=207"></script>
+<script src="js/app.js?v=207"></script>
+<script src="js/faceid.js?v=207"></script>
+<script src="js/dashboard.js?v=207"></script>
+<script src="js/create.js?v=207"></script>
+<script src="js/portrait.js?v=207"></script>
+<script type="module" src="js/cloud.js?v=207"></script>
 </body>
 </html>
