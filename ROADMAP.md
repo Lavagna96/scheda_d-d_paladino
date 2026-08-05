@@ -91,10 +91,31 @@
   Trucchetto: del retaggio scelto..." (testo naturale, non un segnaposto
   rotto a schermo); doppia non-regressione, Talenti (17 righe/3 categorie)
   e Incantesimi (8 chip classe) invariati; console pulita.
-  **Prossimo passo:** Background, stesso pattern A — la sfida in più è che
-  un background dà 4 cose diverse (competenze, strumento, talento,
-  aumenti) invece di una lista di tratti, da riflettere nel sottotitolo/
-  corpo prima di implementare.
+  **Sottopannello Manuale, sezione Background** — FATTO (stesso giorno,
+  `?v=201`). Mostrato ad Andrea un mockup del dettaglio prima di
+  implementare (non le 3 alternative complete della regola CLAUDE.md: qui
+  il contenitore/stile era già deciso da Talenti/Specie, l'unica vera
+  decisione era quali campi includere), con una domanda aperta:
+  includere l'equipaggiamento iniziale (pacchetti A/B) nel dettaglio.
+  **Confermato di sì.** Nuova voce `background` in `SOURCES`: le 16 voci
+  di `manual-55.js`, ordinate alfabeticamente, sottotitolo di riga = le 2
+  competenze; dettaglio con 4 righe **Punteggi/Competenze/Strumenti/
+  Talento** — stesse identiche etichette già usate nel passo Background
+  del wizard di creazione (`create.js`, `renderDetail`) per coerenza col
+  resto dell'app, non inventate da zero — più una riga finale coi due
+  pacchetti di equipaggiamento (oggetti + monete). Punteggi non aveva un
+  equivalente testuale nel wizard (lì i 3 aumenti +1/+1/+1 si applicano
+  in automatico senza mostrare una riga dedicata): aggiunta nuova, stesso
+  stile delle altre tre. Verificato in locale: 16 background in ordine
+  alfabetico, dettaglio di "Accolito" con "Talento: Iniziato alla Magia —
+  lista del Chierico" e la nota del talento per esteso, pacchetto A "Kit
+  del tempio: ... 8 mo" + B "50 mo"; tripla non-regressione, Talenti (17),
+  Specie (10) e Incantesimi (8 chip) invariati; console pulita.
+  **Con Talenti/Specie/Background tutti fatti, il sottopannello Manuale
+  copre ora 4 sezioni** (con Incantesimi). Prossimo passo aperto: non
+  c'è più un candidato ovvio segnalato da Andrea — chiedere se ce n'è
+  un altro (es. Classi, con privilegi 1→20, il dato più corposo rimasto
+  fuori) o se il filone Manuale si considera chiuso per ora.
 - **Aggiornamento precedente:** 2026-07-31
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
   GitHub Pages. L'intera visione originale (login, dashboard multi-personaggio,

@@ -85,7 +85,61 @@
     };
   }
 
-  var SOURCES = { talenti: featsData, specie: speciesData };
+  var ABIL_NAMES = {
+    FOR: 'Forza', DES: 'Destrezza', COS: 'Costituzione',
+    INT: 'Intelligenza', SAG: 'Saggezza', CAR: 'Carisma'
+  };
+
+  function skillLabel(id) {
+    var s = ((window.AppEngine && window.AppEngine.SKILLS) || []).filter(function (x) { return x.id === id; })[0];
+
+    return s ? s.label : id;
+  }
+
+  function packLine(letter, pack) {
+    if (!pack) {
+      return '';
+    }
+    var parts = (pack.items || []).slice();
+    var mo = (pack.coins || {}).mo || 0;
+    if (mo) {
+      parts.push(mo + ' mo');
+    }
+
+    return letter + ' · ' + (pack.label ? pack.label + ': ' : '') + parts.join(', ');
+  }
+
+  function backgroundsData() {
+    var manual = window.MANUAL_55 || { backgrounds: {}, originFeats: {} };
+    var ids = Object.keys(manual.backgrounds || {}).sort(function (a, b) {
+      return manual.backgrounds[a].name.localeCompare(manual.backgrounds[b].name, 'it');
+    });
+    var rows = ids.map(function (id) {
+      var bg = manual.backgrounds[id];
+      var feat = (manual.originFeats || {})[bg.featId] || {};
+      var skillNames = bg.skills.map(skillLabel);
+      var abilNames = bg.abilities.map(function (a) { return ABIL_NAMES[a] || a; });
+      var tool = bg.tool || (bg.toolChoice + ' (a scelta)');
+
+      var body =
+        '<p class="sheet-desc"><b>Punteggi.</b> ' + abilNames.join(', ') + ' (+2/+1 o +1/+1/+1).</p>' +
+        '<p class="sheet-desc"><b>Competenze.</b> ' + skillNames.join(', ') + '.</p>' +
+        '<p class="sheet-desc"><b>Strumenti.</b> ' + tool + '.</p>' +
+        '<p class="sheet-desc"><b>Talento.</b> ' + feat.name + (bg.featNote ? ' — ' + bg.featNote : '') + '.' +
+          (feat.desc ? ' ' + feat.desc : '') + '</p>' +
+        '<p class="sc-meta">' + [packLine('A', bg.equipment.a), packLine('B', bg.equipment.b)].filter(Boolean).join(' &nbsp;·&nbsp; ') + '</p>';
+
+      return { name: bg.name, sub: skillNames.join(', '), body: body };
+    });
+
+    return {
+      title: 'Manuale 5.5 — Background',
+      hint: 'Tocca un background per leggere cosa dà',
+      groups: [{ label: 'Background', rows: rows }]
+    };
+  }
+
+  var SOURCES = { talenti: featsData, specie: speciesData, background: backgroundsData };
 
   function row(item) {
     var el = document.createElement('div');

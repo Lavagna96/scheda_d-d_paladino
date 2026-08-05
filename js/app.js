@@ -817,6 +817,11 @@
       window.AppMenu.close();
     });
 
+    document.getElementById('menu-backgrounds').addEventListener('click', function () {
+      window.AppManualBrowse.open('background');
+      window.AppMenu.close();
+    });
+
     document.getElementById('menu-export').addEventListener('click', function () {
       var state = window.AppStorage.getState();
       var data = JSON.stringify(state, null, 2);
