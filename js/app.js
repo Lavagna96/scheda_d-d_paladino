@@ -972,6 +972,9 @@
     window.AppBottomSheet.init();
     window.AppEditSheet.init();
     window.AppItems.init();
+    if (window.AppEquip) {
+      window.AppEquip.init();
+    }
     window.AppLevelUp.init();
     if (window.AppCreate) {
       window.AppCreate.init();

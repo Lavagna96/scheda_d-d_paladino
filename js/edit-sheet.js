@@ -1,8 +1,11 @@
 (function () {
   /*
    * Editing dei fatti base della scheda (Fase 3): bottom sheet dedicati per
-   * caratteristiche, competenze ed equipaggiamento. Livello e classe NON
-   * sono editabili qui (arrivano con la Fase 4 - Level Up).
+   * caratteristiche, competenze, stile di combattimento e maestrie nelle
+   * armi. Livello e classe NON sono editabili qui (arrivano con la Fase 4 -
+   * Level Up). Equipaggiare/disequipaggiare armatura/arma/scudo/… non passa
+   * più da qui dal redesign 3.8: vive nella schermata unica "Equipaggiamento"
+   * (js/equip.js, card in Scheda) — vedi lì per il perché.
    *
    * Le modifiche vivono su una copia locale (draft) finché non si preme
    * "Salva": chiudere con ✕ o toccando fuori dal foglio non scrive nulla
@@ -21,15 +24,6 @@
     FOR: 'Forza', DES: 'Destrezza', COS: 'Costituzione',
     INT: 'Intelligenza', SAG: 'Saggezza', CAR: 'Carisma'
   };
-  var WEAPON_DICE = ['1d4', '1d6', '1d8', '1d10', '1d12', '2d6'];
-
-  /* Armature e armi vengono dal manuale (5.B.5): prima erano quattro nomi
-     scritti qui e tre campi di testo liberi per l'arma. Qui è dove si
-     personalizza — il master che ti fa partire con qualcosa in più, o la spada
-     magica trovata in giro — quindi resta l'opzione "Personalizzata", che è
-     l'unico modo per avere un'arma fuori catalogo (es. la Spada lunga ✦ di
-     Tharion, che è magica e ha un nome suo). */
-  var CUSTOM_WEAPON = '__custom__';
 
   // Allineamento e Lingue Standard: stesse costanti del passo Identità della
   // creazione personaggio (js/create.js), duplicate qui perché non esportate
@@ -47,35 +41,6 @@
     { id: 'halfling', name: 'Halfling' },
     { id: 'orchesco', name: 'Orchesco' }
   ];
-
-  function armorOptions() {
-    var opts = [{ id: '', label: 'Nessuna armatura' }];
-    (window.MANUAL_55.armors || []).forEach(function (a) {
-      opts.push({ id: a.id, label: window.AppEngine.armorLabel(a.id) });
-    });
-
-    return opts;
-  }
-
-  function weaponOptions() {
-    var opts = (window.MANUAL_55.weapons || []).map(function (w) {
-      return { id: w.id, label: w.name + ' — ' + w.die + ' ' + w.dmg + ' · ' + w.mastery };
-    });
-    opts.push({ id: CUSTOM_WEAPON, label: 'Personalizzata…' });
-
-    return opts;
-  }
-
-  function weaponById(id) {
-    var found = null;
-    (window.MANUAL_55.weapons || []).forEach(function (w) {
-      if (w.id === id) {
-        found = w;
-      }
-    });
-
-    return found;
-  }
 
   // Quante maestrie ha il personaggio al suo livello, dai dati di classe
   // (Paladino 2 fisse, Barbaro e Guerriero crescono). 0 = la classe non ha
@@ -105,16 +70,6 @@
     });
   }
 
-  function weaponByName(name) {
-    var found = null;
-    (window.MANUAL_55.weapons || []).forEach(function (w) {
-      if (w.name === name) {
-        found = w;
-      }
-    });
-
-    return found;
-  }
   var FIGHTING_STYLES = [
     { id: 'nessuno', label: 'Nessuno' },
     { id: 'duello', label: 'Duello (+2 danni, arma a una mano)' },
@@ -331,111 +286,24 @@
     });
   }
 
-  /* ---------- Sheet C: Equipaggiamento ---------- */
+  /* ---------- Sheet C: Stile & Maestrie ----------
+     Fino al redesign 3.8 questo era "Modifica · Equipaggiamento": armatura
+     base, scudo base e arma (catalogo o personalizzata) vivevano qui insieme
+     a Maestria nelle armi e Stile di combattimento. Equipaggiare/disequipaggiare
+     ora passa SOLO dalla nuova schermata unica (card "Equipaggiamento" in
+     Scheda, js/equip.js) — un solo punto per lo stato di torso/arma/scudo/…,
+     niente più doppie fonti. Maestria e Stile invece non sono uno "slot": si
+     tengono anche se non è la stessa arma impugnata (il PHB lo dice
+     esplicitamente), quindi restano qui, sotto lo stesso ✎ dell'Attacchi. */
 
-  function buildEquipSheet() {
+  function buildStyleSheet() {
     var ch = window.AppStorage.getState().character;
-    // Se l'arma attuale ha lo stesso nome di una del catalogo si riapre già
-    // selezionata; altrimenti (arma magica, nome personale) resta su
-    // "Personalizzata…" coi suoi valori.
-    var known = weaponByName((ch.weapon && ch.weapon.name) || '');
     var draft = {
-      armorId: (ch.armor && ch.armor.id) || '',
-      shield: !!(ch.armor && ch.armor.shield),
-      weaponId: known ? known.id : CUSTOM_WEAPON,
-      weaponName: (ch.weapon && ch.weapon.name) || '',
-      weaponDie: (ch.weapon && ch.weapon.die) || '1d8',
-      weaponType: (ch.weapon && ch.weapon.type) || '',
-      weaponMastery: (ch.weapon && ch.weapon.mastery) || '',
       masteries: (ch.weaponMasteries || []).slice(),
       fightingStyle: ch.fightingStyle || 'nessuno'
     };
 
-    openSheet('Modifica · Equipaggiamento');
-
-    var armorSelect = buildSelect(armorOptions(), draft.armorId, 'edit-armor-select');
-    armorSelect.addEventListener('change', function () {
-      draft.armorId = armorSelect.value;
-    });
-    bodyEl.appendChild(buildField('Armatura', armorSelect, 'edit-armor-select'));
-
-    var shieldField = el('div', 'edit-field');
-    shieldField.appendChild(el('span', 'edit-label', 'Scudo'));
-    var shieldAc = ((window.MANUAL_55 && window.MANUAL_55.shield) || {}).ac || 2;
-    var shieldChip = el('button', 'chip', 'Scudo equipaggiato · CA +' + shieldAc);
-    shieldChip.type = 'button';
-    if (draft.shield) {
-      shieldChip.classList.add('on');
-    }
-    shieldChip.addEventListener('click', function () {
-      draft.shield = !draft.shield;
-      shieldChip.classList.toggle('on');
-    });
-    shieldField.appendChild(shieldChip);
-    bodyEl.appendChild(shieldField);
-
-    /* Arma: dal catalogo del manuale (dado, tipo di danno e maestria arrivano
-       da soli) oppure "Personalizzata…", che riapre i campi liberi per le armi
-       magiche o inventate al tavolo. */
-    var weaponSelect = buildSelect(weaponOptions(), draft.weaponId, 'edit-weapon-select');
-    bodyEl.appendChild(buildField('Arma', weaponSelect, 'edit-weapon-select'));
-
-    var customBox = el('div', 'edit-custom-weapon');
-    bodyEl.appendChild(customBox);
-
-    function renderWeaponFields() {
-      customBox.textContent = '';
-      if (draft.weaponId !== CUSTOM_WEAPON) {
-        var w = weaponById(draft.weaponId);
-        if (w) {
-          customBox.appendChild(el('div', 'edit-hint',
-            w.die + ' ' + w.dmg + ' · maestria ' + w.mastery +
-            (w.props.length ? ' · ' + w.props.join(', ') : '')));
-        }
-
-        return;
-      }
-
-      var nameInput = document.createElement('input');
-      nameInput.type = 'text';
-      nameInput.className = 'edit-input';
-      nameInput.value = draft.weaponName;
-      nameInput.addEventListener('input', function () {
-        draft.weaponName = nameInput.value;
-      });
-      customBox.appendChild(buildField('Nome arma', nameInput, 'edit-weapon-name'));
-
-      var dieOptions = WEAPON_DICE.map(function (d) { return { id: d, label: d }; });
-      var dieSelect = buildSelect(dieOptions, draft.weaponDie, 'edit-weapon-die');
-      dieSelect.addEventListener('change', function () {
-        draft.weaponDie = dieSelect.value;
-      });
-      customBox.appendChild(buildField('Dado danni', dieSelect, 'edit-weapon-die'));
-
-      var typeInput = document.createElement('input');
-      typeInput.type = 'text';
-      typeInput.className = 'edit-input';
-      typeInput.value = draft.weaponType;
-      typeInput.addEventListener('input', function () {
-        draft.weaponType = typeInput.value;
-      });
-      customBox.appendChild(buildField('Tipo di danno', typeInput, 'edit-weapon-type'));
-
-      var masteryInput = document.createElement('input');
-      masteryInput.type = 'text';
-      masteryInput.className = 'edit-input';
-      masteryInput.value = draft.weaponMastery;
-      masteryInput.addEventListener('input', function () {
-        draft.weaponMastery = masteryInput.value;
-      });
-      customBox.appendChild(buildField('Maestria', masteryInput, 'edit-weapon-mastery'));
-    }
-
-    weaponSelect.addEventListener('change', function () {
-      draft.weaponId = weaponSelect.value;
-      renderWeaponFields();
-    });
-    renderWeaponFields();
+    openSheet('Modifica · Stile e Maestrie');
 
     /* Maestria nelle armi: quante ne ha il personaggio lo dicono i dati di
        classe al suo livello. Il wizard le fa scegliere alla creazione, ma i
@@ -463,36 +331,6 @@
 
     addSaveButton(function () {
       commit(function (character) {
-        character.armor = character.armor || {};
-        if (draft.armorId) {
-          character.armor.id = draft.armorId;
-        } else {
-          delete character.armor.id;
-        }
-        character.armor.shield = draft.shield;
-        character.weapon = character.weapon || {};
-        var picked = draft.weaponId !== CUSTOM_WEAPON ? weaponById(draft.weaponId) : null;
-        if (picked) {
-          character.weapon.name = picked.name;
-          character.weapon.die = picked.die;
-          character.weapon.type = picked.dmg;
-          character.weapon.mastery = picked.mastery;
-          // Abilità d'attacco (Blocco 5.A.3, letta da js/engine.js): Accurata
-          // → agile (finesse), 'dist' nella categoria → a distanza. Presa dal
-          // catalogo, non più persa quando si sceglie un'arma dal menu.
-          // 'A due mani' esclude lo Stile Duellante (serve un'arma a una mano).
-          character.weapon.finesse = (picked.props || []).indexOf('Accurata') !== -1;
-          character.weapon.ranged = picked.cat.indexOf('dist') !== -1;
-          character.weapon.twoHanded = (picked.props || []).indexOf('A due mani') !== -1;
-        } else {
-          character.weapon.name = draft.weaponName;
-          character.weapon.die = draft.weaponDie;
-          character.weapon.type = draft.weaponType;
-          character.weapon.mastery = draft.weaponMastery;
-          // Arma personalizzata: nessun dato di catalogo da cui derivarli,
-          // restano quelli già impostati (es. una magica basata su un'arma
-          // agile non deve perdere il flag risalvando).
-        }
         // Maestrie: gli id scelti nei selettori, senza vuoti né doppioni.
         var chosen = [];
         masterySelects.forEach(function (sel) {
@@ -712,9 +550,9 @@
     if (skillsBtn) {
       skillsBtn.addEventListener('click', buildSkillsSheet);
     }
-    var equipBtn = document.getElementById('edit-equip-btn');
-    if (equipBtn) {
-      equipBtn.addEventListener('click', buildEquipSheet);
+    var styleBtn = document.getElementById('edit-style-btn');
+    if (styleBtn) {
+      styleBtn.addEventListener('click', buildStyleSheet);
     }
     var identityBtn = document.getElementById('edit-identity-btn');
     if (identityBtn) {

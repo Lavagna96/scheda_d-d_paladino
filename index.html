@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=195">
+<link rel="stylesheet" href="css/styles.css?v=198">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -137,11 +137,32 @@
   <!-- ========== SCHEDA ========== -->
   <section id="view-scheda" class="view-panel">
     <nav class="subtabs" aria-label="Sotto-tab Scheda">
+      <button type="button" class="subtab" data-subtab="equip">Equipagg.</button>
       <button type="button" class="subtab active" data-subtab="comb">Info/Comb</button>
       <button type="button" class="subtab" data-subtab="res">Risorse</button>
       <button type="button" class="subtab" data-subtab="stats">Caratteristiche</button>
       <button type="button" class="subtab" data-subtab="traits">Tratti</button>
     </nav>
+
+    <!-- Equipaggiamento (Step 3.8, sotto-tab dedicata dal redesign 3.8.1): schermata
+         unica per gli 8 slot + sintonizzazione degli oggetti equipaggiati. Il markup
+         di griglia/portrait/sezione sintonizzazione lo genera js/equip.js. -->
+    <div class="subpanel" data-subpanel="equip">
+      <div class="card page-card">
+      <div class="card equip-card">
+        <h2 class="card-title sec">Equipaggiamento</h2>
+        <div class="equip-attune-counter-wrap" id="equip-attune-counter-wrap"></div>
+        <div class="equip-portrait-wrap">
+          <div class="equip-portrait" id="equip-portrait"></div>
+        </div>
+        <div class="equip-grid" id="equip-grid"></div>
+      </div>
+      <div class="card hidden" id="equip-attuned-card">
+        <h2 class="card-title sec">Oggetti sintonizzati indossati</h2>
+        <div id="equip-attuned-list"></div>
+      </div>
+      </div>
+    </div>
 
     <!-- Info/Comb -->
     <div class="subpanel active" data-subpanel="comb">
@@ -258,7 +279,7 @@
       </div>
 
       <div class="card combat-card">
-        <h2 class="card-title sec">Attacchi <small id="atk-extra" class="hidden">Attacco Extra</small> <button type="button" class="edit-pencil" id="edit-equip-btn" aria-label="Modifica equipaggiamento">✎</button></h2>
+        <h2 class="card-title sec">Attacchi <small id="atk-extra" class="hidden">Attacco Extra</small> <button type="button" class="edit-pencil" id="edit-style-btn" aria-label="Modifica stile e maestrie">✎</button></h2>
         <table class="combat-table">
           <thead><tr><th>Arma</th><th>Colpire</th><th>Danni</th></tr></thead>
           <tbody>
@@ -696,6 +717,17 @@
   </div>
 </div>
 
+<div id="equip-sheet-overlay" class="hidden" role="dialog" aria-modal="true">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h2 class="sheet-title" id="equip-sheet-title"></h2>
+      <button type="button" class="sheet-close" id="equip-sheet-close" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="sheet-body" id="equip-sheet-body"></div>
+  </div>
+</div>
+
 <div id="levelup-sheet-overlay" class="hidden" role="dialog" aria-modal="true">
   <div class="bottom-sheet">
     <div class="sheet-handle"></div>
@@ -830,31 +862,32 @@
   <button type="button" class="app-menu-logout" id="menu-logout">Esci</button>
 </aside>
 
-<script src="js/firebase-config.js?v=195"></script>
-<script src="js/manual-55.js?v=195"></script>
-<script src="js/config.js?v=195"></script>
-<script src="js/storage.js?v=195"></script>
-<script src="js/engine.js?v=195"></script>
-<script src="js/hp-bar.js?v=195"></script>
-<script src="js/header.js?v=195"></script>
-<script src="js/stats.js?v=195"></script>
-<script src="js/traits.js?v=195"></script>
-<script src="js/sheet.js?v=195"></script>
-<script src="js/grimorio.js?v=195"></script>
-<script src="js/grimorio-advanced.js?v=195"></script>
-<script src="js/treasury.js?v=195"></script>
-<script src="js/diary.js?v=195"></script>
-<script src="js/inspiration.js?v=195"></script>
-<script src="js/bottom-sheet.js?v=195"></script>
-<script src="js/edit-sheet.js?v=195"></script>
-<script src="js/items.js?v=195"></script>
-<script src="js/levelup.js?v=195"></script>
-<script src="js/menu.js?v=195"></script>
-<script src="js/app.js?v=195"></script>
-<script src="js/faceid.js?v=195"></script>
-<script src="js/dashboard.js?v=195"></script>
-<script src="js/create.js?v=195"></script>
-<script src="js/portrait.js?v=195"></script>
-<script type="module" src="js/cloud.js?v=195"></script>
+<script src="js/firebase-config.js?v=198"></script>
+<script src="js/manual-55.js?v=198"></script>
+<script src="js/config.js?v=198"></script>
+<script src="js/storage.js?v=198"></script>
+<script src="js/engine.js?v=198"></script>
+<script src="js/hp-bar.js?v=198"></script>
+<script src="js/header.js?v=198"></script>
+<script src="js/stats.js?v=198"></script>
+<script src="js/traits.js?v=198"></script>
+<script src="js/sheet.js?v=198"></script>
+<script src="js/grimorio.js?v=198"></script>
+<script src="js/grimorio-advanced.js?v=198"></script>
+<script src="js/treasury.js?v=198"></script>
+<script src="js/diary.js?v=198"></script>
+<script src="js/inspiration.js?v=198"></script>
+<script src="js/bottom-sheet.js?v=198"></script>
+<script src="js/edit-sheet.js?v=198"></script>
+<script src="js/items.js?v=198"></script>
+<script src="js/equip.js?v=198"></script>
+<script src="js/levelup.js?v=198"></script>
+<script src="js/menu.js?v=198"></script>
+<script src="js/app.js?v=198"></script>
+<script src="js/faceid.js?v=198"></script>
+<script src="js/dashboard.js?v=198"></script>
+<script src="js/create.js?v=198"></script>
+<script src="js/portrait.js?v=198"></script>
+<script type="module" src="js/cloud.js?v=198"></script>
 </body>
 </html>

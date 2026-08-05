@@ -233,8 +233,22 @@
     });
     var passivePerception = 10 + skills.percezione.total + modSum(ch, 'pp');
 
-    var armor = armorById((ch.armor || {}).id);
-    var hasArmor = !!(ch.armor && ch.armor.id && ch.armor.id !== 'nessuna');
+    /* Armatura (Step 3.8, schermata unica Equipaggiamento): stesso schema già
+       usato per lo scudo qui sotto — un oggetto kind:'armor' equipaggiato E
+       sintonizzato (activeEquippedArmorProfile già filtra su questo) ha
+       priorità sul fatto base ch.armor.id, che resta il ripiego quando nessun
+       oggetto è attivo (e quindi lo stato di ogni personaggio esistente prima
+       di questo redesign, che non può avere oggetti kind:'armor'). */
+    var armorItemProfile = window.AppItems && window.AppItems.activeEquippedArmorProfile
+      && window.AppItems.activeEquippedArmorProfile(ch);
+    var armor = armorItemProfile
+      ? {
+        label: armorItemProfile.name || 'Armatura',
+        baseAc: armorItemProfile.baseAc,
+        dexCap: armorItemProfile.dexCap === null ? Infinity : armorItemProfile.dexCap
+      }
+      : armorById((ch.armor || {}).id);
+    var hasArmor = !!armor;
     var shieldFromItem = window.AppItems && window.AppItems.characterHasEquippedShield
       && window.AppItems.characterHasEquippedShield(ch);
     var hasShield = !!(ch.armor && ch.armor.shield) || shieldFromItem;

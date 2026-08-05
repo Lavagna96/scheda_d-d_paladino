@@ -1,0 +1,204 @@
+/* ---------- Equipaggiamento (Step 3.8, redesign 3.8.1, js/equip.js) ----------
+   Sotto-tab dedicata "Equipagg." in Scheda: ritratto in medaglione + griglia
+   2 colonne di 8 card-slot + sezione sintonizzazione. Il bottom sheet di
+   scelta per slot riusa .pick-row/.pick-badge/… di css/components/create.css
+   (già caricato globalmente); il contatore/righe di sintonizzazione riusano
+   .attune-counter/.attune-dot di css/components/items.css (stesso
+   meccanismo già in Tesoreria, invariato là): qui ci sono solo piccoli
+   scarti nuovi (.equip-pick-row, .equip-attune-row, la card-slot stessa). */
+
+.equip-portrait-wrap {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+/* Stesso linguaggio visivo di .header-avatar (css/components/header.css:
+   anello dorato, ombra), solo più grande — qui è un ritratto "ingrandito",
+   non serve riusare la classe (accoppiata al layout dell'header). */
+.equip-portrait {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 42% 32%, var(--ruby-bright), var(--ruby) 52%, var(--ruby-dark) 100%);
+  border: 3px solid var(--accent-gold);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(201, 164, 67, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.equip-portrait-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 52% 10%;
+  transform: scale(1.45);
+  transform-origin: 52% 22%;
+}
+
+.equip-portrait-fallback {
+  font-size: 34px;
+  color: #ffe6c4;
+}
+
+.equip-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+.equip-slot-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-gold-soft);
+  border-left: 3px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  padding: var(--space-2) var(--space-3);
+  min-height: var(--touch-min);
+  text-align: left;
+  cursor: pointer;
+}
+
+.equip-slot-icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-gold);
+}
+
+.equip-slot-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.equip-slot-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.equip-slot-label {
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.equip-slot-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.equip-slot-empty {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Bordo sinistro colorato per rarità: stessi colori di .relic-rarity in
+   css/components/treasury.css, qui applicati al bordo invece che a un badge
+   a pillola — solo quando lo slot è occupato da un oggetto magico.
+   L'equipaggiamento "base" (non magico) resta con il bordo neutro sopra. */
+.equip-slot-card.rarity-comune { border-left-color: #9c9690; }
+.equip-slot-card.rarity-non-comune { border-left-color: #3d9470; }
+.equip-slot-card.rarity-raro { border-left-color: #7fb3e8; }
+.equip-slot-card.rarity-molto-raro { border-left-color: #b48be0; }
+.equip-slot-card.rarity-leggendario { border-left-color: #e8a33d; }
+
+/* ---------- righe d'opzione nel bottom sheet (radio, riusa .pick-row) ----------
+   .equip-pick-list è solo un contenitore di layout: NIENTE max-height/overflow
+   qui. Lo scroll unico lo fa .sheet-body (css/bottom-sheet.css) — un secondo
+   overflow-y:auto annidato dentro .sheet-body intrappola lo scroll touch su
+   iOS Safari prima di arrivare in fondo (bug reale, segnalato da test su
+   iPhone: l'ultima voce di liste lunghe come le armature base restava
+   coperta dalla bottom nav e irraggiungibile). */
+
+.equip-pick-row .pick-badge svg,
+.equip-pick-row .pick-badge .medallion {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- sintonizzazione (redesign 3.8.1) ----------
+   .attune-counter/.attune-dots/.attune-dot/.attune-counter-count sono già
+   definite in css/components/items.css (Tesoreria): qui il wrapper serve
+   solo a posizionare il contatore sopra il ritratto, nessuno stile duplicato. */
+
+.equip-attune-counter-wrap:empty {
+  display: none;
+}
+
+.equip-attune-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.equip-attune-row:last-child {
+  border-bottom: none;
+}
+
+.equip-attune-row-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.equip-attune-row-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.equip-attune-row-slot {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Stessa pillola della gemma di Tesoreria (.relic-action-btn.relic-action-attune
+   in css/components/items.css), qui fuori dal layout a 2 bottoni affiancati
+   (flex: 1 1 calc(50% - 4px) lì non ha senso da sola): stile equivalente,
+   dimensioni proprie. */
+.equip-attune-pill {
+  flex: none;
+  padding: 6px 12px;
+  min-height: 30px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.equip-attune-pill.on {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(201, 164, 67, 0.14);
+  box-shadow: 0 0 8px rgba(201, 164, 67, 0.25);
+}

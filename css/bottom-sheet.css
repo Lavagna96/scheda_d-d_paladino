@@ -2,7 +2,8 @@
 #edit-sheet-overlay,
 #item-sheet-overlay,
 #levelup-sheet-overlay,
-#grim-advanced-overlay {
+#grim-advanced-overlay,
+#equip-sheet-overlay {
   position: fixed;
   inset: 0;
   z-index: 80;
@@ -16,7 +17,8 @@
 #edit-sheet-overlay.hidden,
 #item-sheet-overlay.hidden,
 #levelup-sheet-overlay.hidden,
-#grim-advanced-overlay.hidden {
+#grim-advanced-overlay.hidden,
+#equip-sheet-overlay.hidden {
   display: none !important;
 }
 

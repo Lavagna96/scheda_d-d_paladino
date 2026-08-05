@@ -251,13 +251,97 @@
     });
   }
 
-  function isWeaponItem(item) {
-    if (itemKindOf(item) === 'weapon') {
+  /* ---------- equipaggiamento generico per slot (redesign 3.8) ----------
+     8 slot possibili: weapon/shield/armor hanno anche un fatto "base" (senza
+     oggetto, su character.armor/character.weapon — invariato, vive fuori da
+     qui); helmet/gloves/boots/ring/amulet esistono SOLO come oggetto, "Vuoto"
+     è il loro stato di partenza naturale. legacyArt = compatibilità con gli
+     oggetti salvati prima che kind esistesse per quel tipo (stesso principio
+     già in uso per weapon/shield: un oggetto con l'arte preset giusta conta
+     anche senza kind scritto). armor/helmet/gloves/boots sono kind nuovi di
+     zecca (Step 3.8): nessun oggetto salvato in precedenza può averli, quindi
+     nessun fallback su art necessario per loro. */
+  var EQUIP_KIND_LEGACY_ART = {
+    weapon: 'sword',
+    shield: 'shield',
+    ring: 'ring',
+    amulet: 'amulet'
+  };
+
+  function isItemOfKind(item, kind) {
+    if (itemKindOf(item) === kind) {
       return true;
+    }
+    var legacyArt = EQUIP_KIND_LEGACY_ART[kind];
+    if (!legacyArt) {
+      return false;
     }
     var art = itemArtOf(item);
 
-    return art.type === 'preset' && art.value === 'sword';
+    return art.type === 'preset' && art.value === legacyArt;
+  }
+
+  function itemsOfKind(character, kind) {
+    return (character.items || []).filter(function (it) {
+      return isItemOfKind(it, kind);
+    });
+  }
+
+  /* Un solo oggetto attivo per slot: equipaggiarne uno sgancia automaticamente
+     ogni altro oggetto DELLO STESSO kind (mai due "Testa" equipaggiati
+     insieme, mai un'arma vecchia rimasta agganciata insieme alla nuova).
+     itemId null/vuoto = sgancia tutti (equivale a "Nessuno" per quel kind). */
+  function equipItemOfKind(character, kind, itemId) {
+    (character.items || []).forEach(function (it) {
+      if (!isItemOfKind(it, kind)) {
+        return;
+      }
+      it.equipped = !!itemId && it.id === itemId;
+    });
+  }
+
+  /* L'oggetto attivo per un kind: equipaggiato E "effettivo" (non richiede
+     sintonizzazione, oppure è già sintonizzato — itemEffectsActive). Se più
+     oggetti risultassero equipped (stato salvato malformato) vince l'ultimo,
+     stesso comportamento tollerante di getEquippedWeaponItem/ShieldItem prima
+     di questo redesign. */
+  function getEquippedItemOfKind(character, kind) {
+    var equipped = null;
+    (character.items || []).forEach(function (it) {
+      if (isItemOfKind(it, kind) && itemEquippedOf(it) && itemEffectsActive(it)) {
+        equipped = it;
+      }
+    });
+
+    return equipped;
+  }
+
+  function isWeaponItem(item) {
+    return isItemOfKind(item, 'weapon');
+  }
+
+  function isArmorItem(item) {
+    return isItemOfKind(item, 'armor');
+  }
+
+  function isHelmetItem(item) {
+    return isItemOfKind(item, 'helmet');
+  }
+
+  function isGlovesItem(item) {
+    return isItemOfKind(item, 'gloves');
+  }
+
+  function isBootsItem(item) {
+    return isItemOfKind(item, 'boots');
+  }
+
+  function isRingItem(item) {
+    return isItemOfKind(item, 'ring');
+  }
+
+  function isAmuletItem(item) {
+    return isItemOfKind(item, 'amulet');
   }
 
   function itemEffectsActive(item) {
@@ -324,14 +408,7 @@
   }
 
   function getEquippedWeaponItem(character) {
-    var equipped = null;
-    (character.items || []).forEach(function (it) {
-      if (isWeaponItem(it) && itemEquippedOf(it) && itemEffectsActive(it)) {
-        equipped = it;
-      }
-    });
-
-    return equipped;
+    return getEquippedItemOfKind(character, 'weapon');
   }
 
   function activeEquippedWeaponProfile(character) {
@@ -344,12 +421,7 @@
   }
 
   function equipWeaponItem(character, itemId) {
-    (character.items || []).forEach(function (it) {
-      if (!isWeaponItem(it)) {
-        return;
-      }
-      it.equipped = it.id === itemId;
-    });
+    equipItemOfKind(character, 'weapon', itemId);
   }
 
   function isWeaponEquipped(item, character) {
@@ -402,12 +474,7 @@
   }
 
   function isShieldItem(item) {
-    if (itemKindOf(item) === 'shield') {
-      return true;
-    }
-    var art = itemArtOf(item);
-
-    return art.type === 'preset' && art.value === 'shield';
+    return isItemOfKind(item, 'shield');
   }
 
   function shieldProfileOf(item) {
@@ -432,14 +499,7 @@
   }
 
   function getEquippedShieldItem(character) {
-    var equipped = null;
-    (character.items || []).forEach(function (it) {
-      if (isShieldItem(it) && itemEquippedOf(it) && itemEffectsActive(it)) {
-        equipped = it;
-      }
-    });
-
-    return equipped;
+    return getEquippedItemOfKind(character, 'shield');
   }
 
   function activeEquippedShieldBonus(character) {
@@ -456,12 +516,7 @@
   }
 
   function equipShieldItem(character, itemId) {
-    (character.items || []).forEach(function (it) {
-      if (!isShieldItem(it)) {
-        return;
-      }
-      it.equipped = it.id === itemId;
-    });
+    equipItemOfKind(character, 'shield', itemId);
   }
 
   function isShieldEquipped(item, character) {
@@ -493,6 +548,55 @@
     return changed;
   }
 
+  /* ---------- Armatura (kind: 'armor', Step 3.8) ----------
+     Stesso principio di weaponProfile/shieldProfile: dexCap segue la stessa
+     convenzione di MANUAL_55.armors (letta in js/engine.js, armorById) —
+     null = bonus DES pieno, 0 = nessun bonus DES, un numero = tetto al bonus.
+     A differenza di scudo/arma, l'armatura NON ha un fatto base "sempre
+     esistito" da cui pescare un default: si parte da un'imbottita leggera
+     qualunque (CA 11, DES piena), il più neutro dei punti di partenza. */
+  function defaultArmorProfileFromCharacter() {
+    return {
+      name: '',
+      baseAc: 11,
+      dexCap: null
+    };
+  }
+
+  function armorProfileOf(item) {
+    if (item.armorProfile) {
+      return Object.assign({}, item.armorProfile);
+    }
+    if (!isArmorItem(item)) {
+      return null;
+    }
+
+    return defaultArmorProfileFromCharacter();
+  }
+
+  function getEquippedArmorItem(character) {
+    return getEquippedItemOfKind(character, 'armor');
+  }
+
+  function activeEquippedArmorProfile(character) {
+    var item = getEquippedArmorItem(character);
+    if (!item) {
+      return null;
+    }
+    var profile = armorProfileOf(item);
+    profile.name = item.name || profile.name;
+
+    return profile;
+  }
+
+  function characterHasEquippedArmor(character) {
+    return !!getEquippedArmorItem(character);
+  }
+
+  function equipArmorItem(character, itemId) {
+    equipItemOfKind(character, 'armor', itemId);
+  }
+
   /* Icone (stesso stile minimale a tratto di js/sheet.js: viewBox 24x24,
      stroke corrente, tratto 2). 'sword' e 'shield' sono gli stessi path di
      IC_SWORD/IC_SHIELD in js/sheet.js; le altre 6 sono disegnate ex novo.
@@ -514,13 +618,23 @@
     bag: '<path d="M7 10h10l1 11h-12z"/><path d="M8 10v-2a4 4 0 0 1 8 0v2"/>' +
       '<path d="M6 10q6 -4 12 0"/><path d="M9 14h6"/>'
   };
-  var ICON_IDS = ['sword', 'shield', 'ring', 'amulet', 'cloak', 'wand', 'potion', 'tome', 'bag'];
+  /* armor/helmet/gloves/boots (Step 3.8, schermata Equipaggiamento unica):
+     nessuna illustrazione dedicata (non richiesta dal design, per non
+     moltiplicare le arti preset) — medallionSvg() sotto ricade da sola
+     sull'arte "ring" per qualunque art.value non presente in PRESET_ART,
+     stesso ripiego già usato per gli oggetti senza preset dedicato. */
+  var ICON_IDS = ['sword', 'shield', 'armor', 'ring', 'amulet', 'helmet', 'gloves', 'boots',
+    'cloak', 'wand', 'potion', 'tome', 'bag'];
 
   var TYPE_LABELS = {
     sword: 'Arma',
     shield: 'Scudo',
+    armor: 'Armatura',
     ring: 'Anello',
     amulet: 'Amuleto',
+    helmet: 'Elmo',
+    gloves: 'Guanti',
+    boots: 'Stivali',
     cloak: 'Mantello',
     wand: 'Bacchetta',
     potion: 'Pozione',
@@ -867,6 +981,15 @@
     }
     if (window.AppGrimorio && window.AppGrimorio.render) {
       window.AppGrimorio.render();
+    }
+    if (window.AppEquip && window.AppEquip.render) {
+      // La pagina Equipaggiamento (sotto-tab dedicata) resta in DOM anche
+      // quando non è quella attiva (il cambio sotto-tab è solo un
+      // toggle di classe, js/app.js initSubTabs): senza questo refresh,
+      // sintonizzare/eliminare un oggetto da Tesoreria lascerebbe lì la
+      // griglia/il contatore/la lista sintonizzati non aggiornati finché
+      // l'utente non tocca di nuovo qualcosa nella pagina Equipaggiamento.
+      window.AppEquip.render();
     }
   }
 
@@ -1514,6 +1637,14 @@
     return draftTypeId(draft) === 'potion';
   }
 
+  /* Testa/Mani/Piedi/Anello/Amuleto (Step 3.8): niente profilo numerico, solo
+     un kind per farli riconoscere dalla nuova schermata Equipaggiamento
+     (esclusività per slot — vedi equipItemOfKind). Anello/Amuleto esistevano
+     già come arte preset ma senza kind: da qui in poi i NUOVI oggetti lo
+     scrivono; quelli salvati prima restano riconosciuti dal fallback su art
+     in isItemOfKind (nessuna migrazione necessaria). */
+  var SIMPLE_KIND_TYPES = ['helmet', 'gloves', 'boots', 'ring', 'amulet'];
+
   function applyTypeToDraft(draft, typeId) {
     draft.art = { type: 'preset', value: typeId };
     if (typeId === 'bag') {
@@ -1528,6 +1659,13 @@
       if (!draft.shieldProfile) {
         draft.shieldProfile = defaultShieldProfileFromCharacter();
       }
+    } else if (typeId === 'armor') {
+      draft.kind = 'armor';
+      if (!draft.armorProfile) {
+        draft.armorProfile = defaultArmorProfileFromCharacter();
+      }
+    } else if (SIMPLE_KIND_TYPES.indexOf(typeId) !== -1) {
+      draft.kind = typeId;
     } else {
       draft.kind = null;
     }
@@ -1542,6 +1680,10 @@
 
   function isShieldDraft(draft) {
     return draft.kind === 'shield' || draftTypeId(draft) === 'shield';
+  }
+
+  function isArmorDraft(draft) {
+    return draft.kind === 'armor' || draftTypeId(draft) === 'armor';
   }
 
   function buildShieldProfileSection(draft) {
@@ -1574,6 +1716,110 @@
     section.refresh = function () {
       valEl.textContent = '+' + profile.acBonus;
     };
+
+    return section;
+  }
+
+  /* dexCap qui segue la stessa convenzione di MANUAL_55.armors letta da
+     js/engine.js (armorById): null = bonus DES pieno (leggera), un numero =
+     tetto al bonus (media), 0 = nessun bonus DES (pesante). Tre pulsanti a
+     scelta singola invece di un select: stesso stile a "chip" già in uso per
+     Stile di combattimento/Allineamento nel resto della scheda. */
+  var ARMOR_DEX_MODES = [
+    { id: 'full', label: 'DES piena' },
+    { id: 'cap', label: 'DES limitata' },
+    { id: 'none', label: 'Nessun bonus DES' }
+  ];
+
+  function armorDexMode(profile) {
+    if (profile.dexCap === null || profile.dexCap === undefined) {
+      return 'full';
+    }
+
+    return profile.dexCap === 0 ? 'none' : 'cap';
+  }
+
+  function buildArmorProfileSection(draft) {
+    if (!draft.armorProfile) {
+      draft.armorProfile = defaultArmorProfileFromCharacter();
+    }
+    var profile = draft.armorProfile;
+    var section = el('div', 'item-armor-profile');
+    section.appendChild(el('div', 'edit-section-label', 'Armatura in combattimento'));
+
+    var stepper = el('div', 'edit-stepper');
+    var minus = el('button', 'stepper-btn minus', '−');
+    minus.type = 'button';
+    var valEl = el('span', 'edit-stat-score', String(profile.baseAc));
+    var plus = el('button', 'stepper-btn plus', '+');
+    plus.type = 'button';
+    minus.addEventListener('click', function () {
+      profile.baseAc = Math.max(1, profile.baseAc - 1);
+      valEl.textContent = String(profile.baseAc);
+    });
+    plus.addEventListener('click', function () {
+      profile.baseAc = Math.min(25, profile.baseAc + 1);
+      valEl.textContent = String(profile.baseAc);
+    });
+    stepper.appendChild(minus);
+    stepper.appendChild(valEl);
+    stepper.appendChild(plus);
+    section.appendChild(buildField('CA base', stepper, 'item-armor-ac'));
+
+    var capStepper = el('div', 'edit-stepper');
+    var capMinus = el('button', 'stepper-btn minus', '−');
+    capMinus.type = 'button';
+    var capValEl = el('span', 'edit-stat-score', '+' + (profile.dexCap || 0));
+    var capPlus = el('button', 'stepper-btn plus', '+');
+    capPlus.type = 'button';
+    capMinus.addEventListener('click', function () {
+      profile.dexCap = Math.max(1, (profile.dexCap || 1) - 1);
+      capValEl.textContent = '+' + profile.dexCap;
+    });
+    capPlus.addEventListener('click', function () {
+      profile.dexCap = Math.min(5, (profile.dexCap || 0) + 1);
+      capValEl.textContent = '+' + profile.dexCap;
+    });
+    capStepper.appendChild(capMinus);
+    capStepper.appendChild(capValEl);
+    capStepper.appendChild(capPlus);
+    var capField = buildField('Tetto bonus DES', capStepper, 'item-armor-dexcap');
+
+    var chipRow = el('div', 'chip-row');
+    var chips = {};
+    ARMOR_DEX_MODES.forEach(function (mode) {
+      var chip = el('button', 'chip', mode.label);
+      chip.type = 'button';
+      chips[mode.id] = chip;
+      chip.addEventListener('click', function () {
+        if (mode.id === 'full') {
+          profile.dexCap = null;
+        } else if (mode.id === 'none') {
+          profile.dexCap = 0;
+        } else {
+          profile.dexCap = profile.dexCap > 0 ? profile.dexCap : 2;
+        }
+        refreshDexUi();
+      });
+      chipRow.appendChild(chip);
+    });
+    section.appendChild(chipRow);
+    section.appendChild(capField);
+
+    function refreshDexUi() {
+      var mode = armorDexMode(profile);
+      ARMOR_DEX_MODES.forEach(function (m) {
+        chips[m.id].classList.toggle('on', m.id === mode);
+      });
+      capField.classList.toggle('hidden', mode !== 'cap');
+      capValEl.textContent = '+' + (profile.dexCap || 0);
+    }
+
+    section.refresh = function () {
+      valEl.textContent = String(profile.baseAc);
+      refreshDexUi();
+    };
+    refreshDexUi();
 
     return section;
   }
@@ -2244,6 +2490,7 @@
     var bag = isBagDraft(draft);
     var weapon = isWeaponDraft(draft);
     var shield = isShieldDraft(draft);
+    var armor = isArmorDraft(draft);
     if (ui.typeHero && ui.typeHero.refreshHero) {
       ui.typeHero.refreshHero();
     }
@@ -2257,6 +2504,12 @@
       ui.shieldProfileSection.classList.toggle('hidden', bag || !shield);
       if (ui.shieldProfileSection.refresh) {
         ui.shieldProfileSection.refresh();
+      }
+    }
+    if (ui.armorProfileSection) {
+      ui.armorProfileSection.classList.toggle('hidden', bag || !armor);
+      if (ui.armorProfileSection.refresh) {
+        ui.armorProfileSection.refresh();
       }
     }
     if (ui.effectsPanel) {
@@ -2281,6 +2534,30 @@
       ui.enabledBlocks.uses = true;
       ui.renderFeatures();
     }
+  }
+
+  /* kind di un oggetto salvato PRIMA che esistesse quel kind (Anello/Amuleto,
+     redesign 3.6; Sacca/Arma/Scudo, redesign precedenti): stesso fallback su
+     art già usato da isItemOfKind, solo per precompilare la bozza in modo
+     coerente quando si riapre un oggetto vecchio in modifica. */
+  function legacyKindFallback(item) {
+    if (isDimensionalBag(item)) {
+      return 'dimensional-bag';
+    }
+    if (isWeaponItem(item)) {
+      return 'weapon';
+    }
+    if (isShieldItem(item)) {
+      return 'shield';
+    }
+    if (isRingItem(item)) {
+      return 'ring';
+    }
+    if (isAmuletItem(item)) {
+      return 'amulet';
+    }
+
+    return null;
   }
 
   /* ---------- bottom sheet "Nuova Reliquia" / modifica ---------- */
@@ -2309,16 +2586,16 @@
       }),
       profSkills: itemProfSkillsOf(existingItem).slice(),
       profSaves: itemProfSavesOf(existingItem).slice(),
-      kind: itemKindOf(existingItem) || (itemArtOf(existingItem).type === 'preset' && itemArtOf(existingItem).value === 'bag'
-        ? 'dimensional-bag' : (isWeaponItem(existingItem) ? 'weapon' : (isShieldItem(existingItem) ? 'shield' : null))),
+      kind: itemKindOf(existingItem) || legacyKindFallback(existingItem),
       equipped: itemEquippedOf(existingItem),
       weaponProfile: weaponProfileOf(existingItem),
-      shieldProfile: shieldProfileOf(existingItem)
+      shieldProfile: shieldProfileOf(existingItem),
+      armorProfile: armorProfileOf(existingItem)
     } : {
       id: null, name: '', desc: '', art: { type: 'preset', value: 'ring' }, rarity: 'non-comune',
       effects: [], usesMax: 0, requiresAttunement: false, resistances: [], immunities: [], senses: [],
       profSkills: [], profSaves: [],
-      kind: null, equipped: false, weaponProfile: null, shieldProfile: null
+      kind: null, equipped: false, weaponProfile: null, shieldProfile: null, armorProfile: null
     };
 
     openSheet(isEdit ? 'Modifica reliquia' : 'Nuova reliquia');
@@ -2343,6 +2620,9 @@
 
     ui.shieldProfileSection = buildShieldProfileSection(draft);
     main.appendChild(ui.shieldProfileSection);
+
+    ui.armorProfileSection = buildArmorProfileSection(draft);
+    main.appendChild(ui.armorProfileSection);
 
     var nameInput = document.createElement('input');
     nameInput.type = 'text';
@@ -2446,6 +2726,7 @@
       }
       var weaponProfile = isWeaponDraft(draft) ? draft.weaponProfile : null;
       var shieldProfile = isShieldDraft(draft) ? draft.shieldProfile : null;
+      var armorProfile = isArmorDraft(draft) ? draft.armorProfile : null;
       commitState(function (character) {
         character.items = character.items || [];
         var itemId = draft.id;
@@ -2465,7 +2746,8 @@
           profSaves: draft.profSaves,
           kind: draft.kind || null,
           weaponProfile: weaponProfile,
-          shieldProfile: shieldProfile
+          shieldProfile: shieldProfile,
+          armorProfile: armorProfile
         };
         if (isEdit) {
           var idx = -1;
@@ -3256,12 +3538,16 @@
 
   function appendItemActions(card, ch, item, opts) {
     var isBag = opts.isBag;
-    var isWeapon = opts.isWeapon;
-    var isShield = opts.isShield;
     var requiresAttunement = opts.requiresAttunement;
     var attuned = opts.attuned;
     var equipped = opts.equipped;
-    var hasWear = isBag || isWeapon || isShield;
+    // Armi e scudi (equip/disequip): dal redesign 3.8 passa SOLO dalla
+    // schermata unica Equipaggiamento (js/equip.js, tab Scheda) — qui in
+    // Tesoreria restava un secondo punto di modifica per lo stesso stato,
+    // la causa esatta del bug "scudo doppio" che ha motivato il redesign.
+    // La Sacca dimensionale resta equipaggiabile da qui (fuori scope, non è
+    // uno degli 8 slot della nuova schermata).
+    var hasWear = isBag;
     var hasAttune = !isBag && requiresAttunement;
 
     if (!hasWear && !hasAttune) {
@@ -3273,47 +3559,7 @@
       e.stopPropagation();
     });
 
-    if (isWeapon) {
-      var weaponBtn = el('button', 'relic-action-btn relic-action-equip' + (equipped ? ' on' : ''),
-        equipped ? '⚔ Impugnata' : '⚔ Riposta');
-      weaponBtn.type = 'button';
-      weaponBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        commitState(function (character) {
-          if (equipped) {
-            (character.items || []).forEach(function (it) {
-              if (it.id === item.id) {
-                it.equipped = false;
-              }
-            });
-          } else if (itemEffectsActive(item)) {
-            equipWeaponItem(character, item.id);
-          }
-        });
-      });
-      wireActionButton(weaponBtn);
-      actions.appendChild(weaponBtn);
-    } else if (isShield) {
-      var shieldBtn = el('button', 'relic-action-btn relic-action-equip relic-action-shield' + (equipped ? ' on' : ''),
-        equipped ? '🛡 Equipaggiato' : '🛡 Riposto');
-      shieldBtn.type = 'button';
-      shieldBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        commitState(function (character) {
-          if (equipped) {
-            (character.items || []).forEach(function (it) {
-              if (it.id === item.id) {
-                it.equipped = false;
-              }
-            });
-          } else if (itemEffectsActive(item)) {
-            equipShieldItem(character, item.id);
-          }
-        });
-      });
-      wireActionButton(shieldBtn);
-      actions.appendChild(shieldBtn);
-    } else if (isBag) {
+    if (isBag) {
       var bagBtn = el('button', 'relic-action-btn relic-action-bag' + (equipped ? ' on' : ''));
       bagBtn.type = 'button';
       bagBtn.textContent = equipped
@@ -3634,6 +3880,31 @@
     medallionSvg: medallionSvg,
     ICON_IDS: ICON_IDS,
     TYPE_LABELS: TYPE_LABELS,
-    RARITY_OPTIONS: RARITY_OPTIONS
+    RARITY_OPTIONS: RARITY_OPTIONS,
+    // ---------- schermata unica Equipaggiamento (redesign 3.8, js/equip.js) ----------
+    isItemOfKind: isItemOfKind,
+    itemsOfKind: itemsOfKind,
+    getEquippedItemOfKind: getEquippedItemOfKind,
+    equipItemOfKind: equipItemOfKind,
+    isArmorItem: isArmorItem,
+    isHelmetItem: isHelmetItem,
+    isGlovesItem: isGlovesItem,
+    isBootsItem: isBootsItem,
+    isRingItem: isRingItem,
+    isAmuletItem: isAmuletItem,
+    getEquippedArmorItem: getEquippedArmorItem,
+    characterHasEquippedArmor: characterHasEquippedArmor,
+    activeEquippedArmorProfile: activeEquippedArmorProfile,
+    armorProfileOf: armorProfileOf,
+    itemArtOf: itemArtOf,
+    itemRarityOf: itemRarityOf,
+    rarityLabel: rarityLabel,
+    // Sintonizzazione (Step 3.6, già usata in Tesoreria): esportate per il
+    // redesign 3.8.1, sezione "Oggetti sintonizzati indossati" della pagina
+    // Equipaggiamento (js/equip.js) — stesso tetto di 3, nessun comportamento
+    // diverso rispetto alla gemma già in Tesoreria (appendItemActions qui sotto).
+    attunedCount: attunedCount,
+    canAttune: canAttune,
+    MAX_ATTUNED: MAX_ATTUNED
   };
 })();
