@@ -847,7 +847,7 @@ window.MANUAL_55 = {
           label: 'Kit del guerriero',
           armorId: 'cotta-maglia', shield: false, weaponId: 'spadone',
           extra: [
-            { name: 'Flagello', qty: 1, weaponId: 'flagello' },
+            { name: 'Flello', qty: 1, weaponId: 'mazzafrusto' },
             { name: 'Giavellotto', qty: 8, weaponId: 'giavellotto' },
             { name: 'Kit del perlustratore', qty: 1, weight: 55, desc: 'Zaino, tribbie, piede di porco, 2 fiaschette d\'olio, razioni per 10 giorni, corda, acciarino, 10 torce, otre.' }
           ],
@@ -4783,8 +4783,7 @@ window.MANUAL_55 = {
     { id: 'arco-corto', name: 'Arco corto', cat: 'sem-dist', die: '1d6', dmg: 'perf.', props: ['Munizioni (24/96 m)', 'A due mani'], mastery: 'Vex', weight: 2, cost: 25 },
     { id: 'fionda', name: 'Fionda', cat: 'sem-dist', die: '1d4', dmg: 'cont.', props: ['Munizioni (9/36 m)'], mastery: 'Slow', weight: 0, cost: 0.1 },
     { id: 'ascia-da-battaglia', name: 'Ascia da battaglia', cat: 'gue-mis', die: '1d8', dmg: 'tagl.', props: ['Versatile (1d10)'], mastery: 'Topple', weight: 4, cost: 10 },
-    { id: 'mazzafrusto', name: 'Mazzafrusto', cat: 'gue-mis', die: '1d8', dmg: 'cont.', props: [], mastery: 'Sap', weight: 2, cost: 10 },
-    { id: 'flagello', name: 'Flagello', cat: 'gue-mis', die: '1d8', dmg: 'cont.', props: [], mastery: 'Sap', weight: 2, cost: 10 },
+    { id: 'mazzafrusto', name: 'Flello', cat: 'gue-mis', die: '1d8', dmg: 'cont.', props: [], mastery: 'Sap', weight: 2, cost: 10 },
     { id: 'falcione', name: 'Falcione', cat: 'gue-mis', die: '1d10', dmg: 'tagl.', props: ['Pesante', 'Portata', 'A due mani'], mastery: 'Graze', weight: 6, cost: 20 },
     { id: 'ascia-bipenne', name: 'Ascia bipenne', cat: 'gue-mis', die: '1d12', dmg: 'tagl.', props: ['Pesante', 'A due mani'], mastery: 'Cleave', weight: 7, cost: 30 },
     { id: 'spadone', name: 'Spadone', cat: 'gue-mis', die: '2d6', dmg: 'tagl.', props: ['Pesante', 'A due mani'], mastery: 'Graze', weight: 6, cost: 50 },

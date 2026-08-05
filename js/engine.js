@@ -156,18 +156,55 @@
     return total;
   }
 
+  /* Come modSum, ma per 'attacco'/'danni' scarta il bonus di un oggetto-arma
+     (item.kind === 'weapon') a meno che non sia PROPRIO l'arma di cui si sta
+     calcolando Colpire/Danni (weaponItemId): l'incantamento di una spada +1
+     vale solo impugnando quella spada, non si somma anche scegliendo un'altra
+     arma dal catalogo. I modifiers generici e i bonus di oggetti non-arma
+     (anelli, mantelli…) restano universali come prima. */
+  function weaponModSum(ch, target, weaponItemId) {
+    var total = 0;
+    (ch.modifiers || []).forEach(function (m) {
+      if (m.target === target) {
+        total += m.value;
+      }
+    });
+    (ch.items || []).forEach(function (item) {
+      if (window.AppItems && window.AppItems.itemEffectsActive) {
+        if (!window.AppItems.itemEffectsActive(item)) {
+          return;
+        }
+      } else if (item.requiresAttunement && !item.attuned) {
+        return;
+      }
+      var isWeaponItem = window.AppItems && window.AppItems.isWeaponItem && window.AppItems.isWeaponItem(item);
+      if (isWeaponItem && item.id !== weaponItemId) {
+        return;
+      }
+      (item.effects || []).forEach(function (eff) {
+        if (eff.target === target) {
+          total += Number(eff.value) || 0;
+        }
+      });
+    });
+
+    return total;
+  }
+
   /* Colpire/Danni di UN'arma qualunque con le statistiche del personaggio
      (Blocco 5.A.3, estratta allo Step 3.9.e): usata sia per l'arma
      equipaggiata in getView() sia dal selettore "Aggiungi attacco → Da
      un'arma" (js/edit-sheet.js), che compila una volta i campi liberi con i
-     numeri giusti invece di farli ricalcolare a memoria. */
-  function computeWeaponAttack(ch, mods, pb, w) {
+     numeri giusti invece di farli ricalcolare a memoria. weaponItemId è
+     l'oggetto-arma a cui appartiene w (assente per un'arma scelta a mano dal
+     catalogo, che quindi non eredita l'incantamento di nessun oggetto). */
+  function computeWeaponAttack(ch, mods, pb, w, weaponItemId) {
     var wAbil = w.ranged ? 'DES'
       : (w.finesse && mods.DES > mods.FOR) ? 'DES'
       : 'FOR';
-    var hit = mods[wAbil] + pb + modSum(ch, 'attacco');
+    var hit = mods[wAbil] + pb + weaponModSum(ch, 'attacco', weaponItemId);
     var duelloOk = ch.fightingStyle === 'duello' && !w.ranged && !w.twoHanded;
-    var dmgBonus = mods[wAbil] + modSum(ch, 'danni') + (duelloOk ? 2 : 0);
+    var dmgBonus = mods[wAbil] + weaponModSum(ch, 'danni', weaponItemId) + (duelloOk ? 2 : 0);
 
     return {
       hit: hit,
@@ -496,7 +533,10 @@
     var w = (window.AppItems && window.AppItems.activeEquippedWeaponProfile)
       ? (window.AppItems.activeEquippedWeaponProfile(ch) || ch.weapon || {})
       : (ch.weapon || {});
-    var weaponAttack = computeWeaponAttack(ch, mods, pb, w);
+    var equippedWeaponItem = (window.AppItems && window.AppItems.getEquippedItemOfKind)
+      ? window.AppItems.getEquippedItemOfKind(ch, 'weapon')
+      : null;
+    var weaponAttack = computeWeaponAttack(ch, mods, pb, w, equippedWeaponItem ? equippedWeaponItem.id : null);
     var swDef = bonuses.sacredWeapon;
     // Come il filtro subclass di classResources: un bonus con .subclass vale
     // solo per QUELLA sottoclasse, altrimenti Arma Sacra trapelerebbe anche a
