@@ -296,14 +296,148 @@
      tengono anche se non è la stessa arma impugnata (il PHB lo dice
      esplicitamente), quindi restano qui, sotto lo stesso ✎ dell'Attacchi. */
 
+  // Righe personalizzate della card Attacchi (Step 3.9.d): arma equipaggiata
+  // e Soffio restano automatiche (js/stats.js), qui si aggiungono/tolgono
+  // solo le righe libere che l'utente scrive a mano — incantesimi da
+  // attacco, tratti usabili come attacco, ecc. che con i livelli si
+  // accumulano senza che l'engine li calcoli.
+  function buildCustomAttacksSection(draft, ch) {
+    bodyEl.appendChild(el('div', 'edit-label', 'Attacchi personalizzati'));
+    var list = el('div', 'atk-custom-list');
+    bodyEl.appendChild(list);
+
+    function renderRows() {
+      list.innerHTML = '';
+      draft.customAttacks.forEach(function (atk, idx) {
+        var row = el('div', 'atk-custom-row');
+        var nameIn = document.createElement('input');
+        nameIn.type = 'text';
+        nameIn.placeholder = 'Nome';
+        nameIn.value = atk.name || '';
+        nameIn.addEventListener('input', function () { atk.name = nameIn.value; });
+        var hitIn = document.createElement('input');
+        hitIn.type = 'text';
+        hitIn.placeholder = 'Colpire';
+        hitIn.value = atk.hit || '';
+        hitIn.addEventListener('input', function () { atk.hit = hitIn.value; });
+        var dmgIn = document.createElement('input');
+        dmgIn.type = 'text';
+        dmgIn.placeholder = 'Danni';
+        dmgIn.value = atk.dmg || '';
+        dmgIn.addEventListener('input', function () { atk.dmg = dmgIn.value; });
+        var rm = el('button', 'grim-resource-remove', '✕');
+        rm.type = 'button';
+        rm.setAttribute('aria-label', 'Rimuovi attacco');
+        rm.addEventListener('click', function () {
+          draft.customAttacks.splice(idx, 1);
+          renderRows();
+        });
+        row.appendChild(nameIn);
+        row.appendChild(hitIn);
+        row.appendChild(dmgIn);
+        row.appendChild(rm);
+        list.appendChild(row);
+      });
+    }
+    renderRows();
+
+    // Stessa arma del catalogo → stesso profilo che equip.js scrive su
+    // character.weapon quando la equipaggi (finesse/ranged/twoHanded dai
+    // props, type dal campo dmg): qui NON si equipaggia nulla, si chiede solo
+    // all'engine "quanto varrebbe Colpire/Danni con questa in mano" per
+    // compilare i campi una volta sola (l'utente li può poi correggere).
+    function weaponProfileFrom(w) {
+      return {
+        name: w.name,
+        die: w.die,
+        type: w.dmg,
+        finesse: (w.props || []).indexOf('Accurata') !== -1,
+        ranged: w.cat.indexOf('dist') !== -1,
+        twoHanded: (w.props || []).indexOf('A due mani') !== -1
+      };
+    }
+
+    // Popup centrale a due passi (Step 3.9.f): il vecchio menu+select inline
+    // si accumulava dentro il foglio e spingeva giù "Salva" a ogni tocco.
+    // Qui la scelta vive in un livello sopra, che si apre/chiude da solo
+    // senza spostare il layout del foglio sotto.
+    function openAddAttackPopup() {
+      var overlay = el('div', 'atk-add-popup-overlay');
+      var pop = el('div', 'atk-add-popup');
+      overlay.appendChild(pop);
+      document.body.appendChild(overlay);
+
+      function close() {
+        overlay.remove();
+      }
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) {
+          close();
+        }
+      });
+
+      function showChoiceStep() {
+        pop.innerHTML = '';
+        pop.appendChild(el('div', 'atk-add-popup-title', 'Aggiungi attacco'));
+        var fromWeapon = el('button', 'atk-add-popup-choice');
+        fromWeapon.type = 'button';
+        fromWeapon.appendChild(el('b', null, 'Da un\'arma'));
+        fromWeapon.appendChild(el('span', null, 'Colpire e Danni calcolati per te'));
+        var freeText = el('button', 'atk-add-popup-choice');
+        freeText.type = 'button';
+        freeText.appendChild(el('b', null, 'Testo libero'));
+        freeText.appendChild(el('span', null, 'Scrivi tu nome, colpire e danni'));
+        fromWeapon.addEventListener('click', showWeaponStep);
+        freeText.addEventListener('click', function () {
+          draft.customAttacks.push({ name: '', hit: '', dmg: '' });
+          renderRows();
+          close();
+        });
+        pop.appendChild(fromWeapon);
+        pop.appendChild(freeText);
+      }
+
+      function showWeaponStep() {
+        pop.innerHTML = '';
+        var back = el('span', 'atk-add-popup-back', '‹ Scegli');
+        back.addEventListener('click', showChoiceStep);
+        pop.appendChild(back);
+        pop.appendChild(el('div', 'atk-add-popup-title', 'Da un\'arma'));
+        var weapons = masteryChoices(ch);
+        var listEl = el('div', 'atk-add-popup-list');
+        weapons.forEach(function (w) {
+          var item = el('button', 'atk-add-popup-item', w.name);
+          item.type = 'button';
+          item.addEventListener('click', function () {
+            var view = window.AppEngine.getView();
+            var atkText = window.AppEngine.computeWeaponAttack(ch, view.mods, view.profBonus, weaponProfileFrom(w));
+            draft.customAttacks.push({ name: w.name, hit: atkText.hitText, dmg: atkText.dmgText });
+            renderRows();
+            close();
+          });
+          listEl.appendChild(item);
+        });
+        pop.appendChild(listEl);
+      }
+
+      showChoiceStep();
+    }
+
+    var addMain = el('button', 'item-effects-add-main', '+ Aggiungi attacco');
+    addMain.type = 'button';
+    addMain.addEventListener('click', openAddAttackPopup);
+    bodyEl.appendChild(addMain);
+  }
+
   function buildStyleSheet() {
     var ch = window.AppStorage.getState().character;
     var draft = {
       masteries: (ch.weaponMasteries || []).slice(),
-      fightingStyle: ch.fightingStyle || 'nessuno'
+      fightingStyle: ch.fightingStyle || 'nessuno',
+      customAttacks: (ch.customAttacks || []).map(function (a) { return Object.assign({}, a); })
     };
 
-    openSheet('Modifica · Stile e Maestrie');
+    openSheet('Modifica · Attacchi');
 
     /* Maestria nelle armi: quante ne ha il personaggio lo dicono i dati di
        classe al suo livello. Il wizard le fa scegliere alla creazione, ma i
@@ -329,6 +463,8 @@
     });
     bodyEl.appendChild(buildField('Stile di combattimento', styleSelect, 'edit-fighting-style'));
 
+    buildCustomAttacksSection(draft, ch);
+
     addSaveButton(function () {
       commit(function (character) {
         // Maestrie: gli id scelti nei selettori, senza vuoti né doppioni.
@@ -340,6 +476,10 @@
         });
         character.weaponMasteries = chosen;
         character.fightingStyle = draft.fightingStyle;
+        // Righe vuote (mai compilate) scartate al Salva, non lasciate a metà.
+        character.customAttacks = draft.customAttacks.filter(function (a) {
+          return (a.name || '').trim() || (a.hit || '').trim() || (a.dmg || '').trim();
+        });
       });
     });
   }
@@ -550,9 +690,9 @@
     if (skillsBtn) {
       skillsBtn.addEventListener('click', buildSkillsSheet);
     }
-    var styleBtn = document.getElementById('edit-style-btn');
-    if (styleBtn) {
-      styleBtn.addEventListener('click', buildStyleSheet);
+    var attacksBtn = document.getElementById('edit-attacks-btn');
+    if (attacksBtn) {
+      attacksBtn.addEventListener('click', buildStyleSheet);
     }
     var identityBtn = document.getElementById('edit-identity-btn');
     if (identityBtn) {

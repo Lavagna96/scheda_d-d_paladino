@@ -427,26 +427,12 @@
   }
 
   /* Nota attacchi costruita dai dati reali del personaggio (niente più testo
-     fisso di Tharion): bonus magici all'arma, stile di combattimento, Arma Sacra
-     dove applicabile. Stringa vuota → la nota viene nascosta. */
+     fisso di Tharion): stile di combattimento, Arma Sacra, Furia, Attacco
+     Furtivo, Arti Marziali dove applicabile. Stringa vuota → la nota viene
+     nascosta. I bonus magici dell'arma sono già sommati nella riga
+     Colpire/Danni sopra, senza bisogno di ripeterlo qui in una nota. */
   function buildAttackNote(view, ch) {
     var parts = [];
-    var atkBonus = 0;
-    (ch.modifiers || []).forEach(function (m) { if (m.target === 'attacco') { atkBonus += m.value; } });
-    (ch.items || []).forEach(function (it) {
-      if (window.AppItems && window.AppItems.itemEffectsActive && !AppItems.itemEffectsActive(it)) {
-        return;
-      }
-      if (it.requiresAttunement && !it.attuned) {
-        return;
-      }
-      (it.effects || []).forEach(function (e) {
-        if (e.target === 'attacco') {
-          atkBonus += Number(e.value) || 0;
-        }
-      });
-    });
-    if (atkBonus > 0) { parts.push('Colpire e danni includono i bonus magici dell\'arma (+' + atkBonus + ').'); }
     /* Le note valgono solo quando il bonus si applica DAVVERO (stesse
        condizioni di engine.js): Duellante serve un'arma da mischia a una
        mano, Difesa un'armatura indosso. Prima comparivano sempre, anche con
@@ -537,6 +523,32 @@
         view.breath.damageType.slice(1) + ')');
       setText('atk-breath-hit', 'TS DES ' + view.breath.dc);
       setText('atk-breath-dmg', view.breath.dice + ' ' + view.breath.damageType);
+    }
+
+    // Righe personalizzate (Step 3.9.d): a differenza di arma/Soffio non sono
+    // calcolate, l'utente le scrive e le toglie a mano dal foglio "Modifica ·
+    // Attacchi" — utile per incantesimi da attacco, tratti usabili come
+    // attacco, ecc. che con i livelli si accumulano e l'engine non copre.
+    var tbody = document.querySelector('.combat-table tbody');
+    if (tbody) {
+      tbody.querySelectorAll('.custom-atk-row').forEach(function (row) { row.remove(); });
+      (ch.customAttacks || []).forEach(function (atk) {
+        var row = document.createElement('tr');
+        row.className = 'custom-atk-row';
+        var nameTd = document.createElement('td');
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'atk-name';
+        nameSpan.textContent = atk.name || '—';
+        nameTd.appendChild(nameSpan);
+        var hitTd = document.createElement('td');
+        hitTd.textContent = atk.hit || '—';
+        var dmgTd = document.createElement('td');
+        dmgTd.textContent = atk.dmg || '—';
+        row.appendChild(nameTd);
+        row.appendChild(hitTd);
+        row.appendChild(dmgTd);
+        tbody.appendChild(row);
+      });
     }
 
     // "Attacco Extra: N colpi": generico da klass.extraAttacks[livello] (colpi

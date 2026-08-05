@@ -156,6 +156,26 @@
     return total;
   }
 
+  /* Colpire/Danni di UN'arma qualunque con le statistiche del personaggio
+     (Blocco 5.A.3, estratta allo Step 3.9.e): usata sia per l'arma
+     equipaggiata in getView() sia dal selettore "Aggiungi attacco → Da
+     un'arma" (js/edit-sheet.js), che compila una volta i campi liberi con i
+     numeri giusti invece di farli ricalcolare a memoria. */
+  function computeWeaponAttack(ch, mods, pb, w) {
+    var wAbil = w.ranged ? 'DES'
+      : (w.finesse && mods.DES > mods.FOR) ? 'DES'
+      : 'FOR';
+    var hit = mods[wAbil] + pb + modSum(ch, 'attacco');
+    var duelloOk = ch.fightingStyle === 'duello' && !w.ranged && !w.twoHanded;
+    var dmgBonus = mods[wAbil] + modSum(ch, 'danni') + (duelloOk ? 2 : 0);
+
+    return {
+      hit: hit,
+      hitText: fmt(hit),
+      dmgText: (w.die || '1d8') + (dmgBonus ? fmt(dmgBonus) : '') + ' ' + (w.type || '')
+    };
+  }
+
   function breathDice(level) {
     if (level >= 17) { return '4d10'; }
     if (level >= 11) { return '3d10'; }
@@ -476,19 +496,7 @@
     var w = (window.AppItems && window.AppItems.activeEquippedWeaponProfile)
       ? (window.AppItems.activeEquippedWeaponProfile(ch) || ch.weapon || {})
       : (ch.weapon || {});
-    /* Abilità d'attacco dell'arma (Blocco 5.A.3): a distanza → DES; agile
-       (finesse) → la migliore tra FOR e DES; altrimenti FOR. I flag
-       w.ranged / w.finesse vivono nei dati dell'arma del personaggio. */
-    var wAbil = w.ranged ? 'DES'
-      : (w.finesse && mods.DES > mods.FOR) ? 'DES'
-      : 'FOR';
-    var weaponHit = mods[wAbil] + pb + modSum(ch, 'attacco');
-    /* Stile Duellante: il PHB lo richiede su un'arma da mischia impugnata con
-       una sola mano (niente a distanza, niente A due mani) — mancava questo
-       controllo, quindi il +2 compariva anche con un arco o uno spadone.
-       Difesa invece era già corretta più sotto (richiede un'armatura). */
-    var duelloOk = ch.fightingStyle === 'duello' && !w.ranged && !w.twoHanded;
-    var weaponDmgBonus = mods[wAbil] + modSum(ch, 'danni') + (duelloOk ? 2 : 0);
+    var weaponAttack = computeWeaponAttack(ch, mods, pb, w);
     var swDef = bonuses.sacredWeapon;
     // Come il filtro subclass di classResources: un bonus con .subclass vale
     // solo per QUELLA sottoclasse, altrimenti Arma Sacra trapelerebbe anche a
@@ -534,10 +542,9 @@
       weapon: {
         name: w.name || '',
         mastery: w.mastery || '',
-        hit: weaponHit,
-        hitText: fmt(weaponHit),
-        dmgText: (w.die || '1d8') + (weaponDmgBonus ? fmt(weaponDmgBonus) : '') +
-                 ' ' + (w.type || '')
+        hit: weaponAttack.hit,
+        hitText: weaponAttack.hitText,
+        dmgText: weaponAttack.dmgText
       },
       carryStr: ch.abilities.FOR
     };
@@ -581,6 +588,7 @@
     profBonus: profBonus,
     formatMod: fmt,
     armorLabel: armorLabel,
+    computeWeaponAttack: computeWeaponAttack,
     SKILLS: SKILLS
   };
 })();

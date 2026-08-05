@@ -88,6 +88,7 @@
     initiativeNote: '',
     modifiers: [],
     extraResources: [],
+    customAttacks: [],
     items: [],
     feats: [],
     metamagicIds: [],
