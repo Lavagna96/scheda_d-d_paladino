@@ -10,26 +10,58 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
   gap: var(--space-2);
 }
 
-.item-text-effect-row {
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--text-primary);
-  padding: var(--space-2) var(--space-3);
+.item-text-effect-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-2) var(--space-1) var(--space-2);
+  text-align: center;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-gold-soft);
   background: rgba(201, 164, 67, 0.06);
+  cursor: pointer;
+}
+
+.item-text-effect-tile:active {
+  background: rgba(201, 164, 67, 0.14);
+}
+
+.item-text-effect-ic-badge {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #3a332a, #211d17);
+  border: 1.5px solid rgba(201, 164, 67, 0.5);
+  color: var(--accent-gold);
+}
+
+.item-text-effect-ic-badge svg {
+  width: 16px;
+  height: 16px;
+}
+
+.item-text-effect-cat {
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .item-text-effect-src {
-  display: block;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-secondary);
-  margin-top: 4px;
+  line-height: 1.25;
 }
 
 .cs-tile {

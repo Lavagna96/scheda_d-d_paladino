@@ -222,10 +222,73 @@
     card.classList.toggle('hidden', types.length === 0);
   }
 
-  /* Effetti a testo libero dagli oggetti custom attivi (Step 3.9.a): stesso
-     criterio di modSum/renderResistances — sintonizzazione richiesta =
-     solo se sintonizzato. Mostrati in Scheda → Info/Comb per consultarli
-     a tavolo senza aprire Tesoreria. */
+  /* Categorie di effetti a testo libero (Step 3.9.c): l'icona è indovinata
+     dalle parole chiave nel testo, non scelta a mano in fase di modifica —
+     l'ordine conta, la prima regola che matcha vince (es. "svantaggio"
+     prima di "vantaggio" perché la seconda parola è contenuta nella prima). */
+  var ITEM_EFFECT_CATEGORIES = [
+    {
+      id: 'svantaggio', label: 'Svantaggio', test: /svantaggio/i,
+      icon: '<path d="M17 10l-5 5-5-5M17 15l-5 5-5-5"/>'
+    },
+    {
+      id: 'vantaggio', label: 'Vantaggio', test: /vantaggio/i,
+      icon: '<path d="M7 14l5-5 5 5M7 9l5-5 5 5"/>'
+    },
+    {
+      id: 'immunita', label: 'Immunità', test: /immun/i,
+      icon: '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/>'
+    },
+    {
+      id: 'resistenza', label: 'Resistenza', test: /resistenz/i,
+      icon: '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/>'
+    },
+    {
+      id: 'allarme', label: 'Allarme', test: /allarme/i,
+      icon: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>'
+    },
+    {
+      id: 'sensi', label: 'Sensi', test: /scurovision|percezion|vist[ae]|sent[ei]|vede|senso|sensi/i,
+      icon: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+    },
+    {
+      id: 'movimento', label: 'Movimento', test: /veloc|movimento|volo|volare|nuoto|nuotare|scalare|arrampic/i,
+      icon: '<path d="M4 20c9 0 15-6 15-15v-1h-1C9 4 4 10 4 19z"/><path d="M4 20L18 6"/>'
+    },
+    {
+      id: 'iniziativa', label: 'Iniziativa', test: /iniziativa/i,
+      icon: '<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'
+    }
+  ];
+  var ITEM_EFFECT_DEFAULT = {
+    id: 'generico', label: 'Effetto',
+    icon: '<path d="M12 2c1 4 3 6 7 7-4 1-6 3-7 7-1-4-3-6-7-7 4-1 6-3 7-7z"/>'
+  };
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function classifyEffectText(text) {
+    var found = null;
+    ITEM_EFFECT_CATEGORIES.forEach(function (cat) {
+      if (!found && cat.test.test(text)) {
+        found = cat;
+      }
+    });
+
+    return found || ITEM_EFFECT_DEFAULT;
+  }
+
+  /* Effetti a testo libero dagli oggetti custom attivi (Step 3.9.a, griglia
+     a icone Step 3.9.c): stesso criterio di modSum/renderResistances —
+     sintonizzazione richiesta = solo se sintonizzato. Mostrati in Scheda →
+     Info/Comb per consultarli a tavolo senza aprire Tesoreria; il testo
+     preciso sta nel foglio di dettaglio (tocco sulla tessera), la griglia
+     resta compatta anche con molti oggetti attivi. */
   function renderItemTextEffects() {
     var card = document.getElementById('item-text-effects-card');
     var list = document.getElementById('item-text-effects-list');
@@ -247,13 +310,22 @@
     });
     list.innerHTML = '';
     entries.forEach(function (entry) {
+      var cat = classifyEffectText(entry.text);
       var li = document.createElement('li');
-      li.className = 'item-text-effect-row';
-      li.appendChild(document.createTextNode(entry.text));
+      li.className = 'item-text-effect-tile';
+      li.innerHTML =
+        '<span class="item-text-effect-ic-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + cat.icon + '</svg></span>' +
+        '<span class="item-text-effect-cat">' + cat.label + '</span>';
       var src = document.createElement('span');
       src.className = 'item-text-effect-src';
       src.textContent = entry.source;
       li.appendChild(src);
+      li.addEventListener('click', function () {
+        if (window.AppBottomSheet) {
+          window.AppBottomSheet.open(cat.label, '<p>' + escapeHtml(entry.text) + '</p><p><b>Oggetto:</b> ' + escapeHtml(entry.source) + '</p>');
+        }
+      });
       list.appendChild(li);
     });
     card.classList.toggle('hidden', entries.length === 0);
