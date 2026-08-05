@@ -807,6 +807,11 @@
       window.AppMenu.close();
     });
 
+    document.getElementById('menu-feats').addEventListener('click', function () {
+      window.AppManualBrowse.open('talenti');
+      window.AppMenu.close();
+    });
+
     document.getElementById('menu-export').addEventListener('click', function () {
       var state = window.AppStorage.getState();
       var data = JSON.stringify(state, null, 2);
@@ -965,6 +970,9 @@
     window.AppTraits.init();
     window.AppSheet.init();
     window.AppGrimorio.init();
+    if (window.AppManualBrowse) {
+      window.AppManualBrowse.init();
+    }
     initLevelTabs();
     window.AppTreasury.init();
     window.AppDiary.init();

@@ -9,7 +9,68 @@
 
 ## Dove siamo
 
-- **Ultimo aggiornamento:** 2026-07-31
+- **Ultimo aggiornamento:** 2026-08-05
+- **Nota di sessione (2026-08-05):** la roadmap era ferma al 2026-08-02 ma
+  in mezzo sono passati **9 commit non registrati qui** (2026-08-03 →
+  2026-08-05, tutti committati, pushati e deployati, `origin/main`
+  allineato a `HEAD`, `?v=198`), un filone di **rework UI/UX** partito da
+  richieste dirette di Andrea, non da uno step di questa roadmap:
+  - **Risorse personalizzate**: matita per gestire/modificare le risorse
+    create a mano (`0fe653a`), pop-up di creazione resa usabile e completa
+    (`d50b90f`), Scudo + talento Iniziato alla Magia ora aggiunge un uso
+    gratuito (`5a893c3`).
+  - **Restyling header**: banner più compatto con distintivi per
+    nome/classe, nome modificabile toccando il ritratto (`9e9c5c5`,
+    `51c64c7`).
+  - **Cassetto a hamburger**: sostituisce ingranaggio (scheda) e dropdown
+    (dashboard) con un unico cassetto laterale da sinistra, apribile anche
+    a swipe, contenuto adattivo per contesto (`0950504`). "Sali di
+    livello" diventa un badge dorato sul ritratto invece di un bottone.
+  - **Sottopannelli nel cassetto**: "Impostazioni" (email + toggle Face
+    ID, prima nel modal Account) e "Manuale" (solo voce "Incantesimi" per
+    ora), ciascuno con "← Indietro" (`a11adfa`). Rimosso `#account-modal`
+    e il form di login duplicato al suo interno, ormai ridondante col
+    cassetto (`01c263f`).
+  - **Sotto-tab Equipaggiamento**: nuova sotto-tab in Scheda (a sinistra
+    di Info/Comb) con ritratto in medaglione e griglia di 8 slot (Testa,
+    Torso, Arma, Scudo, Mani, Piedi, Anello, Amuleto); ogni slot apre un
+    bottom sheet a scelta singola che combina equipaggiamento base da
+    manuale e oggetti magici di Tesoreria, eliminando il bug per cui due
+    fonti potevano risultare equipaggiate sullo stesso slot senza saperlo.
+    Testa/Mani/Piedi/Anello/Amuleto sono slot esclusivi veri; Torso/Arma/
+    Scudo restano ibridi con priorità all'oggetto magico se sintonizzato.
+    Aggiunta sezione "Oggetti sintonizzati indossati" (contatore X/3,
+    riusa la gemma di sintonizzazione già di Tesoreria). Corretti due bug
+    emersi testando su iPhone reale (scroll bloccato da un contenitore
+    annidato, overlay dello sheet non centrato) (`5e9f197`).
+  **Non riverificato con un harness in questa sessione** (a differenza
+  delle voci precedenti): solo lettura dei messaggi di commit + `git log`/
+  `git status`. Da controllare più a fondo se si ritorna a toccare quelle
+  aree.
+  **Sottopannello Manuale, sezione Talenti** — FATTO (stesso giorno,
+  `?v=199`), primo passo oltre "Incantesimi" (nota lasciata in `a11adfa`).
+  Scelto tra 3 alternative con preview (lista+dettaglio a foglio /
+  accordion inline / griglia di card): **A — lista+dettaglio**, stesso
+  stile di Incantesimi, **confermata da Andrea come pattern anche per
+  Specie e Background** quando arriveranno. Nuovo modulo generico
+  `js/manual-browse.js`: un solo modal `#browse-modal` (stesse classi
+  `.gloss-modal`/`.gloss-row`/`.gloss-sec` già esistenti, zero CSS nuovo)
+  alimentato da `SOURCES[kind]` — oggi solo `talenti` (i 17 talenti di
+  `manual-55.js`, raggruppati per categoria: Stili di Combattimento/
+  Generali/Doni Epici), pensato per crescere aggiungendo nuove chiavi
+  senza toccare markup. Righe col pallino stile Incantesimi, tocco → nome
+  + descrizione completa nel bottom sheet condiviso (`AppBottomSheet`).
+  Nuovo bottone "Talenti" nel sottopannello Manuale del cassetto, accanto
+  a "Incantesimi". Verificato in locale (stato simulato via classe
+  `auth-in` sul `body`, gate di login bypassato solo per il test — la
+  UI non ha bisogno di un personaggio autenticato per questa
+  consultazione): 3 sezioni presenti, 17 righe totali, tocco su
+  "Protezione" apre il foglio con la descrizione intera, Incantesimi
+  (`AppGrimorio.openManual`) invariato con le sue 8 chip di classe,
+  console pulita. **Prossimo passo:** Specie, poi Background, stesso
+  pattern A — aggiungere una voce a `SOURCES` in `manual-browse.js` + un
+  bottone nel pannello Manuale, senza nuovo markup di modal.
+- **Aggiornamento precedente:** 2026-07-31
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
   GitHub Pages. L'intera visione originale (login, dashboard multi-personaggio,
   editing, oggetti magici, level-up guidato per il Paladino) è realizzata e
