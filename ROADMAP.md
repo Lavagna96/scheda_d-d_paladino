@@ -67,9 +67,34 @@
   consultazione): 3 sezioni presenti, 17 righe totali, tocco su
   "Protezione" apre il foglio con la descrizione intera, Incantesimi
   (`AppGrimorio.openManual`) invariato con le sue 8 chip di classe,
-  console pulita. **Prossimo passo:** Specie, poi Background, stesso
-  pattern A — aggiungere una voce a `SOURCES` in `manual-browse.js` + un
-  bottone nel pannello Manuale, senza nuovo markup di modal.
+  console pulita.
+  **Sottopannello Manuale, sezione Specie** — FATTO (stesso giorno,
+  `?v=200`), stessa sera. Nuova voce `specie` in `SOURCES`: le 10 specie di
+  `manual-55.js`, ordinate alfabeticamente, un gruppo unico "Specie";
+  sottotitolo di riga "Taglia · Velocità" (`toLocaleString('it-IT')`,
+  stesso helper già usato in `create.js` per il passo Specie del wizard —
+  serve per il Goliath, "10,5 m" non "10.5 m"), dettaglio col riepilogo
+  taglia/velocità + un paragrafo per tratto (nome in grassetto + testo).
+  **I segnaposto `{{...}}`** di Elfo/Dragonide/Gnomo/Goliath/Tiefling
+  (Retaggio, Ascendenza Draconica, Dono dei Giganti — dipendono da una
+  scelta del giocatore) **non hanno un personaggio a cui agganciarsi qui**:
+  `js/traits.js` li risolve sui dati reali del PG, questa consultazione
+  usa un `fillTemplate` locale con un contesto neutro proprio ("a scelta",
+  "del retaggio scelto") invece di riusare `buildTemplateCtx` di
+  `traits.js` (non esportato e comunque cucito sulla `view` derivata del
+  Paladino — CD/aura/ecc. che qui non esistono). Per riuso pulito tra le
+  due sorgenti, il corpo del dettaglio è ora costruito **per intero**
+  dentro ciascuna funzione dati (non più un wrapping generico in `row()`),
+  cosa che ha toccato anche Talenti (`<p class="sheet-desc">` invece del
+  vecchio giro). Verificato in locale: 10 specie in ordine alfabetico,
+  Goliath "10,5 m", Elfo aperto mostra i 5 tratti con "Retaggio: a scelta.
+  Trucchetto: del retaggio scelto..." (testo naturale, non un segnaposto
+  rotto a schermo); doppia non-regressione, Talenti (17 righe/3 categorie)
+  e Incantesimi (8 chip classe) invariati; console pulita.
+  **Prossimo passo:** Background, stesso pattern A — la sfida in più è che
+  un background dà 4 cose diverse (competenze, strumento, talento,
+  aumenti) invece di una lista di tratti, da riflettere nel sottotitolo/
+  corpo prima di implementare.
 - **Aggiornamento precedente:** 2026-07-31
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
   GitHub Pages. L'intera visione originale (login, dashboard multi-personaggio,

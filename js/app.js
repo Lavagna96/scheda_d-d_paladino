@@ -812,6 +812,11 @@
       window.AppMenu.close();
     });
 
+    document.getElementById('menu-species').addEventListener('click', function () {
+      window.AppManualBrowse.open('specie');
+      window.AppMenu.close();
+    });
+
     document.getElementById('menu-export').addEventListener('click', function () {
       var state = window.AppStorage.getState();
       var data = JSON.stringify(state, null, 2);
