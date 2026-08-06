@@ -9,7 +9,7 @@
 
 ## Dove siamo
 
-- **Ultimo aggiornamento:** 2026-08-05
+- **Ultimo aggiornamento:** 2026-08-06
 - **Nota di sessione (2026-08-05):** la roadmap era ferma al 2026-08-02 ma
   in mezzo sono passati **9 commit non registrati qui** (2026-08-03 →
   2026-08-05, tutti committati, pushati e deployati, `origin/main`
@@ -140,6 +140,37 @@
   `manual-55.js`** (restano fuori solo le sottoclassi per esteso, un
   problema distinto — vedi sopra). Prossimo passo aperto: nessun altro
   candidato segnalato da Andrea per questo filone.
+  **Deploy dei 4 commit (Talenti/Specie/Background/Classi) autorizzato e
+  fatto (2026-08-05):** push su `main` (`fd0964b`), run "pages build and
+  deployment" verde, sito live verificato con `curl` — serve `?v=202` e
+  `js/manual-browse.js` contiene `classesData`.
+- **Nota di sessione (2026-08-06): pannello Info/Comb, chip per Maestrie e
+  Stile & Privilegi** — FATTO. Sotto la tabella Attacchi, la vecchia frase
+  fissa "Maestrie nelle armi: ..." e la nota finale (Stile Duellante/
+  Difesa, Arma Sacra, Furia, Attacco Furtivo, Arti Marziali) diventano due
+  gruppi di chip cliccabili, con titolino (etichetta + filo dorato, stesso
+  stile di "Competenti"/"Altre abilità" nella lista Abilità) a
+  distinguerli: **Maestrie** e **Stile & Privilegi**. Ogni chip mostra il
+  valore già calcolato per il personaggio (es. "+2 ai danni", "+5 al
+  colpire (→ +12)") e il tocco apre la descrizione ufficiale del
+  privilegio nel bottom sheet già usato per gli effetti oggetti. Tre
+  alternative con preview mostrate per il primo pannello (chip / griglia a
+  icone stile "Effetti oggetti" / righe compatte): scelta la **A — chip**.
+  Nuovo helper `findFeatureByName` in `js/stats.js`: recupera il testo
+  ufficiale cercandolo prima nei privilegi base di classe
+  (`klass.levelFeatures`), poi in quelli di sottoclasse (prima quella del
+  personaggio, poi le altre come ripiego — "Arma Sacra" è oggi scritta nei
+  dati solo sotto il Giuramento di Devozione, valido comunque per ogni
+  Paladino). Verificato con un harness HTML isolato (moduli reali
+  `manual-55.js`+`stats.js`+`bottom-sheet.js` con dati finti equivalenti a
+  un personaggio di test, gate di login bypassato): entrambi i gruppi si
+  rendono correttamente, il tocco sui chip apre il bottom sheet giusto per
+  maestrie/Duellante/Arma Sacra, nessun errore console. Cache busting
+  `?v=213`→`?v=214`. Committato in due passi (`3a0f4d5` maestrie,
+  `0179774` stile/privilegi) e **deployato**: push su `main`, run "pages
+  build and deployment" verde, sito live verificato con `curl` — serve
+  `?v=214` e `js/stats.js` contiene `atk-chip-groups`/`buildAttackChips`/
+  `findFeatureByName`.
 - **Aggiornamento precedente:** 2026-07-31
 - **Stato:** **Fasi 0, 1, 2, 3 e 4 tutte COMPLETE, committate e DEPLOYATE** su
   GitHub Pages. L'intera visione originale (login, dashboard multi-personaggio,
