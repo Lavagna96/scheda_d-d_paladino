@@ -3,6 +3,17 @@
     return n.toLocaleString('it-IT');
   }
 
+  /* Categoria per riga di Zaino/Bottino Party (Step: chip categoria invece di
+     due schede separate "solo pozioni"/"solo oggetti generici" — un tap sul
+     chip fa scorrere le 3 categorie, così qualunque riga può diventare
+     pozione, oggetto o denaro senza cambiare form). */
+  var ITEM_KINDS = {
+    pozione: { icon: '🧪', label: 'Pozione' },
+    oggetto: { icon: '🎒', label: 'Oggetto' },
+    denaro: { icon: '💰', label: 'Denaro' }
+  };
+  var KIND_ORDER = ['pozione', 'oggetto', 'denaro'];
+
   function coinTotalMO(coins) {
     return coins.mp * 10 + coins.mo + coins.ma / 10 + coins.mr / 100;
   }
@@ -208,7 +219,21 @@
       }
       inp._bound = true;
       inp.addEventListener('input', function () {
-        var n = parseInt(inp.value, 10);
+        /* Campo testo (non type=number) apposta: su iOS il tipo number
+           rimette il cursore in fondo a ogni tocco, impedendo di editare le
+           centinaia di un numero lungo senza cancellare tutto. Qui puliamo
+           solo i caratteri non numerici, preservando la posizione del
+           cursore invece di riscrivere sempre l'intero valore. */
+        var pos = inp.selectionStart;
+        var before = inp.value;
+        var cleaned = before.replace(/[^0-9]/g, '');
+        if (cleaned !== before) {
+          var removed = before.length - cleaned.length;
+          inp.value = cleaned;
+          pos = Math.max(0, pos - removed);
+          inp.setSelectionRange(pos, pos);
+        }
+        var n = parseInt(cleaned, 10);
         var s = window.AppStorage.getState();
         s.coins[k] = isNaN(n) || n < 0 ? 0 : n;
         window.AppStorage.saveState(s);
@@ -217,7 +242,7 @@
     });
   }
 
-  function renderItemList(containerId, arr, namePh, descPh) {
+  function renderItemList(containerId, arr, namePh, descPh, defaultKind) {
     var list = document.getElementById(containerId);
     if (!list) {
       return;
@@ -230,15 +255,37 @@
       if (it.weight == null) {
         it.weight = 0.5;
       }
+      if (!it.kind || !ITEM_KINDS[it.kind]) {
+        it.kind = defaultKind;
+      }
       var row = document.createElement('div');
       row.className = 'edit-row';
       var main = document.createElement('div');
       main.className = 'edit-main';
+      var nameRow = document.createElement('div');
+      nameRow.className = 'edit-name-row';
       var nameEl = document.createElement('div');
       nameEl.className = 'edit-name';
       nameEl.contentEditable = 'true';
       nameEl.setAttribute('data-ph', namePh);
       nameEl.textContent = it.name || '';
+      var kindPill = document.createElement('button');
+      kindPill.type = 'button';
+      kindPill.className = 'cat-pill';
+      kindPill.setAttribute('aria-label', 'Cambia categoria');
+      function renderKindPill() {
+        var k = ITEM_KINDS[it.kind];
+        kindPill.textContent = k.icon + ' ' + k.label;
+      }
+      renderKindPill();
+      kindPill.addEventListener('click', function () {
+        var idx = KIND_ORDER.indexOf(it.kind);
+        it.kind = KIND_ORDER[(idx + 1) % KIND_ORDER.length];
+        renderKindPill();
+        window.AppStorage.saveState(window.AppStorage.getState());
+      });
+      nameRow.appendChild(nameEl);
+      nameRow.appendChild(kindPill);
       var descEl = document.createElement('div');
       descEl.className = 'edit-desc';
       descEl.contentEditable = 'true';
@@ -256,7 +303,7 @@
       weightInp.setAttribute('aria-label', 'Peso kg');
       meta.appendChild(weightInp);
       meta.appendChild(document.createTextNode(' kg'));
-      main.appendChild(nameEl);
+      main.appendChild(nameRow);
       main.appendChild(descEl);
       main.appendChild(meta);
 
@@ -327,7 +374,7 @@
 
   function addItem(type) {
     var s = window.AppStorage.getState();
-    var item = { name: '', desc: '', qty: 1, weight: 0.5 };
+    var item = { name: '', desc: '', qty: 1, weight: 0.5, kind: type === 'personal' ? 'pozione' : 'oggetto' };
     if (type === 'personal') {
       s.treasury.personalItems.push(item);
     } else {
@@ -345,10 +392,136 @@
 
   function render() {
     var s = window.AppStorage.getState();
-    renderItemList('party-list', s.treasury.partyItems, 'Nome oggetto', 'Descrizione / valore');
-    renderItemList('personal-list', s.treasury.personalItems, 'Nome pozione', 'Effetto / note');
+    renderItemList('party-list', s.treasury.partyItems, 'Nome oggetto', 'Descrizione / valore', 'oggetto');
+    renderItemList('personal-list', s.treasury.personalItems, 'Nome pozione', 'Effetto / note', 'pozione');
     bindCoins();
     renderCoins();
+  }
+
+  /* Modale unico Aggiungi/Togli monete (Step: stesso linguaggio del modale
+     Danno/Cura dei PF in sheet.js — riusa le classi .hp-modal* così lo stile
+     arriva gratis da combat.css, cambia solo l'accento colore via
+     [data-mode="coin-add"/"coin-sub"]). Un solo punto d'ingresso con
+     selettore MP/MO/MA/MR dentro, invece di 4 popup separati. */
+  var COIN_KEYS = ['mp', 'mo', 'ma', 'mr'];
+  var coinModalMode = 'add';
+  var coinModalKind = 'mo';
+
+  function coinModalEls() {
+    return {
+      modal: document.getElementById('coin-modal'),
+      sel: document.getElementById('coin-modal-sel'),
+      input: document.getElementById('coin-modal-input'),
+      cur: document.getElementById('coin-modal-cur'),
+      next: document.getElementById('coin-modal-next'),
+      titletext: document.getElementById('coin-modal-titletext'),
+      apply: document.getElementById('coin-modal-apply'),
+      close: document.getElementById('coin-modal-close')
+    };
+  }
+
+  function updateCoinModalPreview() {
+    var e = coinModalEls();
+    if (!e.modal) {
+      return;
+    }
+    var state = window.AppStorage.getState();
+    var cur = state.coins[coinModalKind] || 0;
+    var n = Math.max(0, parseInt(e.input.value, 10) || 0);
+    e.cur.textContent = fmt(cur);
+    e.next.textContent = fmt(coinModalMode === 'add' ? cur + n : Math.max(0, cur - n));
+  }
+
+  function selectCoinKind(k) {
+    coinModalKind = k;
+    var e = coinModalEls();
+    if (!e.sel) {
+      return;
+    }
+    e.sel.querySelectorAll('.coin-sel-btn').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-coin') === k);
+    });
+    updateCoinModalPreview();
+  }
+
+  function openCoinModal(mode) {
+    var e = coinModalEls();
+    if (!e.modal) {
+      return;
+    }
+    coinModalMode = mode;
+    e.modal.setAttribute('data-mode', mode === 'add' ? 'coin-add' : 'coin-sub');
+    e.titletext.textContent = mode === 'add' ? 'Aggiungi monete' : 'Togli monete';
+    e.apply.textContent = mode === 'add' ? 'Aggiungi' : 'Togli';
+    e.input.value = '';
+    selectCoinKind(coinModalKind);
+    updateCoinModalPreview();
+    e.modal.classList.remove('hidden');
+    setTimeout(function () { e.input.focus(); }, 60);
+  }
+
+  function closeCoinModal() {
+    var modal = document.getElementById('coin-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+
+  function applyCoinModal() {
+    var e = coinModalEls();
+    var n = Math.max(0, parseInt(e.input.value, 10) || 0);
+    if (n > 0) {
+      var s = window.AppStorage.getState();
+      var cur = s.coins[coinModalKind] || 0;
+      s.coins[coinModalKind] = coinModalMode === 'add' ? cur + n : Math.max(0, cur - n);
+      window.AppStorage.saveState(s);
+      renderCoins();
+    }
+    closeCoinModal();
+  }
+
+  function bindCoinModal() {
+    var addOpen = document.getElementById('coin-add-open');
+    var subOpen = document.getElementById('coin-sub-open');
+    if (addOpen && !addOpen._bound) {
+      addOpen._bound = true;
+      addOpen.addEventListener('click', function () { openCoinModal('add'); });
+    }
+    if (subOpen && !subOpen._bound) {
+      subOpen._bound = true;
+      subOpen.addEventListener('click', function () { openCoinModal('sub'); });
+    }
+
+    var e = coinModalEls();
+    if (!e.modal || e.modal._bound) {
+      return;
+    }
+    e.modal._bound = true;
+    e.modal.addEventListener('click', function (ev) {
+      if (ev.target === e.modal) {
+        closeCoinModal();
+      }
+    });
+    e.close.addEventListener('click', closeCoinModal);
+    e.input.addEventListener('input', updateCoinModalPreview);
+    e.apply.addEventListener('click', applyCoinModal);
+    e.sel.querySelectorAll('.coin-sel-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        selectCoinKind(btn.getAttribute('data-coin'));
+      });
+    });
+    e.modal.querySelectorAll('.hp-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var add = parseInt(chip.getAttribute('data-add'), 10);
+        e.input.value = (parseInt(e.input.value, 10) || 0) + add;
+        updateCoinModalPreview();
+      });
+    });
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && !e.modal.classList.contains('hidden')) {
+        closeCoinModal();
+      }
+    });
   }
 
   function bindRelicAccordions() {
@@ -368,6 +541,7 @@
   function init() {
     render();
     bindRelicAccordions();
+    bindCoinModal();
   }
 
   window.AppTreasury = {

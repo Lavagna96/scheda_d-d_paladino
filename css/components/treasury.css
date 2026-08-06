@@ -129,6 +129,65 @@
   color: var(--text-secondary);
 }
 
+.coin-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.coin-btn {
+  flex: 1;
+  min-height: 40px;
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.coin-btn.add {
+  background: rgba(61, 148, 112, 0.14);
+  color: var(--celest-bright);
+  border: 1px solid rgba(61, 148, 112, 0.4);
+}
+
+.coin-btn.sub {
+  background: rgba(158, 9, 34, 0.12);
+  color: var(--ruby-bright);
+  border: 1px solid rgba(158, 9, 34, 0.4);
+}
+
+.coin-btn:active {
+  transform: scale(0.98);
+}
+
+/* Selettore moneta dentro al modale aggiungi/togli (riusa .hp-modal e le sue
+   variabili --dh-accent-*, vedi combat.css: [data-mode="coin-add"/"coin-sub"]) */
+.coin-modal-sel {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.coin-sel-btn {
+  min-height: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-principal);
+  color: var(--text-secondary);
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.coin-sel-btn.active {
+  border-color: var(--dh-accent, var(--accent-gold));
+  color: var(--dh-accent, var(--accent-gold));
+  background: var(--dh-accent-bg, rgba(201, 164, 67, 0.1));
+}
+
 /* ---- Sezioni bottino ---- */
 .loot-sec-head {
   margin-bottom: var(--space-4);
@@ -179,7 +238,16 @@
   min-width: 0;
 }
 
+.edit-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .edit-name {
+  flex: 1 1 auto;
+  min-width: 60px;
   font-family: var(--font-title);
   font-size: 13px;
   font-weight: 600;
@@ -191,6 +259,22 @@
   line-height: 1.35;
   background: transparent;
   min-height: 1.35em;
+}
+
+.cat-pill {
+  flex: none;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-gold-soft);
+  background: rgba(201, 164, 67, 0.08);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cat-pill:active {
+  transform: scale(0.96);
 }
 
 .edit-name::before {

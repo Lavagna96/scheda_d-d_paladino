@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=221">
+<link rel="stylesheet" href="css/styles.css?v=222">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -548,10 +548,14 @@
       <div class="card">
         <h2 class="card-title">Monete totali del gruppo</h2>
         <div class="coin-band">
-          <div class="coin pt"><input class="cv-in" id="coin-mp" type="number" min="0" inputmode="numeric" value="10"><div class="cl">MP</div></div>
-          <div class="coin au"><input class="cv-in" id="coin-mo" type="number" min="0" inputmode="numeric" value="4696"><div class="cl">MO</div></div>
-          <div class="coin ag"><input class="cv-in" id="coin-ma" type="number" min="0" inputmode="numeric" value="250"><div class="cl">MA</div></div>
-          <div class="coin cu"><input class="cv-in" id="coin-mr" type="number" min="0" inputmode="numeric" value="928"><div class="cl">MR</div></div>
+          <div class="coin pt"><input class="cv-in" id="coin-mp" type="text" inputmode="numeric" pattern="[0-9]*" value="10"><div class="cl">MP</div></div>
+          <div class="coin au"><input class="cv-in" id="coin-mo" type="text" inputmode="numeric" pattern="[0-9]*" value="4696"><div class="cl">MO</div></div>
+          <div class="coin ag"><input class="cv-in" id="coin-ma" type="text" inputmode="numeric" pattern="[0-9]*" value="250"><div class="cl">MA</div></div>
+          <div class="coin cu"><input class="cv-in" id="coin-mr" type="text" inputmode="numeric" pattern="[0-9]*" value="928"><div class="cl">MR</div></div>
+        </div>
+        <div class="coin-actions">
+          <button type="button" class="coin-btn add" id="coin-add-open">+ Aggiungi</button>
+          <button type="button" class="coin-btn sub" id="coin-sub-open">− Togli</button>
         </div>
         <p class="total-line">Valore monete convertito: <b id="coin-value">≈ 4.830 MO</b></p>
         <p class="total-line">Peso monete: <b id="coin-weight">≈ 53,4 kg</b> <span class="coin-weight-note">(50 monete ≈ 0,45 kg)</span></p>
@@ -719,6 +723,36 @@
   </div>
 </div>
 
+<div id="coin-modal" class="hp-modal hidden" role="dialog" aria-modal="true" aria-label="Modifica monete">
+  <div class="hp-modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="hp-modal-head">
+      <span class="hp-modal-title"><span class="hp-modal-ic" id="coin-modal-ic" aria-hidden="true">💰</span> <span id="coin-modal-titletext">Aggiungi monete</span></span>
+      <button type="button" class="sheet-close" id="coin-modal-close" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="coin-modal-sel" id="coin-modal-sel">
+      <button type="button" class="coin-sel-btn" data-coin="mp">MP</button>
+      <button type="button" class="coin-sel-btn active" data-coin="mo">MO</button>
+      <button type="button" class="coin-sel-btn" data-coin="ma">MA</button>
+      <button type="button" class="coin-sel-btn" data-coin="mr">MR</button>
+    </div>
+    <div class="hp-modal-preview">
+      <span class="hp-modal-cur" id="coin-modal-cur">0</span>
+      <span class="hp-modal-arrow" aria-hidden="true">→</span>
+      <span class="hp-modal-next" id="coin-modal-next">0</span>
+    </div>
+    <input class="hp-modal-input" id="coin-modal-input" type="number" min="0" inputmode="numeric" placeholder="0" aria-label="Quantità">
+    <p class="hp-modal-hint">scrivi il valore, oppure usa i pulsanti</p>
+    <div class="hp-modal-chips">
+      <button type="button" class="hp-chip" data-add="1">+1</button>
+      <button type="button" class="hp-chip" data-add="10">+10</button>
+      <button type="button" class="hp-chip" data-add="50">+50</button>
+      <button type="button" class="hp-chip" data-add="100">+100</button>
+    </div>
+    <button type="button" class="hp-modal-apply" id="coin-modal-apply">Aggiungi</button>
+  </div>
+</div>
+
 <div id="gloss-modal" class="gloss-modal hidden" role="dialog" aria-modal="true" aria-label="Glossario incantesimi">
   <div class="gloss-head">
     <div class="gloss-head-row">
@@ -819,33 +853,33 @@
   <button type="button" class="app-menu-logout" id="menu-logout">Esci</button>
 </aside>
 
-<script src="js/firebase-config.js?v=221"></script>
-<script src="js/manual-55.js?v=221"></script>
-<script src="js/config.js?v=221"></script>
-<script src="js/storage.js?v=221"></script>
-<script src="js/engine.js?v=221"></script>
-<script src="js/hp-bar.js?v=221"></script>
-<script src="js/header.js?v=221"></script>
-<script src="js/stats.js?v=221"></script>
-<script src="js/traits.js?v=221"></script>
-<script src="js/sheet.js?v=221"></script>
-<script src="js/grimorio.js?v=221"></script>
-<script src="js/grimorio-advanced.js?v=221"></script>
-<script src="js/manual-browse.js?v=221"></script>
-<script src="js/treasury.js?v=221"></script>
-<script src="js/diary.js?v=221"></script>
-<script src="js/inspiration.js?v=221"></script>
-<script src="js/bottom-sheet.js?v=221"></script>
-<script src="js/edit-sheet.js?v=221"></script>
-<script src="js/items.js?v=221"></script>
-<script src="js/equip.js?v=221"></script>
-<script src="js/levelup.js?v=221"></script>
-<script src="js/menu.js?v=221"></script>
-<script src="js/app.js?v=221"></script>
-<script src="js/faceid.js?v=221"></script>
-<script src="js/dashboard.js?v=221"></script>
-<script src="js/create.js?v=221"></script>
-<script src="js/portrait.js?v=221"></script>
-<script type="module" src="js/cloud.js?v=221"></script>
+<script src="js/firebase-config.js?v=222"></script>
+<script src="js/manual-55.js?v=222"></script>
+<script src="js/config.js?v=222"></script>
+<script src="js/storage.js?v=222"></script>
+<script src="js/engine.js?v=222"></script>
+<script src="js/hp-bar.js?v=222"></script>
+<script src="js/header.js?v=222"></script>
+<script src="js/stats.js?v=222"></script>
+<script src="js/traits.js?v=222"></script>
+<script src="js/sheet.js?v=222"></script>
+<script src="js/grimorio.js?v=222"></script>
+<script src="js/grimorio-advanced.js?v=222"></script>
+<script src="js/manual-browse.js?v=222"></script>
+<script src="js/treasury.js?v=222"></script>
+<script src="js/diary.js?v=222"></script>
+<script src="js/inspiration.js?v=222"></script>
+<script src="js/bottom-sheet.js?v=222"></script>
+<script src="js/edit-sheet.js?v=222"></script>
+<script src="js/items.js?v=222"></script>
+<script src="js/equip.js?v=222"></script>
+<script src="js/levelup.js?v=222"></script>
+<script src="js/menu.js?v=222"></script>
+<script src="js/app.js?v=222"></script>
+<script src="js/faceid.js?v=222"></script>
+<script src="js/dashboard.js?v=222"></script>
+<script src="js/create.js?v=222"></script>
+<script src="js/portrait.js?v=222"></script>
+<script type="module" src="js/cloud.js?v=222"></script>
 </body>
 </html>

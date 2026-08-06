@@ -762,6 +762,22 @@
   --dh-accent-fill: linear-gradient(180deg, #4a76a8, #2a5080);
 }
 
+.hp-modal[data-mode="coin-add"] {
+  --dh-accent: var(--celest-bright);
+  --dh-accent-soft: rgba(26, 92, 68, 0.55);
+  --dh-accent-bg: rgba(26, 92, 68, 0.16);
+  --dh-accent-dark: #144a36;
+  --dh-accent-fill: linear-gradient(180deg, var(--celest-soft), var(--celest));
+}
+
+.hp-modal[data-mode="coin-sub"] {
+  --dh-accent: var(--ruby-bright);
+  --dh-accent-soft: rgba(158, 9, 34, 0.5);
+  --dh-accent-bg: rgba(158, 9, 34, 0.14);
+  --dh-accent-dark: var(--ruby-dark);
+  --dh-accent-fill: linear-gradient(180deg, var(--ruby-bright), var(--ruby) 55%, var(--ruby-dark));
+}
+
 .hp-actions-inline {
   display: flex;
   gap: var(--space-2);
