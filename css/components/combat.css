@@ -920,11 +920,23 @@
   margin-top: 2px;
 }
 
+.atk-chip-groups {
+  margin-top: var(--space-3);
+}
+
+.atk-chip-group + .atk-chip-group {
+  margin-top: var(--space-3);
+}
+
 .mastery-chip-row {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-3);
+}
+
+.atk-chip-group .mastery-chip-row {
+  margin-top: 0;
 }
 
 .mastery-chip {

@@ -175,7 +175,7 @@
   }
 
   /* Etichette dei 4 sensi (stessi id di SENSE_OPTIONS in js/items.js — non
-     condivisi tra i due moduli, stesso principio già in uso: buildAttackNote
+     condivisi tra i due moduli, stesso principio già in uso: buildAttackChips
      qui sotto legge ch.items direttamente senza passare dagli helper di
      items.js). */
   var SENSE_LABELS = {
@@ -426,13 +426,48 @@
     });
   }
 
-  /* Nota attacchi costruita dai dati reali del personaggio (niente più testo
-     fisso di Tharion): stile di combattimento, Arma Sacra, Furia, Attacco
-     Furtivo, Arti Marziali dove applicabile. Stringa vuota → la nota viene
-     nascosta. I bonus magici dell'arma sono già sommati nella riga
-     Colpire/Danni sopra, senza bisogno di ripeterlo qui in una nota. */
-  function buildAttackNote(view, ch) {
-    var parts = [];
+  /* Cerca un privilegio per nome nei dati di classe (livelli base) o, se non
+     lo trova lì, nei privilegi di sottoclasse (prima la sottoclasse del
+     personaggio, poi le altre come ripiego: alcuni testi come "Arma Sacra"
+     sono per ora scritti su un solo Giuramento anche se validi per tutti —
+     vedi commento su MANUAL_55.classes.paladino.subclasses.devozione). Serve
+     a recuperare la descrizione ufficiale da mostrare nel bottom sheet senza
+     duplicare i testi del manuale per ogni possibile provenienza. */
+  function findFeatureByName(klass, subclassId, name) {
+    var found = null;
+    Object.keys(klass.levelFeatures || {}).forEach(function (lvl) {
+      (klass.levelFeatures[lvl] || []).forEach(function (f) {
+        if (f.name === name) { found = f; }
+      });
+    });
+    if (found) { return found; }
+
+    var subs = klass.subclasses || {};
+    var order = (subclassId && subs[subclassId]) ? [subclassId] : [];
+    Object.keys(subs).forEach(function (id) {
+      if (order.indexOf(id) === -1) { order.push(id); }
+    });
+    order.forEach(function (id) {
+      var feats = (subs[id] || {}).features || {};
+      Object.keys(feats).forEach(function (lvl) {
+        (feats[lvl] || []).forEach(function (f) {
+          if (f.name === name) { found = f; }
+        });
+      });
+    });
+
+    return found;
+  }
+
+  /* Chip degli attacchi costruiti dai dati reali del personaggio (niente più
+     testo fisso di Tharion): stile di combattimento, Arma Sacra, Furia,
+     Attacco Furtivo, Arti Marziali dove applicabile. Ogni chip mostra il
+     valore già calcolato per il personaggio (come i vecchi part di
+     buildAttackNote) e al tocco apre la descrizione ufficiale del privilegio
+     dal manuale. I bonus magici dell'arma sono già sommati nella riga
+     Colpire/Danni sopra, senza bisogno di ripeterli qui. */
+  function buildAttackChips(view, ch) {
+    var chips = [];
     /* Le note valgono solo quando il bonus si applica DAVVERO (stesse
        condizioni di engine.js): Duellante serve un'arma da mischia a una
        mano, Difesa un'armatura indosso. Prima comparivano sempre, anche con
@@ -442,41 +477,105 @@
     var equippedWeapon = (window.AppItems && window.AppItems.activeEquippedWeaponProfile)
       ? (window.AppItems.activeEquippedWeaponProfile(ch) || ch.weapon || {})
       : (ch.weapon || {});
+    var feats = window.MANUAL_55.feats || {};
+    var klass = (window.MANUAL_55.classes || {})[ch.classId] || {};
+
     if (ch.fightingStyle === 'duello' && !equippedWeapon.ranged && !equippedWeapon.twoHanded) {
-      parts.push('Stile Duellante +2 ai danni.');
+      var duello = feats['stile-duello'];
+      chips.push({ label: 'Duellante', detail: '+2 ai danni', title: 'Stile ' + (duello ? duello.name : 'Duellante'), desc: duello ? duello.desc : '' });
     }
-    if (ch.fightingStyle === 'difesa' && hasArmorForNote) { parts.push('Stile Difesa +1 alla CA.'); }
+    if (ch.fightingStyle === 'difesa' && hasArmorForNote) {
+      var difesa = feats['stile-difesa'];
+      chips.push({ label: 'Difesa', detail: '+1 alla CA', title: 'Stile ' + (difesa ? difesa.name : 'Difesa'), desc: difesa ? difesa.desc : '' });
+    }
     if (view.sacredWeaponBonus > 0) {
-      parts.push('Con Arma Sacra: ' + view.sacredWeaponText + ' al colpire (→ ' +
-        window.AppEngine.formatMod(view.weapon.hit + view.sacredWeaponBonus) + ') e danni Radiosi.');
+      var armaSacra = findFeatureByName(klass, view.subclassId, 'Arma Sacra');
+      chips.push({
+        label: 'Arma Sacra',
+        detail: view.sacredWeaponText + ' al colpire (→ ' + window.AppEngine.formatMod(view.weapon.hit + view.sacredWeaponBonus) + ')',
+        title: 'Arma Sacra',
+        desc: armaSacra ? armaSacra.desc : ''
+      });
     }
     /* Danno da Furia (Barbaro): tabella per livello nei dati, mai mostrata da
        nessuna parte finora — il giocatore doveva ricordarsela a memoria. È un
        bonus che si applica solo con attacchi basati sulla Forza mentre la
        Furia è attiva (stato transitorio, non tracciato nello stato salvato),
-       quindi resta una nota informativa e non un numero già sommato sopra. */
-    var klass = (window.MANUAL_55.classes || {})[ch.classId] || {};
+       quindi resta un chip informativo e non un numero già sommato sopra. */
     var rageBonus = (klass.rageDamage || [])[view.level];
     if (rageBonus) {
-      parts.push('In Furia: +' + rageBonus + ' danni con attacchi basati sulla Forza.');
+      var furia = findFeatureByName(klass, view.subclassId, 'Furia');
+      chips.push({ label: 'Furia', detail: '+' + rageBonus + ' danni (FOR)', title: 'Furia', desc: furia ? furia.desc : '' });
     }
     /* Attacco Furtivo (Ladro): stessa idea della nota Furia — un bonus a
        tabella (klass.sneakAttackD6) mai mostrato altrove, che si applica solo
        una volta per turno con un'arma Accurata o a distanza e vantaggio (o un
-       alleato adiacente al bersaglio), quindi resta informativo. */
+       alleato adiacente al bersaglio), quindi resta un chip informativo. */
     var sneakDice = (klass.sneakAttackD6 || [])[view.level];
     if (sneakDice) {
-      parts.push('Attacco Furtivo: +' + sneakDice + 'd6 una volta per turno (arma Accurata o a distanza, con vantaggio o un alleato adiacente al bersaglio).');
+      var sneak = findFeatureByName(klass, view.subclassId, 'Attacco Furtivo');
+      chips.push({ label: 'Attacco Furtivo', detail: '+' + sneakDice + 'd6', title: 'Attacco Furtivo', desc: sneak ? sneak.desc : '' });
     }
     /* Arti Marziali (Monaco): il dado sostituisce il danno normale del colpo
        senz'armi o di un'arma da Monaco, qualunque cosa sia nella riga Arma
        sopra — informativo per lo stesso motivo delle altre due note. */
     var martialDie = (klass.martialArtsDie || [])[view.level];
     if (martialDie) {
-      parts.push('Arti Marziali: ' + martialDie + ' al posto del danno normale del colpo senz\'armi o di un\'arma da Monaco, con Destrezza al posto della Forza se preferisci.');
+      var martial = findFeatureByName(klass, view.subclassId, 'Arti Marziali');
+      chips.push({ label: 'Arti Marziali', detail: martialDie, title: 'Arti Marziali', desc: martial ? martial.desc : '' });
     }
 
-    return parts.join(' ');
+    return chips;
+  }
+
+  /* Un gruppo di chip con titolino (etichetta + filo dorato, come
+     .skill-group-head nella lista abilità) per distinguere a colpo d'occhio
+     le maestrie dallo stile/privilegi: stesso componente .mastery-chip
+     riusato per entrambi i gruppi, il tocco apre sempre il bottom sheet con
+     la descrizione ufficiale. Nessun gruppo → nessun elemento (niente titolo
+     vuoto sopra il nulla). */
+  function buildChipGroup(label, items) {
+    if (!items.length) {
+      return null;
+    }
+    var wrap = document.createElement('div');
+    wrap.className = 'atk-chip-group';
+
+    var head = document.createElement('div');
+    head.className = 'skill-group-head';
+    var plaque = document.createElement('span');
+    plaque.className = 'skill-group-label';
+    plaque.textContent = label;
+    var line = document.createElement('span');
+    line.className = 'skill-group-line';
+    head.appendChild(plaque);
+    head.appendChild(line);
+    wrap.appendChild(head);
+
+    var row = document.createElement('div');
+    row.className = 'mastery-chip-row';
+    items.forEach(function (it) {
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'mastery-chip';
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'mastery-chip-name';
+      nameSpan.textContent = it.label;
+      var detailSpan = document.createElement('span');
+      detailSpan.className = 'mastery-chip-weapon';
+      detailSpan.textContent = it.detail;
+      chip.appendChild(nameSpan);
+      chip.appendChild(detailSpan);
+      chip.addEventListener('click', function () {
+        if (it.desc && window.AppBottomSheet) {
+          window.AppBottomSheet.open(it.title, '<p>' + escapeHtml(it.desc) + '</p>');
+        }
+      });
+      row.appendChild(chip);
+    });
+    wrap.appendChild(row);
+
+    return wrap;
   }
 
   function renderAttacks(view) {
@@ -495,46 +594,36 @@
       mastEl.classList.toggle('hidden', !mastery);
     }
 
-    // Maestrie possedute (scelte alla creazione): il personaggio le sa usare
-    // anche se in mano ha un'altra arma, quindi vanno dette a parte. Un chip
-    // per maestria (invece della frase fissa) apre la descrizione ufficiale
-    // dal manuale nel bottom sheet già usato per gli effetti oggetti.
-    var ownedEl = document.getElementById('atk-masteries');
-    if (ownedEl) {
+    // Due gruppi di chip sotto la tabella, con titolino a distinguerli:
+    // "Maestrie" (armi che il personaggio sa usare, anche se non impugnate
+    // ora) e "Stile & Privilegi" (bonus attivi da stile di combattimento e
+    // privilegi di classe — ex nota fissa in fondo). Stesso componente chip
+    // per entrambi, il tocco apre sempre la descrizione ufficiale.
+    var groupsEl = document.getElementById('atk-chip-groups');
+    if (groupsEl) {
+      groupsEl.innerHTML = '';
+
       var masteryDefs = window.MANUAL_55.weaponMasteries || {};
-      var owned = (ch.weaponMasteries || []).map(function (id) {
+      var masteryItems = (ch.weaponMasteries || []).map(function (id) {
         var w = null;
         (window.MANUAL_55.weapons || []).forEach(function (x) {
           if (x.id === id) {
             w = x;
           }
         });
+        if (!w) {
+          return null;
+        }
+        var def = masteryDefs[w.mastery];
 
-        return w ? { weaponName: w.name, mastery: w.mastery } : null;
+        return { label: w.mastery, detail: w.name, title: def ? def.name : w.mastery, desc: def ? def.desc : '' };
       }).filter(Boolean);
 
-      ownedEl.innerHTML = '';
-      owned.forEach(function (o) {
-        var chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'mastery-chip';
-        var nameSpan = document.createElement('span');
-        nameSpan.className = 'mastery-chip-name';
-        nameSpan.textContent = o.mastery;
-        var weaponSpan = document.createElement('span');
-        weaponSpan.className = 'mastery-chip-weapon';
-        weaponSpan.textContent = o.weaponName;
-        chip.appendChild(nameSpan);
-        chip.appendChild(weaponSpan);
-        chip.addEventListener('click', function () {
-          var def = masteryDefs[o.mastery];
-          if (def && window.AppBottomSheet) {
-            window.AppBottomSheet.open(def.name, '<p>' + escapeHtml(def.desc) + '</p>');
-          }
-        });
-        ownedEl.appendChild(chip);
-      });
-      ownedEl.classList.toggle('hidden', !owned.length);
+      var masteryGroup = buildChipGroup('Maestrie', masteryItems);
+      if (masteryGroup) { groupsEl.appendChild(masteryGroup); }
+
+      var noteGroup = buildChipGroup('Stile & Privilegi', buildAttackChips(view, ch));
+      if (noteGroup) { groupsEl.appendChild(noteGroup); }
     }
 
     // Riga Soffio: solo per chi ha quell'attacco (Dragonide → risorsa 'breath').
@@ -594,11 +683,6 @@
       extraEl.textContent = 'Attacco Extra: ' + totalHits + ' colpi';
       extraEl.classList.toggle('hidden', totalHits < 2);
     }
-
-    var note = buildAttackNote(view, ch);
-    setText('atk-note', note);
-    var noteEl = document.getElementById('atk-note');
-    if (noteEl) { noteEl.classList.toggle('hidden', !note); }
   }
 
   function render() {
