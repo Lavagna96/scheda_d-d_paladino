@@ -524,6 +524,21 @@
       var martial = findFeatureByName(klass, view.subclassId, 'Arti Marziali');
       chips.push({ label: 'Arti Marziali', detail: martialDie, title: 'Arti Marziali', desc: martial ? martial.desc : '' });
     }
+    /* Punizione Divina (Paladino): prima una card a parte con 3 righe piene +
+       una nota fissa (progressione dei dadi per livello di slot, bonus contro
+       Immondi/Non Morti, gratuita 1/riposo lungo) — ora un solo chip qui, con
+       tutto quel contenuto raccolto nella descrizione del bottom sheet invece
+       di essere spalmato su più righe. */
+    if (ch.classId === 'paladino') {
+      var punizioneDivina = null;
+      (window.MANUAL_55.spells || []).forEach(function (s) {
+        if (s.id === 'punizione-divina') { punizioneDivina = s; }
+      });
+      var punizioneGratis = findFeatureByName(klass, view.subclassId, 'Punizione del Paladino');
+      var smiteDesc = [punizioneDivina ? punizioneDivina.desc : '', punizioneGratis ? punizioneGratis.desc : '']
+        .filter(Boolean).join(' ');
+      chips.push({ label: 'Punizione Divina', detail: 'Az. bonus, dopo un colpo', title: 'Punizione Divina', desc: smiteDesc });
+    }
 
     return chips;
   }
@@ -690,37 +705,6 @@
     }
   }
 
-  /* Card Punizione Divina (Paladino): come Attacchi, righe piene sostituite
-     da una riga di chip compatta — il tocco apre la descrizione ufficiale
-     dell'incantesimo (i tre dati sono facce della stessa cosa, stesso testo)
-     o del privilegio "Punizione del Paladino" che la rende gratuita. */
-  function renderSmiteCard(view) {
-    var card = document.getElementById('paladin-smite-card');
-    if (!card) {
-      return;
-    }
-    var isPaladino = view.classId === 'paladino';
-    card.classList.toggle('hidden', !isPaladino);
-    var chipsEl = document.getElementById('smite-chips');
-    if (!isPaladino || !chipsEl) {
-      return;
-    }
-    var klass = (window.MANUAL_55.classes || {})[view.classId] || {};
-    var spell = null;
-    (window.MANUAL_55.spells || []).forEach(function (s) {
-      if (s.id === 'punizione-divina') { spell = s; }
-    });
-    var gratis = findFeatureByName(klass, view.subclassId, 'Punizione del Paladino');
-
-    chipsEl.innerHTML = '';
-    chipsEl.appendChild(buildChipRow([
-      { label: '1° livello', detail: '2d8 radiosi', title: 'Punizione Divina', desc: spell ? spell.desc : '' },
-      { label: '2° livello', detail: '3d8 radiosi', title: 'Punizione Divina', desc: spell ? spell.desc : '' },
-      { label: 'Immondo/Non Morto', detail: '+1d8', title: 'Punizione Divina', desc: spell ? spell.desc : '' },
-      { label: 'Gratis', detail: '1/riposo lungo', title: 'Punizione del Paladino', desc: gratis ? gratis.desc : '' }
-    ]));
-  }
-
   function render() {
     var view = window.AppEngine.getView();
     renderAbilities(view);
@@ -731,7 +715,6 @@
     renderItemTextEffects();
     renderResources(view);
     renderAttacks(view);
-    renderSmiteCard(view);
     setText('loh-max', view.poolMax.loh);
     // La card Imposizione delle Mani (pool) compare solo se la classe ha quel pool.
     var lohCard = document.querySelector('.loh-card');
