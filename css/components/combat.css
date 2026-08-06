@@ -6,62 +6,17 @@
   margin-bottom: var(--space-3);
 }
 
-.item-text-effects-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-  gap: var(--space-2);
-}
-
-.item-text-effect-tile {
+.mastery-chip-name-row {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: var(--space-2) var(--space-1) var(--space-2);
-  text-align: center;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-gold-soft);
-  background: rgba(201, 164, 67, 0.06);
-  cursor: pointer;
+  gap: 5px;
 }
 
-.item-text-effect-tile:active {
-  background: rgba(201, 164, 67, 0.14);
-}
-
-.item-text-effect-ic-badge {
-  width: 32px;
-  height: 32px;
+.mastery-chip-ic {
+  width: 15px;
+  height: 15px;
   flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #3a332a, #211d17);
-  border: 1.5px solid rgba(201, 164, 67, 0.5);
   color: var(--accent-gold);
-}
-
-.item-text-effect-ic-badge svg {
-  width: 16px;
-  height: 16px;
-}
-
-.item-text-effect-cat {
-  font-family: var(--font-title);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.2;
-}
-
-.item-text-effect-src {
-  font-size: 10px;
-  color: var(--text-secondary);
-  line-height: 1.25;
 }
 
 .cs-tile {

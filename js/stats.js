@@ -284,11 +284,14 @@
   }
 
   /* Effetti a testo libero dagli oggetti custom attivi (Step 3.9.a, griglia
-     a icone Step 3.9.c): stesso criterio di modSum/renderResistances —
-     sintonizzazione richiesta = solo se sintonizzato. Mostrati in Scheda →
-     Info/Comb per consultarli a tavolo senza aprire Tesoreria; il testo
-     preciso sta nel foglio di dettaglio (tocco sulla tessera), la griglia
-     resta compatta anche con molti oggetti attivi. */
+     a icone Step 3.9.c, chip con iconcina 2026-08-06 — stesso componente
+     .mastery-chip di Maestrie/Stile & Privilegi, con una piccola icona
+     prima del nome per riconoscere il tipo di effetto a colpo d'occhio,
+     molto più compatto della griglia di tessere larghe di prima): stesso
+     criterio di modSum/renderResistances — sintonizzazione richiesta = solo
+     se sintonizzato. Mostrati in Scheda → Info/Comb per consultarli a
+     tavolo senza aprire Tesoreria; il testo preciso sta nel foglio di
+     dettaglio (tocco sul chip). */
   function renderItemTextEffects() {
     var card = document.getElementById('item-text-effects-card');
     var list = document.getElementById('item-text-effects-list');
@@ -311,22 +314,26 @@
     list.innerHTML = '';
     entries.forEach(function (entry) {
       var cat = classifyEffectText(entry.text);
-      var li = document.createElement('li');
-      li.className = 'item-text-effect-tile';
-      li.innerHTML =
-        '<span class="item-text-effect-ic-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-        'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + cat.icon + '</svg></span>' +
-        '<span class="item-text-effect-cat">' + cat.label + '</span>';
-      var src = document.createElement('span');
-      src.className = 'item-text-effect-src';
-      src.textContent = entry.source;
-      li.appendChild(src);
-      li.addEventListener('click', function () {
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'mastery-chip';
+      var nameRow = document.createElement('span');
+      nameRow.className = 'mastery-chip-name-row';
+      nameRow.innerHTML =
+        '<svg class="mastery-chip-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + cat.icon + '</svg>' +
+        '<span class="mastery-chip-name">' + escapeHtml(cat.label) + '</span>';
+      var srcSpan = document.createElement('span');
+      srcSpan.className = 'mastery-chip-weapon';
+      srcSpan.textContent = entry.source;
+      chip.appendChild(nameRow);
+      chip.appendChild(srcSpan);
+      chip.addEventListener('click', function () {
         if (window.AppBottomSheet) {
           window.AppBottomSheet.open(cat.label, '<p>' + escapeHtml(entry.text) + '</p><p><b>Oggetto:</b> ' + escapeHtml(entry.source) + '</p>');
         }
       });
-      list.appendChild(li);
+      list.appendChild(chip);
     });
     card.classList.toggle('hidden', entries.length === 0);
   }
