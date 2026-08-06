@@ -898,6 +898,11 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  /* i bottoni hanno min-height:44px (touch target, base.css) ma il
+     contenuto di 2 righe è più basso: senza centrare sull'asse verticale
+     resta incollato in alto e lo spazio in eccesso va tutto sotto — visibile
+     soprattutto sui chip più piccoli di Effetti oggetti. */
+  justify-content: center;
   gap: 2px;
   padding: 6px 12px;
   border-radius: var(--radius-pill);
