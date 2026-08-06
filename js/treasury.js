@@ -13,6 +13,7 @@
     denaro: { icon: '💰', label: 'Denaro' }
   };
   var KIND_ORDER = ['pozione', 'oggetto', 'denaro'];
+  var COIN_FULL_LABELS = { mp: 'di Platino', mo: "d'Oro", ma: "d'Argento", mr: 'di Rame' };
 
   function coinTotalMO(coins) {
     return coins.mp * 10 + coins.mo + coins.ma / 10 + coins.mr / 100;
@@ -372,22 +373,188 @@
     renderCarryBar();
   }
 
-  function addItem(type) {
+  function pushNewItem(item) {
     var s = window.AppStorage.getState();
-    var item = { name: '', desc: '', qty: 1, weight: 0.5, kind: type === 'personal' ? 'pozione' : 'oggetto' };
-    if (type === 'personal') {
+    if (itemAddTarget === 'personal') {
       s.treasury.personalItems.push(item);
     } else {
       s.treasury.partyItems.push(item);
     }
     window.AppStorage.saveState(s);
     render();
-    var listId = type === 'personal' ? 'personal-list' : 'party-list';
-    var rows = document.querySelectorAll('#' + listId + ' .edit-name');
-    var last = rows[rows.length - 1];
-    if (last) {
-      last.focus();
+  }
+
+  /* Peso di una manciata di monete di un solo taglio: stessa formula di
+     coinWeightKg (50 monete ≈ 0,4536 kg), qui su un conteggio singolo
+     invece che sull'oggetto {mp,mo,ma,mr} della Cassa Comune. */
+  function coinLumpWeight(qty) {
+    return Math.round(qty / 50 * 0.4536 * 10) / 10;
+  }
+
+  /* Modale "Aggiungi oggetto" (Zaino e Bottino Party, Step: popup di scelta
+     categoria + form dedicato invece della riga vuota generica — le pozioni
+     hanno il loro form, il denaro il suo con selettore moneta e peso
+     calcolato in automatico, l'oggetto resta il form generico di prima). */
+  var itemAddTarget = 'personal';
+  var itemAddCoin = 'mo';
+
+  function itemAddEls() {
+    return {
+      modal: document.getElementById('item-add-modal'),
+      stepChoice: document.getElementById('item-add-step-choice'),
+      stepPozione: document.getElementById('item-add-step-pozione'),
+      stepOggetto: document.getElementById('item-add-step-oggetto'),
+      stepDenaro: document.getElementById('item-add-step-denaro')
+    };
+  }
+
+  function showItemAddStep(step) {
+    var e = itemAddEls();
+    [e.stepChoice, e.stepPozione, e.stepOggetto, e.stepDenaro].forEach(function (s) {
+      if (s) {
+        s.classList.toggle('hidden', s !== step);
+      }
+    });
+  }
+
+  function updateItemAddCoinSel() {
+    var wrap = document.getElementById('ia-den-coin-sel');
+    if (!wrap) {
+      return;
     }
+    wrap.querySelectorAll('.coin-sel-btn').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-coin') === itemAddCoin);
+    });
+  }
+
+  function updateDenaroWeightHint() {
+    var qtyInp = document.getElementById('ia-den-qty');
+    var hint = document.getElementById('ia-den-weight-hint');
+    if (!qtyInp || !hint) {
+      return;
+    }
+    var qty = Math.max(0, parseInt(qtyInp.value, 10) || 0);
+    hint.textContent = 'Peso stimato: ≈ ' + coinLumpWeight(qty).toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' kg';
+  }
+
+  function resetItemAddForms() {
+    ['ia-poz-nome', 'ia-poz-effetto', 'ia-ogg-nome', 'ia-ogg-desc'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.value = '';
+      }
+    });
+    ['ia-poz-qty', 'ia-ogg-qty', 'ia-den-qty'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.value = 1;
+      }
+    });
+    ['ia-poz-peso', 'ia-ogg-peso'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.value = 0.5;
+      }
+    });
+    itemAddCoin = 'mo';
+    updateItemAddCoinSel();
+    updateDenaroWeightHint();
+  }
+
+  function openItemAddModal(target) {
+    var e = itemAddEls();
+    if (!e.modal) {
+      return;
+    }
+    itemAddTarget = target;
+    resetItemAddForms();
+    showItemAddStep(e.stepChoice);
+    e.modal.classList.remove('hidden');
+  }
+
+  function closeItemAddModal() {
+    var modal = document.getElementById('item-add-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+
+  function bindItemAddModal() {
+    var e = itemAddEls();
+    if (!e.modal || e.modal._bound) {
+      return;
+    }
+    e.modal._bound = true;
+
+    e.modal.querySelectorAll('.item-choice-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var kind = btn.getAttribute('data-kind');
+        if (kind === 'pozione') {
+          showItemAddStep(e.stepPozione);
+        } else if (kind === 'oggetto') {
+          showItemAddStep(e.stepOggetto);
+        } else if (kind === 'denaro') {
+          showItemAddStep(e.stepDenaro);
+        }
+      });
+    });
+    e.modal.querySelectorAll('[data-back]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        showItemAddStep(e.stepChoice);
+      });
+    });
+    e.modal.querySelectorAll('.sheet-close').forEach(function (btn) {
+      btn.addEventListener('click', closeItemAddModal);
+    });
+    e.modal.addEventListener('click', function (ev) {
+      if (ev.target === e.modal) {
+        closeItemAddModal();
+      }
+    });
+
+    document.getElementById('ia-poz-add').addEventListener('click', function () {
+      var nome = document.getElementById('ia-poz-nome').value.trim() || 'Pozione di Cura';
+      var effetto = document.getElementById('ia-poz-effetto').value.trim();
+      var qty = Math.max(1, parseInt(document.getElementById('ia-poz-qty').value, 10) || 1);
+      var peso = Math.max(0, parseFloat(document.getElementById('ia-poz-peso').value) || 0);
+      pushNewItem({ name: nome, desc: effetto, qty: qty, weight: peso, kind: 'pozione' });
+      closeItemAddModal();
+    });
+
+    document.getElementById('ia-ogg-add').addEventListener('click', function () {
+      var nome = document.getElementById('ia-ogg-nome').value.trim() || 'Oggetto';
+      var desc = document.getElementById('ia-ogg-desc').value.trim();
+      var qty = Math.max(1, parseInt(document.getElementById('ia-ogg-qty').value, 10) || 1);
+      var peso = Math.max(0, parseFloat(document.getElementById('ia-ogg-peso').value) || 0);
+      pushNewItem({ name: nome, desc: desc, qty: qty, weight: peso, kind: 'oggetto' });
+      closeItemAddModal();
+    });
+
+    document.getElementById('ia-den-qty').addEventListener('input', updateDenaroWeightHint);
+    document.getElementById('ia-den-coin-sel').querySelectorAll('.coin-sel-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        itemAddCoin = btn.getAttribute('data-coin');
+        updateItemAddCoinSel();
+      });
+    });
+    document.getElementById('ia-den-add').addEventListener('click', function () {
+      var qty = Math.max(1, parseInt(document.getElementById('ia-den-qty').value, 10) || 1);
+      var weight = coinLumpWeight(qty);
+      pushNewItem({
+        name: fmt(qty) + ' Monete ' + COIN_FULL_LABELS[itemAddCoin],
+        desc: '',
+        qty: 1,
+        weight: weight,
+        kind: 'denaro'
+      });
+      closeItemAddModal();
+    });
+
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && !e.modal.classList.contains('hidden')) {
+        closeItemAddModal();
+      }
+    });
   }
 
   function render() {
@@ -542,12 +709,13 @@
     render();
     bindRelicAccordions();
     bindCoinModal();
+    bindItemAddModal();
   }
 
   window.AppTreasury = {
     init: init,
     render: render,
-    addItem: addItem,
+    openItemAddModal: openItemAddModal,
     renderCarryBar: renderCarryBar,
     computeCarryBreakdown: computeCarryBreakdown
   };

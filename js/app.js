@@ -882,7 +882,7 @@
     fab.addEventListener('click', function () {
       var ctx = fab.getAttribute('data-context') || '';
       if (ctx.indexOf('tesoreria') === 0) {
-        window.AppTreasury.addItem(ctx.indexOf('sacca') >= 0 ? 'personal' : 'party');
+        window.AppTreasury.openItemAddModal(ctx.indexOf('sacca') >= 0 ? 'personal' : 'party');
       } else if (ctx.indexOf('diario-cronache') === 0) {
         window.AppDiary.addSession();
       } else if (ctx.indexOf('diario-png') === 0) {
