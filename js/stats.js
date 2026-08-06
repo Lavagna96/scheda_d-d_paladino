@@ -528,30 +528,10 @@
     return chips;
   }
 
-  /* Un gruppo di chip con titolino (etichetta + filo dorato, come
-     .skill-group-head nella lista abilità) per distinguere a colpo d'occhio
-     le maestrie dallo stile/privilegi: stesso componente .mastery-chip
-     riusato per entrambi i gruppi, il tocco apre sempre il bottom sheet con
-     la descrizione ufficiale. Nessun gruppo → nessun elemento (niente titolo
-     vuoto sopra il nulla). */
-  function buildChipGroup(label, items) {
-    if (!items.length) {
-      return null;
-    }
-    var wrap = document.createElement('div');
-    wrap.className = 'atk-chip-group';
-
-    var head = document.createElement('div');
-    head.className = 'skill-group-head';
-    var plaque = document.createElement('span');
-    plaque.className = 'skill-group-label';
-    plaque.textContent = label;
-    var line = document.createElement('span');
-    line.className = 'skill-group-line';
-    head.appendChild(plaque);
-    head.appendChild(line);
-    wrap.appendChild(head);
-
+  /* Riga di chip (stesso componente .mastery-chip ovunque venga usato: qui,
+     nel gruppo con titolino sotto, e in origine per le maestrie): il tocco
+     apre il bottom sheet con la descrizione ufficiale, se presente. */
+  function buildChipRow(items) {
     var row = document.createElement('div');
     row.className = 'mastery-chip-row';
     items.forEach(function (it) {
@@ -573,7 +553,32 @@
       });
       row.appendChild(chip);
     });
-    wrap.appendChild(row);
+
+    return row;
+  }
+
+  /* Un gruppo di chip con titolino (etichetta + filo dorato, come
+     .skill-group-head nella lista abilità) per distinguere a colpo d'occhio
+     le maestrie dallo stile/privilegi. Nessun gruppo → nessun elemento
+     (niente titolo vuoto sopra il nulla). */
+  function buildChipGroup(label, items) {
+    if (!items.length) {
+      return null;
+    }
+    var wrap = document.createElement('div');
+    wrap.className = 'atk-chip-group';
+
+    var head = document.createElement('div');
+    head.className = 'skill-group-head';
+    var plaque = document.createElement('span');
+    plaque.className = 'skill-group-label';
+    plaque.textContent = label;
+    var line = document.createElement('span');
+    line.className = 'skill-group-line';
+    head.appendChild(plaque);
+    head.appendChild(line);
+    wrap.appendChild(head);
+    wrap.appendChild(buildChipRow(items));
 
     return wrap;
   }
@@ -685,6 +690,37 @@
     }
   }
 
+  /* Card Punizione Divina (Paladino): come Attacchi, righe piene sostituite
+     da una riga di chip compatta — il tocco apre la descrizione ufficiale
+     dell'incantesimo (i tre dati sono facce della stessa cosa, stesso testo)
+     o del privilegio "Punizione del Paladino" che la rende gratuita. */
+  function renderSmiteCard(view) {
+    var card = document.getElementById('paladin-smite-card');
+    if (!card) {
+      return;
+    }
+    var isPaladino = view.classId === 'paladino';
+    card.classList.toggle('hidden', !isPaladino);
+    var chipsEl = document.getElementById('smite-chips');
+    if (!isPaladino || !chipsEl) {
+      return;
+    }
+    var klass = (window.MANUAL_55.classes || {})[view.classId] || {};
+    var spell = null;
+    (window.MANUAL_55.spells || []).forEach(function (s) {
+      if (s.id === 'punizione-divina') { spell = s; }
+    });
+    var gratis = findFeatureByName(klass, view.subclassId, 'Punizione del Paladino');
+
+    chipsEl.innerHTML = '';
+    chipsEl.appendChild(buildChipRow([
+      { label: '1° livello', detail: '2d8 radiosi', title: 'Punizione Divina', desc: spell ? spell.desc : '' },
+      { label: '2° livello', detail: '3d8 radiosi', title: 'Punizione Divina', desc: spell ? spell.desc : '' },
+      { label: 'Immondo/Non Morto', detail: '+1d8', title: 'Punizione Divina', desc: spell ? spell.desc : '' },
+      { label: 'Gratis', detail: '1/riposo lungo', title: 'Punizione del Paladino', desc: gratis ? gratis.desc : '' }
+    ]));
+  }
+
   function render() {
     var view = window.AppEngine.getView();
     renderAbilities(view);
@@ -695,10 +731,7 @@
     renderItemTextEffects();
     renderResources(view);
     renderAttacks(view);
-    var smiteCard = document.getElementById('paladin-smite-card');
-    if (smiteCard) {
-      smiteCard.classList.toggle('hidden', view.classId !== 'paladino');
-    }
+    renderSmiteCard(view);
     setText('loh-max', view.poolMax.loh);
     // La card Imposizione delle Mani (pool) compare solo se la classe ha quel pool.
     var lohCard = document.querySelector('.loh-card');

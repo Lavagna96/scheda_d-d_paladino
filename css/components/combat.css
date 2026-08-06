@@ -1153,15 +1153,6 @@
   font-style: italic;
 }
 
-.smite-rows .stat-row {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.smite-rows .stat-row .v {
-  color: var(--accent-gold);
-}
-
 /* ===== Risorse: sezioni per recupero con dorsale, targhe e medaglioni ===== */
 .res-sec {
   position: relative;
