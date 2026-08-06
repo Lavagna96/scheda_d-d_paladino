@@ -922,6 +922,32 @@
   color: var(--text-secondary);
 }
 
+/* Effetti oggetti: chip più piccoli per starci sulla stessa riga anche in
+   3 (a differenza di Maestrie/Stile & Privilegi, qui il numero di effetti
+   può crescere con più oggetti sintonizzati, quindi conviene guadagnare
+   larghezza fin da subito). */
+#item-text-effects-list {
+  gap: var(--space-1);
+}
+
+#item-text-effects-list .mastery-chip {
+  padding: 4px 9px;
+  gap: 1px;
+}
+
+#item-text-effects-list .mastery-chip-name {
+  font-size: 11.5px;
+}
+
+#item-text-effects-list .mastery-chip-weapon {
+  font-size: 9.5px;
+}
+
+#item-text-effects-list .mastery-chip-ic {
+  width: 12px;
+  height: 12px;
+}
+
 .res-panel {
   margin-bottom: var(--space-3);
 }
