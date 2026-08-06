@@ -496,9 +496,12 @@
     }
 
     // Maestrie possedute (scelte alla creazione): il personaggio le sa usare
-    // anche se in mano ha un'altra arma, quindi vanno dette a parte.
+    // anche se in mano ha un'altra arma, quindi vanno dette a parte. Un chip
+    // per maestria (invece della frase fissa) apre la descrizione ufficiale
+    // dal manuale nel bottom sheet già usato per gli effetti oggetti.
     var ownedEl = document.getElementById('atk-masteries');
     if (ownedEl) {
+      var masteryDefs = window.MANUAL_55.weaponMasteries || {};
       var owned = (ch.weaponMasteries || []).map(function (id) {
         var w = null;
         (window.MANUAL_55.weapons || []).forEach(function (x) {
@@ -507,9 +510,30 @@
           }
         });
 
-        return w ? w.name + ' (' + w.mastery + ')' : id;
+        return w ? { weaponName: w.name, mastery: w.mastery } : null;
+      }).filter(Boolean);
+
+      ownedEl.innerHTML = '';
+      owned.forEach(function (o) {
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'mastery-chip';
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'mastery-chip-name';
+        nameSpan.textContent = o.mastery;
+        var weaponSpan = document.createElement('span');
+        weaponSpan.className = 'mastery-chip-weapon';
+        weaponSpan.textContent = o.weaponName;
+        chip.appendChild(nameSpan);
+        chip.appendChild(weaponSpan);
+        chip.addEventListener('click', function () {
+          var def = masteryDefs[o.mastery];
+          if (def && window.AppBottomSheet) {
+            window.AppBottomSheet.open(def.name, '<p>' + escapeHtml(def.desc) + '</p>');
+          }
+        });
+        ownedEl.appendChild(chip);
       });
-      ownedEl.textContent = owned.length ? 'Maestrie nelle armi: ' + owned.join(', ') : '';
       ownedEl.classList.toggle('hidden', !owned.length);
     }
 

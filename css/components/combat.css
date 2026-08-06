@@ -920,6 +920,41 @@
   margin-top: 2px;
 }
 
+.mastery-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.mastery-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-gold-soft);
+  background: rgba(201, 164, 67, 0.06);
+  cursor: pointer;
+}
+
+.mastery-chip:active {
+  background: rgba(201, 164, 67, 0.14);
+}
+
+.mastery-chip-name {
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.mastery-chip-weapon {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+
 .res-panel {
   margin-bottom: var(--space-3);
 }
