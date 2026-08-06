@@ -927,25 +927,44 @@
   color: var(--text-secondary);
 }
 
-/* Effetti oggetti: chip più piccoli per starci sulla stessa riga anche in
-   3 (a differenza di Maestrie/Stile & Privilegi, qui il numero di effetti
-   può crescere con più oggetti sintonizzati, quindi conviene guadagnare
-   larghezza fin da subito). */
+/* Effetti oggetti: chip a larghezza fissa 1/3 così ne stanno sempre 3 sulla
+   stessa riga (a differenza di Maestrie/Stile & Privilegi, qui il numero di
+   effetti può crescere con più oggetti sintonizzati). Nel contesto reale la
+   riga ha solo ~283px (card doppia .page-card > .card, 16px di padding
+   ciascuna): con nomi oggetto lunghi anche i chip più piccoli possibili non
+   garantiscono 3 in riga, quindi il testo si tronca con ellissi invece di
+   andare a capo — il dettaglio completo resta a un tap sul chip. */
 #item-text-effects-list {
   gap: var(--space-1);
+  flex-wrap: nowrap;
 }
 
 #item-text-effects-list .mastery-chip {
-  padding: 4px 9px;
+  flex: 1 1 0;
+  min-width: 0;
+  align-items: center;
+  padding: 4px 6px;
   gap: 1px;
+}
+
+#item-text-effects-list .mastery-chip-name-row {
+  max-width: 100%;
+  overflow: hidden;
 }
 
 #item-text-effects-list .mastery-chip-name {
   font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #item-text-effects-list .mastery-chip-weapon {
   font-size: 9.5px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #item-text-effects-list .mastery-chip-ic {
