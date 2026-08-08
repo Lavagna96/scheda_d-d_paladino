@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=223">
+<link rel="stylesheet" href="css/styles.css?v=225">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -567,6 +567,10 @@
       <div class="card">
         <h2 class="card-title">Oggetti &amp; Valori <small>tutto ciò che trovate in avventura</small></h2>
         <p class="bag-note hidden" id="party-bag-note"></p>
+        <div class="loot-toolbar">
+          <input type="text" class="loot-search-input" id="party-search" placeholder="🔍 Cerca nel bottino…">
+          <div class="loot-filters" id="party-filters"></div>
+        </div>
         <div class="edit-list" id="party-list"></div>
       </div>
     </div>
@@ -574,6 +578,10 @@
     <div class="subpanel" data-subpanel="sacca">
       <div class="card">
         <h2 class="card-title">Pozioni &amp; Effetti <small>tocca per modificare</small></h2>
+        <div class="loot-toolbar">
+          <input type="text" class="loot-search-input" id="personal-search" placeholder="🔍 Cerca nello zaino…">
+          <div class="loot-filters" id="personal-filters"></div>
+        </div>
         <div class="edit-list" id="personal-list"></div>
       </div>
     </div>
@@ -759,50 +767,37 @@
 
     <div class="item-add-step" id="item-add-step-choice">
       <div class="hp-modal-head">
-        <span class="hp-modal-title">Cosa aggiungi?</span>
+        <span class="hp-modal-title" id="item-add-choice-title">Cosa aggiungi?</span>
         <button type="button" class="sheet-close" aria-label="Chiudi">✕</button>
       </div>
-      <button type="button" class="item-choice-btn" data-kind="pozione">
-        <span class="ic" aria-hidden="true">🧪</span>
-        <span><span class="lab">Pozione</span><span class="sub">Nome, effetto, quantità</span></span>
-      </button>
-      <button type="button" class="item-choice-btn" data-kind="oggetto">
-        <span class="ic" aria-hidden="true">🎒</span>
-        <span><span class="lab">Oggetto</span><span class="sub">Nome, descrizione, peso</span></span>
-      </button>
-      <button type="button" class="item-choice-btn" data-kind="denaro">
-        <span class="ic" aria-hidden="true">💰</span>
-        <span><span class="lab">Denaro</span><span class="sub">Quantità e tipo di moneta</span></span>
-      </button>
+      <div class="item-cat-grid">
+        <button type="button" class="item-cat-cell" data-kind="pozione"><span class="ic">🧪</span>Pozione</button>
+        <button type="button" class="item-cat-cell" data-kind="magico"><span class="ic">✨</span>Magico</button>
+        <button type="button" class="item-cat-cell" data-kind="arma"><span class="ic">⚔️</span>Arma</button>
+        <button type="button" class="item-cat-cell" data-kind="armatura"><span class="ic">🛡️</span>Armatura</button>
+        <button type="button" class="item-cat-cell" data-kind="tesoro"><span class="ic">💎</span>Tesoro</button>
+        <button type="button" class="item-cat-cell" data-kind="pergamena"><span class="ic">📜</span>Pergamena</button>
+        <button type="button" class="item-cat-cell" data-kind="attrezzo"><span class="ic">🔧</span>Attrezzo</button>
+        <button type="button" class="item-cat-cell" data-kind="munizioni"><span class="ic">🏹</span>Munizioni</button>
+        <button type="button" class="item-cat-cell" data-kind="cibo"><span class="ic">🍖</span>Cibo</button>
+        <button type="button" class="item-cat-cell" data-kind="denaro"><span class="ic">💰</span>Denaro</button>
+        <button type="button" class="item-cat-cell" data-kind="oggetto"><span class="ic">📦</span>Varie</button>
+      </div>
     </div>
 
-    <div class="item-add-step hidden" id="item-add-step-pozione">
+    <div class="item-add-step hidden" id="item-add-step-generic">
       <div class="hp-modal-head">
-        <span class="hp-modal-title">🧪 Nuova pozione</span>
+        <span class="hp-modal-title" id="ia-gen-title">Nuovo oggetto</span>
         <button type="button" class="sheet-close" aria-label="Chiudi">✕</button>
       </div>
-      <div class="item-field"><label for="ia-poz-nome">Nome pozione</label><input type="text" id="ia-poz-nome" placeholder="Pozione di Cura"></div>
-      <div class="item-field"><label for="ia-poz-effetto">Effetto / note</label><input type="text" id="ia-poz-effetto" placeholder="Recupera 2d4+2 PF"></div>
+      <div class="item-field"><label for="ia-gen-nome" id="ia-gen-nome-label">Nome</label><input type="text" id="ia-gen-nome" placeholder=""></div>
+      <div class="item-field"><label for="ia-gen-nota" id="ia-gen-nota-label">Note</label><input type="text" id="ia-gen-nota" placeholder=""></div>
       <div class="item-field-row">
-        <div class="item-field"><label for="ia-poz-qty">Quantità</label><input type="number" id="ia-poz-qty" min="1" value="1" inputmode="numeric"></div>
-        <div class="item-field"><label for="ia-poz-peso">Peso (kg)</label><input type="number" id="ia-poz-peso" min="0" step="0.1" value="0.5" inputmode="decimal"></div>
+        <div class="item-field"><label for="ia-gen-qty">Quantità</label><input type="number" id="ia-gen-qty" min="1" value="1" inputmode="numeric"></div>
+        <div class="item-field"><label for="ia-gen-peso">Peso (kg)</label><input type="number" id="ia-gen-peso" min="0" step="0.1" value="0.5" inputmode="decimal"></div>
       </div>
-      <button type="button" class="hp-modal-apply" id="ia-poz-add">Aggiungi pozione</button>
-      <span class="item-add-back" data-back>← Cambia categoria</span>
-    </div>
-
-    <div class="item-add-step hidden" id="item-add-step-oggetto">
-      <div class="hp-modal-head">
-        <span class="hp-modal-title">🎒 Nuovo oggetto</span>
-        <button type="button" class="sheet-close" aria-label="Chiudi">✕</button>
-      </div>
-      <div class="item-field"><label for="ia-ogg-nome">Nome oggetto</label><input type="text" id="ia-ogg-nome" placeholder="Torcia"></div>
-      <div class="item-field"><label for="ia-ogg-desc">Descrizione / valore</label><input type="text" id="ia-ogg-desc" placeholder="Dura 1 ora"></div>
-      <div class="item-field-row">
-        <div class="item-field"><label for="ia-ogg-qty">Quantità</label><input type="number" id="ia-ogg-qty" min="1" value="1" inputmode="numeric"></div>
-        <div class="item-field"><label for="ia-ogg-peso">Peso (kg)</label><input type="number" id="ia-ogg-peso" min="0" step="0.1" value="0.5" inputmode="decimal"></div>
-      </div>
-      <button type="button" class="hp-modal-apply" id="ia-ogg-add">Aggiungi oggetto</button>
+      <div class="item-field"><label for="ia-gen-valore">Valore (MO)</label><input type="number" id="ia-gen-valore" min="0" step="1" value="0" inputmode="numeric"></div>
+      <button type="button" class="hp-modal-apply" id="ia-gen-add">Aggiungi</button>
       <span class="item-add-back" data-back>← Cambia categoria</span>
     </div>
 
@@ -928,33 +923,33 @@
   <button type="button" class="app-menu-logout" id="menu-logout">Esci</button>
 </aside>
 
-<script src="js/firebase-config.js?v=223"></script>
-<script src="js/manual-55.js?v=223"></script>
-<script src="js/config.js?v=223"></script>
-<script src="js/storage.js?v=223"></script>
-<script src="js/engine.js?v=223"></script>
-<script src="js/hp-bar.js?v=223"></script>
-<script src="js/header.js?v=223"></script>
-<script src="js/stats.js?v=223"></script>
-<script src="js/traits.js?v=223"></script>
-<script src="js/sheet.js?v=223"></script>
-<script src="js/grimorio.js?v=223"></script>
-<script src="js/grimorio-advanced.js?v=223"></script>
-<script src="js/manual-browse.js?v=223"></script>
-<script src="js/treasury.js?v=223"></script>
-<script src="js/diary.js?v=223"></script>
-<script src="js/inspiration.js?v=223"></script>
-<script src="js/bottom-sheet.js?v=223"></script>
-<script src="js/edit-sheet.js?v=223"></script>
-<script src="js/items.js?v=223"></script>
-<script src="js/equip.js?v=223"></script>
-<script src="js/levelup.js?v=223"></script>
-<script src="js/menu.js?v=223"></script>
-<script src="js/app.js?v=223"></script>
-<script src="js/faceid.js?v=223"></script>
-<script src="js/dashboard.js?v=223"></script>
-<script src="js/create.js?v=223"></script>
-<script src="js/portrait.js?v=223"></script>
-<script type="module" src="js/cloud.js?v=223"></script>
+<script src="js/firebase-config.js?v=225"></script>
+<script src="js/manual-55.js?v=225"></script>
+<script src="js/config.js?v=225"></script>
+<script src="js/storage.js?v=225"></script>
+<script src="js/engine.js?v=225"></script>
+<script src="js/hp-bar.js?v=225"></script>
+<script src="js/header.js?v=225"></script>
+<script src="js/stats.js?v=225"></script>
+<script src="js/traits.js?v=225"></script>
+<script src="js/sheet.js?v=225"></script>
+<script src="js/grimorio.js?v=225"></script>
+<script src="js/grimorio-advanced.js?v=225"></script>
+<script src="js/manual-browse.js?v=225"></script>
+<script src="js/treasury.js?v=225"></script>
+<script src="js/diary.js?v=225"></script>
+<script src="js/inspiration.js?v=225"></script>
+<script src="js/bottom-sheet.js?v=225"></script>
+<script src="js/edit-sheet.js?v=225"></script>
+<script src="js/items.js?v=225"></script>
+<script src="js/equip.js?v=225"></script>
+<script src="js/levelup.js?v=225"></script>
+<script src="js/menu.js?v=225"></script>
+<script src="js/app.js?v=225"></script>
+<script src="js/faceid.js?v=225"></script>
+<script src="js/dashboard.js?v=225"></script>
+<script src="js/create.js?v=225"></script>
+<script src="js/portrait.js?v=225"></script>
+<script type="module" src="js/cloud.js?v=225"></script>
 </body>
 </html>
