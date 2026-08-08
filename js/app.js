@@ -1018,9 +1018,32 @@
     }
   }
 
+  /* Ingresso in un personaggio dalla dashboard SENZA reload (Step navigazione
+     interna): AppStorage.switchActiveCharacter ha già cambiato la chiave
+     attiva e azzerato la cache in RAM, qui si ridisegna tutta la scheda con
+     i dati del nuovo personaggio, come già fa cloud.js quando applica uno
+     stato remoto arrivato dal cloud (stesso principio, stessa lista di
+     render — qui in più si azzera la cache del motore e si torna sempre
+     sulla vista "Scheda"). */
+  function enterCharacterView() {
+    if (window.AppEngine && window.AppEngine.resetCache) {
+      window.AppEngine.resetCache();
+    }
+    syncNavVisibility();
+    showView('scheda', false);
+    ['AppHeader', 'AppStats', 'AppTraits', 'AppSheet', 'AppItems', 'AppLevelUp',
+      'AppGrimorio', 'AppTreasury', 'AppDiary', 'AppInspiration', 'AppEquip']
+      .forEach(function (name) {
+        if (window[name] && window[name].render) {
+          try { window[name].render(); } catch (e) { /* ignore */ }
+        }
+      });
+  }
+
   window.App = {
     showView: showView,
     initSubTabs: initSubTabs,
+    enterCharacterView: enterCharacterView,
     init: init
   };
 

@@ -14,7 +14,8 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   initializeFirestore, persistentLocalCache, persistentSingleTabManager,
-  doc, getDoc, getDocs, collection, setDoc, deleteDoc, onSnapshot, serverTimestamp, writeBatch
+  doc, getDoc, getDocs, getDocsFromCache, collection, setDoc, deleteDoc, onSnapshot,
+  serverTimestamp, writeBatch
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 (function () {
@@ -297,28 +298,44 @@ import {
 
   /* ---------- dashboard multi-personaggio (Fase 2) ---------- */
 
+  function dashboardItemsFromSnap(snap) {
+    var byId = {};
+    snap.forEach(function (d) {
+      if (isDeletedCharacter(d.id)) {
+        return;
+      }
+      var data = d.data();
+      if (data && data.state && window.AppStorage.dashboardItemFromCharacter) {
+        byId[d.id] = window.AppStorage.dashboardItemFromCharacter(data.state.character, d.id);
+      }
+    });
+    (window.AppStorage.listCharactersForDashboard() || []).forEach(function (item) {
+      if (!byId[item.id]) {
+        byId[item.id] = item;
+      }
+    });
+
+    return Object.keys(byId).map(function (k) { return byId[k]; });
+  }
+
+  /* Con la navigazione interna (niente reload) la dashboard si riapre molto
+     più spesso: leggere prima dalla cache locale di Firestore la mostra
+     all'istante, poi il fetch dal server (in parallelo) la riallinea appena
+     arriva, senza far aspettare un giro di rete ad ogni "I tuoi personaggi". */
   function loadDashboard() {
     if (!window.AppDashboard) {
       return;
     }
-    getDocs(collection(db, 'users', user.uid, 'characters')).then(function (snap) {
-      var byId = {};
-      snap.forEach(function (d) {
-        if (isDeletedCharacter(d.id)) {
-          return;
-        }
-        var data = d.data();
-        if (data && data.state && window.AppStorage.dashboardItemFromCharacter) {
-          byId[d.id] = window.AppStorage.dashboardItemFromCharacter(data.state.character, d.id);
-        }
-      });
-      (window.AppStorage.listCharactersForDashboard() || []).forEach(function (item) {
-        if (!byId[item.id]) {
-          byId[item.id] = item;
-        }
-      });
-      var items = Object.keys(byId).map(function (k) { return byId[k]; });
-      window.AppDashboard.render(items, onSelectCharacter);
+    var col = collection(db, 'users', user.uid, 'characters');
+
+    getDocsFromCache(col).then(function (snap) {
+      if (!snap.empty) {
+        window.AppDashboard.render(dashboardItemsFromSnap(snap), onSelectCharacter);
+      }
+    }).catch(function () { /* niente cache locale ancora: si aspetta la rete */ });
+
+    getDocs(col).then(function (snap) {
+      window.AppDashboard.render(dashboardItemsFromSnap(snap), onSelectCharacter);
     }).catch(function () {
       var items = window.AppStorage.listCharactersForDashboard() || [];
       window.AppDashboard.render(items, onSelectCharacter);
@@ -563,7 +580,18 @@ import {
     if (optDashboard) {
       show(optDashboard, true);
       optDashboard.addEventListener('click', function () {
-        location.reload(); // niente skip flag: si riatterra sulla dashboard
+        if (window.AppMenu) {
+          window.AppMenu.close();
+        }
+        // Niente reload: si stacca l'ascolto sul personaggio corrente e si
+        // torna alla dashboard mostrandola subito con l'ultima lista nota
+        // (loadDashboard la riallinea dal cloud appena pronta).
+        if (unsubscribeDoc) {
+          unsubscribeDoc();
+          unsubscribeDoc = null;
+        }
+        document.body.classList.add('in-dashboard');
+        loadDashboard();
       });
     }
 
@@ -656,6 +684,7 @@ import {
     schedulePush: schedulePush,
     createCharacter: createCharacter,
     deleteCharacter: deleteCharacter,
+    watchActiveCharacter: watchDoc,
     getUser: function () { return user; }
   };
 })();

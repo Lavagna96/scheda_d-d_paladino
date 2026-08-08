@@ -330,10 +330,19 @@
     el.classList.toggle('hidden', !msg);
   }
 
+  /* Entra nel personaggio scelto SENZA reload: cambia la chiave attiva,
+     mostra la scheda al posto della dashboard e la ridisegna da capo con i
+     suoi dati (js/app.js). Se il cloud è attivo, riaggancia anche
+     l'ascolto Firestore al documento del nuovo personaggio. */
   function selectCharacter(id) {
-    localStorage.setItem('app-active-char', id);
-    sessionStorage.setItem('app-skip-dashboard', '1');
-    location.reload();
+    window.AppStorage.switchActiveCharacter(id);
+    document.body.classList.remove('in-dashboard');
+    if (window.App && window.App.enterCharacterView) {
+      window.App.enterCharacterView();
+    }
+    if (window.AppCloud && window.AppCloud.watchActiveCharacter) {
+      window.AppCloud.watchActiveCharacter();
+    }
   }
 
   /* Avvio senza personaggio attivo: mostra la dashboard (anche in solo-locale). */

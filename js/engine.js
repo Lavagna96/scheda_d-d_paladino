@@ -604,6 +604,14 @@
     return cache;
   }
 
+  /* Cambio personaggio attivo senza reload: azzera la cache anche se per
+     assurdo i due personaggi avessero lo stesso lastModifiedMs (chiave di
+     invalidazione altrimenti cieca a un cambio di ID). */
+  function resetCache() {
+    cache = null;
+    cacheKey = null;
+  }
+
   /* Etichetta di un'armatura con quanto vale davvero, per i menu di scelta:
      "Cotta di Maglia — CA 16", "Cuoio Borchiato — CA 12 + DES" (5.B.5). */
   function armorLabel(id) {
@@ -624,6 +632,7 @@
   window.AppEngine = {
     derive: derive,
     getView: getView,
+    resetCache: resetCache,
     abilityMod: abilityMod,
     profBonus: profBonus,
     formatMod: fmt,

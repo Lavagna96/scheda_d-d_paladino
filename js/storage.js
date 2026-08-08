@@ -377,6 +377,16 @@
     saveState(current);
   }
 
+  /* Cambio personaggio attivo SENZA reload (dashboard ↔ scheda, Step
+     navigazione interna): azzera la cache in RAM così il prossimo getState()
+     rilegge da zero la chiave del personaggio appena scelto. */
+  function switchActiveCharacter(id) {
+    try {
+      localStorage.setItem(ACTIVE_CHAR_KEY, id);
+    } catch (e) { /* ignore */ }
+    state = null;
+  }
+
   function purgeCharacter(id) {
     markCharacterDeleted(id);
     try {
@@ -404,6 +414,7 @@
     mergeImportedState: mergeImportedState,
     migrateV1: migrateV1,
     activeCharId: activeCharId,
+    switchActiveCharacter: switchActiveCharacter,
     isCharacterDeleted: isCharacterDeleted,
     purgeCharacter: purgeCharacter,
     listCharactersForDashboard: listCharactersForDashboard,
